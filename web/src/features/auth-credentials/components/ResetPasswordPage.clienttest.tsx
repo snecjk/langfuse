@@ -1,7 +1,9 @@
+import { I18nProvider } from "@/src/features/i18n/I18nProvider";
+import { type ReactNode } from "react";
 import {
   act,
   fireEvent,
-  render,
+  render as testingRender,
   screen,
   waitFor,
 } from "@testing-library/react";
@@ -466,3 +468,7 @@ describe("reset-password page ?email= prefill", () => {
     expect(screen.getByLabelText("Email")).toHaveValue("");
   });
 });
+
+function render(ui: ReactNode) {
+  return testingRender(<I18nProvider initialLocale="en">{ui}</I18nProvider>);
+}

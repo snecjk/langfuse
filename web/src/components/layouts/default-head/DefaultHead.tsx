@@ -1,3 +1,4 @@
+import { useLocale } from "@/src/features/i18n/I18nProvider";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useLangfuseCloudRegion } from "@/src/features/organizations/hooks";
@@ -12,11 +13,13 @@ import { getPageMetadata } from "./getPageMetadata";
  * match AuthenticatedLayout so its region-aware icons replace these.
  */
 export function DefaultHead() {
+  const { locale } = useLocale();
   const { pathname } = useRouter();
   const { region } = useLangfuseCloudRegion();
   const { title, description, canonicalUrl } = getPageMetadata(
     pathname,
     region,
+    locale,
   );
   const icons = useLayoutMetadata(undefined, []);
 

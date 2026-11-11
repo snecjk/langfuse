@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { I18nProvider, useLocale } from "@/src/features/i18n/I18nProvider";
 
 import SignInPage, { type PageProps } from "@/src/features/auth/SignInPage";
 
@@ -81,14 +82,51 @@ const renderSignIn = (
   } = {},
 ) =>
   render(
-    <SignInPage
-      authProviders={authProviders}
-      signUpDisabled={false}
-      runningOnHuggingFaceSpaces={false}
-      emailVerificationRequired={false}
-      {...props}
-    />,
+    <I18nProvider initialLocale="en">
+      <SignInPage
+        authProviders={authProviders}
+        signUpDisabled={false}
+        runningOnHuggingFaceSpaces={false}
+        emailVerificationRequired={false}
+        {...props}
+      />
+    </I18nProvider>,
   );
+
+it("translates sign-in fields without discarding credentials or the reset link", () => {
+  function LanguageToggle() {
+    const { setLocale } = useLocale();
+    return <button onClick={() => setLocale("zh-CN")}>简体中文</button>;
+  }
+  routerState.query = {};
+  render(
+    <I18nProvider initialLocale="en">
+      <LanguageToggle />
+      <SignInPage
+        authProviders={authProviders}
+        signUpDisabled={false}
+        runningOnHuggingFaceSpaces={false}
+        emailVerificationRequired={false}
+      />
+    </I18nProvider>,
+  );
+  fireEvent.change(screen.getByLabelText("Email"), {
+    target: { value: "person@example.com" },
+  });
+  fireEvent.change(screen.getByLabelText(/Password/), {
+    target: { value: "unsubmitted-password" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "简体中文" }));
+  expect(
+    screen.getByRole("heading", { name: "登录你的账户" }),
+  ).toBeInTheDocument();
+  expect(screen.getByLabelText("邮箱")).toHaveValue("person@example.com");
+  expect(screen.getByLabelText(/密码/)).toHaveValue("unsubmitted-password");
+  expect(screen.getByRole("link", { name: "（忘记密码？）" })).toHaveAttribute(
+    "href",
+    "/auth/reset-password?email=person%40example.com",
+  );
+});
 
 describe("sign-in page NextAuth error classification", () => {
   let warnSpy: ReturnType<typeof vi.spyOn>;

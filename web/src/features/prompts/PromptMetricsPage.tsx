@@ -1,4 +1,6 @@
 /* eslint-disable no-nested-ternary, react/no-unstable-nested-components */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { coreMessages } from "@/src/features/i18n/messages/core";
 import { DataTable } from "@/src/components/table/data-table";
 import {
   customRowHeightMenu,
@@ -98,6 +100,7 @@ export default function PromptMetricsPage({
   // a `Page` ancestor, to fall back to the toolbar.
   showControlsInPageHeader = true,
 }: { promptName?: string; showControlsInPageHeader?: boolean } = {}) {
+  const t = useTranslation(coreMessages);
   const router = useRouter();
   const projectId = useProjectIdFromURL() ?? "";
   const promptNameFromQuery = router.query.promptName;
@@ -179,7 +182,7 @@ export default function PromptMetricsPage({
   const columns: LangfuseColumnDef<PromptVersionTableRow>[] = [
     createLinkTableColumn<PromptVersionTableRow, number>({
       accessorKey: "version",
-      header: "Version",
+      header: t("version"),
       isPinnedLeft: true,
       size: 80,
       getCell: (version) => {
@@ -197,7 +200,7 @@ export default function PromptMetricsPage({
     {
       accessorKey: "labels",
       id: "labels",
-      header: "Labels",
+      header: t("labels"),
       isPinnedLeft: true,
       size: 240,
       cell: ({ row }) => {
@@ -216,7 +219,7 @@ export default function PromptMetricsPage({
     },
     createNumberTableColumn<PromptVersionTableRow>({
       accessorKey: "medianLatency",
-      header: "Median latency",
+      header: t("medianLatency"),
       size: 140,
       formatter: (value) => formatIntervalSeconds(value / 1000, 3),
       getValue: (value) => {
@@ -229,7 +232,7 @@ export default function PromptMetricsPage({
     }),
     createNumberTableColumn<PromptVersionTableRow>({
       accessorKey: "medianInputTokens",
-      header: "Median input tokens",
+      header: t("medianInputTokens"),
       size: 160,
       enableHiding: true,
       formatter: (value) => String(value),
@@ -242,7 +245,7 @@ export default function PromptMetricsPage({
     }),
     createNumberTableColumn<PromptVersionTableRow>({
       accessorKey: "medianOutputTokens",
-      header: "Median output tokens",
+      header: t("medianOutputTokens"),
       size: 170,
       enableHiding: true,
       formatter: (value) => String(value),
@@ -255,7 +258,7 @@ export default function PromptMetricsPage({
     }),
     createNumberTableColumn<PromptVersionTableRow>({
       accessorKey: "medianCost",
-      header: "Median cost",
+      header: t("medianCost"),
       size: 120,
       formatter: (value) => usdFormatter(value),
       getValue: (value) => {
@@ -268,7 +271,7 @@ export default function PromptMetricsPage({
     }),
     createNumberTableColumn<PromptVersionTableRow, bigint>({
       accessorKey: "generationCount",
-      header: "Generations count",
+      header: t("generationsCount"),
       size: 150,
       enableHiding: true,
       formatter: (value) => numberFormatter(value, 0),
@@ -277,7 +280,7 @@ export default function PromptMetricsPage({
     }),
     {
       accessorKey: "traceScores",
-      header: "Trace Scores",
+      header: t("traceScores"),
       id: "traceScores",
       enableHiding: true,
       columns: traceScoreColumns,
@@ -289,7 +292,7 @@ export default function PromptMetricsPage({
     },
     {
       accessorKey: "generationScores",
-      header: "Generation Scores",
+      header: t("generationScores"),
       id: "generationScores",
       enableHiding: true,
       columns: generationScoreColumns,
@@ -301,7 +304,7 @@ export default function PromptMetricsPage({
     },
     createTextTableColumn<PromptVersionTableRow>({
       accessorKey: "lastUsed",
-      header: "Last used",
+      header: t("lastUsed"),
       enableHiding: true,
       size: 150,
       headerTooltip: {
@@ -313,7 +316,7 @@ export default function PromptMetricsPage({
     }),
     createTextTableColumn<PromptVersionTableRow>({
       accessorKey: "firstUsed",
-      header: "First used",
+      header: t("firstUsed"),
       size: 150,
       enableHiding: true,
       headerTooltip: {
@@ -363,9 +366,9 @@ export default function PromptMetricsPage({
               "Generation",
             ),
             lastUsed:
-              prompt.lastUsed?.toLocaleString() ?? "No linked generation yet",
+              prompt.lastUsed?.toLocaleString() ?? t("noLinkedGeneration"),
             firstUsed:
-              prompt.firstUsed?.toLocaleString() ?? "No linked generation yet",
+              prompt.firstUsed?.toLocaleString() ?? t("noLinkedGeneration"),
           };
         })
       : [];
@@ -382,7 +385,7 @@ export default function PromptMetricsPage({
         },
         breadcrumb: [
           {
-            name: "Prompts",
+            name: t("prompts"),
             href: `/project/${projectId}/prompts/`,
           },
           {

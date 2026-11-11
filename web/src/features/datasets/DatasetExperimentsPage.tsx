@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-deprecated -- Legacy UI usage retained during migration to design-system components. */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { coreMessages } from "@/src/features/i18n/messages/core";
 import { DatasetRunsTable } from "@/src/features/datasets/components/DatasetRunsTable";
 import { api } from "@/src/utils/api";
 import { DetailPageNav } from "@/src/features/navigate-detail-pages/DetailPageNav";
@@ -58,6 +60,7 @@ function DatasetExperimentsView({
   projectId: string;
   datasetId: string;
 }) {
+  const t = useTranslation(coreMessages);
   const capture = usePostHogClientCapture();
   const utils = api.useUtils();
   const [isCreateExperimentDialogOpen, setIsCreateExperimentDialogOpen] =
@@ -115,8 +118,8 @@ function DatasetExperimentsView({
 
     showSuccessToast({
       operation: "experiment.trigger",
-      title: "Experiment triggered successfully",
-      description: "Waiting for experiment to complete...",
+      title: t("experimentTriggered"),
+      description: t("waitingForExperiment"),
       link: {
         text: "View experiment",
         href: isExperimentsBetaActive
@@ -216,7 +219,9 @@ function DatasetExperimentsView({
                   onClick={() => capture("dataset_run:new_form_open")}
                 >
                   <FlaskConical size="base" color="default" />
-                  <span className="ml-2 hidden md:block">Run experiment</span>
+                  <span className="ml-2 hidden md:block">
+                    {t("runExperiment")}
+                  </span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
@@ -279,7 +284,9 @@ function DatasetExperimentsView({
                   onClick={() => capture("dataset_run:new_form_open")}
                 >
                   <FlaskConical size="base" color="default" />
-                  <span className="ml-2 hidden md:block">Run experiment</span>
+                  <span className="ml-2 hidden md:block">
+                    {t("runExperiment")}
+                  </span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
@@ -343,7 +350,7 @@ function DatasetExperimentsView({
                 <Button
                   variant="outline"
                   size="icon"
-                  aria-label="Dataset actions"
+                  aria-label={t("datasetActions")}
                   {...getTriggerProps()}
                 >
                   <MoreVertical size="base" color="default" />
@@ -373,8 +380,9 @@ function DatasetExperimentsView({
           <DialogContent className="max-h-[90vh] max-w-(--breakpoint-md) overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {selectedEvaluatorData.evaluator.id ? "Edit" : "Configure"}{" "}
-                Evaluator
+                {selectedEvaluatorData.evaluator.id
+                  ? t("editEvaluator")
+                  : t("configureEvaluator")}
               </DialogTitle>
             </DialogHeader>
             <EvaluatorForm

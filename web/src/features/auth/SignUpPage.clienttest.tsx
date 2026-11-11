@@ -1,4 +1,11 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { I18nProvider, useLocale } from "@/src/features/i18n/I18nProvider";
+import { type ReactNode } from "react";
+import {
+  fireEvent,
+  render as testingRender,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { signInMock, fetchMock, routerPushMock, routerState, envState } =
@@ -227,4 +234,34 @@ describe("VerifiedSignupFlow target path", () => {
       });
     },
   );
+});
+
+function render(ui: ReactNode) {
+  return testingRender(<I18nProvider initialLocale="en">{ui}</I18nProvider>);
+}
+
+it("switches signup labels without discarding the email draft", () => {
+  function SwitchLanguage() {
+    const { setLocale } = useLocale();
+    return <button onClick={() => setLocale("zh-CN")}>Switch language</button>;
+  }
+  render(
+    <>
+      <SwitchLanguage />
+      <SignUpPage
+        authProviders={FALLBACK_AUTH_PROVIDERS}
+        runningOnHuggingFaceSpaces={false}
+        signUpDisabled={false}
+        emailVerificationRequired
+      />
+    </>,
+  );
+  fireEvent.change(screen.getByPlaceholderText("jsdoe@example.com"), {
+    target: { value: "draft@example.com" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Switch language" }));
+  expect(
+    screen.getByRole("heading", { name: "创建新账户" }),
+  ).toBeInTheDocument();
+  expect(screen.getByLabelText("邮箱")).toHaveValue("draft@example.com");
 });

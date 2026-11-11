@@ -1,3 +1,6 @@
+import { type Locale } from "@/src/features/i18n/locale";
+import { translate } from "@/src/features/i18n/messages";
+import { metadataMessages } from "@/src/features/i18n/messages/metadata";
 import {
   type CloudRegionName,
   isRegionProduction,
@@ -17,42 +20,44 @@ type PageMetadata = {
   canonicalUrl?: string;
 };
 
-const cloudAuthPages: Record<string, PageMetadata> = {
+type MetadataKeys = {
+  title: keyof typeof metadataMessages.en;
+  description?: keyof typeof metadataMessages.en;
+};
+
+const cloudAuthPages: Record<string, MetadataKeys> = {
   "/auth/sign-in": {
-    title: "Sign in | Langfuse Cloud",
-    description:
-      "Sign in to Langfuse Cloud, the open source agent evals & observability platform. EU, US, Japan, and HIPAA data regions.",
+    title: "signInCloudTitle",
+    description: "signInCloudDescription",
   },
   "/auth/sign-up": {
-    title: "Sign up | Langfuse Cloud",
-    description:
-      "Create a free Langfuse Cloud account. No credit card required. Trace, evaluate, and manage prompts for your LLM application.",
+    title: "signUpCloudTitle",
+    description: "signUpCloudDescription",
   },
 };
 
-const selfHostedAuthPages: Record<string, PageMetadata> = {
+const selfHostedAuthPages: Record<string, MetadataKeys> = {
   "/auth/sign-in": {
-    title: "Sign in | Langfuse",
-    description:
-      "Sign in to Langfuse, the open source agent evals & observability platform.",
+    title: "signInTitle",
+    description: "signInDescription",
   },
   "/auth/sign-up": {
-    title: "Sign up | Langfuse",
-    description: "Create a Langfuse account.",
+    title: "signUpTitle",
+    description: "signUpDescription",
   },
 };
 
 // Reached from e-mail links, not from search, so no region-specific copy.
 // ResetPasswordPage swaps in "Set password" after hydration when the session
 // shows the user has no password yet; that cannot be known from the route.
-const passwordPages: Record<string, PageMetadata> = {
+const passwordPages: Record<string, MetadataKeys> = {
   "/auth/reset-password": {
-    title: "Reset password | Langfuse",
-    description: "Reset the password of your Langfuse account.",
+    title: "resetTitle",
+    description: "resetDescription",
   },
   "/auth/setup-password": {
-    title: "Set password | Langfuse",
-    description: "Set the password of your Langfuse account.",
+    title: "setupTitle",
+    description: "setupDescription",
   },
 };
 
@@ -69,20 +74,18 @@ const defaultMetadata: PageMetadata = { title: "Langfuse" };
 export function getPageMetadata(
   pathname: string,
   region: CloudRegionName | undefined,
+  locale: Locale = "en",
 ): PageMetadata {
-  if (!region) {
-    return (
-      selfHostedAuthPages[pathname] ??
-      passwordPages[pathname] ??
-      defaultMetadata
-    );
-  }
-
-  const metadata = cloudAuthPages[pathname] ?? passwordPages[pathname];
-  if (!metadata) return defaultMetadata;
-
-  // Staging and dev share the page but must not point Google at production.
-  if (!isRegionProduction(region)) return metadata;
-
+  const keys =
+    (region ? cloudAuthPages : selfHostedAuthPages)[pathname] ??
+    passwordPages[pathname];
+  if (!keys) return defaultMetadata;
+  const metadata: PageMetadata = {
+    title: translate(locale, metadataMessages, keys.title),
+    description: keys.description
+      ? translate(locale, metadataMessages, keys.description)
+      : undefined,
+  };
+  if (!region || !isRegionProduction(region)) return metadata;
   return { ...metadata, canonicalUrl: `${CANONICAL_CLOUD_ORIGIN}${pathname}` };
 }

@@ -1,4 +1,6 @@
 /* eslint-disable no-nested-ternary */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { coreMessages } from "@/src/features/i18n/messages/core";
 import { useRouter } from "next/router";
 import { default as ObservationsTable } from "@/src/features/tracing-tables/observations/ObservationsTable";
 import Page from "@/src/components/layouts/Page";
@@ -14,6 +16,7 @@ import { useQueryProject } from "@/src/features/projects/hooks";
 import { V4MigrationDelayBadge } from "@/src/features/v4-migration/V4MigrationDelayBadge";
 
 export default function ObservationsPage() {
+  const t = useTranslation(coreMessages);
   const router = useRouter();
   const projectId = router.query.projectId as string;
   const { isV4, isResolved } = useReadPath();
@@ -42,7 +45,7 @@ export default function ObservationsPage() {
   return (
     <Page
       headerProps={{
-        title: "Tracing",
+        title: t("tracing"),
         divider: false,
         // Match traces/index.tsx: no delay badge while onboarding tells the
         // user to set up tracing for the first time.
@@ -50,8 +53,7 @@ export default function ObservationsPage() {
           <V4MigrationDelayBadge page="observations" />
         ),
         help: {
-          description:
-            "An observation captures a single function call in an application. See docs to learn more.",
+          description: t("observationHelp"),
           href: "https://langfuse.com/docs/observability/data-model",
         },
         tabsProps:

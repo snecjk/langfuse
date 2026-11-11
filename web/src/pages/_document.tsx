@@ -1,14 +1,25 @@
-import { Html, Head, Main, NextScript } from "next/document";
+import NextDocument, {
+  Html,
+  Head,
+  Main,
+  NextScript,
+  type DocumentContext,
+  type DocumentInitialProps,
+} from "next/document";
 import { plexMono } from "@/src/styles/fonts";
+import { localeFromCookie, type Locale } from "@/src/features/i18n/locale";
 
-export default function Document() {
+export default function Document({
+  uiLocale,
+}: DocumentInitialProps & { uiLocale: Locale }) {
   return (
-    // lang is set explicitly (not left to the i18n config, which is being
-    // phased out in App Router) so screen readers always get the document
-    // language — WCAG 2.1 SC 3.1.1.
     // next-themes mutates class/style on <html> before hydration; suppress the
     // expected mismatch one level deep (React 19 logs it and can re-render).
-    <Html lang="en" suppressHydrationWarning className={plexMono.variable}>
+    <Html
+      lang={uiLocale}
+      suppressHydrationWarning
+      className={plexMono.variable}
+    >
       <Head />
       <body>
         <Main />
@@ -17,3 +28,8 @@ export default function Document() {
     </Html>
   );
 }
+
+Document.getInitialProps = async (context: DocumentContext) => ({
+  ...(await NextDocument.getInitialProps(context)),
+  uiLocale: localeFromCookie(context.req?.headers.cookie),
+});

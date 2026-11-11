@@ -1,3 +1,5 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { navigationMessages } from "@/src/features/i18n/messages/navigation";
 import * as React from "react";
 import { Monitor, Moon, Sun } from "@langfuse/icons";
 import { useTheme } from "next-themes";
@@ -5,12 +7,13 @@ import { cn } from "@/src/utils/tailwind";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
 
 export function ThemeToggle() {
+  const t = useTranslation(navigationMessages);
   const { theme, setTheme } = useTheme();
   const capture = usePostHogClientCapture();
   return (
     <div className="flex items-center space-x-1">
-      <span className="mr-2">Theme</span>
-      <div title="Light mode">
+      <span className="mr-2">{t("theme")}</span>
+      <div title={t("lightMode")}>
         <Sun
           size="lg"
           __rawClassName={cn(
@@ -26,7 +29,7 @@ export function ThemeToggle() {
           }}
         />
       </div>
-      <div title="Dark mode">
+      <div title={t("darkMode")}>
         <Moon
           size="lg"
           __rawClassName={cn(
@@ -42,7 +45,7 @@ export function ThemeToggle() {
           }}
         />
       </div>
-      <div title="System mode">
+      <div title={t("systemMode")}>
         <Monitor
           size="lg"
           __rawClassName={cn(

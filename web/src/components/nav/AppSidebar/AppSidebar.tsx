@@ -1,8 +1,11 @@
 /* eslint-disable no-nested-ternary, @typescript-eslint/no-use-before-define */
 /* eslint-disable @repo/no-abstracted-overlay-trigger */
 "use client";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { navigationMessages } from "@/src/features/i18n/messages/navigation";
 
 import * as React from "react";
+import { LanguageSelect } from "@/src/features/i18n/LanguageSelect";
 import { NavMain, type NavMainItem } from "@/src/components/nav/NavMain";
 import {
   Sidebar,
@@ -254,6 +257,9 @@ export function AppSidebar({
         <NavMain items={secondaryNavItems} />
       </SidebarContent>
       <SidebarFooter>
+        <div className="group-data-[collapsible=icon]:hidden">
+          <LanguageSelect />
+        </div>
         <NavUser user={user} items={userMenuItems} isMobile={isMobile} />
       </SidebarFooter>
       <SidebarRail />
@@ -348,6 +354,7 @@ function SidebarNotifications({
   state: SidebarNotificationState;
   activeNotifications: SidebarNotification[];
 }) {
+  const t = useTranslation(navigationMessages);
   const visibleNotifications = activeNotifications.slice(0, 3);
   const frontNotification = visibleNotifications[0];
   const backCount = visibleNotifications.length - 1;
@@ -387,7 +394,7 @@ function SidebarNotifications({
             size="sm"
             className="absolute top-2.5 right-1.5 h-5 w-5 p-0"
             onClick={() => state.onDismiss(frontNotification.id)}
-            title="Dismiss"
+            title={t("dismiss")}
           >
             <X size="base" color="default" />
           </Button>
@@ -422,7 +429,7 @@ function SidebarNotifications({
                     target="_blank"
                     onClick={() => state.onLinkClick(frontNotification.id)}
                   >
-                    {frontNotification.linkTitle ?? "Learn more"} &rarr;
+                    {frontNotification.linkTitle ?? t("learnMore")} &rarr;
                   </Link>
                 </Button>
               ))}
@@ -536,32 +543,29 @@ function NavUser({
 }
 
 const DemoBadge = () => {
+  const t = useTranslation(navigationMessages);
   return (
     <SidebarGroup spacing="flushTop" className="border-b">
-      <SidebarGroupLabel>Demo project (view only)</SidebarGroupLabel>
+      <SidebarGroupLabel>{t("demoProject")}</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              tooltip="Use demo app to create traces"
-              variant="cta"
-            >
+            <SidebarMenuButton asChild tooltip={t("demoTooltip")} variant="cta">
               <Link
                 href="https://langfuse.com/docs/demo"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <ExternalLink size="base" />
-                <span>Use demo app</span>
+                <span>{t("useDemo")}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Your Langfuse organizations">
+            <SidebarMenuButton asChild tooltip={t("yourOrganizations")}>
               <Link href="/">
                 <Grid2X2 size="base" />
-                <span>Your Langfuse orgs</span>
+                <span>{t("yourOrgs")}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -600,6 +604,7 @@ const VersionLabel = ({
   state: SidebarVersionState;
   version: string;
 }) => {
+  const t = useTranslation(navigationMessages);
   const selfHostedPlanLabel =
     state.deployment === "self-hosted"
       ? selfHostedPlanLabels[state.plan]
@@ -654,10 +659,7 @@ const VersionLabel = ({
             />
           )}
           {backgroundMigrationStatus && (
-            <AttentionDot
-              label="Background migration running"
-              tone="migration"
-            />
+            <AttentionDot label={t("backgroundMigration")} tone="migration" />
           )}
         </Button>
       </DropdownMenuTrigger>
@@ -677,13 +679,16 @@ const VersionLabel = ({
         {update ? (
           <>
             <DropdownMenuLabel>
-              New {update.updateType} version: {update.latestRelease}
+              {t("newVersion", {
+                type: update.updateType,
+                version: update.latestRelease,
+              })}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
           </>
         ) : state.deployment === "self-hosted" ? (
           <>
-            <DropdownMenuLabel>This is the latest release</DropdownMenuLabel>
+            <DropdownMenuLabel>{t("latestRelease")}</DropdownMenuLabel>
             <DropdownMenuSeparator />
           </>
         ) : null}
@@ -702,18 +707,18 @@ const VersionLabel = ({
             target="_blank"
           >
             <SiGithub size="base" color="default" __rawClassName="mr-2" />
-            Releases
+            {t("releases")}
           </Link>
         </DropdownMenuItem>
         {state.deployment === "self-hosted" && (
           <DropdownMenuItem asChild>
             <Link href="/background-migrations">
               <ArrowUp10 size="base" color="default" __rawClassName="mr-2" />
-              Background migrations
+              {t("backgroundMigrations")}
               {backgroundMigrationStatus && (
                 <span className="ml-2 inline-flex">
                   <AttentionDot
-                    label="Background migration running"
+                    label={t("backgroundMigration")}
                     tone="migration"
                   />
                 </span>
@@ -724,20 +729,20 @@ const VersionLabel = ({
         <DropdownMenuItem asChild>
           <Link href="https://langfuse.com/changelog" target="_blank">
             <Newspaper size="base" color="default" __rawClassName="mr-2" />
-            Changelog
+            {t("changelog")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="https://langfuse.com/roadmap" target="_blank">
             <Map size="base" color="default" __rawClassName="mr-2" />
-            Roadmap
+            {t("roadmap")}
           </Link>
         </DropdownMenuItem>
         {state.deployment === "self-hosted" && (
           <DropdownMenuItem asChild>
             <Link href="https://langfuse.com/pricing-self-host" target="_blank">
               <Info size="base" color="default" __rawClassName="mr-2" />
-              Compare versions
+              {t("compareVersions")}
             </Link>
           </DropdownMenuItem>
         )}
@@ -754,11 +759,11 @@ const VersionLabel = ({
                   color="default"
                   __rawClassName="mr-2"
                 />
-                Update
+                {t("update")}
                 {!backgroundMigrationStatus && (
                   <span className="ml-2 inline-flex">
                     <AttentionDot
-                      label="Update available"
+                      label={t("updateAvailable")}
                       tone={update.updateType}
                     />
                   </span>

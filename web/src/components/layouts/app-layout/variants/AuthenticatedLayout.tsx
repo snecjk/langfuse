@@ -1,3 +1,5 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { navigationMessages } from "@/src/features/i18n/messages/navigation";
 /**
  * Authenticated layout variant
  * Full application layout with sidebar, navigation, support drawer, and payment banner
@@ -210,33 +212,34 @@ export function AuthenticatedLayout({
     email: user.email ?? "",
     avatar: user.image ?? "",
   };
+  const t = useTranslation(navigationMessages);
   const userMenuItems = [
     ...(internalViewMode.available
       ? [
           {
             type: "action" as const,
-            name: "View mode",
+            name: t("viewMode"),
             onClick: () => setInternalViewModeOpen(true),
           },
         ]
       : []),
     {
       type: "link" as const,
-      name: "Settings",
+      name: t("settings"),
       href: accountSettingsPath(currentOrganization?.id),
     },
     ...(showV4Migration
       ? [
           {
             type: "link" as const,
-            name: "V4 migration",
+            name: t("v4Migration"),
             href: "/v4-migration",
           },
         ]
       : []),
     {
       type: "action" as const,
-      name: "Theme",
+      name: t("theme"),
       onClick: () => {},
       content: <ThemeToggle />,
     },
@@ -244,7 +247,7 @@ export function AuthenticatedLayout({
       ? [
           {
             type: "action" as const,
-            name: "Feature preview",
+            name: t("featurePreview"),
             onClick: () => setFeaturePreviewOpen(true),
           },
         ]
@@ -253,13 +256,13 @@ export function AuthenticatedLayout({
       ? [
           {
             type: "submenu" as const,
-            name: "Regions",
+            name: t("regions"),
             subItems: regionMenuItems,
             content: (
               <>
-                Regions
+                {t("regions")}
                 <div className="ml-2 inline-flex rounded bg-black/5 p-1 text-xs dark:bg-white/10">
-                  Current: {currentRegion}
+                  {t("current", { name: currentRegion ?? "" })}
                 </div>
               </>
             ),
@@ -270,20 +273,20 @@ export function AuthenticatedLayout({
       ? [
           {
             type: "submenu" as const,
-            name: "Instances",
+            name: t("instances"),
             subItems: instanceMenuItems,
             content: currentInstance ? (
               <>
-                Instances
+                {t("instances")}
                 <div className="ml-2 inline-flex rounded bg-black/5 p-1 text-xs dark:bg-white/10">
-                  Current: {currentInstance.name}
+                  {t("current", { name: currentInstance.name })}
                 </div>
               </>
             ) : undefined,
           },
         ]
       : []),
-    { type: "action" as const, name: "Sign out", onClick: onSignOut },
+    { type: "action" as const, name: t("signOut"), onClick: onSignOut },
   ];
 
   return (

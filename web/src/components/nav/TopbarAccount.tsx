@@ -1,5 +1,7 @@
 /* eslint-disable @repo/no-style-props, @repo/no-abstracted-overlay-trigger */
 "use client";
+import { useLocale, useTranslation } from "@/src/features/i18n/I18nProvider";
+import { navigationMessages } from "@/src/features/i18n/messages/navigation";
 
 import Link from "next/link";
 import type { Session } from "next-auth";
@@ -7,6 +9,8 @@ import { signOutCleanly } from "@/src/features/auth/lib/signOut";
 import { Avatar } from "@/src/components/design-system/Avatar/Avatar";
 import {
   DropdownMenu,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -31,6 +35,8 @@ export const TopbarAccount = ({
   user: NonNullable<Session["user"]>;
   className?: string;
 }) => {
+  const { locale, setLocale } = useLocale();
+  const t = useTranslation(navigationMessages);
   const showV4Migration = useV4UpgradeUiFlag();
   const { organization } = useQueryProjectOrOrganization();
 
@@ -44,7 +50,7 @@ export const TopbarAccount = ({
           "focus-visible:ring-ring rounded-full focus-visible:ring-2 focus-visible:outline-hidden",
           className,
         )}
-        aria-label="Account menu"
+        aria-label={t("accountMenu")}
       >
         <Avatar
           size="lg"
@@ -69,13 +75,22 @@ export const TopbarAccount = ({
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href={accountSettingsPath(organization?.id)}>Settings</Link>
+          <Link href={accountSettingsPath(organization?.id)}>
+            {t("settings")}
+          </Link>
         </DropdownMenuItem>
         {showV4Migration ? (
           <DropdownMenuItem asChild>
-            <Link href="/v4-migration">V4 migration</Link>
+            <Link href="/v4-migration">{t("v4Migration")}</Link>
           </DropdownMenuItem>
         ) : null}
+        <DropdownMenuRadioGroup
+          value={locale}
+          onValueChange={(value) => setLocale(value === "en" ? "en" : "zh-CN")}
+        >
+          <DropdownMenuRadioItem value="zh-CN">简体中文</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="en">English</DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
         {/* ThemeToggle stops propagation itself; keep the row from closing the
             menu so the user can flip themes and keep the menu open. */}
         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
@@ -87,7 +102,7 @@ export const TopbarAccount = ({
             signOutCleanly().catch(() => {});
           }}
         >
-          Sign out
+          {t("signOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

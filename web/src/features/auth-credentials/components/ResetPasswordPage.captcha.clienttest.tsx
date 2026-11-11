@@ -1,4 +1,11 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { I18nProvider } from "@/src/features/i18n/I18nProvider";
+import { type ReactNode } from "react";
+import {
+  fireEvent,
+  render as testingRender,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { signInMock, envState } = vi.hoisted(() => ({
@@ -128,3 +135,7 @@ describe("ResetPasswordPage captcha", () => {
     ).toBeTruthy();
   });
 });
+
+function render(ui: ReactNode) {
+  return testingRender(<I18nProvider initialLocale="en">{ui}</I18nProvider>);
+}

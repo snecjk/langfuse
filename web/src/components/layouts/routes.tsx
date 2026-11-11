@@ -1,3 +1,5 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { navigationMessages } from "@/src/features/i18n/messages/navigation";
 import { type Flag } from "@/src/features/feature-flags/types";
 import { type ProjectScope } from "@langfuse/shared";
 import {
@@ -72,6 +74,7 @@ export const ROUTE_GROUP_BADGES: Partial<Record<RouteGroup, ReactNode>> = {
 export type Route = {
   id?: "v4-migration" | "ai-gateway" | "gateway-ingestion-project";
   title: string;
+  titleKey?: keyof typeof navigationMessages.en;
   menuNode?: ReactNode;
   featureFlag?: Flag;
   label?: string | ReactNode;
@@ -108,6 +111,7 @@ export type Route = {
 export const ROUTES: Route[] = [
   {
     title: "Go to...",
+    titleKey: "goTo" as const,
     href: "", // Empty pathname since this is a dropdown
     icon: Search,
     menuNode: <CommandMenuTrigger />,
@@ -115,6 +119,7 @@ export const ROUTES: Route[] = [
   },
   {
     title: "Projects",
+    titleKey: "projects" as const,
     href: "/organization/[organizationId]",
     icon: Grid2X2,
     section: RouteSection.Main,
@@ -123,16 +128,19 @@ export const ROUTES: Route[] = [
     [
       {
         title: "Overview",
+        titleKey: "overview" as const,
         slug: GATEWAY_PAGE_SLUGS.overview,
         icon: Home,
       },
       {
         title: "Providers & Models",
+        titleKey: "providersModels" as const,
         slug: GATEWAY_PAGE_SLUGS.models,
         icon: Box,
       },
       {
         title: "Gateway keys",
+        titleKey: "gatewayKeys" as const,
         slug: GATEWAY_PAGE_SLUGS.apiKeys,
         icon: KeyRound,
       },
@@ -159,6 +167,7 @@ export const ROUTES: Route[] = [
   {
     // The URL is filled in from the gateway config; see useFilteredNavigation.
     title: "Tracing",
+    titleKey: "tracing" as const,
     id: "gateway-ingestion-project",
     href: "/project/[gatewayIngestionProjectId]/traces",
     icon: ListTree,
@@ -170,12 +179,14 @@ export const ROUTES: Route[] = [
   },
   {
     title: "Home",
+    titleKey: "home" as const,
     href: `/project/[projectId]`,
     icon: Home,
     section: RouteSection.Main,
   },
   {
     title: "Dashboards",
+    titleKey: "dashboards" as const,
     href: `/project/[projectId]/dashboards`,
     isActive: matchesPathname([
       `/project/[projectId]/dashboards`,
@@ -187,6 +198,7 @@ export const ROUTES: Route[] = [
   },
   {
     title: "Tracing",
+    titleKey: "tracing" as const,
     icon: ListTree,
     productModule: "tracing",
     group: RouteGroup.Observability,
@@ -199,6 +211,7 @@ export const ROUTES: Route[] = [
   },
   {
     title: "Sessions",
+    titleKey: "sessions" as const,
     icon: Clock,
     productModule: "tracing",
     group: RouteGroup.Observability,
@@ -207,6 +220,7 @@ export const ROUTES: Route[] = [
   },
   {
     title: "Users",
+    titleKey: "users" as const,
     href: `/project/[projectId]/users`,
     icon: UsersIcon,
     productModule: "tracing",
@@ -215,6 +229,7 @@ export const ROUTES: Route[] = [
   },
   {
     title: "Topics",
+    titleKey: "topics" as const,
     href: "/project/[projectId]/topics",
     icon: Grid2X2,
     label: <TopicsInternalBadge />,
@@ -224,6 +239,7 @@ export const ROUTES: Route[] = [
   },
   {
     title: "Alerts",
+    titleKey: "alerts" as const,
     href: "/project/[projectId]/alerts",
     icon: BellRing,
     projectRbacScopes: ["alerts:read"],
@@ -233,6 +249,7 @@ export const ROUTES: Route[] = [
   },
   {
     title: "Skills",
+    titleKey: "skills" as const,
     label: <FeatureReleaseStatus status="beta" />,
     href: "/project/[projectId]/skills",
     icon: FolderCode,
@@ -243,6 +260,7 @@ export const ROUTES: Route[] = [
   },
   {
     title: "Prompts",
+    titleKey: "prompts" as const,
     href: "/project/[projectId]/prompts",
     icon: FileJson,
     projectRbacScopes: ["prompts:read"],
@@ -252,6 +270,7 @@ export const ROUTES: Route[] = [
   },
   {
     title: "Playground",
+    titleKey: "playground" as const,
     href: "/project/[projectId]/playground",
     icon: TerminalIcon,
     productModule: "playground",
@@ -260,6 +279,7 @@ export const ROUTES: Route[] = [
   },
   {
     title: "Scores",
+    titleKey: "scores" as const,
     href: `/project/[projectId]/scores`,
     group: RouteGroup.Evaluation,
     section: RouteSection.Main,
@@ -267,6 +287,7 @@ export const ROUTES: Route[] = [
   },
   {
     title: "Evaluators",
+    titleKey: "evaluators" as const,
     icon: Lightbulb,
     productModule: "evaluation",
     projectRbacScopes: ["evaluator:read", "evaluationRule:read"],
@@ -277,6 +298,7 @@ export const ROUTES: Route[] = [
   },
   {
     title: "Human annotation",
+    titleKey: "humanAnnotation" as const,
     href: `/project/[projectId]/annotation-queues`,
     projectRbacScopes: ["annotationQueues:read"],
     group: RouteGroup.Evaluation,
@@ -285,6 +307,7 @@ export const ROUTES: Route[] = [
   },
   {
     title: "Datasets",
+    titleKey: "datasets" as const,
     href: `/project/[projectId]/datasets`,
     icon: Database,
     productModule: "datasets",
@@ -294,6 +317,7 @@ export const ROUTES: Route[] = [
   },
   {
     title: "Experiments",
+    titleKey: "experiments" as const,
     href: `/project/[projectId]/experiments`,
     icon: Beaker,
     featureFlag: "experimentsV4Enabled",
@@ -303,6 +327,7 @@ export const ROUTES: Route[] = [
   {
     // The URL is the viewer's first AI Gateway page; see useFilteredNavigation.
     title: "AI Gateway",
+    titleKey: "aiGateway" as const,
     id: "ai-gateway",
     href: "",
     icon: Waypoints,
@@ -315,6 +340,7 @@ export const ROUTES: Route[] = [
     // Keep Action required first in the secondary nav so it is not sandwiched
     // between regular items like Upgrade plan and Settings.
     title: "Update",
+    titleKey: "update" as const,
     id: "v4-migration",
     href: "",
     section: RouteSection.Secondary,
@@ -323,6 +349,7 @@ export const ROUTES: Route[] = [
   },
   {
     title: "Cloud status",
+    titleKey: "cloudStatus" as const,
     section: RouteSection.Secondary,
     href: "",
     show: ({ isLangfuseCloud, hasActiveCloudIncident }) =>
@@ -347,6 +374,7 @@ export const ROUTES: Route[] = [
   },
   {
     title: "Upgrade plan",
+    titleKey: "upgradePlan" as const,
     icon: Sparkle,
     href: "/project/[projectId]/settings/billing",
     section: RouteSection.Secondary,
@@ -356,6 +384,7 @@ export const ROUTES: Route[] = [
   },
   {
     title: "Upgrade plan",
+    titleKey: "upgradePlan" as const,
     icon: Sparkle,
     href: "/organization/[organizationId]/settings/billing",
     section: RouteSection.Secondary,
@@ -365,12 +394,14 @@ export const ROUTES: Route[] = [
   },
   {
     title: "Settings",
+    titleKey: "settings" as const,
     href: "/project/[projectId]/settings",
     icon: Settings,
     section: RouteSection.Secondary,
   },
   {
     title: "Settings",
+    titleKey: "settings" as const,
     href: "/organization/[organizationId]/settings",
     icon: Settings,
     section: RouteSection.Secondary,
@@ -378,12 +409,14 @@ export const ROUTES: Route[] = [
   },
   {
     title: "Book a call",
+    titleKey: "bookCall" as const,
     section: RouteSection.Secondary,
     href: "",
     menuNode: <BookACallButton />,
   },
   {
     title: "Support",
+    titleKey: "support" as const,
     icon: LifeBuoy,
     section: RouteSection.Secondary,
     href: "", // Empty pathname since this is a dropdown
@@ -408,6 +441,7 @@ function showsOrganizationSettings(
 }
 
 function GatewayKeyReminderDot() {
+  const t = useTranslation(navigationMessages);
   const router = useRouter();
   const organizationId =
     typeof router.query.organizationId === "string"
@@ -416,7 +450,7 @@ function GatewayKeyReminderDot() {
   const showReminder = useGatewayKeyReminder(organizationId);
   return showReminder ? (
     <span
-      aria-label="Get your AI Gateway API key"
+      aria-label={t("getGatewayKey")}
       className="size-1.75 shrink-0 rounded-full bg-orange-400"
     />
   ) : null;
@@ -430,6 +464,7 @@ function TopicsInternalBadge() {
 }
 
 function CommandMenuTrigger() {
+  const t = useTranslation(navigationMessages);
   const { setOpen } = useCommandMenu();
   const capture = usePostHogClientCapture();
 
@@ -444,7 +479,7 @@ function CommandMenuTrigger() {
       className="whitespace-nowrap"
     >
       <Search size="base" />
-      Go to...
+      {t("goTo")}
       <span className="-mr-px ml-auto hidden md:inline-flex">
         <KeyboardShortcut keys={["Mod", "K"]} />
       </span>

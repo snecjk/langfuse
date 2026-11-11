@@ -1,4 +1,6 @@
 /* eslint-disable no-nested-ternary, @typescript-eslint/no-deprecated -- Legacy UI usage retained during migration to design-system components. */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { coreMessages } from "@/src/features/i18n/messages/core";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import {
@@ -134,6 +136,7 @@ await langfuse.prompt.get("${name}", { version: ${version} })
 export const PromptDetail = ({
   promptName: promptNameProp,
 }: { promptName?: string } = {}) => {
+  const t = useTranslation(coreMessages);
   const projectId = useProjectIdFromURL();
   const capture = usePostHogClientCapture();
   const router = useRouter();
@@ -246,10 +249,10 @@ export const PromptDetail = ({
     utils.datasets.runsByDatasetId.invalidate();
     showSuccessToast({
       operation: "experiment.trigger",
-      title: "Experiment triggered successfully",
-      description: "Waiting for experiment to complete...",
+      title: t("experimentTriggered"),
+      description: t("waitingForExperiment"),
       link: {
-        text: "View experiment",
+        text: t("viewExperiment"),
         href: `/project/${projectId}/datasets/${data.datasetId}/compare?runs=${data.runId}`,
       },
     });
@@ -293,7 +296,7 @@ export const PromptDetail = ({
   }, [prompt?.id]);
 
   if (!promptHistory.data || !prompt) {
-    return <div className="p-3">Loading...</div>;
+    return <div className="p-3">{t("loading")}</div>;
   }
 
   const extractedVariables = prompt
@@ -330,7 +333,7 @@ export const PromptDetail = ({
         <CommandInput
           showBorder={false}
           variant="toolbar"
-          placeholder="Search"
+          placeholder={t("search")}
           className="border-none py-0 focus:ring-0"
         />
 
@@ -418,17 +421,15 @@ export const PromptDetail = ({
     <Page
       headerProps={{
         title: prompt.name,
-        titleTooltip:
-          "Prompt names cannot be changed. Instead, duplicate this prompt to a different name.",
+        titleTooltip: t("promptNameHelp"),
         itemType: "PROMPT",
         help: {
-          description:
-            "You can use this prompt within your application through the Langfuse SDKs and integrations. Refer to the documentation for more information.",
+          description: t("promptUsageHelp"),
           href: "https://langfuse.com/docs/prompts",
         },
         breadcrumb: [
           {
-            name: "Prompts",
+            name: t("prompts"),
             href: `/project/${projectId}/prompts/`,
           },
           ...breadcrumbItems.map((item) => ({
@@ -487,7 +488,9 @@ export const PromptDetail = ({
                     className="mb-3 w-full min-w-0 justify-start gap-2 px-3"
                   >
                     <History size="base" color="default" />
-                    <span className="shrink-0">Version #{prompt.version}</span>
+                    <span className="shrink-0">
+                      {t("versionNumber", { version: prompt.version })}
+                    </span>
                     <span
                       className="text-muted-foreground min-w-0 flex-1 truncate text-left font-normal"
                       title={prompt.commitMessage ?? prompt.name}
@@ -499,7 +502,7 @@ export const PromptDetail = ({
                 </DrawerTrigger>
                 <DrawerContent className="max-h-[85dvh]">
                   <DrawerHeader className="shrink-0 border-b text-left">
-                    <DrawerTitle>Prompt versions</DrawerTitle>
+                    <DrawerTitle>{t("promptVersions")}</DrawerTitle>
                     <DrawerDescription>
                       Select a version of {prompt.name}.
                     </DrawerDescription>
@@ -559,7 +562,9 @@ export const PromptDetail = ({
                         )}
                       >
                         <Terminal size="base" color="default" />
-                        <span className="hidden md:inline">Playground</span>
+                        <span className="hidden md:inline">
+                          {t("playground")}
+                        </span>
                         <DropdownIndicator size="sm" nudge />
                       </Button>
                     </Trigger>
@@ -630,7 +635,7 @@ export const PromptDetail = ({
                       ) : (
                         <>
                           <MessageSquare size="base" color="default" />
-                          <span>Add comment</span>
+                          <span>{t("addComment")}</span>
                           {getNumberFromMap(commentCounts, prompt.id) ? (
                             <ActionButtonCountBadge
                               count={
@@ -647,7 +652,7 @@ export const PromptDetail = ({
                   <DropdownMenuTrigger asChild>
                     <IconButton
                       icon={MoreVertical}
-                      label="More actions"
+                      label={t("moreActions")}
                       size="sm"
                     />
                   </DropdownMenuTrigger>
@@ -674,13 +679,13 @@ export const PromptDetail = ({
           >
             <div className="max-w-full min-w-0 shrink-0 overflow-x-auto">
               <Tabs.List variant="underline">
-                <Tabs.Trigger value="prompt" label="Prompt" />
-                <Tabs.Trigger value="config" label="Config" />
+                <Tabs.Trigger value="prompt" label={t("prompt")} />
+                <Tabs.Trigger value="config" label={t("config")} />
                 <Tabs.Trigger
                   value="linked-generations"
-                  label="Linked Generations"
+                  label={t("linkedGenerations")}
                 />
-                <Tabs.Trigger value="use-prompt" label="Use Prompt" />
+                <Tabs.Trigger value="use-prompt" label={t("usePrompt")} />
               </Tabs.List>
             </div>
             <Tabs.Content value="linked-generations" layout="fill">
@@ -716,9 +721,12 @@ export const PromptDetail = ({
                       <Tabs.List variant="inset" gap="sm" size="md">
                         <Tabs.Trigger
                           value="resolved"
-                          label="Resolved prompt"
+                          label={t("resolvedPrompt")}
                         />
-                        <Tabs.Trigger value="tagged" label="Tagged prompt" />
+                        <Tabs.Trigger
+                          value="tagged"
+                          label={t("taggedPrompt")}
+                        />
                       </Tabs.List>
                     </Tabs>
                   </div>
@@ -753,16 +761,19 @@ export const PromptDetail = ({
                     resolutionMode === "resolved" &&
                     promptGraph.data?.resolvedPrompt ? (
                       <CodeSection
-                        title="Text Prompt (resolved)"
+                        title={t("textPromptResolved")}
                         content={String(promptGraph.data.resolvedPrompt)}
                       />
                     ) : (
-                      <CodeSection title="Text Prompt" content={prompt.prompt}>
+                      <CodeSection
+                        title={t("textPrompt")}
+                        content={prompt.prompt}
+                      >
                         {renderRichPromptContent(prompt.prompt)}
                       </CodeSection>
                     )
                   ) : (
-                    <JSONView json={prompt.prompt} title="Prompt" />
+                    <JSONView json={prompt.prompt} title={t("prompt")} />
                   )}
                 </PromptReferenceProvider>
                 {extractedVariables.length > 0 && (
@@ -774,7 +785,7 @@ export const PromptDetail = ({
               <div className="flex max-h-full min-h-0 w-full flex-col overflow-y-auto px-4 pt-3 pb-4">
                 <JSONView
                   json={prompt.config}
-                  title="Config"
+                  title={t("config")}
                   className="pb-2"
                 />
               </div>

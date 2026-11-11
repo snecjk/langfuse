@@ -1,4 +1,6 @@
 /* eslint-disable no-nested-ternary, @repo/component-file-structure */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { authMessages } from "@/src/features/i18n/messages/auth";
 import { LangfuseWordmark } from "@/src/components/design-system/LangfuseWordmark/LangfuseWordmark";
 import { Button } from "@/src/components/ui/button";
 import {
@@ -152,6 +154,7 @@ export function SSOButtons({
   lastUsedMethod?: NextAuthProvider | null;
   onProviderSelect?: (provider: NextAuthProvider) => void;
 }) {
+  const t = useTranslation(authMessages);
   const capture = usePostHogClientCapture();
   const clickEvent =
     action === "sign up" ? "sign_up:button_click" : "sign_in:button_click";
@@ -197,7 +200,7 @@ export function SSOButtons({
               <div className="border-border my-6 border-t"></div>
             ) : (
               <div className="text-muted-foreground my-6 text-center text-xs">
-                or {action} with
+                {t("orSignUpWith")}
               </div>
             )
           ) : null}
@@ -399,11 +402,9 @@ export function SSOButtons({
               <>
                 <AuthProviderButton
                   icon={<Code size="base" __rawClassName="mr-3" />}
-                  label="WorkOS (organization)"
+                  label={t("workosOrganization")}
                   onClick={() => {
-                    const organization = window.prompt(
-                      "Please enter your organization ID",
-                    );
+                    const organization = window.prompt(t("enterOrganization"));
                     if (organization) {
                       capture(clickEvent, { provider: "workos" });
                       onProviderSelect?.("workos");
@@ -419,11 +420,9 @@ export function SSOButtons({
                 />
                 <AuthProviderButton
                   icon={<Code size="base" __rawClassName="mr-3" />}
-                  label="WorkOS (connection)"
+                  label={t("workosConnection")}
                   onClick={() => {
-                    const connection = window.prompt(
-                      "Please enter your connection ID",
-                    );
+                    const connection = window.prompt(t("enterConnection"));
                     if (connection) {
                       capture(clickEvent, { provider: "workos" });
                       onProviderSelect?.("workos");
@@ -508,6 +507,21 @@ export default function SignInPage({
   signUpDisabled,
   runningOnHuggingFaceSpaces,
 }: PageProps) {
+  const t = useTranslation(authMessages);
+  const localizeError = (message: string | null | undefined) => {
+    const errorKeys = [
+      "unexpectedError",
+      "automaticSignInFailed",
+      "invalidEmail",
+      "passwordMinimum",
+      "ssoCheckFailed",
+      "accountNotLinked",
+      "credentialsInvalid",
+      "credentialsSignIn",
+    ] as const;
+    const key = errorKeys.find((key) => authMessages.en[key] === message);
+    return key ? t(key) : message;
+  };
   const router = useRouter();
   useHuggingFaceRedirect(runningOnHuggingFaceSpaces);
 
@@ -828,7 +842,9 @@ export default function SignInPage({
   }
 
   if (previewAutoSignInEnabled && previewAutoSignInPending) {
-    return <Spinner message={`Signing in as ${PREVIEW_DEMO_USER_EMAIL}`} />;
+    return (
+      <Spinner message={t("signingInAs", { email: PREVIEW_DEMO_USER_EMAIL })} />
+    );
   }
 
   return (
@@ -838,19 +854,18 @@ export default function SignInPage({
           <LangfuseWordmark />
         </div>
         <h2 className="text-primary mt-4 text-center text-2xl leading-9 font-bold tracking-tight">
-          Sign in to your account
+          {t("signInTitle")}
         </h2>
       </div>
 
       {isLangfuseCloud && (
         <div className="bg-card mt-4 -mb-4 rounded-lg p-3 text-center text-sm shadow-sm sm:mx-auto sm:w-full sm:max-w-[480px] sm:px-6">
-          If you are experiencing issues signing in, please force refresh this
-          page (CMD + SHIFT + R) or clear your browser cache.{" "}
+          {t("refreshAdvice")}{" "}
           <a
             href="mailto:support@langfuse.com"
             className="text-link hover:text-link-hover cursor-pointer text-xs font-bold whitespace-nowrap"
           >
-            (contact us)
+            {t("contactUs")}
           </a>
         </div>
       )}
@@ -880,7 +895,7 @@ export default function SignInPage({
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel>{t("email")}</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="jsdoe@example.com"
@@ -889,7 +904,11 @@ export default function SignInPage({
                             {...field}
                           />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage>
+                          {localizeError(
+                            credentialsForm.formState.errors.email?.message,
+                          )}
+                        </FormMessage>
                       </FormItem>
                     )}
                   />
@@ -902,14 +921,14 @@ export default function SignInPage({
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            Password{" "}
+                            {t("password")}{" "}
                             <Link
                               href={resetPasswordHref}
                               className="text-link hover:text-link-hover ml-1 text-xs"
                               tabIndex={-1}
-                              title="What is this?"
+                              title={t("whatIsThis")}
                             >
-                              (forgot password?)
+                              {t("forgotPassword")}
                             </Link>
                           </FormLabel>
                           <FormControl>
@@ -920,7 +939,12 @@ export default function SignInPage({
                               {...field}
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage>
+                            {localizeError(
+                              credentialsForm.formState.errors.password
+                                ?.message,
+                            )}
+                          </FormMessage>
                         </FormItem>
                       )}
                     />
@@ -954,7 +978,7 @@ export default function SignInPage({
                     }
                     data-testid="submit-email-password-sign-in-form"
                   >
-                    {showPasswordStep ? "Sign in" : "Continue"}
+                    {showPasswordStep ? t("signIn") : t("continue")}
                   </Button>
                 </form>
               </Form>
@@ -966,17 +990,15 @@ export default function SignInPage({
                     : "hidden",
                 )}
               >
-                Last used
+                {t("lastUsed")}
               </div>
             </div>
           )}
           {credentialsFormError ? (
             <div className="text-destructive text-center text-sm font-bold">
-              {credentialsFormError}
+              {localizeError(credentialsFormError)}
               <br />
-              Contact support if this error is unexpected.{" "}
-              {isLangfuseCloud &&
-                "Make sure you are using the correct cloud data region."}
+              {t("supportError")} {isLangfuseCloud && t("correctRegion")}
             </div>
           ) : null}
           <SSOButtons
@@ -991,12 +1013,12 @@ export default function SignInPage({
         env.NEXT_PUBLIC_SIGN_UP_DISABLED !== "true" &&
         authProviders.credentials ? (
           <p className="text-muted-foreground mt-10 text-center text-sm">
-            No account yet?{" "}
+            {t("noAccount")}{" "}
             <Link
               href={`/auth/sign-up${router.asPath.includes("?") ? router.asPath.substring(router.asPath.indexOf("?")) : ""}`}
               className="text-link hover:text-link-hover font-bold"
             >
-              Sign up
+              {t("signUp")}
             </Link>
           </p>
         ) : null}

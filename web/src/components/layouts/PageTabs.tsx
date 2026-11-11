@@ -1,3 +1,5 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { navigationMessages } from "@/src/features/i18n/messages/navigation";
 /* eslint-disable @repo/no-style-props */
 import { Tabs } from "@/src/components/design-system/Tabs/Tabs";
 import { cn } from "@/src/utils/tailwind";
@@ -7,6 +9,7 @@ import { type ParsedUrlQuery } from "querystring";
 type TabDefinition = {
   value: string;
   label: string;
+  labelKey?: keyof typeof navigationMessages.en;
   href: string;
   onClick?: () => void;
   querySelector?: (
@@ -34,6 +37,7 @@ export const PageTabs = ({
   scrollable = false,
 }: PageTabsProps) => {
   const router = useRouter();
+  const t = useTranslation(navigationMessages);
   return (
     <div className={cn(scrollable && "overflow-x-auto", className)}>
       <Tabs.List variant="underline">
@@ -47,7 +51,7 @@ export const PageTabs = ({
             active={tab.value === activeTab}
             onClick={tab.onClick}
             disabled={tab.disabled}
-            label={tab.label}
+            label={tab.labelKey ? t(tab.labelKey) : tab.label}
           />
         ))}
       </Tabs.List>

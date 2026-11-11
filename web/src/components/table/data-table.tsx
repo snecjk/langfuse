@@ -1,6 +1,8 @@
 /* eslint-disable no-nested-ternary, @repo/component-file-structure, @typescript-eslint/no-use-before-define */
 /* eslint-disable @repo/no-style-props */
 "use client";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tableMessages } from "@/src/features/i18n/messages/table";
 import { type OrderByState } from "@langfuse/shared";
 import React, {
   useState,
@@ -1053,6 +1055,7 @@ function TableBodyComponent<TData>({
   cellPadding = "compact",
   tableSnapshot: _tableSnapshot,
 }: TableBodyComponentProps<TData>) {
+  const t = useTranslation(tableMessages);
   const visibleColumns = table.getVisibleLeafColumns();
   const rowModelRows = table.getRowModel().rows;
   const tableState = table.getState();
@@ -1607,7 +1610,7 @@ function TableBodyComponent<TData>({
             <div className="text-muted-foreground pointer-events-none absolute left-[50%] flex -translate-x-1/2 -translate-y-1/2 items-center justify-center text-center text-sm">
               {noResultsMessage ?? (
                 <>
-                  No results.{" "}
+                  {t("noResults")}{" "}
                   {help && (
                     <DocPopup description={help.description} href={help.href} />
                   )}

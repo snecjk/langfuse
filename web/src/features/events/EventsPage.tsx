@@ -1,3 +1,5 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { coreMessages } from "@/src/features/i18n/messages/core";
 import React from "react";
 import { useRouter } from "next/router";
 import ObservationsEventsTable from "@/src/features/events/components/EventsTable";
@@ -11,6 +13,7 @@ import {
 import { useQueryProject } from "@/src/features/projects/hooks";
 
 export default function EventsPage() {
+  const t = useTranslation(coreMessages);
   const router = useRouter();
   const projectId = router.query.projectId as string;
   const { project } = useQueryProject();

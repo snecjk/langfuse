@@ -21,19 +21,25 @@ export const formatIntervalSeconds = (seconds: number, scale = 2) => {
   return `${seconds.toFixed(scale)}s`;
 };
 
-export const formatApproximateDuration = (secondsRemaining: number) => {
+export const formatApproximateDuration = (
+  secondsRemaining: number,
+  locale: Locale = "en",
+) => {
   const seconds = Math.max(1, secondsRemaining);
 
   if (seconds < 60) {
+    if (locale === "zh-CN") return `${seconds}秒`;
     return `${seconds} second${seconds === 1 ? "" : "s"}`;
   }
 
   const minutes = Math.ceil(seconds / 60);
   if (minutes < 60) {
+    if (locale === "zh-CN") return `${minutes}分钟`;
     return `${minutes} minute${minutes === 1 ? "" : "s"}`;
   }
 
   const hours = Math.ceil(minutes / 60);
+  if (locale === "zh-CN") return `${hours}小时`;
   return `${hours} hour${hours === 1 ? "" : "s"}`;
 };
 
@@ -75,9 +81,11 @@ export const formatLocalIsoDate = (
 export const buildLocalIsoDatePresentation = ({
   date,
   accuracy = "second",
+  locale = "en",
 }: {
   date: unknown;
   accuracy?: Accuracy;
+  locale?: Locale;
 }) => {
   if (!(date instanceof Date) || isNaN(date.getTime())) {
     return null;
@@ -85,14 +93,14 @@ export const buildLocalIsoDatePresentation = ({
 
   return {
     display: formatLocalIsoDate(date, false, accuracy),
-    title: `Local: ${formatLocalIsoDate(date, false, "millisecond")}\nUTC: ${formatLocalIsoDate(date, true, "millisecond")}`,
+    title: `${locale === "zh-CN" ? "本地时间" : "Local"}: ${formatLocalIsoDate(date, false, "millisecond")}\nUTC: ${formatLocalIsoDate(date, true, "millisecond")}`,
   };
 };
 
-export const getShortLocalTimezone = () => {
-  return new Date()
-    .toLocaleTimeString("en-us", { timeZoneName: "short" })
-    .split(" ")[2];
+export const getShortLocalTimezone = (locale: Locale = "en") => {
+  return new Intl.DateTimeFormat(locale, { timeZoneName: "short" })
+    .formatToParts(new Date())
+    .find((part) => part.type === "timeZoneName")?.value;
 };
 
 export const getTimezoneDetails = () => {
@@ -104,24 +112,54 @@ export const getTimezoneDetails = () => {
 
 // Compact relative time: "just now", "3m ago", "5h ago", "15d ago",
 // "2mo ago", "1y ago" — largest sensible unit, no live refresh implied.
-export const formatCompactRelativeTime = (timestamp: Date): string => {
+export const formatCompactRelativeTime = (
+  timestamp: Date,
+  locale: Locale = "en",
+): string => {
   const diffInSeconds = Math.max(0, (Date.now() - timestamp.getTime()) / 1000);
-  if (diffInSeconds < 60) return "just now";
+  if (diffInSeconds < 60) return locale === "zh-CN" ? "刚刚" : "just now";
   const minutes = diffInSeconds / 60;
-  if (minutes < 60) return `${Math.floor(minutes)}m ago`;
+  if (minutes < 60)
+    return locale === "zh-CN"
+      ? `${Math.floor(minutes)}分钟前`
+      : `${Math.floor(minutes)}m ago`;
   const hours = minutes / 60;
-  if (hours < 24) return `${Math.floor(hours)}h ago`;
+  if (hours < 24)
+    return locale === "zh-CN"
+      ? `${Math.floor(hours)}小时前`
+      : `${Math.floor(hours)}h ago`;
   const days = hours / 24;
-  if (days < 30) return `${Math.floor(days)}d ago`;
-  if (days < 365) return `${Math.floor(days / 30)}mo ago`;
-  return `${Math.floor(days / 365)}y ago`;
+  if (days < 30)
+    return locale === "zh-CN"
+      ? `${Math.floor(days)}天前`
+      : `${Math.floor(days)}d ago`;
+  if (days < 365)
+    return locale === "zh-CN"
+      ? `${Math.floor(days / 30)}个月前`
+      : `${Math.floor(days / 30)}mo ago`;
+  return locale === "zh-CN"
+    ? `${Math.floor(days / 365)}年前`
+    : `${Math.floor(days / 365)}y ago`;
 };
 
-export const getRelativeTimestampFromNow = (timestamp: Date): string => {
+export const getRelativeTimestampFromNow = (
+  timestamp: Date,
+  locale: Locale = "en",
+): string => {
   const diffInMs = Math.max(0, new Date().getTime() - timestamp.getTime());
   const diffInMinutes = diffInMs / (1000 * 60);
   const diffInHours = diffInMinutes / 60;
   const diffInDays = diffInHours / 24;
+  if (locale === "zh-CN" && diffInDays < 7) {
+    const formatter = new Intl.RelativeTimeFormat(locale, {
+      numeric: "always",
+    });
+    if (diffInHours < 1)
+      return formatter.format(-Math.floor(diffInMinutes), "minute");
+    if (diffInHours < 24)
+      return formatter.format(-Math.floor(diffInHours), "hour");
+    return formatter.format(-Math.floor(diffInDays), "day");
+  }
 
   if (diffInHours < 1) {
     return `${Math.floor(diffInMinutes)} minutes ago`;
@@ -130,9 +168,10 @@ export const getRelativeTimestampFromNow = (timestamp: Date): string => {
   } else if (diffInDays < 7) {
     return `${Math.floor(diffInDays)} days ago`;
   }
-  return timestamp.toLocaleDateString("en-US", {
+  return timestamp.toLocaleDateString(locale === "en" ? "en-US" : locale, {
     year: "2-digit",
     month: "numeric",
     day: "numeric",
   });
 };
+import { type Locale } from "@/src/features/i18n/locale";

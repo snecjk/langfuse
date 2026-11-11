@@ -1,3 +1,5 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { authFormsMessages } from "@/src/features/i18n/messages/auth-forms";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -39,18 +41,22 @@ import {
   type TurnstileWidgetHandle,
 } from "@/src/features/auth/components/TurnstileWidget";
 
-const resetPasswordSchema = z
-  .object({
-    token: z.string().regex(/^\d{6}$/, {
-      message: "Verification code must be 6 digits.",
-    }),
-    password: passwordSchema,
-    confirmPassword: passwordSchema,
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+type FormTranslator = ReturnType<
+  typeof useTranslation<typeof authFormsMessages>
+>;
+const resetPasswordSchema = (t: FormTranslator) =>
+  z
+    .object({
+      token: z.string().regex(/^\d{6}$/, {
+        message: t("codeDigits"),
+      }),
+      password: passwordSchema,
+      confirmPassword: passwordSchema,
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("passwordMismatch"),
+      path: ["confirmPassword"],
+    });
 
 export function ResetPasswordPage({
   passwordResetAvailable,
@@ -61,6 +67,7 @@ export function ResetPasswordPage({
   initialEmail?: string;
   intent?: "reset" | "setup";
 }) {
+  const t = useTranslation(authFormsMessages);
   const session = useSession();
   const router = useRouter();
   const { isLangfuseCloud, region } = useLangfuseCloudRegion();
@@ -102,7 +109,7 @@ export function ResetPasswordPage({
   const turnstileRef = useRef<TurnstileWidgetHandle>(null);
 
   const form = useForm({
-    resolver: zodResolver(resetPasswordSchema),
+    resolver: zodResolver(resetPasswordSchema(t)),
     defaultValues: {
       token: "",
       password: "",
@@ -122,11 +129,13 @@ export function ResetPasswordPage({
     }
   }, [initialEmail, intent]);
 
-  async function onSubmit(values: z.infer<typeof resetPasswordSchema>) {
+  async function onSubmit(
+    values: z.infer<ReturnType<typeof resetPasswordSchema>>,
+  ) {
     setFormError(null);
     setIsSuccess(false);
     if (!z.email().safeParse(effectiveEmail).success) {
-      setFormError("Enter a valid email address.");
+      setFormError(t("validEmail"));
       return;
     }
     capture(
@@ -179,7 +188,7 @@ export function ResetPasswordPage({
         setFormError(error.message);
       } else {
         console.error(error);
-        setFormError("An unknown error occurred");
+        setFormError(t("unknownError"));
       }
     }
   }
@@ -187,21 +196,19 @@ export function ResetPasswordPage({
   if (!passwordResetAvailable)
     return (
       <ErrorPage
-        title="Not available"
-        message="Password reset is not configured on this instance"
+        title={t("notAvailable")}
+        message={t("resetUnavailable")}
         additionalButton={{
-          label: "Setup instructions",
+          label: t("setupInstructions"),
           href: "https://langfuse.com/self-hosting/security/authentication-and-sso#auth-email-password",
         }}
       />
     );
 
-  const title = isSetMode ? "Set your password" : "Reset your password";
-  const pageTitle = isSetMode ? "Set password" : "Reset password";
-  const submitLabel = isSetMode ? "Set password" : "Update Password";
-  const successMessage = isSetMode
-    ? "Password set successfully. Redirecting ..."
-    : "Password successfully updated. Redirecting ...";
+  const title = isSetMode ? t("setYourPassword") : t("resetYourPassword");
+  const pageTitle = isSetMode ? t("setPassword") : t("resetPassword");
+  const submitLabel = isSetMode ? t("setPassword") : t("updatePassword");
+  const successMessage = isSetMode ? t("setSuccess") : t("resetSuccess");
 
   return (
     <>
@@ -227,7 +234,7 @@ export function ResetPasswordPage({
                     color="default"
                     __rawClassName="mr-2"
                   />
-                  Back to sign in
+                  {t("backToSignIn")}
                 </Link>
               </Button>
             </div>
@@ -242,7 +249,7 @@ export function ResetPasswordPage({
                 onSubmit={form.handleSubmit(onSubmit)}
               >
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>{t("email")}</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="jsdoe@example.com"
@@ -257,36 +264,36 @@ export function ResetPasswordPage({
                 {codeRequested ? (
                   <>
                     <p className="text-muted-foreground text-sm">
-                      Enter the 6-digit code from your email together with your
-                      new password. The code is valid for {codeMinutesValid}{" "}
-                      minutes.
+                      {t("codeInstructions", { minutes: codeMinutesValid })}
                     </p>
                     <FormField
                       control={form.control}
                       name="token"
-                      render={({ field }) => (
+                      render={({ field, fieldState }) => (
                         <FormItem>
-                          <FormLabel>Verification code</FormLabel>
+                          <FormLabel>{t("verificationCode")}</FormLabel>
                           <FormControl>
                             <Input
                               inputMode="numeric"
                               autoComplete="one-time-code"
                               maxLength={6}
-                              placeholder="6-digit code"
+                              placeholder={t("codePlaceholder")}
                               {...field}
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage>
+                            {localizeFormMessage(fieldState.error?.message, t)}
+                          </FormMessage>
                         </FormItem>
                       )}
                     />
                     <FormField
                       control={form.control}
                       name="password"
-                      render={({ field }) => (
+                      render={({ field, fieldState }) => (
                         <FormItem>
                           <FormLabel>
-                            {isSetMode ? "Password" : "New Password"}
+                            {isSetMode ? t("password") : t("newPassword")}
                           </FormLabel>
                           <FormControl>
                             <PasswordInput
@@ -295,19 +302,21 @@ export function ResetPasswordPage({
                               {...field}
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage>
+                            {localizeFormMessage(fieldState.error?.message, t)}
+                          </FormMessage>
                         </FormItem>
                       )}
                     />
                     <FormField
                       control={form.control}
                       name="confirmPassword"
-                      render={({ field }) => (
+                      render={({ field, fieldState }) => (
                         <FormItem>
                           <FormLabel>
                             {isSetMode
-                              ? "Confirm Password"
-                              : "Confirm New Password"}
+                              ? t("confirmPassword")
+                              : t("confirmNewPassword")}
                           </FormLabel>
                           <FormControl>
                             <PasswordInput
@@ -316,7 +325,9 @@ export function ResetPasswordPage({
                               {...field}
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage>
+                            {localizeFormMessage(fieldState.error?.message, t)}
+                          </FormMessage>
                         </FormItem>
                       )}
                     />
@@ -345,7 +356,7 @@ export function ResetPasswordPage({
                     </div>
                     {formError ? (
                       <div className="text-destructive text-center text-sm font-bold">
-                        {formError}
+                        {localizeFormMessage(formError, t)}
                       </div>
                     ) : null}
                     <div className="flex flex-col">
@@ -357,7 +368,7 @@ export function ResetPasswordPage({
                           setTurnstileToken(undefined);
                           setTurnstileAction(TURNSTILE_ACTIONS.login);
                         }}
-                        label="Send another code"
+                        label={t("sendAnotherCode")}
                         variant="secondary"
                         sharedTurnstile={
                           turnstileSiteKey
@@ -399,11 +410,9 @@ export function ResetPasswordPage({
         </div>
         {!isSetMode && session.status !== "authenticated" && (
           <div className="text-muted-foreground mx-auto mt-10 max-w-lg text-center text-xs">
-            You will only receive an email if an account with this email exists
-            and you have signed up with email and password. If you used an
-            authentication provider like Google, Gitlab, Okta, or GitHub, please{" "}
+            {t("resetFooter")}{" "}
             <Link href="/auth/sign-in" className="underline">
-              sign in
+              {t("signInLower")}
             </Link>
             .
           </div>
@@ -411,4 +420,20 @@ export function ResetPasswordPage({
       </div>
     </>
   );
+}
+
+function localizeFormMessage(
+  message: string | null | undefined,
+  t: ReturnType<typeof useTranslation<typeof authFormsMessages>>,
+) {
+  const key = (
+    Object.keys(authFormsMessages.en) as Array<
+      keyof typeof authFormsMessages.en
+    >
+  ).find(
+    (key) =>
+      authFormsMessages.en[key] === message ||
+      authFormsMessages["zh-CN"][key] === message,
+  );
+  return key ? t(key) : message;
 }

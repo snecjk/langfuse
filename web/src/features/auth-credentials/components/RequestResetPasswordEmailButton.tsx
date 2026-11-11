@@ -1,3 +1,5 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { authFormsMessages } from "@/src/features/i18n/messages/auth-forms";
 import { signIn, useSession } from "next-auth/react";
 import { Button } from "@/src/components/design-system/Button/Button";
 import { type ComponentProps, useEffect, useRef, useState } from "react";
@@ -36,6 +38,7 @@ export function RequestResetPasswordEmailButton({
     onRejectToken: () => void;
   };
 }) {
+  const t = useTranslation(authFormsMessages);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [awaitingSharedToken, setAwaitingSharedToken] = useState(false);
@@ -75,14 +78,14 @@ export function RequestResetPasswordEmailButton({
         ...(token ? { turnstileToken: token } : {}),
       });
       if (res?.error) {
-        setErrorMessage(resetEmailSignInError(res.error));
+        setErrorMessage(resetEmailSignInError(res.error, t));
       } else if (res?.ok) {
         sent = true;
         onEmailSent();
       }
     } catch (error) {
       console.error("Error sending reset password email:", error);
-      setErrorMessage("An unexpected error occurred. Please try again.");
+      setErrorMessage(t("unexpected"));
     } finally {
       // The token was redeemed (or rejected) by this attempt either way.
       if (sharedTurnstile) {
@@ -140,13 +143,13 @@ export function RequestResetPasswordEmailButton({
         text={
           label ??
           (session.status === "authenticated"
-            ? "Send verification code"
-            : "Request password reset")
+            ? t("sendVerification")
+            : t("requestReset"))
         }
       />
       {errorMessage && (
         <div className="text-destructive mt-3 text-center text-sm">
-          {errorMessage}
+          {localizeFormMessage(errorMessage, t)}
         </div>
       )}
     </>
@@ -155,12 +158,31 @@ export function RequestResetPasswordEmailButton({
 
 // NextAuth's email sign-in catch puts the thrown Error into the query via
 // URLSearchParams, which stringifies it as "Error: <message>".
-function resetEmailSignInError(error: string): string {
+function resetEmailSignInError(
+  error: string,
+  t: ReturnType<typeof useTranslation<typeof authFormsMessages>>,
+): string {
   if (error === "AccessDenied") {
-    return "This email is not associated with any account.";
+    return t("emailNotAssociated");
   }
   if (error.includes(TURNSTILE_FAILED_MESSAGE)) {
     return TURNSTILE_FAILED_MESSAGE;
   }
   return error;
+}
+
+function localizeFormMessage(
+  message: string | null | undefined,
+  t: ReturnType<typeof useTranslation<typeof authFormsMessages>>,
+) {
+  const key = (
+    Object.keys(authFormsMessages.en) as Array<
+      keyof typeof authFormsMessages.en
+    >
+  ).find(
+    (key) =>
+      authFormsMessages.en[key] === message ||
+      authFormsMessages["zh-CN"][key] === message,
+  );
+  return key ? t(key) : message;
 }

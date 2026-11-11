@@ -1,5 +1,7 @@
 /* eslint-disable @repo/no-margin-on-root-elements */
 "use client";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { navigationMessages } from "@/src/features/i18n/messages/navigation";
 import { type IconComponent } from "@langfuse/icons";
 import {
   SidebarGroup,
@@ -13,7 +15,7 @@ import Link from "next/link";
 import { type ReactNode } from "react";
 import {
   ROUTE_GROUP_BADGES,
-  type RouteGroup,
+  RouteGroup,
 } from "@/src/components/layouts/routes";
 import { Tooltip } from "@/src/components/design-system/Tooltip/Tooltip";
 
@@ -43,6 +45,14 @@ export function NavMain({
     ungrouped: NavMainItem[];
   };
 }) {
+  const t = useTranslation(navigationMessages);
+  const groupKeys = {
+    [RouteGroup.Observability]: "observability",
+    [RouteGroup.ContextManagement]: "contextManagement",
+    [RouteGroup.Evaluation]: "evaluation",
+    [RouteGroup.AiGateway]: "aiGateway",
+    [RouteGroup.Infrastructure]: "infrastructure",
+  } as const;
   return (
     <>
       <SidebarGroup>
@@ -60,7 +70,7 @@ export function NavMain({
         Object.entries(items.grouped).map(([group, items]) => (
           <SidebarGroup key={group}>
             <SidebarGroupLabel className="gap-2">
-              {group}
+              {t(groupKeys[group as RouteGroup])}
               {ROUTE_GROUP_BADGES[group as RouteGroup]}
             </SidebarGroupLabel>
             <SidebarGroupContent>

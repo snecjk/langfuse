@@ -1,3 +1,5 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { authMessages } from "@/src/features/i18n/messages/auth";
 import { Button } from "@/src/components/ui/button";
 import { cn } from "@/src/utils/tailwind";
 import React from "react";
@@ -17,6 +19,7 @@ export function AuthProviderButton({
   loading = false,
   showLastUsedBadge = false,
 }: AuthProviderButtonProps) {
+  const t = useTranslation(authMessages);
   return (
     <div>
       <Button
@@ -34,7 +37,7 @@ export function AuthProviderButton({
           showLastUsedBadge ? "visible" : "invisible",
         )}
       >
-        Last used
+        {t("lastUsed")}
       </div>
     </div>
   );

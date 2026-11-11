@@ -1,3 +1,6 @@
+import { useLocale } from "@/src/features/i18n/I18nProvider";
+import { translate } from "@/src/features/i18n/messages";
+import { navigationMessages } from "@/src/features/i18n/messages/navigation";
 /**
  * Hook to filter and process navigation based on user permissions and context
  * Implements memoization to prevent unnecessary recalculations
@@ -172,6 +175,8 @@ export function useFilteredNavigation(
     gatewayEntryHref,
   ]);
 
+  const { locale } = useLocale();
+
   // Map filtered routes to NavigationItems with url and isActive
   // This is O(n) - we map directly over filteredRoutes instead of re-iterating ROUTES
   return useMemo(() => {
@@ -197,6 +202,9 @@ export function useFilteredNavigation(
 
       return {
         ...route,
+        title: route.titleKey
+          ? translate(locale, navigationMessages, route.titleKey)
+          : route.title,
         menuNode:
           route.id === "v4-migration" && migrationProject
             ? createElement(V4MigrationNavItem, { project: migrationProject })
@@ -241,6 +249,7 @@ export function useFilteredNavigation(
       ],
     };
   }, [
+    locale,
     filteredRoutes,
     migrationProject,
     routerProjectId,

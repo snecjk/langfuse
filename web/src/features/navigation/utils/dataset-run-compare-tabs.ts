@@ -12,12 +12,14 @@ export const getDatasetRunCompareTabs = (
   {
     value: DATASET_RUN_COMPARE_TABS.COMPARE,
     label: "Outputs",
+    labelKey: "outputs" as const,
     href: `/project/${projectId}/datasets/${datasetId}/compare`,
     querySelector: (query: ParsedUrlQuery) => ({ runs: query.runs }),
   },
   {
     value: DATASET_RUN_COMPARE_TABS.CHARTS,
     label: "Charts",
+    labelKey: "charts" as const,
     href: `/project/${projectId}/datasets/${datasetId}/compare/charts`,
     querySelector: (query: ParsedUrlQuery) => ({ runs: query.runs }),
   },

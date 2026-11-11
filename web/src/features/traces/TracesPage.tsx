@@ -1,4 +1,6 @@
 /* eslint-disable no-nested-ternary */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { coreMessages } from "@/src/features/i18n/messages/core";
 import { useRouter } from "next/router";
 import TracesTable from "@/src/features/traces/TracesTable";
 import Page from "@/src/components/layouts/Page";
@@ -14,6 +16,7 @@ import { useQueryProject } from "@/src/features/projects/hooks";
 import { V4MigrationDelayBadge } from "@/src/features/v4-migration/V4MigrationDelayBadge";
 
 export default function TracesPage() {
+  const t = useTranslation(coreMessages);
   const router = useRouter();
   const projectId = router.query.projectId as string;
   const { isV4, isResolved } = useReadPath();
@@ -43,11 +46,10 @@ export default function TracesPage() {
     return (
       <Page
         headerProps={{
-          title: "Tracing",
+          title: t("tracing"),
           divider: false,
           help: {
-            description:
-              "A trace represents a single function/api invocation. Traces contain observations. See [docs](https://langfuse.com/docs/observability/data-model) to learn more.",
+            description: t("traceHelp"),
             href: "https://langfuse.com/docs/observability/data-model",
           },
         }}
@@ -61,14 +63,13 @@ export default function TracesPage() {
   return (
     <Page
       headerProps={{
-        title: "Tracing",
+        title: t("tracing"),
         divider: false,
         titleBadges: <V4MigrationDelayBadge page="traces" />,
         help: {
           description: (
             <>
-              A trace represents a single function/api invocation. Traces
-              contain observations. See{" "}
+              {t("traceExplanation")}{" "}
               <a
                 href="https://langfuse.com/docs/observability/data-model"
                 target="_blank"
@@ -76,9 +77,9 @@ export default function TracesPage() {
                 className="decoration-primary/30 hover:decoration-primary underline"
                 onClick={(e) => e.stopPropagation()}
               >
-                docs
+                {t("docs")}
               </a>{" "}
-              to learn more.
+              {t("learnMoreSuffix")}
             </>
           ),
           href: "https://langfuse.com/docs/observability/data-model",

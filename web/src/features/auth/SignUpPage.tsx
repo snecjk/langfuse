@@ -1,3 +1,5 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { authFormsMessages } from "@/src/features/i18n/messages/auth-forms";
 import { Button } from "@/src/components/ui/button";
 import {
   Form,
@@ -51,10 +53,6 @@ import {
 type NextAuthProvider = NonNullable<Parameters<typeof signIn>[0]>;
 
 const LOGIN_CAPTCHA_WAIT_MS = 20_000;
-const ACCOUNT_CREATED_MESSAGE =
-  "Your account was created. Complete the captcha, then sign in.";
-const VERIFICATION_CODE_PENDING_MESSAGE =
-  "Your account was created. Complete the captcha to receive the verification code.";
 
 function waitForLoginToken(
   pending: Promise<string | undefined> | undefined,
@@ -75,9 +73,13 @@ function waitForLoginToken(
   });
 }
 
-function verifiedSignupSignInError(error: string): string {
+type FormTranslator = ReturnType<
+  typeof useTranslation<typeof authFormsMessages>
+>;
+
+function verifiedSignupSignInError(error: string, t: FormTranslator): string {
   if (error === "AccessDenied") {
-    return "Unable to send verification email. Please try again.";
+    return t("sendVerificationError");
   }
   if (error.includes(TURNSTILE_FAILED_MESSAGE)) {
     return TURNSTILE_FAILED_MESSAGE;
@@ -86,14 +88,15 @@ function verifiedSignupSignInError(error: string): string {
 }
 
 // Schema for the verified signup flow (email + name only, no password)
-const signupVerifyFormSchema = z.object({
-  name: StringNoHTMLNonEmpty.refine((value) => noUrlCheck(value), {
-    message: "Input should not contain a URL",
-  }).refine((value) => /^[a-zA-Z0-9\s]+$/.test(value), {
-    message: "Name can only contain letters, numbers, and spaces",
-  }),
-  email: z.email(),
-});
+const signupVerifyFormSchema = (t: FormTranslator) =>
+  z.object({
+    name: StringNoHTMLNonEmpty.refine((value) => noUrlCheck(value), {
+      message: t("noUrl"),
+    }).refine((value) => /^[a-zA-Z0-9\s]+$/.test(value), {
+      message: t("nameCharacters"),
+    }),
+    email: z.email(),
+  });
 
 export default function SignUpPage({
   authProviders = FALLBACK_AUTH_PROVIDERS,
@@ -122,6 +125,7 @@ export default function SignUpPage({
 function StandardSignupFlow({
   authProviders,
 }: Pick<PageProps, "authProviders" | "emailVerificationRequired">) {
+  const t = useTranslation(authFormsMessages);
   const { isLangfuseCloud } = useLangfuseCloudRegion();
   const router = useRouter();
   const capture = usePostHogClientCapture();
@@ -190,7 +194,7 @@ function StandardSignupFlow({
 
     if (!emailResult.success) {
       form.setError("email", {
-        message: "Invalid email address",
+        message: t("invalidEmail"),
       });
       setContinueLoading(false);
       return;
@@ -245,7 +249,7 @@ function StandardSignupFlow({
         expected: isJsonParseSyntaxError(error),
         extra: { context: "auth.signUp.checkSso" },
       });
-      setFormError("Unable to check SSO configuration. Please try again.");
+      setFormError(t("checkSso"));
     } finally {
       setContinueLoading(false);
     }
@@ -305,22 +309,18 @@ function StandardSignupFlow({
         loginTurnstileToken = await waitForLoginToken(nextToken);
       }
       if (turnstileSiteKey && !loginTurnstileToken) {
-        setFormError(ACCOUNT_CREATED_MESSAGE);
+        setFormError(t("accountCreated"));
         return;
       }
 
       await signInAfterSignup(values, loginTurnstileToken);
     } catch {
       turnstileRef.current?.reset();
-      setFormError(
-        created
-          ? ACCOUNT_CREATED_MESSAGE
-          : "An error occurred. Please try again.",
-      );
+      setFormError(created ? t("accountCreated") : t("genericError"));
     }
   }
 
-  const passwordSubmitLabel = accountCreated ? "Sign in" : "Sign up";
+  const passwordSubmitLabel = accountCreated ? t("signIn") : t("signUp");
 
   return (
     <SignupPageShell>
@@ -340,13 +340,15 @@ function StandardSignupFlow({
             <FormField
               control={form.control}
               name="name"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>{t("name")}</FormLabel>
                   <FormControl>
                     <Input placeholder="Jane Doe" {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage>
+                    {localizeFormMessage(fieldState.error?.message, t)}
+                  </FormMessage>
                 </FormItem>
               )}
             />
@@ -354,9 +356,9 @@ function StandardSignupFlow({
           <FormField
             control={form.control}
             name="email"
-            render={({ field }) => (
+            render={({ field, fieldState }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>{t("email")}</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="jsdoe@example.com"
@@ -365,7 +367,9 @@ function StandardSignupFlow({
                     {...field}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage>
+                  {localizeFormMessage(fieldState.error?.message, t)}
+                </FormMessage>
               </FormItem>
             )}
           />
@@ -373,9 +377,9 @@ function StandardSignupFlow({
             <FormField
               control={form.control}
               name="password"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>{t("password")}</FormLabel>
                   <FormControl>
                     <PasswordInput
                       allowPasswordManager
@@ -383,7 +387,9 @@ function StandardSignupFlow({
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage>
+                    {localizeFormMessage(fieldState.error?.message, t)}
+                  </FormMessage>
                 </FormItem>
               )}
             />
@@ -409,11 +415,11 @@ function StandardSignupFlow({
             }
             data-testid="submit-email-password-sign-up-form"
           >
-            {showPasswordStep ? passwordSubmitLabel : "Continue"}
+            {showPasswordStep ? passwordSubmitLabel : t("continue")}
           </Button>
           {formError ? (
             <div className="text-destructive text-center text-sm font-bold">
-              {formError}
+              {localizeFormMessage(formError, t)}
             </div>
           ) : null}
         </form>
@@ -433,6 +439,7 @@ function StandardSignupFlow({
 function VerifiedSignupFlow({
   authProviders,
 }: Pick<PageProps, "authProviders" | "emailVerificationRequired">) {
+  const t = useTranslation(authFormsMessages);
   const { isLangfuseCloud } = useLangfuseCloudRegion();
   const router = useRouter();
   const capture = usePostHogClientCapture();
@@ -468,7 +475,7 @@ function VerifiedSignupFlow({
     );
 
   const form = useForm({
-    resolver: zodResolver(signupVerifyFormSchema),
+    resolver: zodResolver(signupVerifyFormSchema(t)),
     defaultValues: {
       name: "",
       email: emailParam ?? "",
@@ -476,7 +483,7 @@ function VerifiedSignupFlow({
   });
 
   async function sendSetupCode(
-    values: z.infer<typeof signupVerifyFormSchema>,
+    values: z.infer<ReturnType<typeof signupVerifyFormSchema>>,
     passwordResetToken: string | undefined,
   ) {
     const signInRes = await signIn("email", {
@@ -488,7 +495,7 @@ function VerifiedSignupFlow({
 
     if (signInRes?.error) {
       turnstileRef.current?.reset();
-      setFormError(verifiedSignupSignInError(signInRes.error));
+      setFormError(verifiedSignupSignInError(signInRes.error, t));
       return;
     }
 
@@ -501,7 +508,7 @@ function VerifiedSignupFlow({
   }
 
   async function onVerifiedSubmit(
-    values: z.infer<typeof signupVerifyFormSchema>,
+    values: z.infer<ReturnType<typeof signupVerifyFormSchema>>,
   ) {
     let created = accountCreated;
     try {
@@ -545,18 +552,14 @@ function VerifiedSignupFlow({
         passwordResetToken = await waitForLoginToken(pendingToken);
       }
       if (turnstileSiteKey && !passwordResetToken) {
-        setFormError(VERIFICATION_CODE_PENDING_MESSAGE);
+        setFormError(t("verificationPending"));
         return;
       }
 
       await sendSetupCode(values, passwordResetToken);
     } catch {
       turnstileRef.current?.reset();
-      setFormError(
-        created
-          ? VERIFICATION_CODE_PENDING_MESSAGE
-          : "An error occurred. Please try again.",
-      );
+      setFormError(created ? t("verificationPending") : t("genericError"));
     }
   }
 
@@ -570,22 +573,24 @@ function VerifiedSignupFlow({
           <FormField
             control={form.control}
             name="name"
-            render={({ field }) => (
+            render={({ field, fieldState }) => (
               <FormItem>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>{t("name")}</FormLabel>
                 <FormControl>
                   <Input placeholder="Jane Doe" {...field} />
                 </FormControl>
-                <FormMessage />
+                <FormMessage>
+                  {localizeFormMessage(fieldState.error?.message, t)}
+                </FormMessage>
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
             name="email"
-            render={({ field }) => (
+            render={({ field, fieldState }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>{t("email")}</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="jsdoe@example.com"
@@ -594,7 +599,9 @@ function VerifiedSignupFlow({
                     {...field}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage>
+                  {localizeFormMessage(fieldState.error?.message, t)}
+                </FormMessage>
               </FormItem>
             )}
           />
@@ -613,11 +620,11 @@ function VerifiedSignupFlow({
             disabled={Boolean(turnstileSiteKey) && !turnstileToken}
             data-testid="submit-email-password-sign-up-form"
           >
-            {accountCreated ? "Send verification code" : "Continue"}
+            {accountCreated ? t("sendVerification") : t("continue")}
           </Button>
           {formError ? (
             <div className="text-destructive text-center text-sm font-bold">
-              {formError}
+              {localizeFormMessage(formError, t)}
             </div>
           ) : null}
         </form>
@@ -635,6 +642,7 @@ function VerifiedSignupFlow({
 }
 
 function SignupPageShell({ children }: { children: React.ReactNode }) {
+  const t = useTranslation(authFormsMessages);
   const { isLangfuseCloud } = useLangfuseCloudRegion();
 
   return (
@@ -644,12 +652,12 @@ function SignupPageShell({ children }: { children: React.ReactNode }) {
           <LangfuseWordmark />
         </div>
         <h2 className="text-primary mt-4 text-center text-2xl leading-9 font-bold tracking-tight">
-          Create new account
+          {t("createAccount")}
         </h2>
       </div>
       {isLangfuseCloud ? (
         <div className="text-center sm:mx-auto sm:w-full sm:max-w-[480px]">
-          No credit card required.
+          {t("noCard")}
         </div>
       ) : null}
 
@@ -666,6 +674,7 @@ function SignupPageShell({ children }: { children: React.ReactNode }) {
 }
 
 function SignupFooter() {
+  const t = useTranslation(authFormsMessages);
   const router = useRouter();
   return (
     <p className="text-muted-foreground mt-10 text-center text-sm">
@@ -674,8 +683,24 @@ function SignupFooter() {
         href={`/auth/sign-in${router.asPath.includes("?") ? router.asPath.substring(router.asPath.indexOf("?")) : ""}`}
         className="text-link hover:text-link-hover font-bold"
       >
-        Sign in
+        {t("signIn")}
       </Link>
     </p>
   );
+}
+
+function localizeFormMessage(
+  message: string | null | undefined,
+  t: ReturnType<typeof useTranslation<typeof authFormsMessages>>,
+) {
+  const key = (
+    Object.keys(authFormsMessages.en) as Array<
+      keyof typeof authFormsMessages.en
+    >
+  ).find(
+    (key) =>
+      authFormsMessages.en[key] === message ||
+      authFormsMessages["zh-CN"][key] === message,
+  );
+  return key ? t(key) : message;
 }

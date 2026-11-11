@@ -4,7 +4,9 @@
 // (LFE-10858).
 import "@/src/polyfills/crypto-random-uuid";
 
-import { type AppType } from "next/app";
+import App, { type AppContext, type AppProps } from "next/app";
+import { I18nProvider } from "@/src/features/i18n/I18nProvider";
+import { localeFromCookie, type Locale } from "@/src/features/i18n/locale";
 import Head from "next/head";
 import { type Session } from "next-auth";
 import { SessionProvider, useSession } from "next-auth/react";
@@ -145,10 +147,10 @@ if (typeof window !== "undefined" && postHogClientConfig) {
   });
 }
 
-const MyApp: AppType<{ session: Session | null }> = ({
+function MyApp({
   Component,
-  pageProps: { session, ...pageProps },
-}) => {
+  pageProps: { session, uiLocale, ...pageProps },
+}: AppProps<{ session: Session | null; uiLocale: Locale }>) {
   const router = useRouter();
   const skipAppLayout =
     "skipAppLayout" in Component && Component.skipAppLayout === true;
@@ -177,70 +179,90 @@ const MyApp: AppType<{ session: Session | null }> = ({
   );
 
   return (
-    <div className={`${plexMono.variable} contents`}>
-      {/* Replaces Next's default `width=device-width` (next/head dedupes by
+    <I18nProvider initialLocale={uiLocale}>
+      <div className={`${plexMono.variable} contents`}>
+        {/* Replaces Next's default `width=device-width` (next/head dedupes by
           name). `maximum-scale=1` stops iOS Safari auto-zooming a focused
           sub-16px field; iOS ignores `user-scalable=no` for user gestures, so
           the engine-level zoom block is `touch-action` on `#__next` and the
           overlay layers — NOT on html/body, which WebKit ignores for page
           pinch (styles/globals.css). `viewport-fit=cover` is what makes
           `env(safe-area-inset-*)` non-zero. */}
-      <Head>
-        <meta
-          name="viewport"
-          content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no, viewport-fit=cover"
-        />
-      </Head>
-      <DefaultHead />
-      <LayerProvider>
-        <QueryParamProvider
-          adapter={NextAdapterPagesWithReadyGuard}
-          options={{ enableBatching: true }}
-        >
-          <TooltipProvider>
-            <CommandMenuProvider>
-              <PostHogProvider client={posthog}>
-                <SessionProvider
-                  session={session}
-                  refetchOnWindowFocus={true}
-                  refetchInterval={5 * 60} // 5 minutes
-                  basePath={authBasePath}
-                >
-                  <ResilientSessionProvider basePath={authBasePath}>
-                    <DetailPageListsProvider>
-                      <MarkdownRenderCharacterLimitProvider>
-                        <ThemeProvider
-                          attribute="class"
-                          enableSystem
-                          disableTransitionOnChange
-                        >
-                          <ScoreCacheProvider>
-                            <CorrectionCacheProvider>
-                              <SupportDrawerProvider defaultOpen={false}>
-                                <V4MigrationPanelProvider defaultOpen={false}>
-                                  <InAppAiAgentProvider defaultOpen={false}>
-                                    {skipAppLayout ? (
-                                      page
-                                    ) : (
-                                      <AppLayout>{page}</AppLayout>
-                                    )}
-                                  </InAppAiAgentProvider>
-                                </V4MigrationPanelProvider>
-                              </SupportDrawerProvider>
-                            </CorrectionCacheProvider>
-                          </ScoreCacheProvider>
-                        </ThemeProvider>
-                      </MarkdownRenderCharacterLimitProvider>
-                    </DetailPageListsProvider>
-                  </ResilientSessionProvider>
-                </SessionProvider>
-              </PostHogProvider>
-            </CommandMenuProvider>
-          </TooltipProvider>
-        </QueryParamProvider>
-      </LayerProvider>
-    </div>
+        <Head>
+          <meta
+            name="viewport"
+            content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no, viewport-fit=cover"
+          />
+        </Head>
+        <DefaultHead />
+        <LayerProvider>
+          <QueryParamProvider
+            adapter={NextAdapterPagesWithReadyGuard}
+            options={{ enableBatching: true }}
+          >
+            <TooltipProvider>
+              <CommandMenuProvider>
+                <PostHogProvider client={posthog}>
+                  <SessionProvider
+                    session={session}
+                    refetchOnWindowFocus={true}
+                    refetchInterval={5 * 60} // 5 minutes
+                    basePath={authBasePath}
+                  >
+                    <ResilientSessionProvider basePath={authBasePath}>
+                      <DetailPageListsProvider>
+                        <MarkdownRenderCharacterLimitProvider>
+                          <ThemeProvider
+                            attribute="class"
+                            enableSystem
+                            disableTransitionOnChange
+                          >
+                            <ScoreCacheProvider>
+                              <CorrectionCacheProvider>
+                                <SupportDrawerProvider defaultOpen={false}>
+                                  <V4MigrationPanelProvider defaultOpen={false}>
+                                    <InAppAiAgentProvider defaultOpen={false}>
+                                      {skipAppLayout ? (
+                                        page
+                                      ) : (
+                                        <AppLayout>{page}</AppLayout>
+                                      )}
+                                    </InAppAiAgentProvider>
+                                  </V4MigrationPanelProvider>
+                                </SupportDrawerProvider>
+                              </CorrectionCacheProvider>
+                            </ScoreCacheProvider>
+                          </ThemeProvider>
+                        </MarkdownRenderCharacterLimitProvider>
+                      </DetailPageListsProvider>
+                    </ResilientSessionProvider>
+                  </SessionProvider>
+                </PostHogProvider>
+              </CommandMenuProvider>
+            </TooltipProvider>
+          </QueryParamProvider>
+        </LayerProvider>
+      </div>
+    </I18nProvider>
   );
+}
+
+MyApp.getInitialProps = async (context: AppContext) => {
+  const initialProps = await App.getInitialProps(context);
+  if (context.ctx.res && !context.ctx.res.headersSent) {
+    context.ctx.res.setHeader("Cache-Control", "private, no-store");
+  }
+  const cookie =
+    context.ctx.req?.headers.cookie ??
+    (typeof document === "undefined" ? undefined : document.cookie);
+  // withTRPC preserves pageProps but drops additional top-level App props.
+  return {
+    ...initialProps,
+    pageProps: {
+      ...initialProps.pageProps,
+      uiLocale: localeFromCookie(cookie),
+    },
+  };
 };
 
 export default api.withTRPC(MyApp);

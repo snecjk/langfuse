@@ -1,3 +1,5 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { coreMessages } from "@/src/features/i18n/messages/core";
 import { api } from "@/src/utils/api";
 import {
   getDatasetTabs,
@@ -39,6 +41,7 @@ function DatasetItemsView({
   projectId: string;
   datasetId: string;
 }) {
+  const t = useTranslation(coreMessages);
   const { selectedVersion, resetToLatest } = useDatasetVersion();
   const isViewingOldVersion = selectedVersion !== null;
 
@@ -131,7 +134,7 @@ function DatasetItemsView({
                 <Button
                   variant="outline"
                   size="icon"
-                  aria-label="Dataset actions"
+                  aria-label={t("datasetActions")}
                   {...getTriggerProps()}
                 >
                   <MoreVertical size="base" color="default" />
@@ -142,7 +145,7 @@ function DatasetItemsView({
               variant="outline"
               size="icon"
               onClick={() => setIsVersionPanelOpen(!isVersionPanelOpen)}
-              title="Version History"
+              title={t("versionHistory")}
             >
               <History size="base" color="default" />
             </Button>
@@ -170,7 +173,7 @@ function DatasetItemsView({
               open: isVersionPanelOpen,
               onOpenChange: handlePanelOpenChange,
             }}
-            mobileTitle="Version History"
+            mobileTitle={t("versionHistory")}
           >
             <SidePanelContent className="h-full">
               <DatasetVersionHistoryPanel
