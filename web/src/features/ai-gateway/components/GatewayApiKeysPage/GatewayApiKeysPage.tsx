@@ -6,12 +6,15 @@ import { useGatewaySettingsAccess } from "@/src/features/ai-gateway/hooks/useGat
 import { CreateGatewayApiKeyDialogController } from "@/src/features/ai-gateway/components/GatewayApiKeysPage/components/CreateGatewayApiKeyDialogController/CreateGatewayApiKeyDialogController";
 import { ConnectedGatewayCreateFirstKeyPlaceholder } from "@/src/features/ai-gateway/components/GatewayCreateFirstKeyPlaceholder/ConnectedGatewayCreateFirstKeyPlaceholder";
 import { ConnectedGatewayApiKeysTable } from "@/src/features/ai-gateway/components/GatewayApiKeysPage/components/GatewayApiKeysTable/ConnectedGatewayApiKeysTable";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 
 export function GatewayApiKeysPage({
   organizationId,
 }: {
   organizationId: string;
 }) {
+  const t = useTranslation(gatewayMessages);
   const { canManageGateway, isIngestionConfigured, isSetupStatusPending } =
     useGatewaySettingsAccess(organizationId);
 
@@ -25,11 +28,11 @@ export function GatewayApiKeysPage({
   const description = (
     <p className="text-muted-foreground text-sm">
       {canManageGateway
-        ? "Gateway keys authenticate requests to the AI Gateway only. User keys are revoked when their owner leaves the organization; service account keys keep working."
-        : "Your gateway keys authenticate requests to the AI Gateway only. They are revoked when you leave the organization or lose gateway access."}{" "}
+        ? t("gatewayKeysDescriptionManager")
+        : t("gatewayKeysDescriptionMember")}{" "}
       <Button
         variant="text"
-        text="How gateway keys work"
+        text={t("howGatewayKeysWork")}
         href={GATEWAY_API_KEYS_DOCS_URL}
       />
     </p>

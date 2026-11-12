@@ -8,6 +8,8 @@ import {
 import { FieldHeader } from "@/src/features/ai-gateway/components/GatewaySetupPage/components/ProviderDialogController/components/FieldHeader";
 import { providerIcons } from "@/src/features/ai-gateway/constants/providerIcons";
 import { providerLabels } from "@/src/features/ai-gateway/constants/providerLabels";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 import type { GatewayProvider } from "@/src/features/ai-gateway/types/gatewayProvider";
 
 export function ProviderSelect({
@@ -19,6 +21,7 @@ export function ProviderSelect({
   value: GatewayProvider;
   onChange: (provider: GatewayProvider) => void;
 }) {
+  const t = useTranslation(gatewayMessages);
   const handleValueChange = (next: string) => {
     const provider = providers.find((candidate) => candidate === next);
     if (provider) onChange(provider);
@@ -28,8 +31,8 @@ export function ProviderSelect({
     <div>
       <FieldHeader
         htmlFor="gateway-provider"
-        label="Provider"
-        description="Where gateway requests for this credential are sent."
+        label={t("providerLabel")}
+        description={t("providerDescription")}
       />
       <Select value={value} onValueChange={handleValueChange}>
         <SelectTrigger id="gateway-provider">

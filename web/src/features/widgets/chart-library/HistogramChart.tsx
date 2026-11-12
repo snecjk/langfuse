@@ -8,7 +8,10 @@ import {
   formatMetric,
   toFullMetricString,
 } from "@/src/features/widgets/chart-library/utils";
-import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
 import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 
 const HistogramChart = ({
@@ -26,8 +29,9 @@ const HistogramChart = ({
   metricFormatter?: MetricFormatterFunction;
 }) => {
   const t = useTranslation(widgetMessages);
+  const locale = useInterfaceLocale();
   const formatBinEdge = (value: number) =>
-    toFullMetricString(metricFormatter(value, { style: "compact" }));
+    toFullMetricString(metricFormatter(value, { style: "compact", locale }));
 
   const transformHistogramData = (data: DataPoint[]) => {
     if (!data.length) return [];
@@ -63,7 +67,7 @@ const HistogramChart = ({
       data={histogramData}
       color={config.count?.color ?? "hsl(var(--chart-fill-1))"}
       valueFormatter={(value) =>
-        toFullMetricString(formatMetric(value, { style: "compact" }))
+        toFullMetricString(formatMetric(value, { style: "compact", locale }))
       }
       ariaLabel="Histogram"
       tooltipHeading={(label) => `Bin: ${label}`}

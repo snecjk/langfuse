@@ -6,6 +6,8 @@ import { GATEWAY_SETUP } from "@/src/features/ai-gateway/components/GatewaySetup
 import type { getSetupStepStatus } from "@/src/features/ai-gateway/components/GatewaySetupPage/components/GatewaySetupGuide/fns/getSetupStepStatus";
 import { providerLabels } from "@/src/features/ai-gateway/constants/providerLabels";
 import { formatAvailableGatewayProviderNames } from "@/src/features/ai-gateway/fns/formatAvailableGatewayProviderNames";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 import type { GatewayConnection } from "@/src/features/ai-gateway/types/gatewayProvider";
 
 export type CredentialStepProps = {
@@ -17,21 +19,29 @@ export type CredentialStepProps = {
 function CredentialStepDescription({
   status,
   firstConnection,
-}: Pick<CredentialStepProps, "status" | "firstConnection">) {
+  t,
+}: Pick<CredentialStepProps, "status" | "firstConnection"> & {
+  t: ReturnType<typeof useTranslation<typeof gatewayMessages>>;
+}) {
   if (status === "complete" && firstConnection) {
-    return <>{providerLabels[firstConnection.provider]} credential added</>;
+    return (
+      <>
+        {t("credentialAddedFor", {
+          provider: providerLabels[firstConnection.provider],
+        })}
+      </>
+    );
   }
   const providerNames = formatAvailableGatewayProviderNames();
   return (
     <>
-      Connect {providerNames} with an API key. Available models are loaded from
-      the provider.
+      {t("addProviderCredentialDescription", { providers: providerNames })}
       {status === "current" ? (
         <>
           {" "}
           <Button
             variant="text"
-            text="How provider credentials work"
+            text={t("howCredentialsWork")}
             href={GATEWAY_SETUP.docsUrl}
           />
         </>
@@ -45,22 +55,28 @@ export function CredentialStep({
   firstConnection,
   onAddCredential,
 }: CredentialStepProps) {
+  const t = useTranslation(gatewayMessages);
   return (
     <Stepper
       number={2}
-      title="Add a provider credential"
+      title={t("addProviderCredentialTitle")}
       status={status}
       isCollapsible={false}
       description={
         <CredentialStepDescription
           status={status}
           firstConnection={firstConnection}
+          t={t}
         />
       }
     >
       {status === "current" ? (
         <div className="flex flex-col items-start pt-1">
-          <Button text="Add credential" icon={Plus} onClick={onAddCredential} />
+          <Button
+            text={t("addCredential")}
+            icon={Plus}
+            onClick={onAddCredential}
+          />
         </div>
       ) : null}
     </Stepper>

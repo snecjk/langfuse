@@ -3,19 +3,35 @@ import {
   type TopicExecutionStatus,
   type TopicOperation,
 } from "@langfuse/shared/topics";
+import { type useTranslation } from "@/src/features/i18n/I18nProvider";
+import { type topicsMessages } from "@/src/features/i18n/messages/topics";
 
-export const operationLabels: Record<TopicOperation, string> = {
-  process: "Analyze traces",
-  update: "Regenerate topics",
-};
+type Translator = ReturnType<typeof useTranslation<typeof topicsMessages>>;
 
-export const executionLabels: Record<TopicExecutionStatus, string> = {
-  queued: "Queued",
-  running: "Running",
-  completed: "Complete",
-  completed_with_errors: "Done with issues",
-  failed: "Failed",
-};
+export function operationLabel(
+  operation: TopicOperation,
+  t: Translator,
+): string {
+  return operation === "process" ? t("operationProcess") : t("operationUpdate");
+}
+
+export function executionLabel(
+  status: TopicExecutionStatus,
+  t: Translator,
+): string {
+  switch (status) {
+    case "queued":
+      return t("statusQueued");
+    case "running":
+      return t("statusRunning");
+    case "completed":
+      return t("statusComplete");
+    case "completed_with_errors":
+      return t("statusDoneWithIssues");
+    case "failed":
+      return t("statusFailed");
+  }
+}
 
 /** StatusBadge types, so run statuses share the app-wide status colours. */
 export const executionBadgeTypes: Record<TopicExecutionStatus, Status> = {

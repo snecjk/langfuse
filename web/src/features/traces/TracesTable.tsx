@@ -1,5 +1,8 @@
 /* eslint-disable no-nested-ternary, react/no-unstable-nested-components, @typescript-eslint/no-use-before-define */
-import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
 import { tracingMessages } from "@/src/features/i18n/messages/tracing";
 import { DataTable } from "@/src/components/table/data-table";
 import { TRACING_PAGE_SIZE_OPTIONS } from "@/src/components/table/DataTablePagination";
@@ -196,6 +199,7 @@ function TracesTableInternal({
   openDeleteTraceDialog: (traceId: string) => void;
 }) {
   const t = useTranslation(tracingMessages);
+  const locale = useInterfaceLocale();
   const capture = usePostHogClientCapture();
   const peekContext = usePeekTableState();
   const hasTraceDeleteAccess = useHasProjectAccess({
@@ -702,9 +706,17 @@ function TracesTableInternal({
       return "...";
     }
     if (selectAll) {
-      return compactNumberFormatter(totalCountQuery.data?.totalCount);
+      return compactNumberFormatter(
+        totalCountQuery.data?.totalCount,
+        undefined,
+        locale,
+      );
     }
-    return compactNumberFormatter(Object.keys(selectedRows).length);
+    return compactNumberFormatter(
+      Object.keys(selectedRows).length,
+      undefined,
+      locale,
+    );
   })();
 
   // Select-all deletes persist the raw filterState into the batch action, but
@@ -896,7 +908,7 @@ function TracesTableInternal({
           <BreakdownTooltip details={row.original.costDetails ?? []} isCost>
             <div className="flex items-center gap-1">
               {cost ? (
-                <span>{usdFormatter(cost.toNumber())}</span>
+                <span>{usdFormatter(cost.toNumber(), 2, 2, locale)}</span>
               ) : (
                 <EmptyValue />
               )}
@@ -1062,7 +1074,7 @@ function TracesTableInternal({
       },
       enableHiding: true,
       defaultHidden: true,
-      formatter: (value) => numberFormatter(value, 0),
+      formatter: (value) => numberFormatter(value, 0, undefined, locale),
       getValue: (value, { row }) =>
         isMetricPending(row.original.id) ? { type: "loading" } : (value ?? 0n),
     }),
@@ -1162,7 +1174,7 @@ function TracesTableInternal({
           id: "inputCost",
           header: t("inputCost"),
           size: 100,
-          formatter: (value) => usdFormatter(value),
+          formatter: (value) => usdFormatter(value, 2, 2, locale),
           getValue: (value, { row }) => {
             if (isMetricPending(row.original.id)) return { type: "loading" };
             return value ?? undefined;
@@ -1176,7 +1188,7 @@ function TracesTableInternal({
           id: "outputCost",
           header: t("outputCost"),
           size: 100,
-          formatter: (value) => usdFormatter(value),
+          formatter: (value) => usdFormatter(value, 2, 2, locale),
           getValue: (value, { row }) => {
             if (isMetricPending(row.original.id)) return { type: "loading" };
             return value ?? undefined;
@@ -1204,7 +1216,7 @@ function TracesTableInternal({
           id: "inputTokens",
           header: t("inputTokens"),
           size: 110,
-          formatter: (value) => numberFormatter(value, 0),
+          formatter: (value) => numberFormatter(value, 0, undefined, locale),
           getValue: (value, { row }) =>
             isMetricPending(row.original.id)
               ? { type: "loading" }
@@ -1218,7 +1230,7 @@ function TracesTableInternal({
           id: "outputTokens",
           header: t("outputTokens"),
           size: 110,
-          formatter: (value) => numberFormatter(value, 0),
+          formatter: (value) => numberFormatter(value, 0, undefined, locale),
           getValue: (value, { row }) =>
             isMetricPending(row.original.id)
               ? { type: "loading" }
@@ -1232,7 +1244,7 @@ function TracesTableInternal({
           id: "totalTokens",
           header: t("totalTokens"),
           size: 110,
-          formatter: (value) => numberFormatter(value, 0),
+          formatter: (value) => numberFormatter(value, 0, undefined, locale),
           getValue: (value, { row }) =>
             isMetricPending(row.original.id)
               ? { type: "loading" }
@@ -1704,6 +1716,7 @@ const TracesDynamicCell = ({
 export default function TracesTable(props: TracesTableProps) {
   const [traceIdToDelete, setTraceIdToDelete] = useState<string | null>(null);
   const t = useTranslation(tracingMessages);
+  const locale = useInterfaceLocale();
   const capture = usePostHogClientCapture();
   const utils = api.useUtils();
   const traceMutation = api.traces.deleteMany.useMutation({

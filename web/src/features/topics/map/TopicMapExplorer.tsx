@@ -16,6 +16,8 @@ import { Tooltip } from "@/src/components/design-system/Tooltip/Tooltip";
 import { useElementSize } from "@/src/hooks/useElementSize";
 import { usePanZoomGestures } from "@/src/hooks/usePanZoomGestures";
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 import { TopicMapCanvas } from "./TopicMapCanvas";
 import styles from "./topic-map.module.css";
 import {
@@ -75,8 +77,12 @@ export function TopicMapExplorer({
   fillContainer = false,
   previewOnSelect = false,
 }: TopicMapExplorerProps) {
+  const t = useTranslation(topicsMessages);
   // Projection preparation is independent of the high-frequency camera store.
-  const model = useMemo(() => prepareTopicMap(data, topics), [data, topics]);
+  const model = useMemo(
+    () => prepareTopicMap(data, topics, t),
+    [data, topics, t],
+  );
   const [store] = useState(createTopicMapStore);
   const [stageRef, stageSize] = useElementSize<HTMLDivElement>();
   const sectionRef = useRef<HTMLElement>(null);
@@ -374,7 +380,7 @@ export function TopicMapExplorer({
   return (
     <section
       ref={sectionRef}
-      aria-label="Embedding map"
+      aria-label={t("embeddingMap")}
       className={cn(
         "ph-no-capture bg-background flex min-w-0 flex-col overflow-hidden rounded-lg border",
         fillContainer && "h-full min-h-0",
@@ -383,15 +389,14 @@ export function TopicMapExplorer({
     >
       {fullscreenError && (
         <p role="status" className="text-muted-foreground px-4 py-2 text-xs">
-          Fullscreen is unavailable in this browser. You can still pan and zoom
-          here.
+          {t("fullscreenUnavailable")}
         </p>
       )}
       <div
         ref={stageRef}
         tabIndex={0}
         role="group"
-        aria-label="Interactive topic map. Drag or scroll to pan, pinch or control scroll to zoom. Arrow keys pan, plus and minus zoom, zero fits the map."
+        aria-label={t("mapInteractiveAria")}
         className={cn(
           "bg-muted/10 focus-visible:ring-ring relative w-full overflow-hidden overscroll-contain outline-none focus-visible:ring-2 focus-visible:ring-inset",
           fullscreen || fillContainer
@@ -409,7 +414,7 @@ export function TopicMapExplorer({
       >
         <div
           role="toolbar"
-          aria-label="Map controls"
+          aria-label={t("mapControls")}
           className="bg-background/85 absolute top-2 right-2 z-20 flex items-center gap-0.5 rounded-md border p-0.5 shadow-sm backdrop-blur-sm"
           onPointerDown={stopPointerPropagation}
           onPointerMove={stopPointerPropagation}
@@ -417,12 +422,12 @@ export function TopicMapExplorer({
         >
           <IconButton
             icon={LocateFixed}
-            label="Fit map (0)"
+            label={t("fitMap")}
             onClick={handleFitMap}
           />
           <IconButton
             icon={Minus}
-            label="Zoom out (-)"
+            label={t("zoomOutMap")}
             onClick={handleZoomOut}
           />
           <ZoomReadout
@@ -430,10 +435,14 @@ export function TopicMapExplorer({
             initialCamera={initialCamera}
             scope={selectedTopic}
           />
-          <IconButton icon={Plus} label="Zoom in (+)" onClick={handleZoomIn} />
+          <IconButton
+            icon={Plus}
+            label={t("zoomInMap")}
+            onClick={handleZoomIn}
+          />
           <IconButton
             icon={fullscreen ? X : Maximize2}
-            label={fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            label={fullscreen ? t("exitFullscreen") : t("enterFullscreen")}
             onClick={handleToggleFullscreen}
           />
         </div>
@@ -459,7 +468,7 @@ export function TopicMapExplorer({
         />
         {model.points.length === 0 && (
           <div className="text-muted-foreground pointer-events-none absolute inset-0 flex items-center justify-center p-6 text-center text-sm">
-            No plotted summaries in this selection. Try a wider time range.
+            {t("noPlottedSummaries")}
           </div>
         )}
         <div className="text-muted-foreground pointer-events-none absolute right-4 bottom-3 left-4 flex flex-wrap items-center justify-between gap-2 text-[11px]">
@@ -469,17 +478,13 @@ export function TopicMapExplorer({
             scope={selectedTopic}
             population={
               matchingTraceIds
-                ? `${model.points.filter((point) => matchingTraceIds.has(point.traceId)).length.toLocaleString()} of ${model.populationLabel} match`
+                ? `${model.points.filter((point) => matchingTraceIds.has(point.traceId)).length.toLocaleString()} ${t("ofLabel")} ${model.populationLabel} ${t("matchLabel")}`
                 : model.populationLabel
             }
             missingSummaryCount={data.missingSummaryCount}
             unpositionedCount={data.unpositionedCount}
           />
-          {!fillContainer && (
-            <span>
-              Drag / scroll to pan · Pinch / Ctrl or ⌘ + scroll to zoom
-            </span>
-          )}
+          {!fillContainer && <span>{t("dragScrollHint")}</span>}
         </div>
       </div>
     </section>
@@ -495,12 +500,13 @@ function ZoomReadout({
   initialCamera: Camera;
   scope: string | null;
 }) {
+  const t = useTranslation(topicsMessages);
   const camera = useStore(store, (s) => s.camera);
   const cameraScope = useStore(store, (s) => s.scope);
   return (
     <span
       className="text-muted-foreground w-12 text-center text-xs tabular-nums"
-      aria-label="Zoom level"
+      aria-label={t("zoomLevel")}
     >
       {Math.round(
         (cameraScope === scope && camera ? camera.zoom : initialCamera.zoom) *
@@ -519,6 +525,7 @@ function LayoutReadout({
   missingSummaryCount,
   unpositionedCount,
 }: LayoutReadoutProps) {
+  const t = useTranslation(topicsMessages);
   const camera = useStore(store, (s) => s.camera);
   const cameraScope = useStore(store, (s) => s.scope);
   const current = cameraScope === scope && camera ? camera : initialCamera;
@@ -529,6 +536,7 @@ function LayoutReadout({
         population,
         missingSummaryCount,
         unpositionedCount,
+        t,
       )}
       hoverableContent={false}
     >
@@ -536,7 +544,7 @@ function LayoutReadout({
         <button
           {...getTriggerProps()}
           type="button"
-          aria-label={`Map coverage: ${population}`}
+          aria-label={t("mapCoverage", { population })}
           className="focus-visible:outline-ring pointer-events-auto cursor-help text-left focus-visible:outline-2"
           onPointerDown={stopPointerPropagation}
           onPointerMove={stopPointerPropagation}
@@ -544,8 +552,8 @@ function LayoutReadout({
         >
           {population} ·{" "}
           {nodeDetailBlend(current.zoom) > 0
-            ? "Adaptive detail"
-            : "Saved 2D projection"}
+            ? t("adaptiveDetail")
+            : t("savedProjection")}
         </button>
       )}
     </Tooltip>
@@ -775,8 +783,9 @@ function mapCoverageLabel(
   population: string,
   missingSummaryCount: number,
   unpositionedCount: number,
+  t: ReturnType<typeof useTranslation<typeof topicsMessages>>,
 ) {
-  return `${population}.\n${missingSummaryCount.toLocaleString()} saved map points have no current summary.\n${unpositionedCount.toLocaleString()} current summaries have no saved coordinates.`;
+  return `${population}.\n${t("coverageMissingSummaries", { count: missingSummaryCount })}\n${t("coverageUnpositionedSummaries", { count: unpositionedCount })}`;
 }
 
 export type TopicMapExplorerProps = {

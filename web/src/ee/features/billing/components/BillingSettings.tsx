@@ -6,6 +6,8 @@ import Header from "@/src/components/layouts/header";
 import { useHasEntitlement } from "@/src/features/entitlements/hooks";
 import { useRouter } from "next/router";
 import { Alert } from "@/src/components/design-system/Alert/Alert";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 import { BillingUsageChart } from "./BillingUsageChart";
 import { BillingActionButtons } from "./BillingActionButtons";
@@ -27,6 +29,7 @@ export const BillingSettings = () => {
     organizationId: orgId,
     scope: "langfuseCloudBilling:CRUD",
   });
+  const t = useTranslation(enterpriseMessages);
 
   const isCloudBillingAvailable = useIsCloudBillingAvailable();
   const isCloudBillingEntitled = useHasEntitlement("cloud-billing");
@@ -63,11 +66,8 @@ export const BillingSettings = () => {
   if (!hasAccess) {
     return (
       <Alert>
-        <Alert.Title>Access Denied</Alert.Title>
-        <Alert.Description>
-          You do not have permission to view the billing settings of this
-          organization.
-        </Alert.Description>
+        <Alert.Title>{t("accessDenied")}</Alert.Title>
+        <Alert.Description>{t("noPermissionBilling")}</Alert.Description>
       </Alert>
     );
   }
@@ -88,7 +88,7 @@ export const BillingSettings = () => {
         />
       ) : null}
 
-      <Header title="Usage & Billing" />
+      <Header title={t("billingTitle")} />
       <div className="space-y-6">
         {usage.data !== null && (
           <BillingUsageChart

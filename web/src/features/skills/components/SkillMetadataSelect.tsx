@@ -9,6 +9,8 @@ import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { PopoverController } from "@/src/components/ui/popover";
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 
 export function SkillLabelsSelect({
   value,
@@ -25,6 +27,7 @@ export function SkillLabelsSelect({
   showOnlyOnHover: boolean;
   onSave: (value: string[]) => Promise<boolean>;
 }) {
+  const t = useTranslation(skillMessages);
   const [search, setSearch] = useState("");
   const editableLabels = value.filter((label) => label !== SKILL_LATEST_LABEL);
   const [pendingLabels, setPendingLabels] = useState(editableLabels);
@@ -50,10 +53,10 @@ export function SkillLabelsSelect({
   const isDemotingFromProduction =
     value.includes("production") && !pendingLabels.includes("production");
   const saveButtonCopy = useMemo(() => {
-    if (isPromotingToProduction) return "Save and promote to production";
-    if (isDemotingFromProduction) return "Save and remove from production";
-    return "Save labels";
-  }, [isPromotingToProduction, isDemotingFromProduction]);
+    if (isPromotingToProduction) return t("saveAndPromoteToProduction");
+    if (isDemotingFromProduction) return t("saveAndRemoveFromProduction");
+    return t("saveLabels");
+  }, [isPromotingToProduction, isDemotingFromProduction, t]);
 
   const toggleLabel = (label: string) => {
     setPendingLabels(
@@ -89,13 +92,13 @@ export function SkillLabelsSelect({
       onOpenChange={handleOpenChange}
       renderContent={({ closePopover }) => (
         <>
-          <h2 className="mb-1 font-bold">Skill labels</h2>
+          <h2 className="mb-1 font-bold">{t("skillLabels")}</h2>
           <p className="text-muted-foreground mb-3 text-xs">
-            Use labels to identify deployment targets for this version.
+            {t("useLabelsToIdentifyDeploymentTargets")}
           </p>
           <div className="border-y py-2">
             <p className="text-muted-foreground mb-1 px-2 text-xs font-bold">
-              Promote to production?
+              {t("promoteToProduction")}
             </p>
             <SelectionRow
               value="production"
@@ -105,7 +108,7 @@ export function SkillLabelsSelect({
           </div>
           <div className="pt-2">
             <p className="text-muted-foreground mb-2 px-2 text-xs font-bold">
-              Custom labels
+              {t("customLabels")}
             </p>
             <Input
               value={search}
@@ -116,7 +119,7 @@ export function SkillLabelsSelect({
                   createLabel();
                 }
               }}
-              placeholder="Search or create label…"
+              placeholder={t("searchOrCreateLabel")}
               className="mb-2 h-8"
             />
             <div id={listId} className="max-h-52 overflow-y-auto">
@@ -132,7 +135,7 @@ export function SkillLabelsSelect({
                 <CreateRow value={normalizedSearch} onCreate={createLabel} />
               ) : null}
               {visibleLabels.length === 0 && !canCreate ? (
-                <EmptyOptions copy="No matching labels" />
+                <EmptyOptions copy={t("noMatchingLabels")} />
               ) : null}
             </div>
           </div>
@@ -157,7 +160,7 @@ export function SkillLabelsSelect({
         <Trigger asChild>
           <div
             role="combobox"
-            aria-label="Labels"
+            aria-label={t("labels")}
             aria-controls={listId}
             aria-expanded={isOpen}
             aria-disabled={disabled}
@@ -172,7 +175,7 @@ export function SkillLabelsSelect({
               type="button"
               variant="outline"
               size="icon"
-              title="Add skill label"
+              title={t("addSkillLabel")}
               disabled={disabled}
               className={cn(
                 "bg-muted-gray text-primary h-6 w-6",
@@ -203,6 +206,7 @@ export function SkillTagsSelect({
   isSaving: boolean;
   onSave: (value: string[]) => Promise<boolean>;
 }) {
+  const t = useTranslation(skillMessages);
   const [search, setSearch] = useState("");
   const [pendingTags, setPendingTags] = useState(value);
   const listId = useId();
@@ -249,7 +253,7 @@ export function SkillTagsSelect({
       onOpenChange={handleOpenChange}
       renderContent={({ closePopover }) => (
         <>
-          <h2 className="mb-2 font-bold">Skill tags</h2>
+          <h2 className="mb-2 font-bold">{t("skillTags")}</h2>
           <div className="mb-2 flex flex-wrap items-center gap-1 rounded-lg border px-2 py-1">
             {pendingTags.map((tag) => (
               <Button
@@ -276,7 +280,7 @@ export function SkillTagsSelect({
                   createTag();
                 }
               }}
-              placeholder="Search or create tag…"
+              placeholder={t("searchOrCreateTag")}
               className="h-8 min-w-36 flex-1 border-0 px-1 shadow-none focus-visible:ring-0"
             />
           </div>
@@ -297,7 +301,7 @@ export function SkillTagsSelect({
               <CreateRow value={normalizedSearch} onCreate={createTag} />
             ) : null}
             {visibleTags.length === 0 && !canCreate ? (
-              <EmptyOptions copy="No available tags" />
+              <EmptyOptions copy={t("noAvailableTags")} />
             ) : null}
           </div>
           <Button
@@ -307,7 +311,7 @@ export function SkillTagsSelect({
             className="mt-3 w-full"
             onClick={() => saveTags(closePopover)}
           >
-            Save tags
+            {t("saveTags")}
           </Button>
         </>
       )}
@@ -316,7 +320,7 @@ export function SkillTagsSelect({
         <Trigger asChild>
           <div
             role="combobox"
-            aria-label="Tags"
+            aria-label={t("tags")}
             aria-controls={listId}
             aria-expanded={isOpen}
             aria-disabled={disabled}
@@ -386,6 +390,7 @@ function CreateRow({
   value: string;
   onCreate: () => void;
 }) {
+  const t = useTranslation(skillMessages);
   return (
     <Button
       type="button"
@@ -394,7 +399,7 @@ function CreateRow({
       onClick={onCreate}
     >
       <Plus size="base" color="default" __rawClassName="mr-2" />
-      Create new: “{value}”
+      {t("createNew", { value })}
     </Button>
   );
 }

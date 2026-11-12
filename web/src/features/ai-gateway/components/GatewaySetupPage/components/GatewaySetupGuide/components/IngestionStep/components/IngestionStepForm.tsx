@@ -9,6 +9,8 @@ import type {
   GatewayIngestionSettings,
   GatewayProject,
 } from "@/src/features/ai-gateway/components/GatewaySetupPage/types/gatewaySetup";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 
 export type IngestionStepFormProps = {
   config: GatewayConfig | null;
@@ -23,6 +25,7 @@ export function IngestionStepForm({
   isSaving,
   onContinue,
 }: IngestionStepFormProps) {
+  const t = useTranslation(gatewayMessages);
   const [settings, setSettings] = useState(() =>
     getInitialIngestionSettings({ config, projects }),
   );
@@ -38,7 +41,7 @@ export function IngestionStepForm({
         onChange={setSettings}
       />
       <Button
-        text="Continue"
+        text={t("continue")}
         loading={isSaving}
         disabled={!isIngestionSettingsValid(settings)}
         onClick={handleContinue}

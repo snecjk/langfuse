@@ -7,6 +7,8 @@ import { GatewayPlaceholder } from "@/src/features/ai-gateway/components/Gateway
 import { GATEWAY_SETUP_DOCS_URL } from "@/src/features/ai-gateway/constants/gatewayDocsUrls";
 import { providerLabels } from "@/src/features/ai-gateway/constants/providerLabels";
 import { formatAvailableGatewayProviderNames } from "@/src/features/ai-gateway/fns/formatAvailableGatewayProviderNames";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 import { NoProvidersDiagram } from "./components/NoProvidersDiagram";
 import type { GatewayProvider } from "@/src/features/ai-gateway/types/gatewayProvider";
 
@@ -26,22 +28,25 @@ export function GatewayNoProvidersEmptyState({
   onAddProvider,
   onConnectProvider,
 }: GatewayNoProvidersEmptyStateProps) {
+  const t = useTranslation(gatewayMessages);
   const providerNames = formatAvailableGatewayProviderNames();
   return (
     <GatewayPlaceholder.Frame
-      title="No providers yet"
-      description={`Add an ${providerNames} credential so the gateway can route requests and discover models.`}
+      title={t("noProvidersYet")}
+      description={t("noProvidersManagerDescription", {
+        providers: providerNames,
+      })}
     >
       <GatewayPlaceholder.Actions>
-        <Button text="Add provider" icon={Plus} onClick={onAddProvider} />
+        <Button text={t("addProvider")} icon={Plus} onClick={onAddProvider} />
         <Button
           variant="outline"
-          text="How to set up the gateway"
+          text={t("howToSetupGateway")}
           icon={BookOpen}
           href={GATEWAY_SETUP_DOCS_URL}
         />
       </GatewayPlaceholder.Actions>
-      <NoProvidersDiagram addLabel="+ Add" />
+      <NoProvidersDiagram addLabel={t("addProviderLabel")} />
       <ul className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
         {getGatewaySetupHeroProviders(new Set()).map(({ provider }) => (
           <li key={provider}>
@@ -60,7 +65,7 @@ export function GatewayNoProvidersEmptyState({
                 </span>
               </span>
               <span className="flex shrink-0 items-center gap-1 text-sm">
-                Connect
+                {t("connectProvider")}
                 <ArrowRight size="sm" color="inherit" aria-hidden />
               </span>
             </button>

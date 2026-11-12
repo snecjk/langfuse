@@ -8,6 +8,8 @@ import { Label } from "@/src/components/ui/label";
 import { showSuccessToast } from "@/src/features/notifications/showSuccessToast";
 import { showToast } from "@/src/features/notifications/showToast";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 type RetryBackgroundMigrationPopoverControllerProps = {
   backgroundMigrationName: string;
@@ -23,6 +25,7 @@ export function RetryBackgroundMigrationPopoverController({
   const utils = api.useUtils();
   const [adminApiKey, setAdminApiKey] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const t = useTranslation(enterpriseMessages);
 
   const mutRetryBackgroundMigration =
     api.backgroundMigrations.retry.useMutation({
@@ -30,14 +33,14 @@ export function RetryBackgroundMigrationPopoverController({
         utils.backgroundMigrations.invalidate();
         showSuccessToast({
           operation: "background_migration.retry",
-          title: "Migration scheduled for retry",
+          title: t("retryMigrationScheduled"),
           description: "",
         });
       },
       onError: (error) => {
         showToast({
           type: "ERROR",
-          title: error?.message || "Failed to retry migration",
+          title: error?.message || t("retryMigrationFailed"),
           analytics: classifyTrpcToastError(
             error,
             "background_migration.retry",
@@ -53,7 +56,7 @@ export function RetryBackgroundMigrationPopoverController({
     if (!adminApiKey.trim()) {
       showToast({
         type: "ERROR",
-        title: "Admin API key is required",
+        title: t("adminApiKeyMissing"),
         analytics: {
           operation: "background_migration.retry",
           errorOrigin: "frontend",
@@ -83,20 +86,17 @@ export function RetryBackgroundMigrationPopoverController({
       modal={false}
       renderContent={({ closePopover }) => (
         <>
-          <h2 className="mb-3 font-bold">Retry Background Migration</h2>
-          <p className="mb-4 text-sm">
-            This action schedules the migration for retry. Restart the worker
-            containers to re-initiate the migration.
-          </p>
+          <h2 className="mb-3 font-bold">{t("retryMigrationTitle")}</h2>
+          <p className="mb-4 text-sm">{t("retryMigrationHelp")}</p>
 
           <div className="mb-4">
             <Label htmlFor="admin-api-key" className="text-sm font-bold">
-              Admin API Key
+              {t("adminApiKeyLabel")}
             </Label>
             <Input
               id="admin-api-key"
               type="password"
-              placeholder="Enter admin API key"
+              placeholder={t("adminApiKeyPlaceholder")}
               value={adminApiKey}
               onChange={(e) => setAdminApiKey(e.target.value)}
               className="mt-1"
@@ -106,15 +106,15 @@ export function RetryBackgroundMigrationPopoverController({
               name="admin-api-key"
             />
             <p className="text-muted-foreground mt-1 text-xs">
-              Required for security. This key must match your ADMIN_API_KEY
-              environment variable{" ("}
+              {t("adminApiKeyRequired")}
+              {" ("}
               <a
                 href="https://langfuse.com/self-hosting/administration/organization-management-api#authentication"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-primary underline"
               >
-                Docs
+                {t("adminApiKeyDocs")}
               </a>
               ).
             </p>
@@ -130,7 +130,7 @@ export function RetryBackgroundMigrationPopoverController({
               }}
               disabled={isLoading}
             >
-              Cancel
+              {t("retryMigrationCancel")}
             </Button>
             <Button
               type="button"
@@ -139,7 +139,7 @@ export function RetryBackgroundMigrationPopoverController({
               onClick={() => handleRetry(closePopover)}
               disabled={isLoading}
             >
-              Retry Migration
+              {t("retryMigrationAction")}
             </Button>
           </div>
         </>

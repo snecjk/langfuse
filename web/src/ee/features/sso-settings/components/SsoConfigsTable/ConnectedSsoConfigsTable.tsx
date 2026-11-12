@@ -11,10 +11,13 @@ import {
   type SsoConfigRow,
   type SsoConfigTableRow,
 } from "./SsoConfigsTable";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export function ConnectedSsoConfigsTable({ orgId }: { orgId: string }) {
   const verifiedDomainsQuery = api.verifiedDomain.list.useQuery({ orgId });
   const ssoConfigsQuery = api.ssoConfig.get.useQuery({ orgId });
+  const t = useTranslation(enterpriseMessages);
 
   const verifiedDomains = useMemo(
     () =>
@@ -36,14 +39,14 @@ export function ConnectedSsoConfigsTable({ orgId }: { orgId: string }) {
       const existing = configByDomain.has(payload.domain);
       showSuccessToast({
         operation: existing ? "sso.update" : "sso.configure",
-        title: existing ? "SSO updated" : "SSO configured",
-        description: `Active for @${payload.domain} within 1 hour.`,
+        title: existing ? t("ssoUpdatedToast") : t("ssoConfiguredToast"),
+        description: t("ssoActiveWithinHour", { domain: payload.domain }),
       });
     },
     onError: (err, { payload }) => {
       const existing = configByDomain.has(payload.domain);
       showErrorToast(
-        existing ? "Update failed" : "SSO configuration failed",
+        existing ? t("ssoUpdateFailed") : t("ssoConfigureFailed"),
         err.message,
         classifyTrpcToastError(err, existing ? "sso.update" : "sso.configure"),
       );
@@ -59,7 +62,7 @@ export function ConnectedSsoConfigsTable({ orgId }: { orgId: string }) {
     return (
       <Card className="overflow-hidden">
         <p className="text-muted-foreground px-6 py-12 text-center text-sm">
-          Verify a domain in the section above to configure SSO for it.
+          {t("ssoNoVerifiedDomains")}
         </p>
       </Card>
     );

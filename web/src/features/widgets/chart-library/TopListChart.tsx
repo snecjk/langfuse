@@ -1,4 +1,5 @@
 import { HorizontalBarChart } from "@/src/components/design-system/charts/HorizontalBarChart/HorizontalBarChart";
+import { useInterfaceLocale } from "@/src/features/i18n/I18nProvider";
 import { type ChartProps } from "@/src/features/widgets/chart-library/chart-props";
 import {
   formatMetric,
@@ -10,6 +11,7 @@ export function TopListChart({
   config,
   metricFormatter = formatMetric,
 }: ChartProps) {
+  const locale = useInterfaceLocale();
   return (
     <HorizontalBarChart
       data={(data ?? []).map((row) => ({
@@ -18,7 +20,7 @@ export function TopListChart({
           typeof row.metric === "number" ? row.metric : Number(row.metric ?? 0),
       }))}
       valueFormatter={(value) =>
-        toFullMetricString(metricFormatter(value, { style: "compact" }))
+        toFullMetricString(metricFormatter(value, { style: "compact", locale }))
       }
       color={config?.metric?.color ?? "hsl(var(--chart-fill-1))"}
     />

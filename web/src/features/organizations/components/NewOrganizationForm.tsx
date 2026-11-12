@@ -16,6 +16,7 @@ import { Switch } from "@/src/components/design-system/Switch/Switch";
 import { ExternalLink } from "@langfuse/icons";
 import { useTranslation } from "@/src/features/i18n/I18nProvider";
 import { workspaceMessages } from "@/src/features/i18n/messages/workspace";
+import { accountMessages } from "@/src/features/i18n/messages/account";
 
 export const NewOrganizationForm = ({
   isLangfuseCloud,
@@ -25,6 +26,7 @@ export const NewOrganizationForm = ({
   onSubmit: (values: z.infer<typeof organizationFormSchema>) => Promise<void>;
 }) => {
   const t = useTranslation(workspaceMessages);
+  const tAccount = useTranslation(accountMessages);
   const form = useForm({
     resolver: zodResolver(organizationFormSchema),
     defaultValues: {
@@ -32,6 +34,14 @@ export const NewOrganizationForm = ({
       aiFeaturesEnabled: true,
     },
   });
+
+  const localizeNameError = (message: string | undefined) => {
+    if (message === "Must have at least 3 characters")
+      return tAccount("orgNameShort");
+    if (message === "Must have at most 60 characters")
+      return tAccount("orgNameLong");
+    return message;
+  };
 
   async function handleSubmit(values: z.infer<typeof organizationFormSchema>) {
     try {
@@ -73,7 +83,9 @@ export const NewOrganizationForm = ({
                   data-testid="new-org-name-input"
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage>
+                {localizeNameError(form.formState.errors.name?.message)}
+              </FormMessage>
             </FormItem>
           )}
         />

@@ -5,6 +5,11 @@ import { createBadgeTableColumn } from "@/src/components/design-system/table/col
 import { createButtonTableColumn } from "@/src/components/design-system/table/columns/createButtonTableColumn";
 import { createTextTableColumn } from "@/src/components/design-system/table/columns/createTextTableColumn";
 import { type LangfuseColumnDef } from "@/src/components/table/types";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export type SsoConfigRow = {
   domain: string;
@@ -44,18 +49,20 @@ export function SsoConfigsTable({
   onConfigure: (row: SsoConfigTableRow) => void;
   onDelete: (domain: string) => void;
 }) {
+  const t = useTranslation(enterpriseMessages);
+  const locale = useInterfaceLocale();
   const columns = useMemo<LangfuseColumnDef<SsoConfigTableRow>[]>(
     () => [
       createTextTableColumn<SsoConfigTableRow>({
         accessorKey: "domain",
-        header: "Domain",
+        header: t("ssoDomainHeader"),
       }),
       createBadgeTableColumn<SsoConfigTableRow>({
         id: "provider",
-        accessorFn: (row) => row.config?.authProvider ?? "Not configured",
-        header: "Provider",
+        accessorFn: (row) => row.config?.authProvider ?? t("ssoNotConfigured"),
+        header: t("ssoProviderHeader"),
         getBadge: (provider) =>
-          provider === "Not configured"
+          provider === t("ssoNotConfigured")
             ? { value: provider, variant: "secondary" }
             : {
                 value: providerLabels[provider] ?? provider,
@@ -65,9 +72,10 @@ export function SsoConfigsTable({
       createTextTableColumn<SsoConfigTableRow, Date>({
         accessorFn: (row) => row.config?.updatedAt,
         id: "updatedAt",
-        header: "Updated",
+        header: t("ssoUpdatedHeader"),
         hideBelowMd: true,
-        mapValue: (date) => date?.toLocaleDateString(),
+        mapValue: (date) =>
+          date?.toLocaleDateString(locale === "zh-CN" ? "zh-CN" : "en-US"),
         nullValue: "—",
       }),
       createButtonTableColumn<SsoConfigTableRow, string>({
@@ -75,12 +83,14 @@ export function SsoConfigsTable({
         id: "configure",
         header: "",
         getButton: ({ row }) => ({
-          text: row.original.config ? "Update" : "Configure SSO",
+          text: row.original.config
+            ? t("ssoUpdateAction")
+            : t("ssoConfigureAction"),
           onClick: () => onConfigure(row.original),
         }),
       }),
     ],
-    [onConfigure],
+    [onConfigure, t, locale],
   );
 
   return (
@@ -93,7 +103,7 @@ export function SsoConfigsTable({
               {
                 id: "delete",
                 type: "item",
-                title: `Delete SSO for ${row.domain}`,
+                title: t("ssoDeleteAction", { domain: row.domain }),
                 icon: TrashIcon,
                 variant: "destructive",
                 onClick: () => onDelete(row.domain),

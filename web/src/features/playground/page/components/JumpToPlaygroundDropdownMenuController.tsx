@@ -46,6 +46,8 @@ import {
 import { extractTools } from "@/src/utils/chatml/extractTools";
 import { convertChatMlToPlayground } from "@/src/utils/chatml/playgroundConverter";
 import { api } from "@/src/utils/api";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 import {
   type MetadataDomainClient,
   type WithStringifiedMetadata,
@@ -98,6 +100,7 @@ export function useJumpToPlayground(
           | null;
       }),
 ) {
+  const t = useTranslation(skillMessages);
   const router = useRouter();
   const capture = usePostHogClientCapture();
   const projectId = useProjectIdFromURL();
@@ -217,8 +220,8 @@ export function useJumpToPlayground(
   );
 
   const tooltipMessage = isAvailable
-    ? "Test in LLM playground"
-    : "Test in LLM playground is not available since messages are not in valid ChatML format or tool calls have been used. If you think this is not correct, please open a GitHub issue.";
+    ? t("testInLLMPlayground")
+    : t("testInLLMPlaygroundNotAvailable");
 
   const menu =
     props.source === "prompt" ? (

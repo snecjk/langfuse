@@ -5,6 +5,8 @@ import { Button } from "@/src/components/ui/button";
 import { DataTableToolbar } from "@/src/components/table/data-table-toolbar";
 import type { TableSelectionStore } from "@/src/components/table/table-selection-store";
 import type { LangfuseColumnDef } from "@/src/components/table/types";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 import type { GatewayConnectionModelRow } from "../types/gatewayConnectionModelRow";
 
 export type GatewayConnectionModelsToolbarProps = {
@@ -38,6 +40,7 @@ export function GatewayConnectionModelsToolbar({
   onDisableAll,
   onSearchChange,
 }: GatewayConnectionModelsToolbarProps) {
+  const t = useTranslation(gatewayMessages);
   const rowSelection = useStore(selectionStore, (state) => state.rowSelection);
   const selectAll = useStore(selectionStore, (state) => state.selectAll);
   const actions = selectionStore.getState().actions;
@@ -50,7 +53,7 @@ export function GatewayConnectionModelsToolbar({
       className="px-0"
       rowClassName="mt-0 mb-3"
       searchConfig={{
-        metadataSearchFields: ["Model"],
+        metadataSearchFields: [t("modelColumn")],
         updateQuery: onSearchChange,
         currentQuery: search,
         tableAllowsFullTextSearch: false,
@@ -65,7 +68,7 @@ export function GatewayConnectionModelsToolbar({
             disabled={isSaving}
             onClick={onEnableAll}
           >
-            Enable all
+            {t("enableAll")}
           </Button>
           <Button
             type="button"
@@ -73,7 +76,7 @@ export function GatewayConnectionModelsToolbar({
             disabled={isSaving}
             onClick={onDisableAll}
           >
-            Disable all
+            {t("disableAll")}
           </Button>
         </>
       }

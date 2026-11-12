@@ -2,6 +2,8 @@ import { type ComponentProps, type ReactNode, useState } from "react";
 import { Badge } from "@/src/components/design-system/Badge/Badge";
 import { Tabs } from "@/src/components/design-system/Tabs/Tabs";
 import { CodeMirrorEditor } from "@/src/components/editor/CodeMirrorEditor";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 import { SkillFilePreview } from "./SkillFilePreview";
 import { getSkillFileLanguageExtensions } from "../utils/getSkillFileLanguageExtensions";
 
@@ -24,6 +26,7 @@ export function SkillFileView({
   children?: ReactNode;
   fileNavigation?: ComponentProps<typeof SkillFilePreview>["fileNavigation"];
 }) {
+  const t = useTranslation(skillMessages);
   const [formatted, setFormatted] = useState(mode.kind === "view");
   const isMarkdown = /\.(md|markdown)$/i.test(path);
   const showFormatted = isMarkdown && formatted;
@@ -73,13 +76,17 @@ export function SkillFileView({
           </span>
           <div className="flex shrink-0 items-center gap-2">
             <Badge
-              text={mode.kind === "draft" ? "Editing draft" : "Viewing"}
+              text={mode.kind === "draft" ? t("editingDraft") : t("viewing")}
               color={mode.kind === "draft" ? "info" : "outline"}
             />
             {isMarkdown ? (
-              <Tabs.List aria-label="File display" variant="inset" size="sm">
-                <Tabs.Trigger value="formatted" label="Formatted" />
-                <Tabs.Trigger value="raw" label="Raw" />
+              <Tabs.List
+                aria-label={t("fileDisplay")}
+                variant="inset"
+                size="sm"
+              >
+                <Tabs.Trigger value="formatted" label={t("formatted")} />
+                <Tabs.Trigger value="raw" label={t("raw")} />
               </Tabs.List>
             ) : null}
           </div>

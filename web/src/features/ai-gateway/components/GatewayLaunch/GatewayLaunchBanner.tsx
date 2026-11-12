@@ -12,13 +12,20 @@ import {
   type GatewayLaunchTarget,
 } from "@/src/features/ai-gateway/hooks/useGatewayLaunchEligibility";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 import { cn } from "@/src/utils/tailwind";
 import { FeatureReleaseStatus } from "@/src/components/design-system/FeatureReleaseStatus/FeatureReleaseStatus";
 
-function ctaLabel(state: GatewayLaunchState) {
-  if (state === "get-key") return "Get gateway key";
-  if (state === "ask-admin") return "Learn more";
-  return "Set up";
+function ctaLabel(
+  state: GatewayLaunchState,
+  t: (
+    key: "launchBannerGetKey" | "launchBannerLearnMore" | "launchBannerSetup",
+  ) => string,
+) {
+  if (state === "get-key") return t("launchBannerGetKey");
+  if (state === "ask-admin") return t("launchBannerLearnMore");
+  return t("launchBannerSetup");
 }
 
 /** Organizations-page banner; the page renders it only when there is a target. */
@@ -29,6 +36,7 @@ export function GatewayLaunchBanner({
   target: GatewayLaunchTarget;
   userId: string;
 }) {
+  const t = useTranslation(gatewayMessages);
   const [open, setOpen] = useState(false);
   const capture = usePostHogClientCapture();
   const { state, setupOptions } = target;
@@ -58,12 +66,13 @@ export function GatewayLaunchBanner({
           >
             <div className="flex min-w-0 flex-1 flex-col gap-1">
               <div className="flex items-center gap-2">
-                <span className="text-base font-bold">AI Gateway</span>
+                <span className="text-base font-bold">
+                  {t("launchBannerTitle")}
+                </span>
                 <FeatureReleaseStatus status="beta" />
               </div>
               <p className="text-muted-foreground text-base">
-                Trace and monitor your AI usage by installing the Langfuse AI
-                Gateway in 2 minutes.
+                {t("launchBannerDescription")}
               </p>
             </div>
             <div className="-my-4 mr-12 hidden h-24 w-72 shrink-0 xl:block">
@@ -76,14 +85,14 @@ export function GatewayLaunchBanner({
                   setOpen(true);
                 }}
               >
-                {ctaLabel(state)}
+                {ctaLabel(state, t)}
                 {arrow}
               </Button>
             </div>
             <span className="absolute top-2 right-2">
               <IconButton
                 icon={X}
-                label="Dismiss"
+                label={t("dismiss")}
                 size="sm"
                 onClick={() => {
                   capture("ai_gateway_launch:banner_dismissed", { state });

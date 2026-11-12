@@ -1,6 +1,8 @@
 import { api } from "@/src/utils/api";
 import { type ReactNode } from "react";
 
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 import { GatewayAnalyticsTitleFilters } from "@/src/features/ai-gateway/components/GatewayAnalyticsPage/components/GatewayAnalyticsTitleFilters/GatewayAnalyticsTitleFilters";
 import { GATEWAY_ANALYTICS_DOCS_URL } from "@/src/features/ai-gateway/constants/gatewayDocsUrls";
 import { GatewayApiKeysPage } from "@/src/features/ai-gateway/components/GatewayApiKeysPage/GatewayApiKeysPage";
@@ -49,6 +51,7 @@ type GatewayPageEntry = {
 
 /** The AI Gateway sub-pages of the current organization, in navigation order. */
 export function useGatewayPages(): GatewayPageEntry[] {
+  const t = useTranslation(gatewayMessages);
   const { organization } = useQueryProjectOrOrganization();
   const access = useGatewaySettingsAccess(organization?.id);
   const disabledReason = useGatewaySetupRequiredReason(organization?.id);
@@ -87,7 +90,7 @@ export function useGatewayPages(): GatewayPageEntry[] {
     !overviewSetup.isSetupOpen && !access.showNotDeployedNotice;
   return [
     {
-      title: "Overview",
+      title: t("overview"),
       slug: GATEWAY_PAGE_SLUGS.overview,
       cmdKKeywords: [
         "gateway",
@@ -116,8 +119,8 @@ export function useGatewayPages(): GatewayPageEntry[] {
         ) : undefined,
       help: {
         description: access.canManageGateway
-          ? "Cost and usage of requests made through the AI Gateway, read from its ingestion project."
-          : "Cost and usage of your requests made through the AI Gateway.",
+          ? t("helpDescriptionManager")
+          : t("helpDescriptionMember"),
         href: GATEWAY_ANALYTICS_DOCS_URL,
       },
       actions:
@@ -136,7 +139,7 @@ export function useGatewayPages(): GatewayPageEntry[] {
       show: visible[GATEWAY_PAGE_SLUGS.overview],
     },
     {
-      title: "Providers & Models",
+      title: t("providersAndModels"),
       slug: GATEWAY_PAGE_SLUGS.models,
       cmdKKeywords: [
         "gateway",
@@ -161,13 +164,17 @@ export function useGatewayPages(): GatewayPageEntry[] {
       tabsProps:
         access.showNotDeployedNotice || showsNotSetUpNotice
           ? undefined
-          : buildGatewayModelsTabs(organization.id, modelsTab),
+          : buildGatewayModelsTabs({
+              organizationId: organization.id,
+              activeTab: modelsTab,
+              t,
+            }),
       hideTitle: showsNotSetUpNotice || access.showNotDeployedNotice,
       show: visible[GATEWAY_PAGE_SLUGS.models],
       disabledReason,
     },
     {
-      title: "Gateway keys",
+      title: t("gatewayKeys"),
       slug: GATEWAY_PAGE_SLUGS.apiKeys,
       cmdKKeywords: ["gateway", "api", "keys", "metadata", "credentials"],
       content: <GatewayApiKeysPage organizationId={organization.id} />,

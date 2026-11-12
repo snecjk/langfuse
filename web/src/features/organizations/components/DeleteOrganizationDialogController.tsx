@@ -9,6 +9,8 @@ import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePos
 import { useQueryOrganization } from "@/src/features/organizations/hooks";
 import { useHasOrganizationAccess } from "@/src/features/rbac/utils/checkOrganizationAccess";
 import { api, reportNonTrpcError } from "@/src/utils/api";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { accountMessages } from "@/src/features/i18n/messages/account";
 
 type DeleteOrganizationDialogControllerProps = {
   children: (control: {
@@ -20,6 +22,7 @@ type DeleteOrganizationDialogControllerProps = {
 export function DeleteOrganizationDialogController({
   children,
 }: DeleteOrganizationDialogControllerProps) {
+  const t = useTranslation(accountMessages);
   const router = useRouter();
   const session = useSession();
   const capture = usePostHogClientCapture();
@@ -33,9 +36,7 @@ export function DeleteOrganizationDialogController({
   const deleteOrganization = api.organizations.delete.useMutation();
   const hasProjects = !!organization && organization.projects.length > 0;
 
-  const disabled = hasAccess
-    ? undefined
-    : { reason: "You don't have permission to delete this organization." };
+  const disabled = hasAccess ? undefined : { reason: t("deleteOrgNotAllowed") };
 
   const onSubmit = async (closeDialog: () => void) => {
     if (!organization || hasProjects) return;
@@ -47,8 +48,8 @@ export function DeleteOrganizationDialogController({
       closeDialog();
       showSuccessToast({
         operation: "organization.delete",
-        title: "Organization Deleted",
-        description: "The organization has been successfully deleted.",
+        title: t("organizationDeleted"),
+        description: t("organizationDeletedHelp"),
       });
       // Refresh the session first so the landing page no longer lists the deleted organization.
       await session.update();

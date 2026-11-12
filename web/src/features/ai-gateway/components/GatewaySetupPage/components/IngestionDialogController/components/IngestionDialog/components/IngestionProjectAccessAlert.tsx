@@ -2,6 +2,8 @@ import { AlertTriangle } from "@langfuse/icons";
 import type { GatewayIngestionMode } from "@langfuse/shared";
 
 import { Alert } from "@/src/components/design-system/Alert/Alert";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 
 export type IngestionProjectAccessAlertProps = {
   ingestionMode: Exclude<GatewayIngestionMode, "NONE">;
@@ -11,20 +13,16 @@ export type IngestionProjectAccessAlertProps = {
 export function IngestionProjectAccessAlert({
   ingestionMode,
 }: IngestionProjectAccessAlertProps) {
+  const t = useTranslation(gatewayMessages);
   return (
     <Alert variant="warning" size="sm" icon={AlertTriangle}>
-      <Alert.Title>
-        Everyone with project access sees gateway traffic
-      </Alert.Title>
+      <Alert.Title>{t("projectAccessAlertTitle")}</Alert.Title>
       <Alert.Description>
         <p>
-          Anyone who can open the ingestion project, including every
-          organization member and viewer through their organization role, can
-          see gateway requests, costs, and gateway key owners
-          {ingestionMode === "FULL"
-            ? ", plus the full prompts and responses"
-            : ""}
-          . Use a dedicated project and restrict who can access it.
+          {t("projectAccessAlertDescription", {
+            extra:
+              ingestionMode === "FULL" ? t("projectAccessAlertFullExtra") : "",
+          })}
         </p>
       </Alert.Description>
     </Alert>

@@ -3,6 +3,13 @@
 import { describe, expect, it } from "vitest";
 
 import { centCostFormatter, costFormatter } from "@/src/utils/numbers";
+import {
+  compactNumberFormatter,
+  costFormatterWithLocale,
+  latencyFormatterWithLocale,
+  numberFormatter,
+  usdFormatter,
+} from "@/src/utils/numbers";
 
 describe("costFormatter", () => {
   it("formats dashboard costs with cent precision", () => {
@@ -45,5 +52,51 @@ describe("centCostFormatter", () => {
   it("keeps the sign on negative costs", () => {
     expect(centCostFormatter(-0.37)).toBe("-$0.37");
     expect(centCostFormatter(-0.0049)).toBe("-<$0.01");
+  });
+});
+
+describe("numberFormatter (locale)", () => {
+  it("uses Chinese grouping for zh-CN and US grouping for en", () => {
+    expect(numberFormatter(1234567, 0, undefined, "zh-CN")).toBe("1,234,567");
+    expect(numberFormatter(1234567, 0, undefined, "en")).toBe("1,234,567");
+  });
+
+  it("respects fraction digits per locale", () => {
+    expect(numberFormatter(1234.5, 1, undefined, "zh-CN")).toBe("1,234.5");
+    expect(numberFormatter(1234.5, 1, undefined, "en")).toBe("1,234.5");
+  });
+});
+
+describe("compactNumberFormatter (locale)", () => {
+  it("renders compact notation in zh-CN and en", () => {
+    expect(compactNumberFormatter(1500000, undefined, "zh-CN")).toBe("150万");
+    expect(compactNumberFormatter(1500000, undefined, "en")).toBe("1.5M");
+  });
+});
+
+describe("usdFormatter (locale)", () => {
+  it("keeps USD currency code while using locale decimal grouping", () => {
+    expect(usdFormatter(1234.5, 2, 2, "zh-CN")).toBe("US$1,234.50");
+    expect(usdFormatter(1234.5, 2, 2, "en")).toBe("$1,234.50");
+  });
+
+  it("uses the passed locale for sub-cent widening", () => {
+    expect(usdFormatter(0.000601, 2, 10, "zh-CN")).toBe("US$0.000601");
+    expect(usdFormatter(0.000601, 2, 10, "en")).toBe("$0.000601");
+  });
+});
+
+describe("costFormatterWithLocale (locale)", () => {
+  it("formats costs with locale", () => {
+    expect(costFormatterWithLocale(4.402973, "zh-CN")).toBe("US$4.40");
+    expect(costFormatterWithLocale(4.402973, "en")).toBe("$4.40");
+    expect(costFormatterWithLocale(0.000601, "zh-CN")).toBe("US$0.000601");
+  });
+});
+
+describe("latencyFormatterWithLocale (locale)", () => {
+  it("renders duration units in zh-CN and en", () => {
+    expect(latencyFormatterWithLocale(1500, "zh-CN")).toBe("1.5秒");
+    expect(latencyFormatterWithLocale(1500, "en")).toBe("1.5s");
   });
 });

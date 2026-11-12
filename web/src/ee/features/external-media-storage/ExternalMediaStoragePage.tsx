@@ -21,6 +21,8 @@ import { showErrorToast } from "@/src/features/notifications/showErrorToast";
 import { showSuccessToast } from "@/src/features/notifications/showSuccessToast";
 import { api } from "@/src/utils/api";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 const EXTERNAL_MEDIA_STORAGE_FORM_ID = "external-media-storage-form";
 
@@ -48,6 +50,7 @@ export default function ExternalMediaStoragePage() {
     status,
   } = useExternalMediaStorage(projectId);
   const utils = api.useUtils();
+  const t = useTranslation(enterpriseMessages);
   const updateMutation = api.externalMediaStorage.update.useMutation({
     onSuccess: async () => {
       // Saving or deleting can replace or remove the external ID.
@@ -55,13 +58,13 @@ export default function ExternalMediaStoragePage() {
       await utils.externalMediaStorage.invalidate();
       showSuccessToast({
         operation: "external_media_storage.save",
-        title: "External media storage saved",
-        description: "The integration configuration has been saved.",
+        title: t("externalMediaStorageSaved"),
+        description: t("externalMediaStorageSavedDescription"),
       });
     },
     onError: (error) => {
       showErrorToast(
-        "Failed to save external media storage",
+        t("externalMediaStorageSaveFailed"),
         error.message,
         classifyTrpcToastError(error, "external_media_storage.save"),
       );
@@ -74,13 +77,13 @@ export default function ExternalMediaStoragePage() {
       await utils.externalMediaStorage.invalidate();
       showSuccessToast({
         operation: "external_media_storage.delete",
-        title: "External media storage deleted",
-        description: "The integration configuration has been deleted.",
+        title: t("externalMediaStorageDeleted"),
+        description: t("externalMediaStorageDeletedDescription"),
       });
     },
     onError: (error) => {
       showErrorToast(
-        "Failed to delete external media storage",
+        t("externalMediaStorageDeleteFailed"),
         error.message,
         classifyTrpcToastError(error, "external_media_storage.delete"),
       );
@@ -126,10 +129,10 @@ export default function ExternalMediaStoragePage() {
                   return result.signedUrl;
                 } catch (error) {
                   showErrorToast(
-                    "External media test failed",
+                    t("externalMediaStorageTestFailed"),
                     error instanceof Error
                       ? error.message
-                      : "The media object could not be loaded.",
+                      : t("externalMediaStorageTestCorsFailed"),
                     failureOrigin === "trpc"
                       ? classifyTrpcToastError(
                           error,
@@ -149,7 +152,7 @@ export default function ExternalMediaStoragePage() {
         >
           {({ openDialog }) => (
             <DesignSystemButton
-              text="Test"
+              text={t("externalMediaStorageTest")}
               variant="secondary"
               onClick={openDialog}
             />
@@ -160,10 +163,14 @@ export default function ExternalMediaStoragePage() {
 
     if (!config) {
       return (
-        <Tooltip label="Save the integration before running the validation.">
+        <Tooltip label={t("externalMediaStorageSaveFirst")}>
           {({ getTriggerProps }) => (
             <span {...getTriggerProps()}>
-              <DesignSystemButton text="Test" variant="secondary" disabled />
+              <DesignSystemButton
+                text={t("externalMediaStorageTest")}
+                variant="secondary"
+                disabled
+              />
             </span>
           )}
         </Tooltip>
@@ -176,7 +183,7 @@ export default function ExternalMediaStoragePage() {
   return (
     <ContainerPage
       headerProps={{
-        title: "External Media Storage",
+        title: t("externalMediaStorageTitle"),
         breadcrumb: [
           { name: "Settings", href: `/project/${projectId}/settings` },
         ],
@@ -187,15 +194,14 @@ export default function ExternalMediaStoragePage() {
               href="https://langfuse.com/docs/observability/features/multi-modality#external-s3-media"
               target="_blank"
             >
-              Integration Docs ↗
+              {t("externalMediaStorageDocs")}
             </Link>
           </Button>
         ),
       }}
     >
       <p className="text-primary mb-4 text-sm">
-        Resolve media referenced by s3:// URIs from your own Amazon S3 or
-        S3-compatible bucket.
+        {t("externalMediaStorageDescription")}
       </p>
       {(() => {
         if (featureAvailability.isPending) {
@@ -204,25 +210,17 @@ export default function ExternalMediaStoragePage() {
 
         if (!isFeatureEnabled) {
           return (
-            <p className="text-sm">
-              External media storage is an Enterprise feature. Upgrade your plan
-              to resolve s3:// media references from your own bucket.
-            </p>
+            <p className="text-sm">{t("externalMediaStorageEnterprise")}</p>
           );
         }
 
         if (!hasAccess) {
-          return (
-            <p className="text-sm">
-              Your current role does not grant you access to these settings,
-              please reach out to your project admin or owner.
-            </p>
-          );
+          return <p className="text-sm">{t("externalMediaStorageNoAccess")}</p>;
         }
 
         return (
           <>
-            <Header title="Configuration" />
+            <Header title={t("externalMediaStorageConfiguration")} />
             {configuration.isLoading || !configuration.data ? (
               <Card className="p-3">
                 <IntegrationSettingsSkeleton />
@@ -246,9 +244,9 @@ export default function ExternalMediaStoragePage() {
                     {renderTestAction()}
                     {config ? (
                       <ConfirmationDialogController
-                        title="Delete external media storage?"
-                        text="Media stored in this bucket will no longer be resolved in Langfuse."
-                        confirmLabel="Delete"
+                        title={t("externalMediaStorageDeleteConfirmTitle")}
+                        text={t("externalMediaStorageDeleteConfirmText")}
+                        confirmLabel={t("externalMediaStorageDelete")}
                         variant="destructive"
                         loading={deleteMutation.isPending}
                         onConfirm={() =>
@@ -257,7 +255,7 @@ export default function ExternalMediaStoragePage() {
                       >
                         {({ openDialog }) => (
                           <DesignSystemButton
-                            text="Delete"
+                            text={t("externalMediaStorageDelete")}
                             variant="destructive"
                             onClick={openDialog}
                           />
@@ -265,11 +263,11 @@ export default function ExternalMediaStoragePage() {
                       </ConfirmationDialogController>
                     ) : null}
                     {!isDirty ? (
-                      <Tooltip label="Make a change before saving.">
+                      <Tooltip label={t("externalMediaStorageMakeChange")}>
                         {({ getTriggerProps }) => (
                           <span {...getTriggerProps()}>
                             <DesignSystemButton
-                              text="Save"
+                              text={t("externalMediaStorageSave")}
                               form={EXTERNAL_MEDIA_STORAGE_FORM_ID}
                               type="submit"
                               disabled
@@ -279,7 +277,7 @@ export default function ExternalMediaStoragePage() {
                       </Tooltip>
                     ) : (
                       <DesignSystemButton
-                        text="Save"
+                        text={t("externalMediaStorageSave")}
                         form={EXTERNAL_MEDIA_STORAGE_FORM_ID}
                         type="submit"
                         loading={updateMutation.isPending}

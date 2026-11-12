@@ -12,6 +12,8 @@ import { IconButton } from "@/src/components/design-system/IconButton/IconButton
 import { useElementSize } from "@/src/hooks/useElementSize";
 import { formatCompactRelativeTime } from "@/src/utils/dates";
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 import { type FacetRow } from "./facet-topics";
 import { type prepareTopicGrid } from "./prepare-topic-grid";
 import { topicColor } from "./topic-map-colors";
@@ -106,6 +108,7 @@ function GridHoverCard({
   color,
   previewOnSelect,
 }: GridHoverCardProps) {
+  const t = useTranslation(topicsMessages);
   // Card sits above/below the dot, growing toward the grid center, so it never covers it.
   const toLeft = cell.col >= grid.cols / 2;
   const below = cell.row < grid.rows / 2;
@@ -150,7 +153,7 @@ function GridHoverCard({
           {topicName}
         </span>
         <span className="text-muted-foreground text-2xs ml-auto shrink-0 font-mono">
-          {count.toLocaleString()} traces
+          {t("tracesLabel", { count })}
         </span>
       </div>
       {members.length > 1 ? (
@@ -158,17 +161,17 @@ function GridHoverCard({
           <ul className="mt-1 flex flex-col gap-0.5 text-xs">
             {members.slice(0, 3).map((member) => (
               <li key={member.traceId} className="line-clamp-1">
-                {member.summary || "No applicable summary."}
+                {member.summary || t("noApplicableSummary")}
               </li>
             ))}
           </ul>
           <p className="text-muted-foreground text-2xs mt-1 font-mono">
             {[
-              `${members.length.toLocaleString()} traces in this dot`,
+              t("tracesInDot", { count: members.length }),
               members.length > 3
-                ? `+${(members.length - 3).toLocaleString()} more`
+                ? t("moreCount", { count: members.length - 3 })
                 : null,
-              !previewOnSelect && "click to open the first",
+              !previewOnSelect && t("clickToOpenFirst"),
             ]
               .filter(Boolean)
               .join(" · ")}
@@ -182,13 +185,13 @@ function GridHoverCard({
               previewOnSelect ? "line-clamp-4" : "line-clamp-2",
             )}
           >
-            {row?.summary || "No applicable summary."}
+            {row?.summary || t("noApplicableSummary")}
           </p>
           <p
             className="text-muted-foreground text-2xs mt-1 truncate font-mono"
             title={cell.id}
           >
-            {[shortId, started, !previewOnSelect && "click to open"]
+            {[shortId, started, !previewOnSelect && t("clickToOpen")]
               .filter(Boolean)
               .join(" · ")}
           </p>
@@ -196,7 +199,9 @@ function GridHoverCard({
       )}
       {previewOnSelect && (
         <p className="text-muted-foreground mt-2 text-xs">
-          Tap again to view {members.length > 1 ? "the first trace" : "trace"}
+          {members.length > 1
+            ? t("tapAgainToViewFirstTrace")
+            : t("tapAgainToViewTrace")}
         </p>
       )}
     </div>
@@ -210,6 +215,7 @@ function GridLegend({
   onHoverTopic,
   children,
 }: GridLegendProps) {
+  const t = useTranslation(topicsMessages);
   const entries = topics
     .map((topic, topicIndex) => ({ topic, topicIndex }))
     .filter(({ topic }) => topic.count > 0)
@@ -220,7 +226,7 @@ function GridLegend({
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden border-t">
       <ul
-        aria-label="Topics"
+        aria-label={t("topics")}
         className="grid min-h-0 grid-cols-2 gap-x-4 gap-y-0.5 overflow-y-auto p-2"
       >
         {entries.map((entry) => {
@@ -285,6 +291,7 @@ export function TopicGrid({
   barHeight,
   previewOnSelect = false,
 }: TopicGridProps) {
+  const t = useTranslation(topicsMessages);
   const [zoom, setZoom] = useState(0);
   const [hoverTarget, setHoverTarget] = useState<GridHoverTarget>(null);
   const [containerRef, size] = useElementSize<HTMLDivElement>();
@@ -393,7 +400,7 @@ export function TopicGrid({
   const hoverCard = hoveredCell && (
     <GridHoverCard
       cell={hoveredCell}
-      topicName={topics[hoveredCell.topicIndex]?.name ?? "No topic"}
+      topicName={topics[hoveredCell.topicIndex]?.name ?? t("noTopic")}
       count={
         topics[hoveredCell.topicIndex]?.count ??
         (countByIndex.get(hoveredCell.topicIndex) ?? 0) * perDot
@@ -426,14 +433,14 @@ export function TopicGrid({
         <div className="flex items-center gap-0.5">
           <IconButton
             icon={Minus}
-            label="Zoom out (−)"
+            label={t("zoomOut")}
             size="sm"
             disabled={zoom <= ZOOM_MIN || cell <= CELL_MIN}
             onClick={zoomOut}
           />
           <IconButton
             icon={Plus}
-            label="Zoom in (+)"
+            label={t("zoomIn")}
             size="sm"
             disabled={zoom >= ZOOM_MAX || cell >= CELL_MAX}
             onClick={zoomIn}
@@ -450,7 +457,7 @@ export function TopicGrid({
         >
           {points.length === 0 ? (
             <p className="text-muted-foreground p-4 text-sm">
-              No positioned traces in this time range.
+              {t("noPositionedTraces")}
             </p>
           ) : (
             size && (
@@ -466,7 +473,7 @@ export function TopicGrid({
                     width={gridWidth}
                     height={gridHeight}
                     role="img"
-                    aria-label={`Topic grid, ${points.length.toLocaleString()} traces`}
+                    aria-label={t("topicGridAria", { count: points.length })}
                     className="block"
                     onPointerMove={handlePointerMove}
                     onPointerLeave={handlePointerLeave}
@@ -516,11 +523,11 @@ export function TopicGrid({
         >
           <span>
             {perDot > 1
-              ? `1 dot ≈ ${perDot.toLocaleString()} traces`
-              : "1 dot = 1 trace"}
+              ? t("oneDotApprox", { count: perDot })
+              : t("oneDotOneTrace")}
           </span>
           <Button
-            text="Show all topics"
+            text={t("showAllTopics")}
             variant="ghost"
             size="sm"
             disabled={selectedId === null}

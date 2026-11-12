@@ -14,6 +14,8 @@ import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAcces
 import { api } from "@/src/utils/api";
 import { safeExtract } from "@/src/utils/map-utils";
 import { AuditLogsTable, type AuditLogRow } from "./AuditLogsTable";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 type AuditLogsTableProps =
   | { scope: "project"; projectId: string }
@@ -28,6 +30,7 @@ export function ConnectedAuditLogsTable(props: AuditLogsTableProps) {
     pageIndex: withDefault(NumberParam, 0),
     pageSize: withDefault(NumberParam, 50),
   });
+  const t = useTranslation(enterpriseMessages);
 
   const projectAuditLogs = api.auditLogs.all.useQuery(
     {
@@ -53,12 +56,12 @@ export function ConnectedAuditLogsTable(props: AuditLogsTableProps) {
     onSuccess: (_data, variables) => {
       showSuccessToast({
         operation: "audit_log.export",
-        title: "Export queued",
-        description: "You will receive an email when the export is ready.",
+        title: t("auditLogsExportQueued"),
+        description: t("auditLogsExportQueuedDescription"),
         duration: 10000,
         link: {
           href: `/project/${variables.projectId}/settings/exports`,
-          text: "View exports",
+          text: t("auditLogsViewExports"),
         },
       });
     },
@@ -69,21 +72,22 @@ export function ConnectedAuditLogsTable(props: AuditLogsTableProps) {
       ? [
           {
             id: "export",
-            label: "Export",
+            label: t("auditLogsExportAction"),
             icon: <Download size="base" />,
             variant: "outline" as const,
             loading: createExport.isPending,
             dropdown: {
-              title: "Export",
-              description:
-                "Note: Filters are not applied to audit log exports. All audit logs for this project will be exported.",
+              title: t("auditLogsExportDropdownTitle"),
+              description: t("auditLogsExportDescription"),
               disabled: createExport.isPending,
               items: (
                 Object.keys(exportOptions) as BatchExportFileFormat[]
               ).map((format) => ({
                 type: "item" as const,
                 id: `export-${format}`,
-                title: `as ${exportOptions[format].label}`,
+                title: t("auditLogsExportFormat", {
+                  format: exportOptions[format].label,
+                }),
                 onClick: () =>
                   createExport.mutate({
                     projectId: props.projectId,

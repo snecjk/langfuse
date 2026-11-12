@@ -1,5 +1,11 @@
 import type { RouterOutputs } from "@/src/utils/api";
 import { topicColor } from "../topic-map-colors";
+import { type useTranslation } from "@/src/features/i18n/I18nProvider";
+import { type topicsMessages } from "@/src/features/i18n/messages/topics";
+
+type T = ReturnType<typeof useTranslation<typeof topicsMessages>>;
+
+const FALLBACK_T: T = ((key: string) => key) as T;
 
 export type MapData = Pick<
   RouterOutputs["topics"]["map"],
@@ -173,6 +179,7 @@ function visualDepth(id: string) {
 export function prepareTopicMap(
   data: MapData,
   topics: MapTopic[],
+  t: T = FALLBACK_T,
 ): TopicMapModel {
   const known = new Map(
     topics.map((topic, i) => [topic.id, { ...topic, color: topicColor(i) }]),
@@ -199,25 +206,25 @@ export function prepareTopicMap(
       x: members.reduce((sum, p) => sum + p.x, 0) / members.length,
       y: members.reduce((sum, p) => sum + p.y, 0) / members.length,
     };
-    let description =
-      topic?.description?.trim() ||
-      "No description is available for this topic.";
-    if (id === "outliers")
-      description = "Summaries outside the discovered topics.";
-    if (id === "awaiting_map")
-      description = "These summaries have no current assignment.";
+    let description = topic?.description?.trim() || t("noDescriptionAvailable");
+    if (id === "outliers") description = t("outliersZoneDescription");
+    if (id === "awaiting_map") description = t("awaitingZoneDescription");
     return {
       id,
       name:
         topic?.name ??
-        (id === "awaiting_map" ? "Assignment unavailable" : "Outliers"),
+        (id === "awaiting_map" ? t("awaitingZoneName") : t("outliersZoneName")),
       description,
       color: topic?.color ?? topicColor(-1),
       points: members,
       bounds: pointBounds(members),
       ...center,
-      countLabel: `${members.length.toLocaleString()} mapped traces`,
-      shareLabel: `${Math.round((members.length / Math.max(points.length, 1)) * 100)}% of map`,
+      countLabel: t("mappedTraces", { count: members.length }),
+      shareLabel: t("ofMapLabel", {
+        percent: Math.round(
+          (members.length / Math.max(points.length, 1)) * 100,
+        ),
+      }),
     };
   }).sort((a, b) => b.points.length - a.points.length);
   return {
@@ -225,7 +232,7 @@ export function prepareTopicMap(
     zones,
     bounds: pointBounds(points),
     pointById: new Map(points.map((p) => [p.traceId, p])),
-    populationLabel: `${points.length.toLocaleString()} mapped traces`,
+    populationLabel: t("mappedTraces", { count: points.length }),
   };
 }
 

@@ -13,6 +13,8 @@ import {
   getGatewayModelApiFormats,
 } from "@/src/features/ai-gateway/fns/getGatewayModelApiFormats";
 import type { GatewayProvider } from "@/src/features/ai-gateway/types/gatewayProvider";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 
 const PAGE_SIZE_OPTIONS = [10, 20, 30, 40, 50];
 const DEFAULT_PAGE_SIZE = 50;
@@ -24,49 +26,52 @@ type ReadOnlyModelRow = {
   apiFormats: ApiFormat[];
 };
 
-const columns: LangfuseColumnDef<ReadOnlyModelRow>[] = [
-  {
-    accessorKey: "id",
-    id: "name",
-    header: "Model",
-    size: 360,
-    minSize: 180,
-    enableSorting: true,
-    cell: ({ row }) => (
-      <div className="ph-no-capture flex min-w-0 items-center gap-2">
-        <span className="truncate" title={row.original.id}>
-          {row.original.id}
-        </span>
-        <CopyModelIdButton
-          connectionName={row.original.connectionName}
-          modelId={row.original.id}
+function useColumns(): LangfuseColumnDef<ReadOnlyModelRow>[] {
+  const t = useTranslation(gatewayMessages);
+  return [
+    {
+      accessorKey: "id",
+      id: "name",
+      header: t("modelColumn"),
+      size: 360,
+      minSize: 180,
+      enableSorting: true,
+      cell: ({ row }) => (
+        <div className="ph-no-capture flex min-w-0 items-center gap-2">
+          <span className="truncate" title={row.original.id}>
+            {row.original.id}
+          </span>
+          <CopyModelIdButton
+            connectionName={row.original.connectionName}
+            modelId={row.original.id}
+          />
+        </div>
+      ),
+    },
+    {
+      ...createGatewayRoutesTableColumn<ReadOnlyModelRow>({ size: 200 }),
+      isFlexWidth: true,
+    },
+    {
+      accessorKey: "enabled",
+      id: "status",
+      header: t("enabledColumn"),
+      enableSorting: true,
+      size: 90,
+      minSize: 90,
+      maxSize: 90,
+      enableResizing: false,
+      cell: ({ row }) => (
+        <Switch
+          color="green"
+          checked={row.original.enabled}
+          disabled
+          aria-label={`${row.original.id} is ${row.original.enabled ? "enabled" : "disabled"}`}
         />
-      </div>
-    ),
-  },
-  {
-    ...createGatewayRoutesTableColumn<ReadOnlyModelRow>({ size: 200 }),
-    isFlexWidth: true,
-  },
-  {
-    accessorKey: "enabled",
-    id: "status",
-    header: "Enabled",
-    enableSorting: true,
-    size: 90,
-    minSize: 90,
-    maxSize: 90,
-    enableResizing: false,
-    cell: ({ row }) => (
-      <Switch
-        color="green"
-        checked={row.original.enabled}
-        disabled
-        aria-label={`${row.original.id} is ${row.original.enabled ? "enabled" : "disabled"}`}
-      />
-    ),
-  },
-];
+      ),
+    },
+  ];
+}
 
 export type GatewayConnectionModelsReadOnlyTableProps = {
   connectionName: string;
@@ -85,6 +90,8 @@ export function GatewayConnectionModelsReadOnlyTable({
   enabledModels,
   filters,
 }: GatewayConnectionModelsReadOnlyTableProps) {
+  const t = useTranslation(gatewayMessages);
+  const columns = useColumns();
   const [search, setSearch] = useState("");
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -144,7 +151,7 @@ export function GatewayConnectionModelsReadOnlyTable({
         className="px-0"
         rowClassName="mt-0 mb-3"
         searchConfig={{
-          metadataSearchFields: ["Model"],
+          metadataSearchFields: [t("modelColumn")],
           updateQuery: handleSearchChange,
           currentQuery: search,
           tableAllowsFullTextSearch: false,
@@ -169,7 +176,7 @@ export function GatewayConnectionModelsReadOnlyTable({
           rowHeight="s"
           orderBy={orderBy}
           setOrderBy={handleOrderByChange}
-          noResultsMessage="No models match the current search."
+          noResultsMessage={t("noModelsMatch")}
         />
       </div>
     </div>

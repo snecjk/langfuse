@@ -39,6 +39,11 @@ import { PARTNER_INTEGRATION_FAQ_URL } from "@/src/features/v4-migration/partner
 import { V4MigrationLoadingState } from "@/src/features/v4-migration/V4MigrationLoadingState";
 import { useReadPath } from "@/src/features/events/hooks/useReadPath";
 import { V4PreviewToggleRow } from "@/src/features/events/components/V4SidebarToggle";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 const V4_DOCS_URL = "https://langfuse.com/docs/v4";
 const SDK_UPGRADE_URL =
@@ -62,11 +67,20 @@ function FaqLink({ href, children }: { href: string; children: ReactNode }) {
 }
 
 function AffectedCell({ count }: { count: MigrationCountState }) {
+  const t = useTranslation(enterpriseMessages);
   if (count.status === "loading") {
-    return <span className="text-foreground-tertiary">Checking…</span>;
+    return (
+      <span className="text-foreground-tertiary">
+        {t("migrationCheckingShort")}
+      </span>
+    );
   }
   if (count.status === "error") {
-    return <span className="text-foreground-tertiary">Unavailable</span>;
+    return (
+      <span className="text-foreground-tertiary">
+        {t("migrationUnavailable")}
+      </span>
+    );
   }
   if (count.count === 0) {
     return <span className="text-foreground-tertiary">0</span>;
@@ -75,22 +89,34 @@ function AffectedCell({ count }: { count: MigrationCountState }) {
 }
 
 function MigrationActionCell({ state }: { state: MigrationActionState }) {
+  const t = useTranslation(enterpriseMessages);
   if (state.status === "loading") {
-    return <span className="text-foreground-tertiary">Checking…</span>;
+    return (
+      <span className="text-foreground-tertiary">
+        {t("migrationCheckingShort")}
+      </span>
+    );
   }
   if (state.status === "error") {
-    return <span className="text-foreground-tertiary">Unavailable</span>;
+    return (
+      <span className="text-foreground-tertiary">
+        {t("migrationUnavailable")}
+      </span>
+    );
   }
   if (state.result === "required") {
-    return <span>Update required</span>;
+    return <span>{t("migrationUpdateRequired")}</span>;
   }
   if (state.result === "sdk_usage_inconclusive") {
-    return <span>Needs review</span>;
+    return <span>{t("migrationNeedsReview")}</span>;
   }
-  return <span className="text-foreground-tertiary">Up to date</span>;
+  return (
+    <span className="text-foreground-tertiary">{t("migrationUpToDate")}</span>
+  );
 }
 
 function StatusPill({ readiness }: { readiness: ProjectMigrationReadiness }) {
+  const t = useTranslation(enterpriseMessages);
   // Forced-v3 projects are managed by their integration partner — link the pill
   // straight to the FAQ instead of showing a migration action state.
   if (readiness === "partner-managed") {
@@ -101,9 +127,9 @@ function StatusPill({ readiness }: { readiness: ProjectMigrationReadiness }) {
         target="_blank"
         rel="noopener noreferrer"
         className="bg-muted text-muted-foreground inline-flex w-fit shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-bold whitespace-nowrap hover:underline"
-        title="Upgrade is handled by your integration partner"
+        title={t("migrationPartnerManagedTitle")}
       >
-        Integration partner
+        {t("migrationPartnerManaged")}
       </a>
     );
   }
@@ -112,7 +138,7 @@ function StatusPill({ readiness }: { readiness: ProjectMigrationReadiness }) {
 
   return (
     <span className="bg-light-yellow text-dark-yellow inline-flex w-fit shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-bold whitespace-nowrap">
-      Action needed
+      {t("migrationActionNeeded")}
     </span>
   );
 }
@@ -141,6 +167,7 @@ function SortableHeader({
   orderBy: OrderBy;
   onSort: (column: SortKey) => void;
 }) {
+  const t = useTranslation(enterpriseMessages);
   return (
     <div
       className="-mx-2 flex h-10 w-[calc(100%+1rem)] items-center px-2"
@@ -151,7 +178,7 @@ function SortableHeader({
           {label}
         </span>
         {orderBy?.column === column && (
-          <span className="ml-1" title="Sort by this column">
+          <span className="ml-1" title={t("migrationSortTooltip")}>
             {orderBy.order === "ASC" ? "▲" : "▼"}
           </span>
         )}
@@ -172,6 +199,8 @@ function OrgStatusSection({
   const router = useRouter();
   const capture = usePostHogClientCapture();
   const openMigrationPanel = useOpenV4MigrationPanel();
+  const t = useTranslation(enterpriseMessages);
+  const locale = useInterfaceLocale();
 
   const openProjectMigration = (
     row: { id: string; name: string },
@@ -228,7 +257,7 @@ function OrgStatusSection({
         status,
         readiness,
         lastTraceLabel: lastTraceAt
-          ? formatCompactRelativeTime(new Date(lastTraceAt))
+          ? formatCompactRelativeTime(new Date(lastTraceAt), locale)
           : "—",
         lastTraceSort: lastTraceAt ? new Date(lastTraceAt).getTime() : -1,
       },
@@ -322,7 +351,7 @@ function OrgStatusSection({
       ...columnOptions,
       accessorKey: "name",
       size: 192,
-      header: () => sortableHeader("Project", "name"),
+      header: () => sortableHeader(t("migrationProjectHeader"), "name"),
       cell: ({ row }) => (
         <Link
           data-row-click-ignore
@@ -342,61 +371,87 @@ function OrgStatusSection({
     {
       ...columnOptions,
       accessorKey: "readiness",
-      header: () => sortableHeader("Status", "status"),
+      header: () => sortableHeader(t("migrationStatusHeader"), "status"),
       cell: ({ row }) => <StatusPill readiness={row.original.readiness} />,
     },
     {
       ...columnOptions,
       accessorKey: "sdk",
-      header: () => sortableHeader("SDK", "sdk"),
+      header: () => sortableHeader(t("migrationSdkHeader"), "sdk"),
       cell: ({ row }) => {
         if (row.original.status.sdk.status === "latest") {
-          return <span className="text-foreground-tertiary">Latest</span>;
+          return (
+            <span className="text-foreground-tertiary">
+              {t("migrationLatest")}
+            </span>
+          );
         }
         if (row.original.status.sdk.status === "otel_realtime") {
           return (
-            <span className="text-foreground-tertiary">OTel real-time</span>
+            <span className="text-foreground-tertiary">
+              {t("migrationOtelRealtime")}
+            </span>
           );
         }
         if (row.original.status.sdk.status === "no_data") {
           return (
-            <span className="text-foreground-tertiary">No data detected</span>
+            <span className="text-foreground-tertiary">
+              {t("migrationNoData")}
+            </span>
           );
         }
         if (row.original.status.sdk.status === "checking") {
-          return <span className="text-foreground-tertiary">Checking…</span>;
+          return (
+            <span className="text-foreground-tertiary">
+              {t("migrationCheckingShort")}
+            </span>
+          );
         }
         if (row.original.status.sdk.status === "unknown") {
-          return <span className="text-foreground-tertiary">Unknown</span>;
+          return (
+            <span className="text-foreground-tertiary">
+              {t("migrationUnknown")}
+            </span>
+          );
         }
         if (row.original.status.sdk.status === "otel_header_required") {
           return (
             <span>
-              {row.original.status.sdk.delayedOtelIngestionCount} OTel header{" "}
               {row.original.status.sdk.delayedOtelIngestionCount === 1
-                ? "required"
-                : "issues"}
+                ? t("migrationOtelHeaderRequiredOne")
+                : t("migrationOtelHeaderRequired", {
+                    count: row.original.status.sdk.delayedOtelIngestionCount,
+                  })}
             </span>
           );
         }
         if (row.original.status.sdk.status === "error") {
-          return <span className="text-foreground-tertiary">Unavailable</span>;
+          return (
+            <span className="text-foreground-tertiary">
+              {t("migrationUnavailable")}
+            </span>
+          );
         }
         return (
-          <span>{row.original.status.sdk.upgradeRequiredCount} outdated</span>
+          <span>
+            {t("migrationOutdated", {
+              count: row.original.status.sdk.upgradeRequiredCount,
+            })}
+          </span>
         );
       },
     },
     {
       ...columnOptions,
       accessorKey: "evals",
-      header: () => sortableHeader("Affected Evals", "evals"),
+      header: () => sortableHeader(t("migrationAffectedEvals"), "evals"),
       cell: ({ row }) => <AffectedCell count={row.original.status.evals} />,
     },
     {
       ...columnOptions,
       accessorKey: "experiments",
-      header: () => sortableHeader("Affected Experiments", "experiments"),
+      header: () =>
+        sortableHeader(t("migrationAffectedExperiments"), "experiments"),
       cell: ({ row }) => (
         <MigrationActionCell state={row.original.status.experiments} />
       ),
@@ -404,19 +459,19 @@ function OrgStatusSection({
     {
       ...columnOptions,
       accessorKey: "apis",
-      header: () => sortableHeader("Affected APIs", "apis"),
+      header: () => sortableHeader(t("migrationAffectedApis"), "apis"),
       cell: ({ row }) => <AffectedCell count={row.original.status.apis} />,
     },
     {
       ...columnOptions,
       accessorKey: "exports",
-      header: () => sortableHeader("Affected Exports", "exports"),
+      header: () => sortableHeader(t("migrationAffectedExports"), "exports"),
       cell: ({ row }) => <AffectedCell count={row.original.status.exports} />,
     },
     createTextTableColumn<(typeof rows)[number]>({
       ...columnOptions,
       accessorKey: "lastTraceLabel",
-      header: () => sortableHeader("Last trace", "lastTrace"),
+      header: () => sortableHeader(t("migrationLastTraceHeader"), "lastTrace"),
     }),
     {
       accessorKey: "id",
@@ -425,7 +480,7 @@ function OrgStatusSection({
       cellPadding: "comfortable",
       cell: () => (
         <span className="text-dark-blue flex items-center justify-end gap-1 whitespace-nowrap opacity-0 transition-opacity group-hover/row:opacity-100">
-          Review <ArrowRight size="sm" />
+          {t("migrationReview")} <ArrowRight size="sm" />
         </span>
       ),
     },
@@ -448,7 +503,7 @@ function OrgStatusSection({
               noResultsMessage={null}
               topBorder={false}
               onRowClick={(row) => handleRowClick(row, row.readiness)}
-              getRowLabel={(row) => `Review ${row.name}`}
+              getRowLabel={(row) => `${t("migrationReview")} ${row.name}`}
             />
           </div>
         </div>
@@ -472,6 +527,7 @@ function V4MigrationStatusPageContent() {
   const handleCopyPrompt = useCopyMigrationPrompt();
   const hasDeadline = useHasV4MigrationDeadline();
   const title = useV4MigrationTitle();
+  const t = useTranslation(enterpriseMessages);
 
   const orgs: V4MigrationOrganization[] =
     session.data?.user?.organizations?.map((org) => ({
@@ -500,77 +556,77 @@ function V4MigrationStatusPageContent() {
 
   const faqItems: { q: string; a: ReactNode }[] = [
     {
-      q: "Why is this happening?",
+      q: t("migrationFaqWhy"),
       a: (
         <>
-          We rebuilt the tracing and evaluation engine around{" "}
-          <FaqLink href={DATA_MODEL_URL}>observations</FaqLink>. The new engine
-          is real-time and holds up much better at scale.
-        </>
-      ),
-    },
-    {
-      q: "What's in it for me?",
-      a: (
-        <>
-          Your{" "}
-          <FaqLink href={OBSERVATIONS_FAQ_URL}>data shows up instantly</FaqLink>
-          , everything loads faster, and you get{" "}
-          <FaqLink href={V4_DOCS_URL}>
-            features we could not build on the old engine
+          {t("migrationFaqWhyBody")}{" "}
+          <FaqLink href={DATA_MODEL_URL}>
+            {t("migrationObservationsLink")}
           </FaqLink>
-          , like full-text search, alerting, and observation-level evals.
+          {t("migrationFaqWhyTail")}
         </>
       ),
     },
     {
-      q: "Do I have to do this?",
+      q: t("migrationFaqBenefits"),
       a: (
         <>
-          Yes, eventually. The{" "}
-          <FaqLink href={SDK_UPGRADE_URL}>old SDKs</FaqLink>, trace-level evals,
-          and APIs are frozen and stop working{" "}
+          {t("migrationFaqBenefitsBody")}{" "}
+          <FaqLink href={OBSERVATIONS_FAQ_URL}>
+            {t("migrationDataLink")}
+          </FaqLink>
+          {t("migrationFaqBenefitsTail")}{" "}
+          <FaqLink href={V4_DOCS_URL}>{t("migrationFeaturesLink")}</FaqLink>
+          {t("migrationFaqBenefitsTail2")}
+        </>
+      ),
+    },
+    {
+      q: t("migrationFaqObligation"),
+      a: (
+        <>
+          {t("migrationFaqObligationBody")}{" "}
+          <FaqLink href={SDK_UPGRADE_URL}>{t("migrationOldSdksLink")}</FaqLink>
+          {t("migrationFaqObligationTail")}{" "}
           <span className="underline">
             {hasDeadline
-              ? `on ${V4_MIGRATION_DEADLINE}`
-              : "once your administrator disables the legacy mode"}
+              ? t("migrationFaqDeadline", { date: V4_MIGRATION_DEADLINE })
+              : t("migrationFaqAdminDisables")}
           </span>
-          . They keep running until then, but we&apos;re no longer fixing bugs
-          in them.
+          {t("migrationFaqObligationTail2")}
         </>
       ),
     },
     {
-      q: "How much work is it?",
+      q: t("migrationFaqEffort"),
       a: (
         <>
-          Less than you&apos;d think. For most projects it&apos;s{" "}
+          {t("migrationFaqEffortBody")}{" "}
           <button
             type="button"
             onClick={handleCopyPrompt}
             className="text-dark-blue hover:underline"
           >
-            one prompt
+            {t("migrationOnePrompt")}
           </button>
-          : the agent updates your SDK and evals, and migrates your API calls,
-          checking with you before it changes anything.
+          {t("migrationFaqEffortTail")}
         </>
       ),
     },
     {
-      q: "What if I do nothing?",
+      q: t("migrationFaqNothing"),
       a: (
         <>
           <span className="underline">
             {hasDeadline
-              ? `On ${V4_MIGRATION_DEADLINE}`
-              : "Once your administrator disables the legacy mode"}
+              ? t("migrationFaqDeadlineCap", { date: V4_MIGRATION_DEADLINE })
+              : t("migrationFaqAdminDisablesCap")}
           </span>
-          , old SDKs stop sending data, and the{" "}
+          {t("migrationFaqNothingTail")}{" "}
           <FaqLink href={API_REFERENCE_URL}>
-            deprecated evals and endpoints
+            {t("migrationDeprecatedApisLink")}
           </FaqLink>{" "}
-          start returning errors.
+          {t("migrationFaqNothingTail2")}
         </>
       ),
     },
@@ -609,7 +665,7 @@ function V4MigrationStatusPageContent() {
 
   if (isLoading) {
     return (
-      <ContainerPage headerProps={{ title: "Migration status" }}>
+      <ContainerPage headerProps={{ title: t("migrationStatusTitle") }}>
         <V4MigrationLoadingState />
       </ContainerPage>
     );
@@ -618,7 +674,7 @@ function V4MigrationStatusPageContent() {
   return (
     <ContainerPage
       headerProps={{
-        title: "Migration status",
+        title: t("migrationStatusTitle"),
       }}
     >
       <div className="flex flex-col gap-6 pt-2 pb-24">
@@ -627,8 +683,8 @@ function V4MigrationStatusPageContent() {
           <div className="text-muted-foreground flex flex-col gap-2 text-sm leading-relaxed">
             <p>
               {actionNeededProjects > 0
-                ? "Langfuse v4 is here: real-time ingestion and up to 165× faster queries. Complete the action items on each project below to avoid disruption. "
-                : "Langfuse v4 is here: real-time ingestion and up to 165× faster queries. "}
+                ? t("migrationPitchActionable")
+                : t("migrationPitch")}
               <V4MigrationDocsLink />
             </p>
             {actionNeededProjects > 0 && <V4MigrationDeadlineNote />}
@@ -636,7 +692,7 @@ function V4MigrationStatusPageContent() {
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
             {totalProjects === 0 ? (
               <span className="text-muted-foreground text-sm">
-                No active projects
+                {t("migrationNoActiveProjects")}
               </span>
             ) : (
               <>
@@ -644,10 +700,17 @@ function V4MigrationStatusPageContent() {
                   {actionNeededProjects}
                 </span>
                 <span className="text-muted-foreground text-sm">
-                  of {totalProjects} projects{" "}
-                  {actionNeededProjects === 1 ? "needs" : "need"} action
+                  {actionNeededProjects === 1
+                    ? t("migrationProjectNeedsAction", {
+                        total: totalProjects,
+                      })
+                    : t("migrationProjectsNeedAction", {
+                        total: totalProjects,
+                      })}
                   {unavailableProjects > 0 &&
-                    ` · ${unavailableProjects} could not be checked`}
+                    t("migrationCouldNotCheck", {
+                      count: unavailableProjects,
+                    })}
                 </span>
               </>
             )}
@@ -666,12 +729,12 @@ function V4MigrationStatusPageContent() {
         {totalProjects > 0 && listedProjects === 0 && (
           <p className="text-muted-foreground flex items-center gap-2.5 text-sm">
             <V4MigrationStatusDot variant="done" />
-            All projects are up to date. Nothing to do here.
+            {t("migrationAllUpToDate")}
           </p>
         )}
 
         <div className="mt-6">
-          <p className="text-base font-bold">What&apos;s new in v4</p>
+          <p className="text-base font-bold">{t("migrationWhatsNew")}</p>
           <div className="flex flex-col gap-6 pt-4">
             <div className="divide-y">
               {faqItems.map(({ q, a }) => (
@@ -698,6 +761,7 @@ function V4MigrationStatusPageContent() {
 function SwitchBackSection() {
   const { canToggleV4, isV4 } = useReadPath();
   const hasDeadline = useHasV4MigrationDeadline();
+  const t = useTranslation(enterpriseMessages);
 
   if (!canToggleV4) {
     return null;
@@ -706,18 +770,20 @@ function SwitchBackSection() {
   return (
     <div className="mt-6">
       <p className="text-base font-bold">
-        {isV4
-          ? "Need to switch back to the legacy UI (v3)?"
-          : "Switch back to the latest UI (v4)"}
+        {isV4 ? t("migrationSwitchBackTitle") : t("migrationSwitchLatestTitle")}
       </p>
       <div className="flex flex-col gap-4 pt-4">
         {isV4 && (
           <p className="text-muted-foreground text-sm leading-relaxed">
-            The features powering the legacy v3 UI will be sunset{" "}
             {hasDeadline
-              ? `on ${V4_MIGRATION_DEADLINE}`
-              : "once your administrator disables the legacy mode"}
-            . We strongly recommend switching to the latest UI (v4) before then.
+              ? t("migrationSwitchBackDescription", {
+                  deadline: t("migrationSwitchBackDeadline", {
+                    date: V4_MIGRATION_DEADLINE,
+                  }),
+                })
+              : t("migrationSwitchBackDescription", {
+                  deadline: t("migrationSwitchBackAdminDisables"),
+                })}
           </p>
         )}
         <V4PreviewToggleRow />

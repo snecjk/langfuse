@@ -2,6 +2,11 @@
 /* eslint-disable @repo/no-style-props */
 import { TextActionButton } from "@/src/components/TextActionButton/TextActionButton";
 import { Button } from "@/src/components/ui/button";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
+import { tableMessages } from "@/src/features/i18n/messages/table";
 import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
 import {
@@ -122,6 +127,7 @@ export function PopoverFilterBuilder({
   /** Whether this builder sits on a v4 (fast-mode) surface — `isV4` dimension. */
   isV4?: boolean;
 }) {
+  const t = useTranslation(tableMessages);
   const capture = usePostHogClientCapture();
   const projectId = useProjectIdFromURL();
   const { organization } = useQueryProject();
@@ -340,7 +346,7 @@ export function PopoverFilterBuilder({
                 <X size="base" color="default" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Clear all filters</TooltipContent>
+            <TooltipContent>{t("clearAllFilters")}</TooltipContent>
           </Tooltip>
         ) : (
           <Tooltip>
@@ -355,7 +361,7 @@ export function PopoverFilterBuilder({
                 <X size="sm" color="default" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Clear all filters</TooltipContent>
+            <TooltipContent>{t("clearAllFilters")}</TooltipContent>
           </Tooltip>
         )
       ) : null}
@@ -603,6 +609,8 @@ function FilterBuilderForm({
   subtleAddButton?: boolean;
   aiFilter?: AiFilterConfig;
 }) {
+  const t = useTranslation(tableMessages);
+  const locale = useInterfaceLocale();
   const [showAiFilter, setShowAiFilter] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiError, setAiError] = useState<string | null>(null);
@@ -711,11 +719,11 @@ function FilterBuilderForm({
         <PopoverContent align="start" className="ph-no-capture max-w-fit p-0">
           <InputCommand>
             <InputCommandInput
-              placeholder="Search for column"
+              placeholder={t("columnSearchPlaceholder")}
               variant="bottom"
             />
             <InputCommandList>
-              <InputCommandEmpty>No options found.</InputCommandEmpty>
+              <InputCommandEmpty>{t("noOptionsFound")}</InputCommandEmpty>
               <InputCommandGroup>
                 {columnsForPicker.map((option) => {
                   const hasAlert = !!option.alert;
@@ -798,7 +806,7 @@ function FilterBuilderForm({
         stringObjectSuggest ? (
           // Case 0: opt-in stringObject - single key select with free text
           <SingleSelect
-            title="Key"
+            title={t("keyPlaceholderKey")}
             className="min-w-[100px]"
             options={
               column?.type === "stringObject" && column.keyOptions
@@ -949,7 +957,7 @@ function FilterBuilderForm({
         filter.operator === "is not set") ? null : stringObjectSuggest &&
       filter.type === "stringObject" ? (
       <SingleSelect
-        title="Value"
+        title={t("keyPlaceholderValue")}
         className="min-w-[100px]"
         options={(filter.key ? stringObjectValueOptions[filter.key] : []) ?? []}
         value={filter.value ?? undefined}
@@ -959,7 +967,7 @@ function FilterBuilderForm({
       />
     ) : stringSuggest && filter.type === "string" ? (
       <SingleSelect
-        title="Value"
+        title={t("keyPlaceholderValue")}
         className="min-w-[100px]"
         options={column?.type === "string" ? (column.options ?? []) : []}
         value={filter.value ?? undefined}
@@ -1013,10 +1021,11 @@ function FilterBuilderForm({
           );
         }}
         includeTimePicker
+        locale={locale}
       />
     ) : filter.type === "stringOptions" || filter.type === "arrayOptions" ? (
       <MultiSelect
-        title="Value"
+        title={t("keyPlaceholderValue")}
         chipsOnly={compact}
         className="min-w-[100px]"
         options={column?.type === filter.type ? column.options : []}
@@ -1035,7 +1044,7 @@ function FilterBuilderForm({
     ) : filter.type === "categoryOptions" &&
       column?.type === "categoryOptions" ? (
       <MultiSelect
-        title="Value"
+        title={t("keyPlaceholderValue")}
         chipsOnly={compact}
         className="min-w-[100px]"
         options={
@@ -1203,7 +1212,7 @@ function FilterBuilderForm({
                   setAiPrompt(e.target.value);
                   if (aiError) setAiError(null); // Clear error when user starts typing
                 }}
-                placeholder="Describe the filters you want to apply..."
+                placeholder={t("aiFilterPlaceholder")}
                 className="min-h-[80px] min-w-112 resize-none"
                 disabled={aiFilter.isPending}
                 onKeyDown={(e) => {

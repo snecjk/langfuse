@@ -4,6 +4,8 @@ import { AsyncSelectInput } from "@/src/components/design-system/AsyncSelectInpu
 import { Alert } from "@/src/components/design-system/Alert/Alert";
 import { IconButton } from "@/src/components/design-system/IconButton/IconButton";
 import { type SlackChannel } from "@langfuse/shared/src/server";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 
 export interface ChannelSelectorViewProps {
   id?: string;
@@ -58,11 +60,12 @@ export const ChannelSelectorView: React.FC<ChannelSelectorViewProps> = ({
   onRefresh,
   onReauthenticate,
   disabled = false,
-  placeholder = "Select a channel",
+  placeholder,
   memberOnly = false,
   filterChannels,
   showRefreshButton = true,
 }) => {
+  const t = useTranslation(integrationMessages);
   const [searchValue, setSearchValue] = useState("");
   const trimmedSearch = searchValue.trim();
   const effectiveName = trimmedSearch.replace(/^#/, "");
@@ -124,7 +127,7 @@ export const ChannelSelectorView: React.FC<ChannelSelectorViewProps> = ({
             aria-invalid={invalid}
             disabled={disabled}
             error={invalid === true || invalid === "true"}
-            placeholder={placeholder}
+            placeholder={placeholder ?? t("slackSelectChannelPlaceholder")}
             value={
               selectedChannel
                 ? {
@@ -138,7 +141,9 @@ export const ChannelSelectorView: React.FC<ChannelSelectorViewProps> = ({
               canUseTypedName
                 ? {
                     position: "first",
-                    label: `Use "${effectiveName}"`,
+                    label: t("slackUseChannelName", {
+                      name: effectiveName,
+                    }),
                     onSelect: () =>
                       onChannelSelect({
                         id: `#${effectiveName}`,
@@ -161,16 +166,15 @@ export const ChannelSelectorView: React.FC<ChannelSelectorViewProps> = ({
               if (channel) onChannelSelect(channel);
             }}
             search={{
-              placeholder: "Search channels...",
+              placeholder: t("slackSearchChannels"),
               value: searchValue,
               onValueChange: setSearchValue,
             }}
-            emptyMessage="No channels available."
+            emptyMessage={t("slackNoChannels")}
             loading={
               isLoading
                 ? {
-                    message:
-                      "Loading Slack channels. This can take a while for large workspaces.",
+                    message: t("slackLoadingChannels"),
                   }
                 : undefined
             }
@@ -181,7 +185,7 @@ export const ChannelSelectorView: React.FC<ChannelSelectorViewProps> = ({
         {showRefreshButton && (
           <IconButton
             icon={RefreshCw}
-            label="Refresh channels"
+            label={t("slackRefreshChannels")}
             variant="outline"
             onClick={onRefresh}
             disabled={disabled || isRefreshing || isLoading}
@@ -191,32 +195,29 @@ export const ChannelSelectorView: React.FC<ChannelSelectorViewProps> = ({
 
       {hasError && (
         <Alert>
-          <Alert.Description>
-            Failed to load channels. You can still enter a channel name
-            manually, or check your Slack connection and try again.
-          </Alert.Description>
+          <Alert.Description>{t("slackLoadChannelsFailed")}</Alert.Description>
         </Alert>
       )}
 
       {/* Private channel scope warning */}
       {channelsData && !channelsData.hasPrivateChannelAccess && (
         <Alert icon={AlertTriangle} variant="warning" size="sm">
-          <Alert.Title>Private channels are not visible</Alert.Title>
+          <Alert.Title>{t("slackPrivateChannelsWarning")}</Alert.Title>
           <Alert.Description>
             {onReauthenticate ? (
               <>
-                To access private channels,{" "}
+                {t("slackPrivateChannelsReauthPrefix")}{" "}
                 <button
                   type="button"
                   className="font-bold underline"
                   onClick={onReauthenticate}
                 >
-                  re-authenticate your Slack integration
+                  {t("slackPrivateChannelsReauth")}
                 </button>{" "}
-                to grant the required permissions.
+                {t("slackPrivateChannelsReauthSuffix")}
               </>
             ) : (
-              "To access private channels, ask a project admin to re-authenticate the Slack integration."
+              t("slackPrivateChannelsAskAdmin")
             )}
           </Alert.Description>
         </Alert>

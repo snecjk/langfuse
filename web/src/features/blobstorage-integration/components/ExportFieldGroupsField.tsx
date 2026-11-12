@@ -19,6 +19,8 @@ import {
 } from "@langfuse/shared";
 import { type BlobStorageFormControl } from "@/src/features/blobstorage-integration/components/formValues";
 import { FieldGroupCheckbox } from "@/src/features/blobstorage-integration/components/FieldGroupCheckbox";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 
 // Field-group checkboxes; descriptions and available groups depend on the
 // selected export source and file type.
@@ -27,6 +29,7 @@ export const ExportFieldGroupsField = ({
 }: {
   control: BlobStorageFormControl;
 }) => {
+  const t = useTranslation(integrationMessages);
   const [watchedExportSource, watchedFileType] = useWatch({
     control,
     name: ["exportSource", "fileType"],
@@ -64,20 +67,18 @@ export const ExportFieldGroupsField = ({
       name="exportFieldGroups"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Export Field Groups</FormLabel>
+          <FormLabel>{t("exportFieldGroups")}</FormLabel>
           <FormDescription>
-            Choose which field groups to include in the exports. Deselect large
-            groups (e.g. Input / Output) to reduce export size, or
-            privacy-sensitive groups (e.g. Metadata) to avoid storing user data.
+            {t("exportFieldGroupsHelp")}
             {includesLegacyExport
               ? isLegacyOnlyExport
-                ? " Field groups that only exist on the enriched observations (e.g. Trace Context) are not available for this export source."
-                : " Fields that only exist on the enriched observations (e.g. Trace Context) are omitted from the legacy observations export."
+                ? t("exportFieldGroupsEnrichedOnlyLegacy")
+                : t("exportFieldGroupsEnrichedOnly")
               : ""}
           </FormDescription>
           {includesLegacyExport && (
             <>
-              <div className="text-sm font-bold">Traces</div>
+              <div className="text-sm font-bold">{t("tracesLabel")}</div>
               <div className="mt-2 space-y-2">
                 {TRACE_EXPORT_FIELD_GROUP_OPTIONS.map((option) =>
                   option.value === "trace_core" ? (
@@ -102,14 +103,12 @@ export const ExportFieldGroupsField = ({
               </div>
               <Alert variant="warning" size="sm" icon={AlertTriangle}>
                 <Alert.Description>
-                  Trace field groups can only be set here. The public API
-                  doesn&apos;t show them, and updating field groups through the
-                  API keeps this selection.
+                  {t("traceFieldGroupsWarning")}
                 </Alert.Description>
               </Alert>
             </>
           )}
-          <div className="text-sm font-bold">Observations</div>
+          <div className="text-sm font-bold">{t("observationsLabel")}</div>
           <div className="mt-2 space-y-2">
             {EXPORT_FIELD_GROUP_OPTIONS.filter(
               // Hide no-op groups (no legacy columns) for legacy-only
@@ -137,7 +136,7 @@ export const ExportFieldGroupsField = ({
               ),
             )}
           </div>
-          <div className="text-sm font-bold">Scores</div>
+          <div className="text-sm font-bold">{t("scoresLabel")}</div>
           <div className="mt-2 space-y-2">
             <FieldGroupCheckbox
               id="field-group-score-core"

@@ -3,6 +3,8 @@ import { Pencil, RefreshCw, Trash2 } from "@langfuse/icons";
 import { IconButton } from "@/src/components/design-system/IconButton/IconButton";
 import { Tooltip } from "@/src/components/design-system/Tooltip/Tooltip";
 import type { GatewayConnection } from "@/src/features/ai-gateway/types/gatewayProvider";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 
 export type ManagedProviderCardActionsProps = {
   connection: GatewayConnection;
@@ -19,41 +21,42 @@ export function ManagedProviderCardActions({
   onRetry,
   onDelete,
 }: ManagedProviderCardActionsProps) {
+  const t = useTranslation(gatewayMessages);
   const handleEdit = () => onEdit(connection);
   const handleRetry = () => onRetry(connection);
   const handleDelete = () => onDelete(connection);
 
   return (
     <>
-      <Tooltip label="Refresh models">
+      <Tooltip label={t("refreshModels")}>
         {({ getTriggerProps }) => (
           <IconButton
             {...getTriggerProps()}
             icon={RefreshCw}
-            label={`Refresh models for ${connection.name}`}
+            label={t("refreshModelsFor", { name: connection.name })}
             size="sm"
             disabled={isRetrying}
             onClick={handleRetry}
           />
         )}
       </Tooltip>
-      <Tooltip label="Edit credential">
+      <Tooltip label={t("editCredential")}>
         {({ getTriggerProps }) => (
           <IconButton
             {...getTriggerProps()}
             icon={Pencil}
-            label={`Edit ${connection.name}`}
+            label={t("editFor", { name: connection.name })}
             size="sm"
             onClick={handleEdit}
           />
         )}
       </Tooltip>
-      <Tooltip label="Delete credential">
+      <Tooltip label={t("deleteCredential")}>
         {({ getTriggerProps }) => (
           <IconButton
             {...getTriggerProps()}
             icon={Trash2}
-            label={`Delete ${connection.name}`}
+            label={t("deleteFor", { name: connection.name })}
             size="sm"
             onClick={handleDelete}
           />

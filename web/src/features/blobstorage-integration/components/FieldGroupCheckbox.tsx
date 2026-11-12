@@ -1,5 +1,7 @@
 import { Checkbox } from "@/src/components/design-system/Checkbox/Checkbox";
 import { type ExportFieldGroup } from "@langfuse/shared";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 
 type FieldGroupCheckboxProps = {
   label: string;
@@ -20,6 +22,7 @@ type FieldGroupCheckboxProps = {
 
 /** Toggles one export field group; required groups render checked and locked. */
 export const FieldGroupCheckbox = (props: FieldGroupCheckboxProps) => {
+  const t = useTranslation(integrationMessages);
   const id = props.required ? props.id : `field-group-${props.value}`;
 
   const handleCheckedChange = (checked: boolean | "indeterminate") => {
@@ -51,7 +54,7 @@ export const FieldGroupCheckbox = (props: FieldGroupCheckboxProps) => {
           {props.label}
           {props.required && (
             <span className="text-muted-foreground ml-1 font-normal">
-              (required)
+              {t("required")}
             </span>
           )}
         </div>

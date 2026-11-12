@@ -9,16 +9,21 @@ import { type ReactNode } from "react";
 
 import { CodeSection } from "@/src/components/design-system/CodeSection/CodeSection";
 import { type RevealableExternalId } from "@/src/ee/features/storage-role-auth/components/types";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 const MASKED_EXTERNAL_ID = "••••••••••••••••••••••••";
 const EXTERNAL_ID_PLACEHOLDER = "<external-id>";
 
-function getExternalIdHint(externalId: RevealableExternalId) {
+function getExternalIdHint(
+  externalId: RevealableExternalId,
+  t: ReturnType<typeof useTranslation<typeof enterpriseMessages>>,
+) {
   if (!externalId.isSet) {
-    return "Langfuse generates the external ID when you save. Replace <external-id> in the trust policy with it.";
+    return t("storageRoleExternalIdHintSave");
   }
   if (!externalId.value) {
-    return "Show the external ID to copy it and include it in the trust policy.";
+    return t("storageRoleExternalIdHintShow");
   }
   return null;
 }
@@ -57,15 +62,16 @@ export function RoleAuthSetupInstructions({
   description: string;
 }) {
   const hasValue = externalId.value !== undefined;
-  const hint = getExternalIdHint(externalId);
+  const t = useTranslation(enterpriseMessages);
+  const hint = getExternalIdHint(externalId, t);
 
   return (
     <div className="flex flex-col gap-3">
       <p className="text-muted-foreground text-sm">{description}</p>
-      <LabeledCode label="Langfuse cross-account role">
+      <LabeledCode label={t("storageRoleCrossAccount")}>
         <CodeSection content={crossAccountRoleArn} />
       </LabeledCode>
-      <LabeledCode label="External ID">
+      <LabeledCode label={t("storageRoleExternalId")}>
         <CodeSection
           content={
             externalId.value ??
@@ -77,7 +83,7 @@ export function RoleAuthSetupInstructions({
               ? [
                   {
                     icon: Eye,
-                    label: "Show external ID",
+                    label: t("storageRoleShowExternalId"),
                     onClick: externalId.reveal,
                   },
                 ]
@@ -86,7 +92,7 @@ export function RoleAuthSetupInstructions({
         />
         {hint ? <p className="text-muted-foreground text-sm">{hint}</p> : null}
       </LabeledCode>
-      <LabeledCode label="Trust policy">
+      <LabeledCode label={t("storageRoleTrustPolicy")}>
         <CodeSection
           language="json"
           content={JSON.stringify(
@@ -99,7 +105,7 @@ export function RoleAuthSetupInstructions({
           )}
         />
       </LabeledCode>
-      <LabeledCode label="Permission policy">
+      <LabeledCode label={t("storageRolePermissionPolicy")}>
         <CodeSection
           language="json"
           content={JSON.stringify(

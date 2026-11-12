@@ -33,6 +33,8 @@ import {
   type SsoConfigRow,
   type SsoConfigTableRow,
 } from "./SsoConfigsTable/SsoConfigsTable";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 const SSO_PROVIDERS: ReadonlyArray<{
   id: SsoProviderSchema["authProvider"];
@@ -130,6 +132,7 @@ function SsoConfigDialogContent({
   closeDialog: () => void;
 }) {
   const [pendingValues, setPendingValues] = useState<FormValues | null>(null);
+  const t = useTranslation(enterpriseMessages);
 
   const defaultValues = useMemo<FormValues>(() => {
     const cfg = (existing?.authConfig ?? {}) as Record<string, unknown>;
@@ -199,7 +202,7 @@ function SsoConfigDialogContent({
       ];
       if (!FORM_FIELDS.includes(formField)) {
         showErrorToast(
-          existing ? "Update failed" : "SSO configuration failed",
+          existing ? t("ssoUpdateFailed") : t("ssoConfigureFailed"),
           firstIssue.message,
           {
             operation: existing ? "sso.update" : "sso.configure",
@@ -220,11 +223,15 @@ function SsoConfigDialogContent({
     <ConfirmationDialogController
       title={
         existing
-          ? `Replace SSO for @${domain}?`
-          : `Activate SSO for @${domain}?`
+          ? t("ssoReplaceConfirmTitle", { domain })
+          : t("ssoActivateConfirmTitle", { domain })
       }
-      text={`Saving will activate SSO for @${domain} within 1 hour. Every user at that domain will be redirected to your identity provider on sign-in - they will not be able to use Google, GitHub, password, or any other method until SSO is deleted.${existing ? " The new credentials will replace the active configuration." : ""} Tip: sign in via the new SSO in a second browser to confirm it works before closing this tab.`}
-      confirmLabel={existing ? "Replace" : "Activate SSO"}
+      text={
+        existing
+          ? t("ssoReplaceConfirmText", { domain })
+          : t("ssoActivateConfirmText", { domain })
+      }
+      confirmLabel={existing ? t("ssoReplaceConfirm") : t("ssoActivateConfirm")}
       variant="default"
       loading={isSaving}
       onConfirm={handleConfirm}
@@ -234,8 +241,8 @@ function SsoConfigDialogContent({
           <DialogHeader>
             <DialogTitle>
               {existing
-                ? `Update SSO for ${domain}`
-                : `Configure SSO for ${domain}`}
+                ? t("ssoUpdateTitle", { domain })
+                : t("ssoConfigureTitle", { domain })}
             </DialogTitle>
           </DialogHeader>
           <Form {...form}>
@@ -251,12 +258,12 @@ function SsoConfigDialogContent({
                   name="authProvider"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Provider</FormLabel>
+                      <FormLabel>{t("ssoProviderLabel")}</FormLabel>
                       <FormControl>
                         <SelectInput
                           value={field.value}
                           onValueChange={field.onChange}
-                          placeholder="Select an SSO provider"
+                          placeholder={t("ssoProviderPlaceholder")}
                           options={SSO_PROVIDERS.map((provider) => ({
                             value: provider.id,
                             label: provider.label,
@@ -276,9 +283,12 @@ function SsoConfigDialogContent({
                     name="authConfig.name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Display Name</FormLabel>
+                        <FormLabel>{t("ssoDisplayName")}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Acme SSO" {...field} />
+                          <Input
+                            placeholder={t("ssoDisplayNamePlaceholder")}
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -291,7 +301,7 @@ function SsoConfigDialogContent({
                   name="authConfig.clientId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Client ID</FormLabel>
+                      <FormLabel>{t("ssoClientId")}</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -305,13 +315,13 @@ function SsoConfigDialogContent({
                   name="authConfig.clientSecret"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Client Secret</FormLabel>
+                      <FormLabel>{t("ssoClientSecret")}</FormLabel>
                       <FormControl>
                         <Input
                           type="password"
                           autoComplete="off"
                           placeholder={
-                            existing ? "Re-enter to update" : undefined
+                            existing ? t("ssoClientSecretReenter") : undefined
                           }
                           {...field}
                         />
@@ -327,7 +337,7 @@ function SsoConfigDialogContent({
                     name="authConfig.issuer"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Issuer URL</FormLabel>
+                        <FormLabel>{t("ssoIssuerUrl")}</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="https://example.okta.com"
@@ -346,7 +356,7 @@ function SsoConfigDialogContent({
                     name="authConfig.tenantId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Tenant ID</FormLabel>
+                        <FormLabel>{t("ssoTenantId")}</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -362,7 +372,7 @@ function SsoConfigDialogContent({
                     name="authConfig.baseUrl"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Base URL</FormLabel>
+                        <FormLabel>{t("ssoBaseUrl")}</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="https://github.acme.com"
@@ -390,12 +400,9 @@ function SsoConfigDialogContent({
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel>
-                            Use id_token claims only (skip userinfo)
-                          </FormLabel>
+                          <FormLabel>{t("ssoIdTokenOnlyLabel")}</FormLabel>
                           <FormDescription>
-                            Leave off for IdPs that release email only via the
-                            userinfo endpoint.
+                            {t("ssoIdTokenOnlyHelp")}
                           </FormDescription>
                         </div>
                       </FormItem>
@@ -405,10 +412,10 @@ function SsoConfigDialogContent({
               </DialogBody>
               <DialogFooter>
                 <Button type="button" variant="ghost" onClick={closeDialog}>
-                  Cancel
+                  {t("retryMigrationCancel")}
                 </Button>
                 <Button type="submit" loading={isSaving}>
-                  Save
+                  {t("externalMediaStorageSave")}
                 </Button>
               </DialogFooter>
             </form>
@@ -422,11 +429,12 @@ function SsoConfigDialogContent({
 function CallbackUrlPanel({ callbackUrl }: { callbackUrl: string }) {
   const inputId = useId();
   const { copy, isCopied } = useCopyToClipboard();
+  const t = useTranslation(enterpriseMessages);
 
   return (
     <div>
       <label htmlFor={inputId} className="mb-2 block text-sm font-bold">
-        Callback URL
+        {t("ssoCallbackUrl")}
       </label>
       <div className="relative">
         <Input
@@ -441,8 +449,8 @@ function CallbackUrlPanel({ callbackUrl }: { callbackUrl: string }) {
           variant="ghost"
           size="icon-xs"
           className="absolute top-1/2 right-0 -translate-y-1/2"
-          title="Copy to clipboard"
-          aria-label="Copy to clipboard"
+          title={t("ssoCopyTooltip")}
+          aria-label={t("ssoCopyTooltip")}
           onClick={async (event) => {
             const button = event.currentTarget;
             await copy(callbackUrl).catch(() => undefined);
@@ -460,7 +468,7 @@ function CallbackUrlPanel({ callbackUrl }: { callbackUrl: string }) {
         id={`${inputId}-description`}
         className="text-muted-foreground mt-2 text-xs"
       >
-        Add this URL as an authorized redirect URI in your identity provider.
+        {t("ssoCallbackUrlHelp")}
       </p>
     </div>
   );

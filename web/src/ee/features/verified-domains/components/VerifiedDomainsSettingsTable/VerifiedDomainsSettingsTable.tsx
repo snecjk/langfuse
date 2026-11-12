@@ -10,6 +10,8 @@ import {
   type AsyncTableData,
   type TableProps,
 } from "@/src/components/design-system/table/Table";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export type DomainRowData = {
   id: string;
@@ -31,28 +33,32 @@ export function VerifiedDomainsSettingsTable({
   onDelete: (row: DomainRowData) => void;
   onViewInstructions: (row: DomainRowData) => void;
 }) {
+  const t = useTranslation(enterpriseMessages);
   const columns = useMemo<LangfuseColumnDef<DomainRowData>[]>(
     () => [
       createTextTableColumn<DomainRowData>({
         accessorKey: "domain",
-        header: "Domain",
+        header: t("verifiedDomainHeader"),
         enableResizing: false,
       }),
       createBadgeTableColumn<DomainRowData>({
         accessorFn: (row) =>
-          row.verifiedAt ? "Verified" : "Pending verification",
+          row.verifiedAt
+            ? t("verifiedDomainsVerified")
+            : t("verifiedDomainsPending"),
         id: "status",
-        header: "Status",
+        header: t("verifiedDomainsStatusHeader"),
         enableResizing: false,
         range: "semantic",
         getBadge: (value) => ({
           value,
-          variant: value === "Verified" ? "success" : "warning",
+          variant:
+            value === t("verifiedDomainsVerified") ? "success" : "warning",
         }),
       }),
       createDateTableColumn<DomainRowData>({
         accessorKey: "createdAt",
-        header: "Added",
+        header: t("verifiedDomainsAddedHeader"),
         hideBelowMd: true,
         enableResizing: false,
       }),
@@ -61,21 +67,21 @@ export function VerifiedDomainsSettingsTable({
         id: "verify",
         header: "",
         getButton: ({ row }) => ({
-          text: "Verify",
+          text: t("verifiedDomainsVerifyAction"),
           onClick: () => onViewInstructions(row.original),
           loading: verifyingDomainId === row.original.id,
           disabled: Boolean(row.original.verifiedAt),
         }),
       }),
     ],
-    [onViewInstructions, verifyingDomainId],
+    [onViewInstructions, verifyingDomainId, t],
   );
 
   const actions: NonNullable<TableProps<DomainRowData>["actions"]> = (row) => [
     {
       id: "delete",
       type: "item",
-      title: "Delete",
+      title: t("verifiedDomainsDeleteAction"),
       icon: TrashIcon,
       variant: "destructive",
       onClick: () => onDelete(row),
@@ -88,7 +94,7 @@ export function VerifiedDomainsSettingsTable({
       columns={columns}
       actions={actions}
       data={data}
-      noResultsMessage="No domains added yet"
+      noResultsMessage={t("verifiedDomainsEmpty")}
     />
   );
 }

@@ -10,6 +10,9 @@ import { useIsForceV3ExperienceSettled } from "@/src/features/v4-migration/useFo
 import { useV4UpgradeUiEnabled } from "@/src/features/v4-migration/useV4UpgradeUiEnabled";
 import type { V4MigrationTopBannerViewProps } from "@/src/features/v4-migration/V4MigrationTopBannerView";
 import { api } from "@/src/utils/api";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
+import { V4_MIGRATION_DEADLINE } from "@/src/features/v4-migration/V4MigrationContent";
 
 const QUERY_STALE_TIME_MS = 5 * 60 * 1000;
 
@@ -25,6 +28,7 @@ export function useV4MigrationTopBanner(): V4MigrationTopBannerViewProps | null 
   const v4UpgradeUiEnabled = useV4UpgradeUiEnabled(project?.id);
   const forceV3Settled = useIsForceV3ExperienceSettled(project?.id);
   const enabled = isLangfuseCloud && v4UpgradeUiEnabled && forceV3Settled;
+  const t = useTranslation(enterpriseMessages);
 
   const accountStateQuery = api.v4Transition.legacyApiBannerState.useQuery(
     undefined,
@@ -70,9 +74,15 @@ export function useV4MigrationTopBanner(): V4MigrationTopBannerViewProps | null 
     actionNeededCount,
   };
 
+  // The server ships the translation key; the deadline is only known to Cloud
+  // deployments, which is the only surface this banner renders on.
+  const message = t(state.message as Parameters<typeof t>[0], {
+    date: V4_MIGRATION_DEADLINE,
+  });
+
   return {
     severity: bannerSeverity,
-    message: state.message,
+    message,
     onStatusClick: () => {
       capture("v4_migration:top_banner_cta_clicked", {
         ...analytics,

@@ -9,6 +9,8 @@ import useSessionStorage from "@/src/components/useSessionStorage";
 import Page from "@/src/components/layouts/Page";
 import { TIME_RANGES, type TimeRange } from "@/src/utils/date-range-utils";
 import { ErrorPage } from "@/src/components/error-page";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 import {
   Sheet,
   SheetContent,
@@ -53,7 +55,7 @@ import { useTopicTraceFilters } from "./useTopicTraceFilters";
 import { TopicRunDetails } from "./TopicRunDetails";
 import { TopicRunHistoryList } from "./TopicRunHistoryList";
 import { TopicsErrorMessage } from "./TopicsErrorMessage";
-import { busy, operationLabels } from "./topic-run-labels";
+import { busy, operationLabel } from "./topic-run-labels";
 
 const loadingPage = (
   <Page headerProps={{ title: "Topics" }}>
@@ -63,12 +65,16 @@ const loadingPage = (
 
 export default function TopicsPage() {
   const router = useRouter();
+  const t = useTranslation(topicsMessages);
   const projectId =
     typeof router.query.projectId === "string" ? router.query.projectId : "";
   const topicsEnabled = useCanViewTopics(projectId);
   if (!topicsEnabled) {
     return (
-      <ErrorPage title="Not found" message="This page is not available." />
+      <ErrorPage
+        title={t("pageUnavailableTitle")}
+        message={t("pageUnavailableMessage")}
+      />
     );
   }
   return projectId ? (
@@ -176,6 +182,7 @@ function TopicsWorkspaceContent({
   openSetup,
   openAutomaticProcessing,
 }: TopicsWorkspaceContentProps) {
+  const t = useTranslation(topicsMessages);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [resultsView, setResultsView] = useTopicsResultsView();
   const [showUnassigned, setShowUnassigned] = useSessionStorage(
@@ -250,7 +257,7 @@ function TopicsWorkspaceContent({
         key: `${facet.facetId}:${facet.facetVersion}`,
         name:
           facets.data?.find((item) => item.id === facet.facetId)?.name ??
-          "Facet",
+          t("facetLabel"),
         complete: facet.counts.complete,
         requested: facet.counts.requested,
       };
@@ -277,8 +284,8 @@ function TopicsWorkspaceContent({
     },
   );
   const selectedRunTitle = selectedExecution.data
-    ? operationLabels[selectedExecution.data.input.operation]
-    : "Run";
+    ? operationLabel(selectedExecution.data.input.operation, t)
+    : t("runLabel");
   const completedAt = Math.max(
     0,
     ...[...(executions.data ?? []), selectedExecution.data].flatMap(
@@ -305,6 +312,7 @@ function TopicsWorkspaceContent({
   const setupBlockedReason = startBlockedReason(
     running,
     modelSettings.automaticProcessing.state.status === "on",
+    t,
   );
   const results = useCurrentTopics({
     projectId,
@@ -433,7 +441,7 @@ function TopicsWorkspaceContent({
         return (
           <Page
             headerProps={{
-              title: "Topics",
+              title: t("topics"),
               className: "@container/topics-header",
               actionButtonsLeft: showOnboarding ? null : (
                 <div className="flex items-center gap-3">
@@ -445,7 +453,7 @@ function TopicsWorkspaceContent({
                     />
                   )}
                   <span className="text-muted-foreground flex shrink-0 items-center gap-1 text-sm whitespace-nowrap">
-                    Visualize as
+                    {t("visualizeAs")}
                     <TopicsResultsViewSelect
                       value={resultsView}
                       onValueChange={setResultsView}
@@ -543,7 +551,7 @@ function TopicsWorkspaceContent({
                     </SheetTitle>
                   ) : (
                     <SheetHeader className="border-b px-5 py-4">
-                      <SheetTitle>Run history</SheetTitle>
+                      <SheetTitle>{t("runHistory")}</SheetTitle>
                     </SheetHeader>
                   )}
                   <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
@@ -632,6 +640,7 @@ function ExecutionPanel({
   canWrite: boolean;
   onBack: () => void;
 }) {
+  const t = useTranslation(topicsMessages);
   const utils = api.useUtils();
   const retry = api.topics.retry.useMutation({
     onSuccess: () =>
@@ -659,7 +668,7 @@ function ExecutionPanel({
         <header className="flex items-center border-b py-3.5 pr-12 pl-3">
           <IconButton
             icon={ChevronLeft}
-            label="All runs"
+            label={t("allRuns")}
             variant="ghost"
             size="sm"
             onClick={onBack}
@@ -670,7 +679,7 @@ function ExecutionPanel({
             <TopicsErrorMessage message={query.error.message} />
           </div>
         ) : (
-          <p className="p-4 text-sm">Loading execution…</p>
+          <p className="p-4 text-sm">{t("loadingExecution")}</p>
         )}
       </>
     );
@@ -698,10 +707,12 @@ function ExecutionPanel({
   );
 }
 
-function startBlockedReason(running: boolean, automaticOn: boolean) {
-  if (running)
-    return "Analysis is running. Topics appear here when it finishes.";
-  if (automaticOn)
-    return "Automatic processing is on. Topics appear here as traces are summarized.";
+function startBlockedReason(
+  running: boolean,
+  automaticOn: boolean,
+  t: (key: "analysisRunningBlocked" | "autoProcessingBlocked") => string,
+) {
+  if (running) return t("analysisRunningBlocked");
+  if (automaticOn) return t("autoProcessingBlocked");
   return null;
 }

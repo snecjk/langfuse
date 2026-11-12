@@ -21,6 +21,8 @@ import {
   getExportSourceUnavailableMessage,
   isExportSourceSelectable,
 } from "@/src/features/analytics-integrations/exportSource";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 import { posthogIntegrationFormSchema } from "@/src/features/posthog-integration/types";
 import { areDestinationUrlsEquivalent } from "@/src/features/automations/destinationUrl";
 
@@ -49,14 +51,18 @@ type PostHogIntegrationFormProps = {
 };
 
 function getApiKeyDescription(
+  t: (
+    key: "posthogApiKeyReenter" | "posthogApiKeyKeepBlank",
+    params?: Record<string, string | number>,
+  ) => string,
   configurationState: PostHogIntegrationFormProps["configurationState"],
   isHostnameChanged: boolean,
 ): string | undefined {
   if (isHostnameChanged) {
-    return "Enter the API key again when changing the hostname.";
+    return t("posthogApiKeyReenter");
   }
   if (configurationState === "configured") {
-    return "Leave blank to keep the current API key.";
+    return t("posthogApiKeyKeepBlank");
   }
   return undefined;
 }
@@ -71,6 +77,7 @@ export function PostHogIntegrationForm({
   projectApiKeyDisplay,
   resetError,
 }: PostHogIntegrationFormProps) {
+  const t = useTranslation(integrationMessages);
   const { options: exportSourceOptions, showField: showExportSourceField } =
     getExportSourceFieldState(defaultValues.exportSource, exportSourceContext);
   const formSchema = useMemo(
@@ -80,7 +87,7 @@ export function PostHogIntegrationForm({
           ctx.addIssue({
             code: "custom",
             path: ["posthogProjectApiKey"],
-            message: "PostHog Project API Key is required",
+            message: t("posthogApiKeyRequired"),
           });
         }
         if (
@@ -94,20 +101,18 @@ export function PostHogIntegrationForm({
           ctx.addIssue({
             code: "custom",
             path: ["posthogProjectApiKey"],
-            message:
-              "PostHog Project API Key is required when changing the hostname",
+            message: t("posthogApiKeyRequiredHostname"),
           });
         }
         if (!isExportSourceSelectable(data.exportSource, exportSourceContext)) {
           ctx.addIssue({
             code: "custom",
             path: ["exportSource"],
-            message:
-              "This export source is not available on this deployment. Select an available export source to save.",
+            message: t("exportSourceNotAvailableGeneric"),
           });
         }
       }),
-    [configurationState, defaultValues.posthogHostname, exportSourceContext],
+    [configurationState, defaultValues.posthogHostname, exportSourceContext, t],
   );
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -128,6 +133,7 @@ export function PostHogIntegrationForm({
       defaultValues.posthogHostname,
     );
   const apiKeyDescription = getApiKeyDescription(
+    t,
     configurationState,
     isHostnameChanged,
   );
@@ -137,9 +143,9 @@ export function PostHogIntegrationForm({
 
   return (
     <ConfirmationDialogController
-      title="Reset PostHog integration?"
-      text="This resets the PostHog integration for this project."
-      confirmLabel="Reset integration"
+      title={t("posthogResetTitle")}
+      text={t("posthogResetText")}
+      confirmLabel={t("posthogResetConfirm")}
       variant="destructive"
       disabled={configurationState === "new"}
       loading={actionState === "resetting"}
@@ -154,13 +160,13 @@ export function PostHogIntegrationForm({
             {
               id: "save",
               type: "submit",
-              text: "Save",
+              text: t("save"),
               loading: actionState === "saving",
             },
             {
               id: "reset",
               type: "button",
-              text: "Reset",
+              text: t("reset"),
               variant: "ghost",
               disabled: configurationState === "new",
               onClick: openDialog,
@@ -169,8 +175,8 @@ export function PostHogIntegrationForm({
         >
           <PostHogForm.Field
             name="posthogHostname"
-            label="Posthog Hostname"
-            description="US region: https://us.posthog.com; EU region: https://eu.posthog.com"
+            label={t("posthogHostname")}
+            description={t("posthogHostnameHelp")}
           >
             {(field) => (
               <Input
@@ -188,7 +194,7 @@ export function PostHogIntegrationForm({
           </PostHogForm.Field>
           <PostHogForm.Field
             name="posthogProjectApiKey"
-            label="Posthog Project API Key"
+            label={t("posthogApiKey")}
             description={apiKeyDescription}
           >
             {(field) => (
@@ -230,7 +236,7 @@ export function PostHogIntegrationForm({
                       rel="noopener noreferrer"
                       className="text-muted-foreground hover:text-primary inline-flex items-center gap-1 text-xs hover:underline"
                     >
-                      For further information see
+                      {t("learnMoreProviders")}
                       <ExternalLink size="sm" />
                     </a>
                   </div>
@@ -240,8 +246,8 @@ export function PostHogIntegrationForm({
               {({ getTriggerProps }) => (
                 <PostHogForm.Field
                   name="exportSource"
-                  label="Export Source"
-                  description="Choose which data sources to export to PostHog. Scores are always included."
+                  label={t("exportSource")}
+                  description={t("posthogExportSourceHelp")}
                   registerLabelTooltip={getTriggerProps}
                 >
                   {(field) => (
@@ -252,14 +258,16 @@ export function PostHogIntegrationForm({
                       aria-describedby={field.inputDescribedById}
                       aria-invalid={Boolean(field.error)}
                       error={Boolean(field.error)}
-                      placeholder="Select data to export"
+                      placeholder={t("selectDataToExport")}
                       options={exportSourceOptions.map((option) => {
                         if (option.unavailable) {
                           return {
                             value: option.value,
-                            label: `${option.label} (not available on this deployment)`,
+                            label: t("exportSourceUnavailableLabel", {
+                              label: option.label,
+                            }),
                             disabled: true as const,
-                            disabledReason: "Not available on this deployment.",
+                            disabledReason: t("exportSourceUnavailableReason"),
                           };
                         }
 
@@ -273,21 +281,20 @@ export function PostHogIntegrationForm({
           ) : null}
           {!exportSourceValidation.ok ? (
             <Alert variant="destructive">
-              <Alert.Title>
-                Saved export source is no longer available
-              </Alert.Title>
+              <Alert.Title>{t("exportSourceUnavailableTitle")}</Alert.Title>
               <Alert.Description>
                 {getExportSourceUnavailableMessage(
                   exportSourceValidation.reason,
+                  t,
                 )}
               </Alert.Description>
             </Alert>
           ) : null}
-          <PostHogForm.Field name="enabled" label="Enabled">
+          <PostHogForm.Field name="enabled" label={t("enabled")}>
             {(field) => (
               <SwitchInput
                 id={field.id}
-                description="Send data to PostHog while this integration is active."
+                description={t("posthogEnabledHelp")}
                 name={field.name}
                 checked={field.value}
                 onBlur={field.onBlur}

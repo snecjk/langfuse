@@ -1,6 +1,9 @@
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 
 export function TopicMapLoading({ fillContainer }: TopicMapLoadingProps) {
+  const t = useTranslation(topicsMessages);
   return (
     <div
       role="status"
@@ -17,7 +20,7 @@ export function TopicMapLoading({ fillContainer }: TopicMapLoadingProps) {
             : "h-[clamp(380px,64vh,820px)] min-h-[340px]",
         )}
       >
-        Loading embedding map…
+        {t("loadingEmbeddingMap")}
       </div>
     </div>
   );

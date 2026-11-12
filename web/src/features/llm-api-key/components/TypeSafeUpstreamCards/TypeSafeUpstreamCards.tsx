@@ -3,15 +3,23 @@
 import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
 import { Check } from "@langfuse/icons";
 import type { ComponentPropsWithoutRef } from "react";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 import { TYPESAFE_UPSTREAMS, type TypeSafeUpstream } from "@langfuse/shared";
 
 type TypeSafeUpstreamId = TypeSafeUpstream["id"];
 
-const UPSTREAM_DESCRIPTIONS: Record<TypeSafeUpstreamId, string> = {
-  typesafe: "Direct connection, billed by TypeSafe.",
-  "vercel-ai-gateway": "Routed and billed through your AI Gateway.",
-  openrouter: "Routed and billed through OpenRouter.",
-  custom: "Your own TypeSafe-compatible gateway.",
+const UPSTREAM_DESCRIPTIONS: Record<
+  TypeSafeUpstreamId,
+  | "upstreamTypesafeDesc"
+  | "upstreamVercelDesc"
+  | "upstreamOpenrouterDesc"
+  | "upstreamCustomDesc"
+> = {
+  typesafe: "upstreamTypesafeDesc",
+  "vercel-ai-gateway": "upstreamVercelDesc",
+  openrouter: "upstreamOpenrouterDesc",
+  custom: "upstreamCustomDesc",
 };
 
 type TypeSafeUpstreamCardsProps = {
@@ -31,6 +39,7 @@ export function TypeSafeUpstreamCards({
   onValueChange,
   ...rootProps
 }: TypeSafeUpstreamCardsProps) {
+  const t = useTranslation(integrationMessages);
   return (
     <RadioGroupPrimitive.Root
       {...rootProps}
@@ -51,7 +60,7 @@ export function TypeSafeUpstreamCards({
             </RadioGroupPrimitive.Indicator>
             <span className="text-sm leading-none font-bold">{label}</span>
             <span className="text-muted-foreground text-xs">
-              {UPSTREAM_DESCRIPTIONS[id]}
+              {t(UPSTREAM_DESCRIPTIONS[id])}
             </span>
           </RadioGroupPrimitive.Item>
         );

@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { useInterfaceLocale } from "@/src/features/i18n/I18nProvider";
 import { PieChart as DesignSystemPieChart } from "@/src/components/design-system/charts/PieChart/PieChart";
 import { type ChartProps } from "@/src/features/widgets/chart-library/chart-props";
 import {
@@ -16,8 +17,9 @@ export const PieChart: React.FC<
   data,
   metricFormatter = (value, options) => formatMetric(value, options),
 }) => {
+  const locale = useInterfaceLocale();
   const formatValue = (value: number) =>
-    toFullMetricString(metricFormatter(value, { style: "compact" }));
+    toFullMetricString(metricFormatter(value, { style: "compact", locale }));
 
   const chartData = useMemo(() => {
     return data.map((item) => ({

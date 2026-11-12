@@ -9,6 +9,8 @@ import type {
   GatewayIngestionSettings,
   GatewayProject,
 } from "@/src/features/ai-gateway/components/GatewaySetupPage/types/gatewaySetup";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 
 export type IngestionStepProps = {
   status: ReturnType<typeof getSetupStepStatus>;
@@ -25,17 +27,18 @@ export function IngestionStep({
   isSaving,
   onContinue,
 }: IngestionStepProps) {
+  const t = useTranslation(gatewayMessages);
   const description =
     status === "complete" && config ? (
       <span className="ph-no-capture">
-        {describeGatewayIngestion({ config, projects })}
+        {describeGatewayIngestion({ config, projects, t })}
       </span>
     ) : (
       <>
-        You can change this later.{" "}
+        {t("ingestionChangeLater")}{" "}
         <Button
           variant="text"
-          text="How ingestion modes work"
+          text={t("ingestionDocsLink")}
           href={GATEWAY_SETUP.docsUrl}
         />
       </>
@@ -44,7 +47,7 @@ export function IngestionStep({
   return (
     <Stepper
       number={1}
-      title="Choose how gateway traffic is recorded"
+      title={t("chooseIngestionTitle")}
       status={status}
       isCollapsible={false}
       description={description}

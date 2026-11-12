@@ -3,7 +3,10 @@ import { useRouter } from "next/router";
 import { DataTable } from "@/src/components/table/data-table";
 import { TRACING_PAGE_SIZE_OPTIONS } from "@/src/components/table/DataTablePagination";
 import { DataTableToolbar } from "@/src/components/table/data-table-toolbar";
-import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
 import { sessionsMessages } from "@/src/features/i18n/messages/sessions";
 import {
   DataTableControlsProvider,
@@ -145,6 +148,7 @@ export default function SessionsTable({
   const router = useRouter();
   const capture = usePostHogClientCapture();
   const t = useTranslation(sessionsMessages);
+  const locale = useInterfaceLocale();
   const sessionsFilterConfig = useMemo(
     () => getSessionFilterConfig(omittedFilter, isV4),
     [isV4, omittedFilter],
@@ -668,7 +672,7 @@ export default function SessionsTable({
       },
       enableHiding: true,
       enableSorting: true,
-      formatter: (value) => numberFormatter(value, 0),
+      formatter: (value) => numberFormatter(value, 0, undefined, locale),
       getValue: (value) => {
         if (!sessionMetrics.isSuccess) return { type: "loading" };
         if (!value) return undefined;
@@ -684,7 +688,7 @@ export default function SessionsTable({
       enableHiding: true,
       defaultHidden: true,
       enableSorting: true,
-      formatter: (value) => usdFormatter(value),
+      formatter: (value) => usdFormatter(value, 2, 2, locale),
       getValue: (value) => {
         if (!sessionMetrics.isSuccess) return { type: "loading" };
         if (!value) return undefined;
@@ -700,7 +704,7 @@ export default function SessionsTable({
       enableHiding: true,
       enableSorting: true,
       defaultHidden: true,
-      formatter: (value) => usdFormatter(value),
+      formatter: (value) => usdFormatter(value, 2, 2, locale),
       getValue: (value) => {
         if (!sessionMetrics.isSuccess) return { type: "loading" };
         if (!value) return undefined;
@@ -715,7 +719,7 @@ export default function SessionsTable({
       size: 110,
       enableHiding: true,
       enableSorting: true,
-      formatter: (value) => usdFormatter(value),
+      formatter: (value) => usdFormatter(value, 2, 2, locale),
       getValue: (value) => {
         if (!sessionMetrics.isSuccess) return { type: "loading" };
         if (!value) return undefined;
@@ -730,7 +734,7 @@ export default function SessionsTable({
       enableHiding: true,
       defaultHidden: true,
       enableSorting: true,
-      formatter: (value) => numberFormatter(value, 0),
+      formatter: (value) => numberFormatter(value, 0, undefined, locale),
       getValue: (value) => {
         if (!sessionMetrics.isSuccess) return { type: "loading" };
         if (!value) return undefined;
@@ -745,7 +749,7 @@ export default function SessionsTable({
       enableHiding: true,
       defaultHidden: true,
       enableSorting: true,
-      formatter: (value) => numberFormatter(value, 0),
+      formatter: (value) => numberFormatter(value, 0, undefined, locale),
       getValue: (value) => {
         if (!sessionMetrics.isSuccess) return { type: "loading" };
         if (!value) return undefined;
@@ -760,7 +764,7 @@ export default function SessionsTable({
       enableHiding: true,
       defaultHidden: true,
       enableSorting: true,
-      formatter: (value) => numberFormatter(value, 0),
+      formatter: (value) => numberFormatter(value, 0, undefined, locale),
       getValue: (value) => {
         if (!sessionMetrics.isSuccess) return { type: "loading" };
         if (!value) return undefined;

@@ -2,6 +2,8 @@ import { useId, useState, type ChangeEvent } from "react";
 import { Accordion } from "@/src/components/design-system/Accordion/Accordion";
 import { Input } from "@/src/components/design-system/Input/Input";
 import { Tabs } from "@/src/components/design-system/Tabs/Tabs";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 import { CopyAgentPromptPanel } from "./CopyAgentPromptPanel";
 import { CliSetupAccordion } from "./CliSetupAccordion";
 import { shellQuote } from "../utils/shellQuote";
@@ -13,6 +15,7 @@ export function CliSkillImportInstructions({
   projectId: string;
   host: string;
 }) {
+  const t = useTranslation(skillMessages);
   const id = useId();
   const [scope, setScope] = useState("all");
   const [directory, setDirectory] = useState(".agents/skills");
@@ -41,27 +44,24 @@ Check the selected folder contains the intended SKILL.md files before pushing. T
 
   return (
     <div className="ph-no-capture flex min-w-0 flex-col gap-4">
-      <p className="text-muted-foreground">
-        Choose what to import, then let your coding agent handle setup or run
-        the command yourself.
-      </p>
+      <p className="text-muted-foreground">{t("chooseWhatToImport")}</p>
       <CliSetupAccordion projectId={projectId} host={host} />
       <div className="flex flex-col gap-3">
         <Accordion type="single" collapsible>
           <Accordion.Item value="configuration">
             <Accordion.Trigger size="sm">
-              Configure import command
+              {t("configureImportCommand")}
             </Accordion.Trigger>
             <Accordion.Content>
               <div className="flex flex-col gap-3 py-3">
                 <Tabs value={scope} onValueChange={setScope}>
                   <Tabs.List
-                    aria-label="Import scope"
+                    aria-label={t("importScope")}
                     variant="inset"
                     size="md"
                   >
-                    <Tabs.Trigger value="all" label="All skills" />
-                    <Tabs.Trigger value="single" label="Single skill" />
+                    <Tabs.Trigger value="all" label={t("allSkills")} />
+                    <Tabs.Trigger value="single" label={t("singleSkill")} />
                   </Tabs.List>
                 </Tabs>
                 <div className="flex flex-col gap-2">
@@ -69,7 +69,7 @@ Check the selected folder contains the intended SKILL.md files before pushing. T
                     className="text-muted-foreground text-xs"
                     htmlFor={`${id}-path`}
                   >
-                    {scope === "all" ? "Skills directory" : "Skill folder"}
+                    {scope === "all" ? t("skillsDirectory") : t("skillFolder")}
                   </label>
                   <Input
                     id={`${id}-path`}
@@ -84,7 +84,7 @@ Check the selected folder contains the intended SKILL.md files before pushing. T
         </Accordion>
         {!path ? (
           <p role="alert" className="text-destructive">
-            Enter a folder path to generate the import command.
+            {t("enterFolderPath")}
           </p>
         ) : (
           <CopyAgentPromptPanel prompt={prompt} command={command} />
@@ -93,13 +93,11 @@ Check the selected folder contains the intended SKILL.md files before pushing. T
 
       <Accordion type="single" collapsible>
         <Accordion.Item value="updates">
-          <Accordion.Trigger size="sm">Updating later</Accordion.Trigger>
+          <Accordion.Trigger size="sm">{t("updatingLater")}</Accordion.Trigger>
           <Accordion.Content>
             <div className="flex min-w-0 flex-col gap-3 py-3">
               <p className="text-muted-foreground">
-                Run the same import command after editing your local skills. The
-                name in SKILL.md identifies each skill in Langfuse. Changed
-                files publish a new version; new names create new skills.
+                {t("updatingLaterDescription")}
               </p>
             </div>
           </Accordion.Content>

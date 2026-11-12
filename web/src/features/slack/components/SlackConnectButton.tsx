@@ -2,6 +2,8 @@ import React from "react";
 import { Button, type ButtonProps } from "@/src/components/ui/button";
 import { SiSlack } from "@langfuse/icons/si";
 import { useSlackConnect } from "@/src/features/slack/hooks/useSlackConnect";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 
 /**
  * Props for the SlackConnectButton component
@@ -36,11 +38,12 @@ export const SlackConnectButton: React.FC<SlackConnectButtonProps> = ({
   disabled = false,
   variant = "default",
   size = "default",
-  buttonText = "Connect Slack",
+  buttonText,
   onSuccess,
   onError,
   showText = true,
 }) => {
+  const t = useTranslation(integrationMessages);
   const { connect, isConnecting, canConnect } = useSlackConnect({
     projectId,
     onSuccess,
@@ -56,7 +59,13 @@ export const SlackConnectButton: React.FC<SlackConnectButtonProps> = ({
       className="flex items-center gap-2"
     >
       <SiSlack size="base" />
-      {showText && <span>{isConnecting ? "Connecting..." : buttonText}</span>}
+      {showText && (
+        <span>
+          {isConnecting
+            ? t("slackConnecting")
+            : (buttonText ?? t("connectSlack"))}
+        </span>
+      )}
     </Button>
   );
 };

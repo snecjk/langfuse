@@ -12,6 +12,8 @@ import {
   FormMessage,
 } from "@/src/components/ui/form";
 import { Input } from "@/src/components/ui/input";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { accountMessages } from "@/src/features/i18n/messages/account";
 
 export type DeleteOrganizationDialogProps = {
   confirmMessage: string;
@@ -26,6 +28,7 @@ export function DeleteOrganizationDialog({
   isPending,
   onConfirm,
 }: DeleteOrganizationDialogProps) {
+  const t = useTranslation(accountMessages);
   const formId = useId();
   const formSchema = z.object({
     name: z.string().includes(confirmMessage, {
@@ -46,10 +49,10 @@ export function DeleteOrganizationDialog({
 
   return (
     <Dialog
-      title="Delete Organization"
+      title={t("deleteOrganizationDialogTitle")}
       actions={[
         {
-          label: "Delete Organization",
+          label: t("deleteOrganizationDialogLabel"),
           type: "submit",
           form: formId,
           variant: "destructive",
@@ -60,17 +63,13 @@ export function DeleteOrganizationDialog({
     >
       {hasProjects ? (
         <Dialog.Body>
-          <p>
-            You can only delete an organization if it has no projects associated
-            with it. Please delete or transfer all projects first. Deleting
-            projects may take a few minutes.
-          </p>
+          <p>{t("deleteOrgHasProjectsHelp")}</p>
         </Dialog.Body>
       ) : (
         <Form {...form}>
           <form id={formId} onSubmit={form.handleSubmit(onSubmit)}>
             <Dialog.Body>
-              <p>{`To confirm, type "${confirmMessage}" in the input box`}</p>
+              <p>{t("confirmInput", { value: confirmMessage })}</p>
               <FormField
                 control={form.control}
                 name="name"
@@ -79,7 +78,11 @@ export function DeleteOrganizationDialog({
                     <FormControl>
                       <Input placeholder={confirmMessage} {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage>
+                      {form.formState.errors.name
+                        ? t("confirmValue", { value: confirmMessage })
+                        : undefined}
+                    </FormMessage>
                   </FormItem>
                 )}
               />

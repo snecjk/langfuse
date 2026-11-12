@@ -2,8 +2,9 @@ import { env } from "@/src/env.mjs";
 
 type V4BannerSeverity = "off" | "warning" | "critical";
 
-const V4_MIGRATION_TOP_BANNER_MESSAGE =
-  "Action required: After November 16, 2026, some features may stop working for at least one of your projects.";
+// Translation key resolved against enterpriseMessages at render time; the
+// English source stays the fallback for any locale that lacks the entry.
+const V4_MIGRATION_TOP_BANNER_MESSAGE = "migrationTopBannerMessage";
 
 export type V4MigrationBannerConfig = {
   severity: V4BannerSeverity;

@@ -1,6 +1,8 @@
 import { Accordion } from "@/src/components/design-system/Accordion/Accordion";
 import { Button } from "@/src/components/design-system/Button/Button";
 import { Codeblock } from "@/src/components/design-system/Codeblock/Codeblock";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 import { shellQuote } from "../utils/shellQuote";
 
 export function CliSetupAccordion({
@@ -10,15 +12,16 @@ export function CliSetupAccordion({
   projectId: string;
   host: string;
 }) {
+  const t = useTranslation(skillMessages);
   return (
     <Accordion type="single" collapsible>
       <Accordion.Item value="setup">
-        <Accordion.Trigger size="sm">First-time CLI setup</Accordion.Trigger>
+        <Accordion.Trigger size="sm">
+          {t("firstTimeCLISetup")}
+        </Accordion.Trigger>
         <Accordion.Content>
           <div className="flex min-w-0 flex-col items-start gap-3 py-3">
-            <p className="text-muted-foreground">
-              Requires Node.js 20+. Run in your project directory.
-            </p>
+            <p className="text-muted-foreground">{t("requiresNodeJS")}</p>
             <div className="w-full min-w-0">
               <Codeblock
                 language="bash"
@@ -26,12 +29,9 @@ export function CliSetupAccordion({
                 variant="read-only"
               />
             </div>
-            <p className="text-muted-foreground">
-              Replace the placeholders with your project’s API keys. These
-              settings apply to your current terminal session.
-            </p>
+            <p className="text-muted-foreground">{t("replacePlaceholders")}</p>
             <Button
-              text="Get project API keys"
+              text={t("getProjectAPIKeys")}
               href={`/project/${projectId}/settings/api-keys`}
               variant="secondary"
               size="sm"
@@ -44,7 +44,7 @@ export function CliSetupAccordion({
               />
             </div>
             <p className="text-muted-foreground text-xs">
-              If LANGFUSE_BASE_URL is already set, use the same host.
+              {t("ifBaseURLIsSet")}
             </p>
           </div>
         </Accordion.Content>

@@ -18,6 +18,8 @@ import {
 } from "@/src/components/ui/popover";
 import { FieldHeader } from "@/src/features/ai-gateway/components/GatewaySetupPage/components/ProviderDialogController/components/FieldHeader";
 import { bedrockRegionGroups } from "@/src/features/ai-gateway/constants/bedrockRegions";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 import { cn } from "@/src/utils/tailwind";
 
 const regions = bedrockRegionGroups.flatMap((group) => group.regions);
@@ -31,6 +33,7 @@ export function BedrockRegionField({
   value,
   onChange,
 }: BedrockRegionFieldProps) {
+  const t = useTranslation(gatewayMessages);
   const [open, setOpen] = useState(false);
   const listId = useId();
   const selectedRegion = regions.find((region) => region.value === value);
@@ -44,8 +47,8 @@ export function BedrockRegionField({
     <div>
       <FieldHeader
         htmlFor="gateway-bedrock-region"
-        label="AWS region"
-        description="Requests go to Bedrock in this region. It can't be changed after saving."
+        label={t("awsRegionLabel")}
+        description={t("awsRegionDescription")}
       />
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
@@ -65,7 +68,7 @@ export function BedrockRegionField({
                 !selectedRegion && "text-muted-foreground",
               )}
             >
-              {selectedRegion?.label ?? "Select a region"}
+              {selectedRegion?.label ?? t("selectRegion")}
             </span>
             {selectedRegion ? (
               <Badge text={selectedRegion.value} color="filled" />
@@ -78,9 +81,9 @@ export function BedrockRegionField({
           className="w-(--radix-popover-trigger-width) p-0"
         >
           <Command>
-            <CommandInput placeholder="Search regions" />
+            <CommandInput placeholder={t("searchRegions")} />
             <CommandList id={listId}>
-              <CommandEmpty>No matching region</CommandEmpty>
+              <CommandEmpty>{t("noMatchingRegion")}</CommandEmpty>
               {bedrockRegionGroups.map((group) => (
                 <CommandGroup
                   key={group.label}

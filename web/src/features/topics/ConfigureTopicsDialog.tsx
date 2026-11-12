@@ -21,6 +21,8 @@ import {
 import { type JudgeModel } from "@/src/features/evals/v2/judgeModel";
 import { Alert } from "@/src/components/design-system/Alert/Alert";
 import { FeatureReleaseStatus } from "@/src/components/design-system/FeatureReleaseStatus/FeatureReleaseStatus";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 
 type FacetDraft = {
   id: string;
@@ -91,27 +93,41 @@ type ConfigureTopicsDialogProps = {
     }
 );
 
-const SLOT_COPY = {
-  summary: {
-    label: "Facet summaries",
-    recommendation:
-      "Choose a strong but cost-efficient model, such as GPT-6 Luna or Claude Haiku 5.5. It runs once per trace.",
-  },
-  embedding: {
-    label: "Embeddings",
-    lockedHint: "Locked after the first summaries are embedded.",
-    recommendation:
-      "Choose an embedding model your connection offers, such as text-embedding-3-small.",
-  },
-  clustering: {
-    label: "Topic clustering",
-    recommendation:
-      "Choose a slightly stronger model, such as GPT-5.6 Terra, GPT-6.1 Sol, or Claude Sonnet. It runs when topics are updated, manually or once or twice a day.",
-  },
-} as const;
+type SlotName = "summary" | "embedding" | "clustering";
+
+type SlotCopy = {
+  label: string;
+  lockedHint?: string;
+  recommendation: string;
+};
+
+function slotCopy(
+  name: SlotName,
+  t: ReturnType<typeof useTranslation<typeof topicsMessages>>,
+): SlotCopy {
+  switch (name) {
+    case "summary":
+      return {
+        label: t("slotSummary"),
+        recommendation: t("slotSummaryRecommendation"),
+      };
+    case "embedding":
+      return {
+        label: t("slotEmbedding"),
+        lockedHint: t("slotEmbeddingLocked"),
+        recommendation: t("slotEmbeddingRecommendation"),
+      };
+    case "clustering":
+      return {
+        label: t("slotClustering"),
+        recommendation: t("slotClusteringRecommendation"),
+      };
+  }
+}
 
 /** Dialog content; render it from a `DialogController`. */
 export function ConfigureTopicsDialog(props: ConfigureTopicsDialogProps) {
+  const t = useTranslation(topicsMessages);
   const {
     closeDialog,
     draft,
@@ -192,11 +208,11 @@ export function ConfigureTopicsDialog(props: ConfigureTopicsDialogProps) {
 
   return (
     <Dialog
-      title="Configure Topics"
+      title={t("configureTopicsTitle")}
       size="lg"
       actions={[
         {
-          label: "Save",
+          label: t("save"),
           type: "submit",
           form: formId,
           loading: saving,
@@ -225,10 +241,7 @@ export function ConfigureTopicsDialog(props: ConfigureTopicsDialogProps) {
       >
         <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">
           <Alert variant="info">
-            <Alert.Description>
-              These settings apply to the whole project. Choose which traces to
-              process in Automatic processing or for each manual batch.
-            </Alert.Description>
+            <Alert.Description>{t("configureIntro")}</Alert.Description>
           </Alert>
           {paused ? (
             <PausedNotice
@@ -240,8 +253,8 @@ export function ConfigureTopicsDialog(props: ConfigureTopicsDialogProps) {
           ) : null}
           <Stepper
             number={1}
-            title="Models"
-            description="The connections and models used for summaries, embeddings, and clustering."
+            title={t("modelsStepTitle")}
+            description={t("modelsStepDescription")}
             compactBottomSpacing
           >
             <ModelSlot
@@ -292,11 +305,11 @@ export function ConfigureTopicsDialog(props: ConfigureTopicsDialogProps) {
           </Stepper>
           <Stepper
             number={2}
-            title="Facets"
+            title={t("facetsStepTitle")}
             description={
               <>
-                Choose which questions you want answered. Five can be on.
-                <DocPopup description="A facet is one question Topics answers for every trace, such as what the user asked for, how the run ended, or which issues came up. Answers to the same facet are clustered into topics." />
+                {t("facetsStepDescription")}
+                <DocPopup description={t("facetHelp")} />
               </>
             }
             compactBottomSpacing
@@ -313,14 +326,14 @@ export function ConfigureTopicsDialog(props: ConfigureTopicsDialogProps) {
           </Stepper>
           <Stepper
             number={3}
-            title="Trace readiness"
-            description="Set when a trace is ready to be summarized across the project."
+            title={t("traceReadinessTitle")}
+            description={t("traceReadinessDescription")}
             compactBottomSpacing
           >
             <div className="flex items-center gap-2">
               <div className="w-24 shrink-0">
                 <Input
-                  aria-label="Seconds to wait after the last observation"
+                  aria-label={t("secondsToWait")}
                   type="number"
                   inputMode="numeric"
                   min={60}
@@ -329,8 +342,7 @@ export function ConfigureTopicsDialog(props: ConfigureTopicsDialogProps) {
                 />
               </div>
               <p className="text-muted-foreground text-sm">
-                seconds to wait after the last observation before considering
-                the trace done and summarizing it.
+                {t("secondsToWaitHelp")}
               </p>
             </div>
           </Stepper>
@@ -362,14 +374,15 @@ function ModelSlot({
   disabled?: boolean;
   locked: boolean;
   model: JudgeModel | null;
-  name: keyof typeof SLOT_COPY;
+  name: SlotName;
   onConfigureProviders: () => void;
   onDimensionsChange?: (dimensions: string) => void;
   onSelect: (model: JudgeModel) => void;
   providerGroups: Array<[string, string[]]>;
 }) {
+  const t = useTranslation(topicsMessages);
   const [open, setOpen] = useState(false);
-  const copy = SLOT_COPY[name];
+  const copy = slotCopy(name, t);
   const inactive = locked || disabled;
   const controls = (
     <>
@@ -400,7 +413,7 @@ function ModelSlot({
           className={`w-20 shrink-0 ${inactive ? "pointer-events-none" : ""}`}
         >
           <Input
-            aria-label="Embedding dimensions"
+            aria-label={t("embeddingDimensions")}
             type="number"
             inputMode="numeric"
             value={dimensions}
@@ -425,7 +438,7 @@ function ModelSlot({
           <Tooltip>
             <TooltipTrigger asChild>{fields}</TooltipTrigger>
             <TooltipContent side="bottom">
-              {"lockedHint" in copy ? copy.lockedHint : null}
+              {copy.lockedHint ?? null}
             </TooltipContent>
           </Tooltip>
         ) : (
@@ -445,8 +458,9 @@ function SlotStatus({
   check?: TopicSlotCheck;
   recommendation: string;
 }) {
+  const t = useTranslation(topicsMessages);
   if (check?.status === "testing")
-    return <p className="text-muted-foreground text-xs">Testing this model…</p>;
+    return <p className="text-muted-foreground text-xs">{t("testingModel")}</p>;
   if (check?.status === "error" && check.message)
     return <p className="text-destructive text-xs">{check.message}</p>;
   return <p className="text-muted-foreground text-xs">{recommendation}</p>;
@@ -469,13 +483,14 @@ function FacetPicker({
   onBrowse: (id: string) => void;
   onEnabledChange: (id: string, enabled: boolean) => void;
 }) {
+  const t = useTranslation(topicsMessages);
   const enabledCount = facets.filter((facet) => facet.enabled).length;
   return (
     <div className="flex flex-col gap-3">
       <div className="-m-1 max-w-full overflow-x-auto p-1">
         <Tabs value={browsing} onValueChange={onBrowse}>
           <Tabs.List
-            aria-label="Facets"
+            aria-label={t("facets")}
             variant="inset"
             size="sm"
             layout="packed"
@@ -490,7 +505,7 @@ function FacetPicker({
                 </span>
               </Tabs.Trigger>
             ))}
-            <Tabs.Trigger value={ADD_FACET_TAB} label="Add my own" />
+            <Tabs.Trigger value={ADD_FACET_TAB} label={t("addMyOwn")} />
           </Tabs.List>
         </Tabs>
       </div>
@@ -508,31 +523,30 @@ function FacetPicker({
             <Switch
               checked={browsed.enabled}
               disabled={!canWrite || (atCap && !browsed.enabled)}
-              aria-label={`Enable ${browsed.name}`}
+              aria-label={t("enableFacet", { name: browsed.name })}
               onCheckedChange={(checked) =>
                 onEnabledChange(browsed.id, checked)
               }
             />
-            {browsed.enabled ? "On" : "Off"}
+            {browsed.enabled ? t("on") : t("off")}
             {browsed.builtIn ? (
-              <span className="text-muted-foreground text-xs">Built-in</span>
+              <span className="text-muted-foreground text-xs">
+                {t("builtIn")}
+              </span>
             ) : null}
           </label>
           {atCap && !browsed.enabled ? (
-            <p className="text-muted-foreground text-xs">
-              Five facets can be on. Turn one off to enable another.
-            </p>
+            <p className="text-muted-foreground text-xs">{t("fiveFacetsOn")}</p>
           ) : (
             <p className="text-muted-foreground text-xs">
-              {enabledCount} of {MAX_ENABLED_FACETS} on
+              {t("facetsOn", { count: enabledCount, max: MAX_ENABLED_FACETS })}
             </p>
           )}
         </div>
       ) : (
         <p className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
           <FeatureReleaseStatus status="coming-soon" />
-          Custom facets with your own questions. This setup uses the built-in
-          facets for now.
+          {t("customFacetsComingSoon")}
         </p>
       )}
     </div>
@@ -550,6 +564,7 @@ function PausedNotice({
   pausedAgo: string;
   shortLabel: string;
 }) {
+  const t = useTranslation(topicsMessages);
   return (
     <section
       role="alert"
@@ -558,16 +573,17 @@ function PausedNotice({
       <div className="flex gap-3 p-4">
         <AlertTriangle size="base" __rawClassName="text-dark-yellow mt-0.5" />
         <div className="min-w-0 flex-1">
-          <h2 className="text-foreground text-base font-bold">Topics paused</h2>
+          <h2 className="text-foreground text-base font-bold">
+            {t("topicsPausedTitle")}
+          </h2>
           <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-2 text-sm">
             <span className="font-bold">{shortLabel}</span>
             <span className="bg-border h-1 w-1 rounded-full" />
-            <span>Paused {pausedAgo}</span>
+            <span>{t("pausedAgo", { time: pausedAgo })}</span>
           </div>
           <p className="text-muted-foreground mt-2 text-sm">{message}</p>
           <p className="text-muted-foreground mt-1 text-sm">
-            Saving here keeps automatic processing paused. Turn it back on from
-            the Topics page once the models work.
+            {t("savingKeepsPaused")}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <LegacyButton
@@ -581,7 +597,7 @@ function PausedNotice({
                 color="default"
                 __rawClassName="mr-1.5"
               />
-              Open LLM connections
+              {t("openLlmConnections")}
             </LegacyButton>
           </div>
         </div>

@@ -12,6 +12,8 @@ import {
 import { Switch } from "@/src/components/design-system/Switch/Switch";
 import { Button } from "@/src/components/ui/button";
 import { useInternalViewMode } from "../hooks/useInternalViewMode";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export function InternalViewModeDialog({
   open,
@@ -21,24 +23,23 @@ export function InternalViewModeDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const viewMode = useInternalViewMode();
+  const t = useTranslation(enterpriseMessages);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>View mode</DialogTitle>
+          <DialogTitle>{t("featureFlagsViewModeTitle")}</DialogTitle>
         </DialogHeader>
         <DialogBody>
           <DialogDescription className="m-0 leading-relaxed">
-            Internal view includes unreleased features for the Langfuse team.
-            Switch it off for the external view. Permissions and feature preview
-            settings stay unchanged.
+            {t("featureFlagsViewModeDescription")}
           </DialogDescription>
           <div className="flex items-center gap-4 py-2">
             <label
               htmlFor="internal-view-mode"
               className="flex cursor-pointer items-center gap-2 text-sm"
             >
-              Internal view
+              {t("featureFlagsInternalView")}
             </label>
             <Switch
               id="internal-view-mode"
@@ -52,7 +53,7 @@ export function InternalViewModeDialog({
         </DialogBody>
         <DialogFooter className="p-4">
           <DialogClose asChild>
-            <Button variant="ghost">Close</Button>
+            <Button variant="ghost">{t("migrationClose")}</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

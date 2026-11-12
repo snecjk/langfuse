@@ -2,6 +2,8 @@ import type { ChangeEvent } from "react";
 
 import { Input } from "@/src/components/design-system/Input/Input";
 import { FieldHeader } from "@/src/features/ai-gateway/components/GatewaySetupPage/components/ProviderDialogController/components/FieldHeader";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 
 export type ConnectionNameFieldProps = {
   name: string;
@@ -14,6 +16,7 @@ export function ConnectionNameField({
   nameError,
   onNameChange,
 }: ConnectionNameFieldProps) {
+  const t = useTranslation(gatewayMessages);
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     onNameChange(event.target.value);
   };
@@ -22,21 +25,19 @@ export function ConnectionNameField({
     <div>
       <FieldHeader
         htmlFor="gateway-credential-name"
-        label="Name"
+        label={t("credentialNameLabel")}
         description={
           <>
-            Used as the prefix when calling models, e.g.{" "}
-            <code className="bg-muted rounded-md px-1 py-px font-mono text-xs">
-              {name.trim() || "production"}:gpt-5
-            </code>
-            .
+            {t("credentialNameDescription", {
+              example: `${name.trim() || "production"}:gpt-5`,
+            })}
           </>
         }
       />
       <div className="space-y-1">
         <Input
           id="gateway-credential-name"
-          placeholder="Production"
+          placeholder={t("credentialNamePlaceholder")}
           value={name}
           aria-invalid={Boolean(nameError)}
           aria-describedby={

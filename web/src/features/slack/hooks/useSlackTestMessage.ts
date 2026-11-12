@@ -3,6 +3,8 @@ import { showErrorToast } from "@/src/features/notifications/showErrorToast";
 import { type SlackChannel } from "@/src/features/slack/components/ChannelSelector";
 import { api } from "@/src/utils/api";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 
 /** useSlackTestMessage sends a test message to a Slack channel and reports the outcome in a toast unless `shouldToast` is false. */
 export function useSlackTestMessage({
@@ -20,14 +22,14 @@ export function useSlackTestMessage({
   }) => void;
   onError?: (error: Error) => void;
 }) {
+  const t = useTranslation(integrationMessages);
   const testMessageMutation = api.slack.sendTestMessage.useMutation({
     onSuccess: (data) => {
       if (shouldToast) {
         showSuccessToast({
           operation: "slack.test_message_send",
-          title: "Test Message Sent",
-          description:
-            "Test message sent successfully to the selected channel.",
+          title: t("slackTestSent"),
+          description: t("slackTestSentDesc"),
         });
       }
       onSuccess?.(data.channelInfo);
@@ -35,7 +37,7 @@ export function useSlackTestMessage({
     onError: (error) => {
       if (shouldToast) {
         showErrorToast(
-          "Failed to Send Test Message",
+          t("slackTestFailed"),
           error.message,
           classifyTrpcToastError(error, "slack.test_message_send"),
         );

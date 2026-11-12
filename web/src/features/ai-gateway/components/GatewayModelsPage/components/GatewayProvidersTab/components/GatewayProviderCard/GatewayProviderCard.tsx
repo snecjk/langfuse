@@ -5,6 +5,8 @@ import { ArrowRight } from "@langfuse/icons";
 import { GatewayProviderMark } from "@/src/features/ai-gateway/components/GatewayProviderMark";
 import type { GatewayModelCount } from "@/src/features/ai-gateway/components/GatewayModelsPage/types/gatewayModelCount";
 import { providerLabels } from "@/src/features/ai-gateway/constants/providerLabels";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 import type {
   GatewayConnection,
   GatewayProvider,
@@ -34,6 +36,7 @@ export function GatewayProviderCard({
   credential,
   actions,
 }: GatewayProviderCardProps) {
+  const t = useTranslation(gatewayMessages);
   return (
     <article
       aria-label={name}
@@ -58,22 +61,24 @@ export function GatewayProviderCard({
       <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 px-4 pb-4 text-sm">
         {credential !== undefined ? (
           <>
-            <dt className="text-muted-foreground">Credential</dt>
+            <dt className="text-muted-foreground">
+              {t("providerCredentialLabel")}
+            </dt>
             <dd className="ph-no-capture truncate font-mono" title={credential}>
               {credential}
             </dd>
           </>
         ) : null}
-        <dt className="text-muted-foreground">Models</dt>
+        <dt className="text-muted-foreground">{t("modelsLabel")}</dt>
         <dd className={cn(status === "ERROR" && "text-destructive")}>
-          {describeGatewayModelCount(modelCount, status)}
+          {describeGatewayModelCount(modelCount, status, t)}
         </dd>
       </dl>
       <Link
         href={modelsHref}
         className="hover:bg-accent/50 hover:text-foreground focus-visible:ring-ring mt-auto flex min-h-11 items-center justify-between gap-2 rounded-b-lg border-t px-4 py-1.5 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-hidden focus-visible:ring-inset"
       >
-        View models
+        {t("viewModels")}
         <ArrowRight size="sm" aria-hidden />
       </Link>
     </article>

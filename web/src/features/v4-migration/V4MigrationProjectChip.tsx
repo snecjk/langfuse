@@ -3,6 +3,8 @@ import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePos
 import { type ProjectMigrationReadiness } from "@/src/features/v4-migration/migrationData";
 import { useOpenV4MigrationPanel } from "@/src/features/v4-migration/hooks/useOpenV4MigrationPanel";
 import { PARTNER_INTEGRATION_FAQ_URL } from "@/src/features/v4-migration/partnerIntegrationDocs";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export function V4MigrationProjectChip({
   project,
@@ -16,6 +18,7 @@ export function V4MigrationProjectChip({
 }) {
   const openMigrationPanel = useOpenV4MigrationPanel();
   const capture = usePostHogClientCapture();
+  const t = useTranslation(enterpriseMessages);
 
   // Forced-v3 projects show no migration action — the upgrade is handled by
   // their integration partner. Point them at the FAQ instead.
@@ -30,9 +33,9 @@ export function V4MigrationProjectChip({
           event.stopPropagation();
         }}
         className="text-muted-foreground ring-border hover:bg-muted/50 relative inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-xs whitespace-nowrap ring"
-        title="Upgrade is handled by your integration partner. Click on badge to learn more."
+        title={t("migrationProjectChipPartnerTitle")}
       >
-        Update to v4 managed by integration partner
+        {t("migrationProjectChipPartner")}
       </a>
     );
   }
@@ -52,7 +55,7 @@ export function V4MigrationProjectChip({
         aria-hidden
         className="size-1.75 shrink-0 rounded-full bg-orange-400 dark:bg-orange-400"
       ></span>
-      Update
+      {t("migrationProjectChipUpdate")}
     </button>
   );
 }

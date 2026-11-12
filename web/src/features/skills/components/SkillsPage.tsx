@@ -66,10 +66,13 @@ import {
   SkillListOrderBySchema,
 } from "../constants/skillsSorting";
 import { FeatureReleaseStatus } from "@/src/components/design-system/FeatureReleaseStatus/FeatureReleaseStatus";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 
 type SkillRow = RouterOutput["skills"]["all"]["data"][number];
 
 export function SkillsPage() {
+  const t = useTranslation(skillMessages);
   const { isV3Legacy } = useReadPath();
   const projectId = useProjectIdFromURL() ?? "";
   const canCreate = useHasProjectAccess({ projectId, scope: "skills:CUD" });
@@ -95,14 +98,14 @@ export function SkillsPage() {
       {({ openDialog }) => (
         <Page
           headerProps={{
-            title: "Skills",
+            title: t("skills"),
             titleBadges: (
               <>
                 <FeatureReleaseStatus status="beta" />
                 {isV3Legacy && (
                   <Badge
-                    text="Skill tracing requires v4"
-                    title="You can still create and use skills in the legacy view."
+                    text={t("skillTracingRequiresV4")}
+                    title={t("skillTracingRequiresV4Help")}
                     color="warning"
                     size="md"
                     leadingIcon={TriangleAlert}
@@ -111,8 +114,7 @@ export function SkillsPage() {
               </>
             ),
             help: {
-              description:
-                "Create, version, and distribute reusable agent skills from one place.",
+              description: t("skillsHelp"),
               href: "https://langfuse.com/docs/skill-management/get-started",
             },
             actionButtonsRight: (
@@ -160,6 +162,7 @@ function SkillsHeaderActions({
   onInstall,
   closeMenu,
 }: SkillsHeaderActionsProps) {
+  const t = useTranslation(skillMessages);
   const capture = usePostHogClientCapture();
   const canReadAutomations = useHasProjectAccess({
     projectId,
@@ -176,28 +179,28 @@ function SkillsHeaderActions({
       {canReadAutomations && (
         <DesignSystemButton
           href={`/project/${projectId}/automations`}
-          text="Automations"
+          text={t("automations")}
           icon={Zap}
           variant="secondary"
         />
       )}
       <DropdownMenu
-        ariaLabel="Use skill"
+        ariaLabel={t("useSkill")}
         items={[
           {
             type: "item",
             id: "install",
-            title: "Install with CLI",
+            title: t("installWithCLI"),
             icon: Terminal,
             disabled: installDisabled
-              ? { reason: "Loading installation options" }
+              ? { reason: t("loadingInstallationOptions") }
               : undefined,
             onClick: handleInstall,
           },
           {
             type: "item",
             id: "api",
-            title: "API",
+            title: t("api"),
             icon: ExternalLink,
             href: "https://api.reference.langfuse.com/#tag/skills",
             linkTarget: "_blank",
@@ -206,7 +209,7 @@ function SkillsHeaderActions({
       >
         {({ getTriggerProps }) => (
           <DesignSystemButton
-            text="Use skill"
+            text={t("useSkill")}
             icon={ChevronDown}
             variant="secondary"
             {...getTriggerProps()}
@@ -216,13 +219,13 @@ function SkillsHeaderActions({
       <ImportSkillsDialog key={projectId} projectId={projectId}>
         {(openDialog) => (
           <DropdownMenu
-            ariaLabel="New skill"
+            ariaLabel={t("newSkill")}
             disabled={!canCreate}
             items={[
               {
                 type: "item",
                 id: "create",
-                title: "Create from scratch",
+                title: t("createFromScratch"),
                 icon: Plus,
                 href: `/project/${projectId}/skills/new`,
                 onAfterNavigate: () => {
@@ -233,7 +236,7 @@ function SkillsHeaderActions({
               {
                 type: "item",
                 id: "import",
-                title: "Import skills",
+                title: t("importSkills"),
                 icon: Download,
                 onClick: openDialog,
               },
@@ -241,7 +244,7 @@ function SkillsHeaderActions({
           >
             {({ getTriggerProps }) => (
               <DesignSystemButton
-                text="New skill"
+                text={t("newSkill")}
                 icon={ChevronDown}
                 disabled={!canCreate}
                 {...getTriggerProps()}
@@ -261,6 +264,7 @@ function SkillsList({
   projectId: string;
   canDelete: boolean;
 }) {
+  const t = useTranslation(skillMessages);
   const utils = api.useUtils();
   const capture = usePostHogClientCapture();
   const [tableState, setTableState] = useQueryParams({
@@ -336,7 +340,7 @@ function SkillsList({
   const columns = [
     createLinkTableColumn<SkillRow>({
       accessorKey: "name",
-      header: "Name",
+      header: t("name"),
       enableSorting: true,
       size: 220,
       cellClassName: "ph-no-capture",
@@ -353,34 +357,34 @@ function SkillsList({
     }),
     createTextTableColumn<SkillRow>({
       accessorKey: "description",
-      header: "Description",
+      header: t("description"),
       size: 280,
       cellClassName: "ph-no-capture",
     }),
     createNumberTableColumn<SkillRow>({
       accessorKey: "latestVersion",
-      header: "Latest version",
+      header: t("latestVersion"),
       enableSorting: true,
       size: 100,
       formatter: (version) => `v${version}`,
     }),
     createNumberTableColumn<SkillRow>({
       accessorKey: "productionVersion",
-      header: "Production version",
+      header: t("productionVersion"),
       size: 140,
       formatter: (version) => `v${version}`,
-      emptyValue: "Not set",
+      emptyValue: t("notSet"),
     }),
     createBadgeListTableColumn<SkillRow>({
       accessorKey: "tags",
-      header: "Tags",
+      header: t("tags"),
       enableSorting: true,
       size: 120,
       cellClassName: "ph-no-capture",
     }),
     createDateTableColumn<SkillRow>({
       accessorKey: "latestVersionCreatedAt",
-      header: "Latest version created",
+      header: t("latestVersionCreated"),
       enableSorting: true,
       size: 175,
     }),
@@ -423,10 +427,10 @@ function SkillsList({
             onDismiss={deleteSkill.reset}
             renderDialog={({ state: name, closeDialog }) => (
               <Dialog
-                title="Delete skill"
+                title={t("deleteSkill")}
                 actions={[
                   {
-                    label: "Delete skill",
+                    label: t("deleteSkillConfirm"),
                     variant: "destructive",
                     disabled: !canDelete,
                     loading: deleteSkill.isPending,
@@ -443,13 +447,7 @@ function SkillsList({
               >
                 <Dialog.Body>
                   <p className="text-muted-foreground">
-                    This permanently deletes{" "}
-                    <code className="ph-no-capture text-foreground font-bold break-all">
-                      {name}
-                    </code>
-                    , including all versions and labels. Requests to fetch any
-                    version of this skill will fail. This action cannot be
-                    undone.
+                    {t("deleteSkillDescription", { name })}
                   </p>
                   {deleteSkill.error ? (
                     <p
@@ -481,17 +479,17 @@ function SkillsList({
                     });
                   }}
                   loadingRowCount={Math.min(paginationState.pageSize, 8)}
-                  noResultsMessage="No skills match your search or filters."
+                  noResultsMessage={t("noSkillsMatch")}
                   actions={(skill) => [
                     {
                       type: "item",
                       id: "delete",
-                      title: "Delete skill",
+                      title: t("deleteSkill"),
                       icon: Trash,
                       variant: "destructive",
                       disabled: canDelete
                         ? undefined
-                        : { reason: "You do not have write access" },
+                        : { reason: t("noWriteAccess") },
                       onClick: () => openDialog(skill.name),
                     },
                   ]}
@@ -539,17 +537,18 @@ function NewSkillButton({
   href: string;
   onOpen: () => void;
 }) {
+  const t = useTranslation(skillMessages);
   if (!canCreate) {
     return (
-      <Button disabled title="You do not have write access">
-        <Plus size="base" __rawClassName="mr-1.5" /> New skill
+      <Button disabled title={t("noWriteAccess")}>
+        <Plus size="base" __rawClassName="mr-1.5" /> {t("newSkill")}
       </Button>
     );
   }
   return (
     <Button asChild>
       <Link href={href} onClick={onOpen}>
-        <Plus size="base" __rawClassName="mr-1.5" /> New skill
+        <Plus size="base" __rawClassName="mr-1.5" /> {t("newSkill")}
       </Link>
     </Button>
   );
@@ -566,12 +565,13 @@ function EmptySkills({
   onOpen: () => void;
   onImport: () => void;
 }) {
+  const t = useTranslation(skillMessages);
   return (
     <SplashScreen
-      title="Get Started with Skills"
-      description="Create, version, and distribute reusable agent skills from one place. Start with a new skill or import the skills your team already uses."
+      title={t("getStartedWithSkills")}
+      description={t("getStartedWithSkillsDescription")}
       primaryAction={{
-        label: "New skill",
+        label: t("newSkill"),
         component: (
           <NewSkillButton
             canCreate={canCreate}
@@ -581,10 +581,10 @@ function EmptySkills({
         ),
       }}
       secondaryAction={{
-        label: "Import skills",
+        label: t("importSkills"),
         component: (
           <DesignSystemButton
-            text="Import skills"
+            text={t("importSkills")}
             icon={Download}
             variant="secondary"
             disabled={!canCreate}
@@ -594,35 +594,30 @@ function EmptySkills({
       }}
       valuePropositions={[
         {
-          title: "Manage Skills",
-          description:
-            "Create a new skill directly in the Langfuse UI, upload existing skill files, or push skills from your repository with the CLI.",
+          title: t("manageSkills"),
+          description: t("manageSkillsDescription"),
           icon: FileCode2,
         },
         {
-          title: "Track skill usage",
-          description:
-            "See which skills your agents actually load and explore the traces where they are used.",
+          title: t("trackSkillUsage"),
+          description: t("trackSkillUsageDescription"),
           icon: BarChart4,
         },
         {
-          title: "Version and iterate",
-          description:
-            "Save changes as immutable versions and use labels to control which version your agents receive.",
+          title: t("versionAndIterate"),
+          description: t("versionAndIterateDescription"),
           icon: GitBranch,
         },
         {
-          title: "Use via CLI or SDK",
-          description:
-            "Install skills into your agent's skills directory with the CLI or fetch them with the Langfuse SDK.",
+          title: t("useViaCLIOrSDK"),
+          description: t("useViaCLIOrSDKDescription"),
           icon: Terminal,
         },
       ]}
     >
       {!canCreate ? (
         <p className="text-muted-foreground text-center text-sm">
-          Ask a project member with write access to create or import your first
-          skill.
+          {t("askMemberToCreateSkill")}
         </p>
       ) : null}
     </SplashScreen>

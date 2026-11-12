@@ -19,11 +19,13 @@ import {
 } from "@/src/components/table/data-table-row-height-switch";
 import { type LangfuseColumnDef } from "@/src/components/table/types";
 import { type RouterOutputs } from "@/src/utils/api";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export type AuditLogRow = RouterOutputs["auditLogs"]["all"]["data"][number];
 
-function formatAuditLogValue(value: string | null) {
-  if (value === null) return "(none)";
+function formatAuditLogValue(value: string | null, emptyLabel: string) {
+  if (value === null) return emptyLabel;
 
   try {
     return JSON.stringify(JSON.parse(value), null, 2);
@@ -47,19 +49,26 @@ export function AuditLogsTable({
   onRowHeightChange: (height: RowHeight) => void;
   toolbarActions?: SettingsTableToolbarAction[];
 }) {
+  const t = useTranslation(enterpriseMessages);
   return (
     <DialogController<AuditLogRow>
       renderDialog={({ state }) => (
-        <Dialog title="Audit log changes" size="xxl">
+        <Dialog title={t("auditLogsChangesDialogTitle")} size="xxl">
           <Dialog.Body>
             <p>
               {state.action} · {state.resourceType} · {state.resourceId}
             </p>
             <DiffViewer
-              oldString={formatAuditLogValue(state.before)}
-              newString={formatAuditLogValue(state.after)}
-              oldLabel="Before"
-              newLabel="After"
+              oldString={formatAuditLogValue(
+                state.before,
+                t("auditLogsDiffEmpty"),
+              )}
+              newString={formatAuditLogValue(
+                state.after,
+                t("auditLogsDiffEmpty"),
+              )}
+              oldLabel={t("auditLogsDiffBefore")}
+              newLabel={t("auditLogsDiffAfter")}
             />
           </Dialog.Body>
         </Dialog>
@@ -69,33 +78,32 @@ export function AuditLogsTable({
         const columns: LangfuseColumnDef<AuditLogRow>[] = [
           createDateTableColumn<AuditLogRow>({
             accessorKey: "createdAt",
-            header: "Time",
+            header: t("auditLogsTimeHeader"),
           }),
           createActorTableColumn<AuditLogRow>({
             accessorKey: "actor",
-            header: "Actor",
+            header: t("auditLogsActorHeader"),
             variant: "avatar",
             emptyValue: "",
             headerTooltip: {
-              description:
-                "The actor within Langfuse who performed the action.",
+              description: t("auditLogsActorTooltip"),
             },
           }),
           createBadgeTableColumn<AuditLogRow>({
             accessorKey: "resourceType",
-            header: "Resource Type",
+            header: t("auditLogsResourceTypeHeader"),
           }),
           createIdTableColumn<AuditLogRow>({
             accessorKey: "resourceId",
-            header: "Resource ID",
+            header: t("auditLogsResourceIdHeader"),
           }),
           createBadgeTableColumn<AuditLogRow>({
             accessorKey: "action",
-            header: "Action",
+            header: t("auditLogsActionHeader"),
           }),
           createIOTableColumn<AuditLogRow>({
             accessorKey: "before",
-            header: "Before",
+            header: t("auditLogsBeforeHeader"),
             size: 300,
             getCell: (value) => value || undefined,
             singleLine: resolveRowHeightRendering({ preset: rowHeight })
@@ -103,7 +111,7 @@ export function AuditLogsTable({
           }),
           createIOTableColumn<AuditLogRow>({
             accessorKey: "after",
-            header: "After",
+            header: t("auditLogsAfterHeader"),
             size: 300,
             getCell: (value) => value || undefined,
             singleLine: resolveRowHeightRendering({ preset: rowHeight })
@@ -112,11 +120,11 @@ export function AuditLogsTable({
           createButtonTableColumn<AuditLogRow, AuditLogRow["id"]>({
             accessorFn: (row) => row.id,
             id: "compare",
-            header: "Compare",
+            header: t("auditLogsCompareHeader"),
             size: 96,
             enableHiding: false,
             getButton: ({ row }) => ({
-              text: "Compare",
+              text: t("auditLogsCompareAction"),
               disabled: !row.original.before && !row.original.after,
               onClick: () => openDialog(row.original),
             }),

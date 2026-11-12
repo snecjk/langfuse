@@ -12,6 +12,7 @@ type SkillCliSelectorProps = {
   options: { value: string; label: ReactNode }[];
   value: string;
   onValueChange: (value: string) => void;
+  placeholder?: string;
 };
 
 export function SkillCliSelector({
@@ -19,6 +20,7 @@ export function SkillCliSelector({
   options,
   value,
   onValueChange,
+  placeholder,
 }: SkillCliSelectorProps) {
   const id = useId();
   return (
@@ -35,8 +37,8 @@ export function SkillCliSelector({
           <SelectValue
             placeholder={
               options.length > 0
-                ? `Select ${label.toLowerCase()}`
-                : "No skills available"
+                ? (placeholder ?? `Select ${label.toLowerCase()}`)
+                : undefined
             }
           />
         </SelectTrigger>

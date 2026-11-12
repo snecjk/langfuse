@@ -1,5 +1,6 @@
 /* eslint-disable no-nested-ternary, @typescript-eslint/no-deprecated -- Legacy UI usage retained during migration to design-system components. */
 import { useEffect, useState } from "react";
+import { useInterfaceLocale } from "@/src/features/i18n/I18nProvider";
 import { Button } from "@/src/components/ui/button";
 import { X, Trash, Plus } from "@langfuse/icons";
 import { Spinner } from "@/src/components/design-system/Spinner/Spinner";
@@ -45,6 +46,7 @@ export function TableActionMenu({
   onClearSelection,
   onCustomAction,
 }: TableActionMenuProps) {
+  const locale = useInterfaceLocale();
   const [selectedActionId, setSelectedActionId] = useState<
     TableAction["id"] | null
   >(null);
@@ -91,7 +93,10 @@ export function TableActionMenu({
             {approximateCount ? (
               <span> All matching selected</span>
             ) : selectedCount !== null ? (
-              <span> {`${numberFormatter(selectedCount, 0)} selected`}</span>
+              <span>
+                {" "}
+                {`${numberFormatter(selectedCount, 0, undefined, locale)} selected`}
+              </span>
             ) : (
               <Spinner size="sm" />
             )}

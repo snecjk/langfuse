@@ -1,6 +1,8 @@
 import { useState } from "react";
 import type { FileWithPath } from "react-dropzone";
 import { Dropzone } from "@/src/components/design-system/Dropzone/Dropzone";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 import { discoverLocalSkills } from "../utils/local-import";
 import type { SkillImportSourceProps } from "./skillImportTypes";
 
@@ -9,6 +11,7 @@ export function LocalSkillImportSource({
   onScan,
   onReset,
 }: SkillImportSourceProps) {
+  const t = useTranslation(skillMessages);
   const [files, setFiles] = useState<File[]>();
   const [error, setError] = useState<string>();
 
@@ -43,8 +46,7 @@ export function LocalSkillImportSource({
   return (
     <div className="flex flex-col gap-2">
       <p className="text-muted-foreground text-sm">
-        Drop files, folders, or ZIPs containing SKILL.md and supporting files.
-        ZIPs can be up to 3 MB each.
+        {t("dropFilesDescription")}
       </p>
       <div className="ph-no-capture">
         <Dropzone
@@ -59,7 +61,7 @@ export function LocalSkillImportSource({
           onDrop={handleDrop}
         />
       </div>
-      {busy ? <p role="status">Scanning local files for skills…</p> : null}
+      {busy ? <p role="status">{t("scanningLocalFiles")}</p> : null}
       {error ? (
         <p role="alert" className="ph-no-capture text-destructive">
           {error}

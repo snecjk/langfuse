@@ -79,6 +79,8 @@ import {
 } from "@/src/features/skills/utils/parseSkillFrontmatterMetadata";
 import { api } from "@/src/utils/api";
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 
 const SkillAnalytics = dynamic(() =>
   import("@/src/features/skills/components/SkillAnalytics").then(
@@ -132,6 +134,7 @@ export function SkillEditor({
       };
   metadataOptions: { labels: string[]; tags: string[] };
 }) {
+  const t = useTranslation(skillMessages);
   const dirty = useStore(store, (state) => state.dirty);
   const isImporting = useStore(store, (state) => state.isImporting);
   const fileCount = useStore(store, (state) => Object.keys(state.files).length);
@@ -152,8 +155,8 @@ export function SkillEditor({
     if (skillMarkdown === undefined) return null;
     return metadata
       ? metadata.nameError
-      : `Add valid YAML frontmatter with a name in SKILL.md. ${SKILL_NAME_RULES}`;
-  }, [skillMarkdown, metadata]);
+      : t("addValidYAMLFrontmatter", { rules: SKILL_NAME_RULES });
+  }, [skillMarkdown, metadata, t]);
   const hasNameChanged =
     baseVersion !== null &&
     skillMarkdown !== undefined &&
@@ -168,10 +171,10 @@ export function SkillEditor({
   const createDisabledReason = useMemo(() => {
     if (!createsNewSkill || nameError) return nameError;
     if (nameAvailability.data?.data.length) {
-      return `A skill named "${draftName}" already exists. Choose a different name.`;
+      return t("skillNameAlreadyExists", { name: draftName });
     }
     if (nameAvailability.isError) {
-      return "Could not check whether this skill name is available. Please try again.";
+      return t("couldNotCheckSkillNameAvailability");
     }
     return nameError;
   }, [
@@ -180,11 +183,10 @@ export function SkillEditor({
     nameAvailability.data,
     nameAvailability.isError,
     draftName,
+    t,
   ]);
   const nameWarning = [
-    hasNameChanged
-      ? `Versions must keep the name "${name}". Reset the name or create a new skill.`
-      : null,
+    hasNameChanged ? t("versionsMustKeepName", { name }) : null,
     createDisabledReason,
   ]
     .filter(Boolean)
@@ -249,9 +251,9 @@ export function SkillEditor({
   const createButtonTitle = canCreate
     ? (createDisabledReason ??
       (baseVersion !== null && !dirty
-        ? "Edit the skill to create a new version"
+        ? t("editTheSkillToCreateANewVersion")
         : undefined))
-    : "You do not have write access";
+    : t("noWriteAccess");
 
   const save = async (createNew: boolean): Promise<boolean> => {
     if (
@@ -278,15 +280,15 @@ export function SkillEditor({
       });
       showSuccessToast({
         operation: "skill_version.create",
-        title: "Skill version created",
-        description: `Version ${created.version} is now available.`,
+        title: t("skillVersionCreated"),
+        description: t("skillVersionCreatedHelp", { version: created.version }),
       });
       await onCreated(created);
       return true;
     } catch (error) {
       showErrorToast(
-        "Failed to create skill version",
-        error instanceof Error ? error.message : "Please try again.",
+        t("failedToCreateSkillVersion"),
+        error instanceof Error ? error.message : t("tryAgain"),
         classifyTrpcToastError(error, "skill_version.create"),
       );
       return false;
@@ -324,14 +326,14 @@ export function SkillEditor({
       });
       showSuccessToast({
         operation: "skill_labels.update",
-        title: "Skill labels updated",
-        description: `Version ${version} now uses the selected labels.`,
+        title: t("skillLabelsUpdated"),
+        description: t("skillLabelsUpdatedHelp", { version }),
       });
       return true;
     } catch (error) {
       showErrorToast(
-        "Failed to update skill labels",
-        error instanceof Error ? error.message : "Please try again.",
+        t("failedToUpdateSkillLabels"),
+        error instanceof Error ? error.message : t("tryAgain"),
         classifyTrpcToastError(error, "skill_labels.update"),
       );
       return false;
@@ -358,14 +360,14 @@ export function SkillEditor({
       });
       showSuccessToast({
         operation: "skill_tags.update",
-        title: "Skill tags updated",
-        description: "All versions now use the selected tags.",
+        title: t("skillTagsUpdated"),
+        description: t("skillTagsUpdatedHelp"),
       });
       return true;
     } catch (error) {
       showErrorToast(
-        "Failed to update skill tags",
-        error instanceof Error ? error.message : "Please try again.",
+        t("failedToUpdateSkillTags"),
+        error instanceof Error ? error.message : t("tryAgain"),
         classifyTrpcToastError(error, "skill_tags.update"),
       );
       return false;
@@ -386,8 +388,8 @@ export function SkillEditor({
       capture("skills:version_download", { fileCount: result.fileCount });
     } catch (error) {
       showErrorToast(
-        "Download failed",
-        "Could not download this skill version. Please try again.",
+        t("downloadFailed"),
+        t("couldNotDownloadSkillVersion"),
         classifyTrpcToastError(error, "skill_version.download"),
       );
     } finally {
@@ -395,11 +397,14 @@ export function SkillEditor({
     }
   };
 
-  const downloadTitle = isDownloading
-    ? "Downloading…"
-    : `Download v${baseVersion} as ZIP`;
+  const downloadTitle = useMemo(() => {
+    if (isDownloading) return t("downloading");
+    return baseVersion !== null
+      ? t("downloadAsZIP", { version: baseVersion })
+      : "";
+  }, [isDownloading, baseVersion, t]);
   const downloadDisabled = isDownloading
-    ? { reason: "Download in progress" }
+    ? { reason: t("downloadInProgress") }
     : undefined;
   const usageTab = isV4 && view.kind === "version" && baseVersion !== null && (
     <Tabs.Content value="usage" layout="fill">
@@ -458,12 +463,12 @@ export function SkillEditor({
       ) : null}
       {baseVersion !== null && !isDraft ? (
         <DropdownMenu
-          ariaLabel="Use skill"
+          ariaLabel={t("useSkill")}
           items={[
             {
               type: "item",
               id: "install",
-              title: "Install with CLI",
+              title: t("installWithCLI"),
               icon: Terminal,
               onClick: () => {
                 closeMenu?.();
@@ -481,7 +486,7 @@ export function SkillEditor({
             {
               type: "item",
               id: "api",
-              title: "API",
+              title: t("api"),
               icon: ExternalLink,
               href: "https://api.reference.langfuse.com/#tag/skills",
               linkTarget: "_blank",
@@ -490,7 +495,7 @@ export function SkillEditor({
         >
           {({ getTriggerProps }) => (
             <DesignSystemButton
-              text="Use skill"
+              text={t("useSkill")}
               variant="secondary"
               icon={ChevronDown}
               {...getTriggerProps()}
@@ -503,7 +508,7 @@ export function SkillEditor({
           {({ getTriggerProps }) => (
             <button
               type="button"
-              aria-label="Skill name warning"
+              aria-label={t("skillNameWarning")}
               className="text-dark-yellow flex shrink-0 items-center"
               {...getTriggerProps()}
             >
@@ -513,12 +518,12 @@ export function SkillEditor({
         </Tooltip>
       ) : null}
       {hasNameChanged ? (
-        <Tooltip label={`Reset name to "${name}"`}>
+        <Tooltip label={t("resetNameTo", { name })}>
           {({ getTriggerProps }) => (
             <IconButton
               {...getTriggerProps()}
               icon={RotateCcw}
-              label="Reset skill name"
+              label={t("resetSkillName")}
               size="sm"
               onClick={() => store.getState().actions.resetName()}
             />
@@ -528,14 +533,16 @@ export function SkillEditor({
       {!isDraft ? (
         <Button
           disabled={!canCreate}
-          title={!canCreate ? "You do not have write access" : undefined}
+          title={!canCreate ? t("noWriteAccess") : undefined}
           onClick={async () => {
             closeMenu?.();
             if (view.kind === "version") await view.onEdit();
           }}
         >
           <Pencil size="base" __rawClassName="mr-1.5" />
-          {view.kind === "version" && view.hasDraft ? "Resume draft" : "Edit"}
+          {view.kind === "version" && view.hasDraft
+            ? t("resumeDraft")
+            : t("edit")}
         </Button>
       ) : (
         <>
@@ -549,7 +556,7 @@ export function SkillEditor({
               else await view.onDiscard();
             }}
           >
-            Discard draft
+            {t("discardDraft")}
           </Button>
           <Button
             onClick={() => {
@@ -567,7 +574,7 @@ export function SkillEditor({
             title={createButtonTitle}
           >
             <Save size="base" __rawClassName="mr-1.5" />
-            Publish
+            {t("publish")}
           </Button>
         </>
       )}
@@ -600,11 +607,11 @@ export function SkillEditor({
         }
         return state.kind === "discard" ? (
           <Dialog
-            title="Discard draft?"
-            text="Your unsaved file changes and commit note will be lost."
+            title={t("discardDraftQuestion")}
+            text={t("discardDraftWarning")}
             actions={[
               {
-                label: "Discard draft",
+                label: t("discardDraft"),
                 variant: "destructive",
                 onClick: async () => {
                   if (view.kind === "draft") await view.onDiscard();
@@ -649,7 +656,7 @@ export function SkillEditor({
               <section
                 ref={focusUploadPanel}
                 tabIndex={-1}
-                aria-label="Upload files"
+                aria-label={t("uploadFilesOrFolders")}
                 aria-busy={isImporting}
                 className="bg-background flex min-h-0 flex-col gap-3 p-4 outline-none [grid-area:1/1]"
                 onKeyDown={(event) => {
@@ -662,13 +669,15 @@ export function SkillEditor({
               >
                 <div className="flex items-center justify-between gap-2">
                   <div>
-                    <p className="text-sm font-bold">Upload files or folders</p>
+                    <p className="text-sm font-bold">
+                      {t("uploadFilesOrFolders")}
+                    </p>
                     {isImporting ? (
                       <p
                         role="status"
                         className="text-muted-foreground text-sm"
                       >
-                        Adding files to draft…
+                        {t("addingFilesToDraft")}
                       </p>
                     ) : null}
                   </div>
@@ -678,7 +687,7 @@ export function SkillEditor({
                     disabled={isImporting}
                     onClick={cancelUpload}
                   >
-                    Cancel
+                    {t("cancel")}
                   </Button>
                 </div>
                 <div className="flex min-h-0 flex-1">
@@ -691,7 +700,7 @@ export function SkillEditor({
                     minSize={undefined}
                     isDisabled={isImporting}
                     onError={(error) => {
-                      showErrorToast("Could not add files", error.message, {
+                      showErrorToast(t("couldNotAddFile"), error.message, {
                         operation: "skill_files.add",
                         errorOrigin: "frontend",
                         errorCategory: "user_input",
@@ -749,16 +758,12 @@ export function SkillEditor({
                     layout="fill"
                   >
                     <Tabs.List variant="underline">
-                      <Tabs.Trigger value="files" label="Files" />
+                      <Tabs.Trigger value="files" label={t("files")} />
                       <Tabs.Trigger
                         value="usage"
-                        label="Usage"
+                        label={t("usage")}
                         disabled={isDraft || !isV4}
-                        tooltip={
-                          !isV4
-                            ? "Skill tracing is only supported in Langfuse v4."
-                            : undefined
-                        }
+                        tooltip={!isV4 ? t("skillTracingOnlyInV4") : undefined}
                       />
                     </Tabs.List>
                     {usageTab}
@@ -824,13 +829,14 @@ function SkillMetadataFields({
   onSaveTags: (tags: string[]) => Promise<boolean>;
   metadataOptions: { labels: string[]; tags: string[] };
 }) {
+  const t = useTranslation(skillMessages);
   const labels = useStore(store, (state) => state.labels);
   const tags = useStore(store, (state) => state.tags);
 
   return (
     <div className="ph-no-capture flex max-w-full flex-wrap items-center gap-2">
       <div className="flex min-w-0 items-center gap-1.5">
-        <span className="text-muted-foreground text-xs">Labels</span>
+        <span className="text-muted-foreground text-xs">{t("labels")}</span>
         <SkillLabelsSelect
           showOnlyOnHover={false}
           value={labels}
@@ -841,7 +847,7 @@ function SkillMetadataFields({
         />
       </div>
       <div className="flex min-w-0 items-center gap-1.5">
-        <span className="text-muted-foreground text-xs">Tags</span>
+        <span className="text-muted-foreground text-xs">{t("tags")}</span>
         <SkillTagsSelect
           value={tags}
           options={metadataOptions.tags}
@@ -867,6 +873,7 @@ function SkillFileEditor({
   editable: boolean;
   onSelectFile: (path: string) => void;
 }) {
+  const t = useTranslation(skillMessages);
   const filePaths = useStore(
     store,
     useShallow((state) => Object.keys(state.files)),
@@ -893,7 +900,7 @@ function SkillFileEditor({
               refetch();
             }}
           >
-            Retry
+            {t("retry")}
           </Button>
         </div>
       );
@@ -901,12 +908,13 @@ function SkillFileEditor({
     if (content === undefined) {
       return (
         <div role="status" className="flex items-center gap-2 text-sm">
-          <Loader2 size="base" __rawClassName="animate-spin" /> Loading file…
+          <Loader2 size="base" __rawClassName="animate-spin" />{" "}
+          {t("loadingFile")}
         </div>
       );
     }
     return null;
-  }, [content, fileContents.isError, fileContents.error, refetch]);
+  }, [content, fileContents.isError, fileContents.error, refetch, t]);
 
   return (
     <SkillFileView

@@ -1,5 +1,8 @@
 /* eslint-disable no-nested-ternary, @typescript-eslint/no-deprecated -- Legacy UI usage retained during migration to design-system components. */
-import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
 import { tableMessages } from "@/src/features/i18n/messages/table";
 import {
   ChevronLeft,
@@ -61,6 +64,7 @@ export function DataTablePagination<TData>({
   hasNextPage,
 }: DataTablePaginationProps<TData>) {
   const t = useTranslation(tableMessages);
+  const locale = useInterfaceLocale();
   const capture = usePostHogClientCapture();
 
   // Last page shows the exact loaded-row total; multi-page shows "Total ≈ X".
@@ -140,7 +144,8 @@ export function DataTablePagination<TData>({
         {showExactTotal ? (
           // Result fits on the loaded page(s) — the total is exact, no estimate.
           <span className={totalCountClassName}>
-            {t("total")}&nbsp;{compactNumberFormatter(exactTotal)}
+            {t("total")}&nbsp;
+            {compactNumberFormatter(exactTotal, undefined, locale)}
           </span>
         ) : showApproxTotal ? (
           <TooltipProvider>
@@ -149,7 +154,7 @@ export function DataTablePagination<TData>({
                 <span className={totalCountClassName}>
                   {t("total")}&nbsp;≈&nbsp;
                   {approxTotalCount != null ? (
-                    compactNumberFormatter(approxTotalCount)
+                    compactNumberFormatter(approxTotalCount, undefined, locale)
                   ) : (
                     <span className="inline-flex align-middle">
                       <Spinner size="xxs" variant="muted" display="inline" />

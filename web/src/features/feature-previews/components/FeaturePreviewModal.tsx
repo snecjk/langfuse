@@ -18,6 +18,8 @@ import {
   isInternalFeaturePreviewFlag,
   type PersonalFeaturePreviewFlag,
 } from "@/src/features/feature-flags/available-flags";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 import modernSessionDarkIllustration from "../assets/modern-session-dark.svg";
 import modernSessionLightIllustration from "../assets/modern-session-light.svg";
@@ -30,15 +32,24 @@ export type PreviewFlag = PersonalFeaturePreviewFlag;
 type PreviewIllustration = {
   light: React.ComponentProps<typeof Image>["src"];
   dark: React.ComponentProps<typeof Image>["src"];
-  alt: string;
+  /** Translation key for the illustration alt text. */
+  altKey: Parameters<
+    ReturnType<typeof useTranslation<typeof enterpriseMessages>>
+  >[0];
   width?: number;
   height?: number;
 };
 
 type PreviewRegistryItem = {
   flag: PreviewFlag;
-  description: string;
-  details: string;
+  /** Translation key for the short description under the preview name. */
+  descriptionKey: Parameters<
+    ReturnType<typeof useTranslation<typeof enterpriseMessages>>
+  >[0];
+  /** Translation key for the long details paragraph. */
+  detailsKey: Parameters<
+    ReturnType<typeof useTranslation<typeof enterpriseMessages>>
+  >[0];
   feedbackUrl?: string;
   illustration?: PreviewIllustration;
 };
@@ -58,36 +69,30 @@ export type PreviewState = {
 const PREVIEW_REGISTRY: PreviewRegistryItem[] = [
   {
     flag: "langfuseTopics",
-    description:
-      "Discover common topics across traces, with summaries and an interactive topic map.",
-    details:
-      "Choose traces and facets, run the topic pipeline, and explore the resulting clusters and trace summaries.",
+    descriptionKey: "featurePreviewTopicsDescription",
+    detailsKey: "featurePreviewTopicsDetails",
     feedbackUrl: "https://github.com/orgs/langfuse/discussions",
   },
   {
     flag: "sessionViewV2",
-    description:
-      "Navigate every trace in a session from one continuous conversation feed, with tools and structured data available on demand.",
-    details:
-      "Redesigned Session View replaces separate trace cards with a compact minimap and a virtualized feed. Jump between traces, keep the active trace in view, or temporarily show inline tool calls and system prompts.",
+    descriptionKey: "featurePreviewSessionDescription",
+    detailsKey: "featurePreviewSessionDetails",
     feedbackUrl: "https://github.com/orgs/langfuse/discussions/18687",
     illustration: {
       light: modernSessionLightIllustration,
       dark: modernSessionDarkIllustration,
-      alt: "Redesigned Session View with a continuous session conversation feed.",
+      altKey: "featurePreviewSessionAlt",
     },
   },
   {
     flag: "unifiedTraceSessionView",
-    description: "Explore traces and their full session in one unified view.",
-    details:
-      "Switch between Trace and Session scope without leaving the trace UI. Requires the events-backed read path and a trace belonging to a session.",
+    descriptionKey: "featurePreviewUnifiedDescription",
+    detailsKey: "featurePreviewUnifiedDetails",
   },
 ];
 
-const FEATURE_PREVIEW_MODAL_TITLE = "Feature preview";
-const FEATURE_PREVIEW_MODAL_SUBTITLE =
-  "Try upcoming and experimental product experiences before they become generally available.";
+const FEATURE_PREVIEW_MODAL_TITLE = "featurePreviewTitle";
+const FEATURE_PREVIEW_MODAL_SUBTITLE = "featurePreviewSubtitle";
 
 export type FeaturePreviewModalProps = {
   open: boolean;
@@ -101,6 +106,7 @@ export function FeaturePreviewModal({
   onOpenChange,
   state,
 }: FeaturePreviewModalProps) {
+  const t = useTranslation(enterpriseMessages);
   const items = PREVIEW_REGISTRY.filter((item) => state[item.flag]);
   const [selectedFlag, setSelectedFlag] = useState<PreviewFlag | null>(
     items[0]?.flag ?? null,
@@ -119,10 +125,10 @@ export function FeaturePreviewModal({
       >
         <DialogHeader>
           <DialogTitle className="text-foreground text-lg font-bold">
-            {FEATURE_PREVIEW_MODAL_TITLE}
+            {t(FEATURE_PREVIEW_MODAL_TITLE)}
           </DialogTitle>
           <DialogDescription className="mt-0">
-            {FEATURE_PREVIEW_MODAL_SUBTITLE}
+            {t(FEATURE_PREVIEW_MODAL_SUBTITLE)}
           </DialogDescription>
         </DialogHeader>
 
@@ -152,7 +158,7 @@ export function FeaturePreviewModal({
                         {featurePreviewLabels[item.flag]}
                       </span>
                       <span className="text-muted-foreground mt-1 line-clamp-2 block text-xs">
-                        {getPreviewStatusLabel(state[item.flag])}
+                        {getPreviewStatusLabel(t, state[item.flag])}
                       </span>
                     </span>
                   </button>
@@ -184,7 +190,7 @@ export function FeaturePreviewModal({
                       )}
                     </h2>
                     <p className="text-muted-foreground mt-2 max-w-2xl text-sm">
-                      {selected.description}
+                      {t(selected.descriptionKey)}
                     </p>
                     {selected.feedbackUrl && (
                       <Button asChild className="mt-4">
@@ -193,7 +199,7 @@ export function FeaturePreviewModal({
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          Give feedback
+                          {t("featurePreviewGiveFeedback")}
                         </a>
                       </Button>
                     )}
@@ -206,7 +212,9 @@ export function FeaturePreviewModal({
                         selectedState.isToggling === true
                       }
                       onCheckedChange={selectedState.onToggle}
-                      aria-label={`Toggle ${featurePreviewLabels[selected.flag]}`}
+                      aria-label={t("featurePreviewToggle", {
+                        name: featurePreviewLabels[selected.flag],
+                      })}
                     />
                   </div>
                 </div>
@@ -219,8 +227,7 @@ export function FeaturePreviewModal({
                         {featurePreviewLabels.sessionViewV2Timeline}
                       </h3>
                       <p className="text-muted-foreground mt-1 max-w-2xl text-sm">
-                        Use the redesigned timeline to navigate session events
-                        in chronological order.
+                        {t("featurePreviewTimelineDescription")}
                       </p>
                       {state.sessionViewV2Timeline.warningReason ? (
                         <p className="mt-2 text-xs text-yellow-800 dark:text-yellow-200">
@@ -235,7 +242,9 @@ export function FeaturePreviewModal({
                         state.sessionViewV2Timeline.isToggling === true
                       }
                       onCheckedChange={state.sessionViewV2Timeline.onToggle}
-                      aria-label={`Toggle ${featurePreviewLabels.sessionViewV2Timeline}`}
+                      aria-label={t("featurePreviewToggle", {
+                        name: featurePreviewLabels.sessionViewV2Timeline,
+                      })}
                     />
                   </div>
                 ) : null}
@@ -245,7 +254,7 @@ export function FeaturePreviewModal({
                 )}
 
                 <p className="text-muted-foreground mt-5 text-sm">
-                  {selected.details}
+                  {t(selected.detailsKey)}
                 </p>
               </>
             ) : null}
@@ -256,10 +265,13 @@ export function FeaturePreviewModal({
   );
 }
 
-function getPreviewStatusLabel(state: PreviewState | undefined) {
-  if (state?.enabled) return "Enabled";
-  if (state?.disabled) return "Unavailable";
-  return "Available";
+function getPreviewStatusLabel(
+  t: ReturnType<typeof useTranslation<typeof enterpriseMessages>>,
+  state: PreviewState | undefined,
+) {
+  if (state?.enabled) return t("featurePreviewEnabled");
+  if (state?.disabled) return t("featurePreviewUnavailable");
+  return t("featurePreviewAvailable");
 }
 
 function PreviewMockupPanel({
@@ -267,18 +279,20 @@ function PreviewMockupPanel({
 }: {
   illustration: PreviewIllustration;
 }) {
+  const t = useTranslation(enterpriseMessages);
+  const alt = t(illustration.altKey);
   return (
     <div className="border-border bg-muted/30 mt-6 overflow-hidden rounded-2xl border shadow-inner">
       <Image
         src={illustration.light}
-        alt={illustration.alt}
+        alt={alt}
         width={illustration.width}
         height={illustration.height}
         className="block h-auto w-full dark:hidden"
       />
       <Image
         src={illustration.dark}
-        alt={illustration.alt}
+        alt={alt}
         width={illustration.width}
         height={illustration.height}
         className="hidden h-auto w-full dark:block"

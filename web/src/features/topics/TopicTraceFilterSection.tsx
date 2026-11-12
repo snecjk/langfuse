@@ -9,6 +9,8 @@ import { ObservationFilterBuilder } from "@/src/features/evals/v2/components/Eva
 import { SectionHeader } from "@/src/features/evals/v2/components/Evaluators/Testing/components/SectionHeader/SectionHeader";
 import { EventsSearchBarRow } from "@/src/features/search-bar/components/EventsSearchBarRow";
 import { compactNumberFormatter } from "@/src/utils/numbers";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 import {
   topicsFilterQueryOnlyColumnIds,
   topicsFilterRegistry,
@@ -29,13 +31,14 @@ export function TopicTraceFilterSection({
   onFiltersChange: (filters: FilterState) => void;
   model: TopicTraceFilterModel;
 }) {
+  const t = useTranslation(topicsMessages);
   return (
     <div className="ph-no-capture flex flex-col gap-6">
       <section className="flex flex-col gap-2">
         <SectionHeader
-          title="Filter traces"
+          title={t("filterTraces")}
           meta={null}
-          description="A trace matches when one of its observations meets every filter."
+          description={t("filterTracesDescription")}
           tooltip={TOPICS_RULE_FILTER_HINT}
           trailing={
             <FilterModeToggle mode={model.mode} onChange={model.changeMode} />
@@ -70,26 +73,26 @@ export function TopicTraceFilterSection({
       </section>
       <section className="flex min-h-0 flex-col gap-2">
         <SectionHeader
-          title="Matching traces"
+          title={t("matchingTraces")}
           meta={
             model.preview.status === "ready" ? (
               <MatchedTraceCount count={model.preview.count} />
             ) : null
           }
-          description="The latest traces from the last seven days that match the filters."
-          tooltip="Traces that are still running are included."
+          description={t("matchingTracesDescription")}
+          tooltip={t("runningIncluded")}
           trailing={null}
         />
         <div className="flex h-72 min-h-0 min-w-0 flex-col overflow-hidden rounded-md border">
           <Table
             tableName="Topics setup matching traces"
-            columns={matchingTraceColumns(projectId)}
+            columns={matchingTraceColumns(projectId, t)}
             data={tableData(model.preview)}
             onRowClick={(trace) => openTrace(projectId, trace.id)}
             noResultsMessage={
               model.preview.status === "invalid"
-                ? "Fix the filter to preview matching traces."
-                : "No traces in the last seven days match these filters."
+                ? t("fixFilterToPreview")
+                : t("noTracesLastSevenDays")
             }
           />
         </div>
@@ -99,7 +102,8 @@ export function TopicTraceFilterSection({
 }
 
 function MatchedTraceCount({ count }: { count: number }) {
-  const unit = count === 1 ? "trace" : "traces";
+  const t = useTranslation(topicsMessages);
+  const unit = count === 1 ? t("traceSingular") : t("tracesLabel", { count });
   return (
     <span className="text-muted-foreground shrink-0 text-sm">
       ({compactNumberFormatter(count)} {unit})
@@ -129,11 +133,12 @@ function openTrace(projectId: string, traceId: string) {
 
 function matchingTraceColumns(
   projectId: string,
+  t: ReturnType<typeof useTranslation<typeof topicsMessages>>,
 ): ColumnDef<TopicTracePreviewRow>[] {
   return [
     {
       accessorKey: "name",
-      header: "Trace",
+      header: t("traceId"),
       size: 320,
       cell: ({ row }) => (
         <TraceNameCell projectId={projectId} trace={row.original} />
@@ -141,11 +146,11 @@ function matchingTraceColumns(
     },
     {
       accessorKey: "timestamp",
-      header: "First match",
+      header: t("firstMatch"),
       size: 176,
       cell: ({ row }) => new Date(row.original.timestamp).toLocaleString(),
     },
-    { accessorKey: "environment", header: "Environment", size: 128 },
+    { accessorKey: "environment", header: t("environment"), size: 128 },
   ];
 }
 

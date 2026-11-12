@@ -21,6 +21,8 @@ import {
   SettingsTable,
   type SettingsTableProps,
 } from "@/src/components/SettingsTable/SettingsTable";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 import { type LangfuseColumnDef } from "@/src/components/table/types";
 import {
   isBooleanDataType,
@@ -91,23 +93,24 @@ export function ScoreConfigsTable({
     openDialog: (config: ScoreConfigTableRow) => void;
   };
 }) {
+  const t = useTranslation(evaluationsMessages);
   const columns = useMemo<LangfuseColumnDef<ScoreConfigTableRow>[]>(
     () => [
       createTextTableColumn<ScoreConfigTableRow>({
         accessorKey: "name",
-        header: "Name",
+        header: t("name"),
         enableHiding: true,
       }),
       createBadgeTableColumn<ScoreConfigTableRow>({
         accessorKey: "dataType",
-        header: "Data Type",
+        header: t("dataType"),
         size: 80,
         enableHiding: true,
       }),
       createIOTableColumn<ScoreConfigTableRow, Prisma.JsonValue>({
         id: "range",
         accessorFn: getConfigRange,
-        header: "Range",
+        header: t("range"),
         enableHiding: true,
         size: 300,
         getCell: (value) => value || undefined,
@@ -115,20 +118,20 @@ export function ScoreConfigsTable({
       }),
       createIOTableColumn<ScoreConfigTableRow>({
         accessorKey: "description",
-        header: "Description",
+        header: t("description"),
         enableHiding: true,
         getCell: (value) => value || undefined,
         singleLine: true,
       }),
       createIdTableColumn<ScoreConfigTableRow>({
         accessorKey: "id",
-        header: "Config ID",
+        header: t("configId"),
         enableHiding: true,
         defaultHidden: true,
       }),
       createDateTableColumn<ScoreConfigTableRow>({
         accessorKey: "createdAt",
-        header: "Created At",
+        header: t("createdAt"),
         enableHiding: true,
         defaultHidden: true,
       }),
@@ -138,7 +141,7 @@ export function ScoreConfigsTable({
         header: "",
         size: 80,
         getButton: ({ row }) => ({
-          text: "Edit",
+          text: t("edit"),
           disabled: !!editAction.disabled,
           disabledReason: editAction.disabled?.reason,
           onClick: () => editAction.openDialog(row.original),
@@ -146,13 +149,14 @@ export function ScoreConfigsTable({
       }),
       createBadgeTableColumn<ScoreConfigTableRow>({
         id: "status",
-        accessorFn: (config) => (config.isArchived ? "Archived" : "Active"),
-        header: "Status",
+        accessorFn: (config) =>
+          config.isArchived ? t("archived") : t("active"),
+        header: t("status"),
         size: 80,
         enableHiding: true,
       }),
     ],
-    [editAction],
+    [editAction, t],
   );
 
   const actions = useCallback<

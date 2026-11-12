@@ -4,11 +4,24 @@ import type { GatewayConnection } from "@/src/features/ai-gateway/types/gatewayP
 export function describeGatewayModelCount(
   modelCount: GatewayModelCount | "loading" | undefined,
   status: GatewayConnection["status"] | undefined,
+  t: (
+    key:
+      | "credentialRejected"
+      | "loadingEllipsis"
+      | "allModelsEnabled"
+      | "modelsEnabledCount"
+      | "modelsEnabledOfTotal",
+    params?: Record<string, string | number>,
+  ) => string,
 ) {
-  if (status === "ERROR") return "Credential rejected";
-  if (modelCount === "loading") return "Loading…";
+  if (status === "ERROR") return t("credentialRejected");
+  if (modelCount === "loading") return t("loadingEllipsis");
   if (modelCount === undefined) return "—";
-  if (modelCount.enabled === "all") return "All models enabled";
-  if (modelCount.total === undefined) return `${modelCount.enabled} enabled`;
-  return `${modelCount.enabled} of ${modelCount.total} enabled`;
+  if (modelCount.enabled === "all") return t("allModelsEnabled");
+  if (modelCount.total === undefined)
+    return t("modelsEnabledCount", { count: String(modelCount.enabled) });
+  return t("modelsEnabledOfTotal", {
+    enabled: String(modelCount.enabled),
+    total: String(modelCount.total),
+  });
 }

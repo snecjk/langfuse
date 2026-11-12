@@ -59,6 +59,8 @@ import {
 } from "@/src/features/skills/components/skillEditorStore";
 import { cn } from "@/src/utils/tailwind";
 import { Tooltip } from "@/src/components/design-system/Tooltip/Tooltip";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 
 type PendingEntry = {
   kind: "file" | "folder";
@@ -87,6 +89,7 @@ export function SkillFileExplorer({
   onStateChange: Dispatch<SetStateAction<SkillFileExplorerState>>;
   onUpload: () => void;
 }) {
+  const t = useTranslation(skillMessages);
   const filePaths = useStore(
     store,
     useShallow((state) => [
@@ -132,8 +135,8 @@ export function SkillFileExplorer({
       : actions.moveFile(path, targetFolder);
     if (!moved) {
       showErrorToast(
-        `Could not move ${isFolder ? "folder" : "file"}`,
-        "The destination conflicts with an existing file or folder, or the move is invalid.",
+        isFolder ? t("couldNotMoveFolder") : t("couldNotMoveFile"),
+        t("moveDestinationConflict"),
         {
           operation: isFolder ? "skill_folder.move" : "skill_file.move",
           errorOrigin: "frontend",
@@ -192,11 +195,13 @@ export function SkillFileExplorer({
     ) {
       const validationMessage = !parsed.success
         ? parsed.error.issues[0]?.message
-        : "Use a relative file path, such as docs/readme.md.";
+        : t("useRelativeFilePath");
       showErrorToast(
-        `Invalid ${pendingEntry.kind} name`,
         pendingEntry.kind === "folder"
-          ? "Use a single normalized path segment."
+          ? t("invalidFolderName")
+          : t("invalidFileName"),
+        pendingEntry.kind === "folder"
+          ? t("useSingleNormalizedPathSegment")
           : validationMessage,
         {
           operation:
@@ -212,8 +217,8 @@ export function SkillFileExplorer({
 
     if (pendingEntry.kind === "file" && fileCount >= MAX_SKILL_FILES) {
       showErrorToast(
-        "Could not add file",
-        `A skill can contain at most ${MAX_SKILL_FILES} files.`,
+        t("couldNotAddFile"),
+        t("skillMaxFiles", { max: MAX_SKILL_FILES }),
         {
           operation: "skill_file.create",
           errorOrigin: "frontend",
@@ -229,7 +234,9 @@ export function SkillFileExplorer({
         : actions.addFile(createSkillDraftFile(path, ""));
     if (!created) {
       showErrorToast(
-        `${pendingEntry.kind === "folder" ? "Folder" : "File"} already exists`,
+        pendingEntry.kind === "folder"
+          ? t("folderAlreadyExists")
+          : t("fileAlreadyExists"),
         path,
         {
           operation:
@@ -259,7 +266,8 @@ export function SkillFileExplorer({
 
   const renderPendingEntry = (parentPath: string): ReactNode => {
     if (!pendingEntry || pendingEntry.parentPath !== parentPath) return null;
-    const label = pendingEntry.kind === "folder" ? "folder" : "file";
+    const label =
+      pendingEntry.kind === "folder" ? t("newFolder") : t("newFile");
 
     return (
       <form
@@ -283,7 +291,10 @@ export function SkillFileExplorer({
           onKeyDown={(event) => {
             if (event.key === "Escape") setPendingEntry(null);
           }}
-          aria-label={`New ${label} name${parentPath ? ` in ${parentPath}` : ""}`}
+          aria-label={t("newEntryName", {
+            label,
+            parentPath: parentPath ? ` in ${parentPath}` : "",
+          })}
           disabled={moveDisabled}
           placeholder={
             pendingEntry.kind === "folder" ? "folder-name" : "docs/readme.md"
@@ -294,7 +305,7 @@ export function SkillFileExplorer({
           type="submit"
           variant="ghost"
           size="icon-sm"
-          aria-label={`Create new ${label}`}
+          aria-label={t("createNewEntry", { label })}
           disabled={moveDisabled}
         >
           <Check size="base" color="default" />
@@ -303,7 +314,7 @@ export function SkillFileExplorer({
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label={`Cancel new ${label}`}
+          aria-label={t("cancelNewEntry", { label })}
           onClick={() => setPendingEntry(null)}
         >
           <X size="base" color="default" />
@@ -338,8 +349,8 @@ export function SkillFileExplorer({
                   setSelectedFolder(parentFolder(node.path));
                 } else {
                   showErrorToast(
-                    "Could not restore file",
-                    `A skill can contain at most ${MAX_SKILL_FILES} files. Delete another file before restoring this one.`,
+                    t("couldNotRestoreFile"),
+                    t("deleteFileBeforeRestoring", { max: MAX_SKILL_FILES }),
                     {
                       operation: "skill_file.restore",
                       errorOrigin: "frontend",
@@ -389,19 +400,19 @@ export function SkillFileExplorer({
         onDragEnd={handleDragEnd}
       >
         <aside
-          aria-label="Skill files"
+          aria-label={t("skillFiles")}
           className="ph-no-capture bg-muted/20 relative flex h-full min-w-0 flex-col"
         >
           <div className="flex min-h-11 items-center justify-between gap-2 border-b px-3">
             <SkillFolderDropTarget path="" disabled={moveDisabled}>
               <button
                 type="button"
-                aria-label="Root folder"
-                title="Drop a file here to move it to the root"
+                aria-label={t("rootFolder")}
+                title={t("dropFileToRoot")}
                 onClick={() => setSelectedFolder("")}
                 className="flex items-center gap-2 rounded px-1 py-2 text-sm font-bold"
               >
-                <FolderOpen size="base" /> Files
+                <FolderOpen size="base" /> {t("rootFolder")}
               </button>
             </SkillFolderDropTarget>
             {!readOnly ? (
@@ -409,7 +420,7 @@ export function SkillFileExplorer({
                 <IconButton
                   onClick={onUpload}
                   icon={Upload}
-                  label="Upload files or folders"
+                  label={t("uploadFilesOrFolders")}
                   size="sm"
                   disabled={moveDisabled}
                 />
@@ -417,8 +428,8 @@ export function SkillFileExplorer({
                   type="button"
                   variant="ghost"
                   size="icon-sm"
-                  title="New file"
-                  aria-label="New file"
+                  title={t("newFile")}
+                  aria-label={t("newFile")}
                   disabled={moveDisabled}
                   onClick={() => startEntry("file")}
                 >
@@ -428,8 +439,8 @@ export function SkillFileExplorer({
                   type="button"
                   variant="ghost"
                   size="icon-sm"
-                  title="New folder"
-                  aria-label="New folder"
+                  title={t("newFolder")}
+                  aria-label={t("newFolder")}
                   disabled={moveDisabled}
                   onClick={() => startEntry("folder")}
                 >
@@ -448,7 +459,7 @@ export function SkillFileExplorer({
           </div>
           {isImporting ? (
             <p className="text-muted-foreground border-t px-3 py-2 text-xs leading-4">
-              Adding files to draft…
+              {t("addingFilesToDraft")}
             </p>
           ) : null}
         </aside>
@@ -474,17 +485,14 @@ const skillMoveCollisionDetection: CollisionDetection = (args) => {
 
 const fileChangeIndicators = {
   new: {
-    label: "New file",
     icon: Plus,
     className: "text-dark-green h-3.5 w-3.5",
   },
   edited: {
-    label: "Edited file",
     icon: Circle,
     className: "text-dark-yellow h-2 w-2 fill-current",
   },
   pending: {
-    label: "Checking for changes",
     icon: CircleDashed,
     className: "text-muted-foreground h-3.5 w-3.5",
   },
@@ -509,6 +517,7 @@ function DraggableSkillFile({
   onDelete: () => void;
   onRestore: () => void;
 }) {
+  const t = useTranslation(skillMessages);
   const changeStatusId = useId();
   const deleted = useStore(store, (state) => Boolean(state.deletedFiles[path]));
   const changeStatus = useStore(store, (state) => {
@@ -519,8 +528,20 @@ function DraggableSkillFile({
     if (file.currentSha === null) return "pending";
     return file.currentSha !== file.sourceSha ? "edited" : null;
   });
-  const indicator = changeStatus ? fileChangeIndicators[changeStatus] : null;
-  const IndicatorIcon = indicator?.icon;
+  const indicator = changeStatus
+    ? {
+        new: { label: t("newFileIndicator") },
+        edited: { label: t("editedFileIndicator") },
+        pending: { label: t("checkingForChangesIndicator") },
+      }[changeStatus]
+    : null;
+  const indicatorLabel = indicator?.label;
+  const IndicatorIcon = indicator
+    ? fileChangeIndicators[changeStatus!].icon
+    : null;
+  const indicatorClassName = indicator
+    ? fileChangeIndicators[changeStatus!].className
+    : "";
   const movable = path !== "SKILL.md";
   const draggable = movable && !disabled && !deleted;
   const {
@@ -583,24 +604,24 @@ function DraggableSkillFile({
         </span>
         {deleted ? (
           <span id={changeStatusId} className="sr-only">
-            Deleted file
+            {t("deletedFile")}
           </span>
         ) : null}
-        {indicator && IndicatorIcon ? (
-          <Tooltip label={indicator.label}>
+        {indicator && IndicatorIcon && indicatorLabel ? (
+          <Tooltip label={indicatorLabel}>
             {({ getTriggerProps }) => (
               <span
                 {...getTriggerProps()}
                 id={changeStatusId}
                 role="img"
-                aria-label={indicator.label}
+                aria-label={indicatorLabel}
                 className="flex h-4 w-4 shrink-0 items-center justify-center"
               >
                 <IndicatorIcon
                   aria-hidden="true"
-                  __rawClassName={indicator.className}
+                  __rawClassName={indicatorClassName}
                 />
-                <span className="sr-only">{indicator.label}</span>
+                <span className="sr-only">{indicatorLabel}</span>
               </span>
             )}
           </Tooltip>
@@ -611,8 +632,8 @@ function DraggableSkillFile({
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label={`${deleted ? "Restore" : "Delete"} ${path}`}
-          title={deleted ? "Restore file" : "Delete file"}
+          aria-label={`${deleted ? t("restoreFile") : t("deleteFile")} ${path}`}
+          title={deleted ? t("restoreFile") : t("deleteFile")}
           onClick={deleted ? onRestore : onDelete}
           className={cn(
             "mr-1",
@@ -650,6 +671,7 @@ function DraggableSkillFolder({
   onToggle: () => void;
   onDelete: () => void;
 }) {
+  const t = useTranslation(skillMessages);
   const {
     attributes,
     listeners,
@@ -702,7 +724,7 @@ function DraggableSkillFolder({
             type="button"
             variant="ghost"
             size="icon-sm"
-            aria-label={`Delete folder ${path}`}
+            aria-label={`${t("deleteFile")} ${path}`}
             onClick={onDelete}
             className="mr-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100"
           >

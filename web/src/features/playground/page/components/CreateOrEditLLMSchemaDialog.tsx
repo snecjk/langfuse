@@ -32,10 +32,12 @@ import { api } from "@/src/utils/api";
 import { JSONSchemaFormSchema, type LlmSchema } from "@langfuse/shared";
 import { CodeMirrorEditor } from "@/src/components/editor/CodeMirrorEditor";
 import { showErrorToast } from "@/src/features/notifications/showErrorToast";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 
 const formSchema = z.object({
   name: LLMSchemaNameSchema,
-  description: z.string().min(1, "Description is required"),
+  description: z.string().min(1),
   schema: JSONSchemaFormSchema,
 });
 
@@ -58,6 +60,7 @@ type CreateOrEditLLMSchemaDialog = {
 export const CreateOrEditLLMSchemaDialog: React.FC<
   CreateOrEditLLMSchemaDialog
 > = (props) => {
+  const t = useTranslation(skillMessages);
   const { projectId, onSave, existingLlmSchema, open, onOpenChange } = props;
 
   const utils = api.useUtils();
@@ -141,8 +144,8 @@ export const CreateOrEditLLMSchemaDialog: React.FC<
       form.setValue("schema", prettified);
     } catch {
       showErrorToast(
-        "Failed to prettify JSON",
-        "Please verify your input is valid JSON",
+        t("failedToPrettifyJSON"),
+        t("pleaseVerifyYourInputIsValidJSON"),
         {
           operation: "playground_schema.prettify",
           errorOrigin: "frontend",
@@ -161,10 +164,10 @@ export const CreateOrEditLLMSchemaDialog: React.FC<
       >
         <DialogHeader>
           <DialogTitle>
-            {existingLlmSchema ? "Edit LLM Schema" : "Create LLM Schema"}
+            {existingLlmSchema ? t("editLLMSchema") : t("createLLMSchema")}
           </DialogTitle>
           <DialogDescription>
-            Define a JSON Schema for structured outputs
+            {t("defineJSONSchemaForStructuredOutputs")}
           </DialogDescription>
         </DialogHeader>
 
@@ -185,9 +188,12 @@ export const CreateOrEditLLMSchemaDialog: React.FC<
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>{t("name")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., get_weather" {...field} />
+                        <Input
+                          placeholder={t("exampleGetWeather")}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -199,10 +205,10 @@ export const CreateOrEditLLMSchemaDialog: React.FC<
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel>{t("description")}</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Describe the schema"
+                          placeholder={t("describeSchema")}
                           className="max-h-[120px] focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                           {...field}
                           onKeyDown={(e) => {
@@ -220,17 +226,16 @@ export const CreateOrEditLLMSchemaDialog: React.FC<
                   name="schema"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>JSON Schema</FormLabel>
+                      <FormLabel>{t("jsonSchema")}</FormLabel>
                       <FormDescription>
-                        Define the structure of your schema using JSON Schema
-                        format.{" "}
+                        {t("defineSchemaStructureJSONSchema")}{" "}
                         <a
                           href="https://json-schema.org/learn/miscellaneous-examples"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center"
                         >
-                          See JSON Schema examples here
+                          {t("seeJSONSchemaExamples")}
                           <ArrowUpRight size="sm" />
                         </a>
                       </FormDescription>
@@ -250,12 +255,12 @@ export const CreateOrEditLLMSchemaDialog: React.FC<
                             onClick={prettifyJson}
                             className="absolute top-3 right-3 text-xs"
                           >
-                            Prettify
+                            {t("prettify")}
                           </Button>
                         </div>
                       </FormControl>
                       <p className="text-muted-foreground text-xs">
-                        Parameters must be a valid JSON Schema object
+                        {t("parametersMustBeValidJSONSchema")}
                       </p>
                       <FormMessage />
                     </FormItem>
@@ -267,8 +272,9 @@ export const CreateOrEditLLMSchemaDialog: React.FC<
             <DialogFooter className="bg-modal sticky bottom-0 mt-4 flex flex-col gap-2 border-t pt-4">
               <div className="flex w-full flex-col gap-2">
                 <p className="text-muted-foreground text-xs">
-                  Note: Changes to schemas are reflected to all members of this
-                  project.
+                  {t("noteChangesReflectedToAllMembers", {
+                    resource: t("schemas"),
+                  })}
                 </p>
                 <div className="flex items-center justify-between gap-2">
                   {existingLlmSchema && (
@@ -278,7 +284,7 @@ export const CreateOrEditLLMSchemaDialog: React.FC<
                       onClick={handleDelete}
                       className="mr-auto"
                     >
-                      Delete
+                      {t("delete")}
                     </Button>
                   )}
                   <Button
@@ -286,9 +292,9 @@ export const CreateOrEditLLMSchemaDialog: React.FC<
                     variant="outline"
                     onClick={() => onOpenChange(false)}
                   >
-                    Cancel
+                    {t("cancel")}
                   </Button>
-                  <Button type="submit">Save</Button>
+                  <Button type="submit">{t("save")}</Button>
                 </div>
               </div>
             </DialogFooter>

@@ -4,6 +4,8 @@ import { Alert } from "@/src/components/design-system/Alert/Alert";
 import { Dialog } from "@/src/components/design-system/Dialog/Dialog";
 import { Label } from "@/src/components/ui/label";
 import { Textarea } from "@/src/components/ui/textarea";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 import { type SkillEditorStore } from "@/src/features/skills/components/skillEditorStore";
 import { SkillDraftChanges } from "./SkillDraftChanges";
 
@@ -24,6 +26,7 @@ export function CreateSkillVersionDialog({
   disabled: boolean;
   onConfirm: () => Promise<void>;
 }) {
+  const t = useTranslation(skillMessages);
   const originalName = useStore(store, (state) =>
     state.baseVersion === null ? null : state.name,
   );
@@ -35,11 +38,11 @@ export function CreateSkillVersionDialog({
 
   return (
     <Dialog
-      title={isFirstVersion ? "Create skill" : "Create new version"}
+      title={isFirstVersion ? t("createSkill") : t("createNewVersion")}
       size="xxl"
       actions={[
         {
-          label: isFirstVersion ? "Create skill" : "Create version",
+          label: isFirstVersion ? t("createSkill") : t("createVersion"),
           icon: Save,
           loading: isSaving,
           disabled,
@@ -51,45 +54,37 @@ export function CreateSkillVersionDialog({
         <div className="ph-no-capture flex min-h-0 flex-1 flex-col gap-4">
           <div className="flex shrink-0 flex-col gap-4">
             <p className="text-muted-foreground">
-              {isFirstVersion ? (
-                <>
-                  Create <strong>{name}</strong> as a new skill using the
-                  current files.
-                </>
-              ) : (
-                <>
-                  Commit the current draft of <strong>{name}</strong> as an
-                  immutable version.
-                </>
-              )}
+              {isFirstVersion
+                ? t("createSkillAsNewSkill", { name })
+                : t("commitTheCurrentDraft", { name })}
             </p>
             {isFirstVersion && originalName ? (
               <Alert variant="warning" icon={TriangleAlert}>
-                <Alert.Title>You are duplicating this skill</Alert.Title>
+                <Alert.Title>{t("youAreDuplicatingThisSkill")}</Alert.Title>
                 <Alert.Description>
-                  This creates <strong>{name}</strong> as a separate skill,
-                  starting at version 1. <strong>{originalName}</strong> stays
-                  unchanged.
+                  {t("duplicatingSkillDescription", {
+                    name,
+                    originalName,
+                  })}
                 </Alert.Description>
               </Alert>
             ) : null}
             <div className="grid gap-2">
-              <Label htmlFor="skill-version-note">Version note</Label>
+              <Label htmlFor="skill-version-note">{t("versionNote")}</Label>
               <p className="text-muted-foreground text-sm">
-                Describe the changes in this version to make the history easier
-                to understand.
+                {t("describeChangesInVersion")}
               </p>
               <Textarea
                 id="skill-version-note"
                 value={commitMessage}
                 onChange={(event) => setCommitMessage(event.target.value)}
-                placeholder="Add version note…"
+                placeholder={t("versionNotePlaceholder")}
                 rows={3}
                 autoFocus
               />
             </div>
           </div>
-          <h3 className="shrink-0 text-sm font-bold">File changes</h3>
+          <h3 className="shrink-0 text-sm font-bold">{t("fileChanges")}</h3>
           <SkillDraftChanges
             projectId={projectId}
             store={store}

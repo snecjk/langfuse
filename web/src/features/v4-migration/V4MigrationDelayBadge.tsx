@@ -23,6 +23,8 @@ import {
 import { EvaluatorMigrationDialog } from "@/src/features/v4-migration/EvaluatorMigrationDialog";
 import { buildDeprecatedRulesUrl } from "@/src/features/v4-migration/evaluatorMigrationUrls";
 import { useReadPath } from "@/src/features/events/hooks/useReadPath";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 // The pill's description finishes expanding after 300ms (V4MigrationBadgeContent),
 // so a 500ms dwell means the full text was on screen — a drive-by mouse pass
@@ -41,6 +43,7 @@ export function V4MigrationDelayBadge({
   const forceV3 = useForceV3Experience(project?.id);
   const { isV4 } = useReadPath();
   const capture = usePostHogClientCapture();
+  const t = useTranslation(enterpriseMessages);
 
   // Forced-v3 projects still see the data-delay badge, but it points at the
   // partner FAQ instead of the migration panel
@@ -154,15 +157,15 @@ export function V4MigrationDelayBadge({
   // multiple delayed paths get the generic clause.
   const description = (() => {
     if (actionablePaths > 1) {
-      return "Upgrade to v4 for real-time data";
+      return t("migrationBadgeDelayGeneric");
     }
     if (sdkActionable) {
-      return "Update your SDK for real-time data";
+      return t("migrationBadgeDelaySdk");
     }
     if (otelActionable) {
-      return "Update your OTel instrumentation for real-time data";
+      return t("migrationBadgeDelayOtel");
     }
-    return "Upgrade your instrumentation for real-time data";
+    return t("migrationBadgeDelayCustom");
   })();
 
   return (
@@ -170,8 +173,8 @@ export function V4MigrationDelayBadge({
       onClick={handleClick}
       onHoverStart={handleHoverStart}
       onHoverEnd={handleHoverEnd}
-      title="New data in ~15 min"
-      description={forceV3 ? "Learn more in the docs" : description}
+      title={t("migrationBadgeDelayTitle")}
+      description={forceV3 ? t("migrationBadgePartner") : description}
     />
   );
 }
@@ -206,6 +209,7 @@ export function V4MigrationUpdateRequiredBadge() {
     projectId: project?.id,
     enabled,
   });
+  const t = useTranslation(enterpriseMessages);
 
   if (!visible || !project) {
     return null;
@@ -226,8 +230,8 @@ export function V4MigrationUpdateRequiredBadge() {
     <>
       <V4MigrationBadgeContent
         onClick={handleClick}
-        title="Action required"
-        description="Choose how to upgrade"
+        title={t("migrationBadgeTitle")}
+        description={t("migrationBadgeDescription")}
       />
       <EvaluatorMigrationDialog
         open={dialogOpen}

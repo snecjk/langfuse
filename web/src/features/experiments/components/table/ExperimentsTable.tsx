@@ -90,7 +90,10 @@ import {
   scoreColumnScopeToggledProps,
 } from "@/src/features/experiments/lib/analytics";
 import { type ColumnGroupTogglePayload } from "@/src/components/table/DataTableColumnVisibilityFilter";
-import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
 import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 /**
@@ -135,6 +138,7 @@ function ExperimentsMultiSelectActionMenu({
 }) {
   const router = useRouter();
   const t = useTranslation(experimentMessages);
+  const locale = useInterfaceLocale();
   const capture = usePostHogClientCapture();
   const [showRunEvaluationDialog, setShowRunEvaluationDialog] = useState(false);
   // Page-scoped and in table order, so the first id is the topmost selected
@@ -329,6 +333,7 @@ export default function ExperimentsTable({
 }: ExperimentsTableProps) {
   const router = useRouter();
   const t = useTranslation(experimentMessages);
+  const locale = useInterfaceLocale();
 
   const { setDetailPageList } = useDetailPageLists();
   // Selection lives in a per-mount vanilla zustand store (not useState) so a
@@ -653,7 +658,7 @@ export default function ExperimentsTable({
       accessorKey: "itemCount",
       header: t("itemCount"),
       size: 100,
-      formatter: (value) => numberFormatter(value, 0, 0),
+      formatter: (value) => numberFormatter(value, 0, 0, locale),
     }),
     {
       accessorKey: "errorCount",
@@ -662,7 +667,7 @@ export default function ExperimentsTable({
       size: 100,
       cell: ({ row }) => {
         const value: number = row.getValue("errorCount");
-        const formatted = numberFormatter(value, 0);
+        const formatted = numberFormatter(value, 0, undefined, locale);
 
         if (value <= 0) {
           return <Badge color="filled" text={formatted} />;
@@ -749,7 +754,8 @@ export default function ExperimentsTable({
       headerTooltip: {
         description: t("latencyAvgHelp"),
       },
-      formatter: (value) => `Ø ${numberFormatter(value / 1000, 4)}s`,
+      formatter: (value) =>
+        `Ø ${numberFormatter(value / 1000, 4, undefined, locale)}s`,
       metricsLoading,
     }),
     createExperimentMetricColumn<ExperimentsTableRow>({
@@ -758,7 +764,7 @@ export default function ExperimentsTable({
       header: t("totalCost"),
       size: 100,
       enableHiding: true,
-      formatter: (value) => `$${numberFormatter(value, 6)}`,
+      formatter: (value) => `$${numberFormatter(value, 6, undefined, locale)}`,
       metricsLoading,
     }),
     {

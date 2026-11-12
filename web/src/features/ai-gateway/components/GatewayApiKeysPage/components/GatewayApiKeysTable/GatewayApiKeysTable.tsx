@@ -18,6 +18,8 @@ import type { LangfuseColumnDef } from "@/src/components/table/types";
 import { isApiKeyExpired } from "@/src/features/apiKey/helpers/isApiKeyExpired";
 import { GATEWAY_API_KEY_LAST_USED_WINDOW_DAYS } from "@/src/features/ai-gateway/constants/gatewayApiKeyLastUsed";
 import { GatewayApiKeysEmptyState } from "@/src/features/ai-gateway/components/GatewayApiKeysPage/components/GatewayApiKeysTable/components/GatewayApiKeysEmptyState/GatewayApiKeysEmptyState";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 
 type GatewayApiKey = {
   metadata: unknown;
@@ -61,6 +63,7 @@ export function GatewayApiKeysTable({
   pagination: PaginationBarProps;
   search: { value: string; onChange: (value: string) => void };
 }) {
+  const t = useTranslation(gatewayMessages);
   const hasSearch = search.value.trim().length > 0;
   /** An out-of-range page is also empty; it keeps the table so its pagination can page back. */
   const hasNoKeys = !hasSearch && pagination.totalCount === 0;
@@ -68,14 +71,14 @@ export function GatewayApiKeysTable({
     createDateTableColumn<GatewayApiKey>({
       accessorFn: (row) => row.apiKey.createdAt,
       id: "createdAt",
-      header: "Created",
+      header: t("tableCreated"),
       enableResizing: false,
       enableSorting: true,
     }),
     createTextTableColumn<GatewayApiKey>({
       accessorFn: (row) => row.apiKey.note,
       id: "description",
-      header: "Name",
+      header: t("tableName"),
       nullValue: "-",
       enableResizing: false,
       enableSorting: true,
@@ -83,34 +86,34 @@ export function GatewayApiKeysTable({
     createTextTableColumn<GatewayApiKey>({
       accessorFn: (row) => row.apiKey.displaySecretKey,
       id: "key",
-      header: "Key",
+      header: t("tableKey"),
       sensitive: true,
       enableResizing: false,
     }),
     createUserTableColumn<GatewayApiKey>({
       accessorFn: (row) => row.apiKey.user,
       id: "user",
-      header: "User",
+      header: t("tableUser"),
       variant: "avatar",
-      nullValue: "Service account",
+      nullValue: t("serviceAccount"),
       hideBelowMd: true,
       enableResizing: false,
     }),
     createDateTableColumn<GatewayApiKey>({
       accessorFn: (row) => row.apiKey.expiresAt,
       id: "expiresAt",
-      header: "Expiration",
+      header: t("tableExpiration"),
       hideBelowMd: true,
       enableResizing: false,
       enableSorting: true,
-      emptyValue: "No expiration",
+      emptyValue: t("noExpiration"),
       getPrefix: (expiresAt) =>
-        isApiKeyExpired(expiresAt) ? "Expired on " : null,
+        isApiKeyExpired(expiresAt) ? t("expiredOn") : null,
     }),
     createTableColumn<GatewayApiKey, Date>({
       accessorFn: (row) => row.lastUsedAt,
       id: "lastUsedAt",
-      header: "Last used",
+      header: t("tableLastUsed"),
       hideBelowMd: true,
       enableResizing: false,
       loadingCell: lastUsedSkeleton,
@@ -120,8 +123,10 @@ export function GatewayApiKeysTable({
           return (
             <span className="text-muted-foreground">
               {lastUsed.status === "success" && lastUsed.isTracked
-                ? `Not used (${GATEWAY_API_KEY_LAST_USED_WINDOW_DAYS}d)`
-                : "Unavailable"}
+                ? t("notUsedInDays", {
+                    days: String(GATEWAY_API_KEY_LAST_USED_WINDOW_DAYS),
+                  })
+                : t("unavailable")}
             </span>
           );
         }
@@ -138,7 +143,7 @@ export function GatewayApiKeysTable({
     createBadgeListTableColumn<GatewayApiKey>({
       accessorFn: (row) => getMetadataEntries(row.metadata),
       id: "metadata",
-      header: "Metadata",
+      header: t("tableMetadata"),
       sensitive: true,
       enableResizing: false,
     }),
@@ -155,7 +160,7 @@ export function GatewayApiKeysTable({
         {
           id: "revoke",
           type: "item",
-          title: "Revoke key",
+          title: t("revokeKey"),
           icon: Trash,
           variant: "destructive",
           onClick: () => onRevoke(row.apiKey.id),
@@ -165,13 +170,9 @@ export function GatewayApiKeysTable({
       search={
         hasNoKeys
           ? undefined
-          : { ...search, placeholder: "Search by name or user" }
+          : { ...search, placeholder: t("searchByNameOrUser") }
       }
-      noResultsMessage={
-        hasSearch
-          ? "No gateway keys match the current search."
-          : "No gateway keys created."
-      }
+      noResultsMessage={hasSearch ? t("noKeysMatchSearch") : t("noKeysCreated")}
       emptyState={hasNoKeys ? <GatewayApiKeysEmptyState /> : undefined}
     />
   );

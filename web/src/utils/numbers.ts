@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import Decimal from "decimal.js";
+import { type Locale } from "@/src/features/i18n/locale";
 
 export const compactNumberFormatter = (
   number?: number | bigint,
   maxFractionDigits?: number,
+  locale: Locale = "en",
 ) => {
-  return Intl.NumberFormat("en-US", {
+  return Intl.NumberFormat(locale === "zh-CN" ? "zh-CN" : "en-US", {
     notation: "compact",
     compactDisplay: "short",
     maximumFractionDigits: maxFractionDigits ?? 2,
@@ -16,8 +18,9 @@ export const numberFormatter = (
   number?: number | bigint,
   fractionDigits?: number,
   maxFractionDigits?: number,
+  locale: Locale = "en",
 ) => {
-  return Intl.NumberFormat("en-US", {
+  return Intl.NumberFormat(locale === "zh-CN" ? "zh-CN" : "en-US", {
     notation: "standard",
     useGrouping: true,
     minimumFractionDigits: fractionDigits ?? 2,
@@ -33,30 +36,50 @@ const durationFormatters = [
   "minute",
   "hour",
   "day",
-].map((unit) =>
-  Intl.NumberFormat("en-US", {
-    style: "unit",
-    unit: unit,
-    unitDisplay: "narrow",
-    notation: "compact",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }),
+].map(
+  (unit) => (locale: Locale) =>
+    Intl.NumberFormat(locale === "zh-CN" ? "zh-CN" : "en-US", {
+      style: "unit",
+      unit: unit,
+      unitDisplay: "narrow",
+      notation: "compact",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }),
 );
+
+const durationFormatterCache = new Map<Locale, Intl.NumberFormat[]>();
+
+const getDurationFormatters = (locale: Locale): Intl.NumberFormat[] => {
+  let cached = durationFormatterCache.get(locale);
+  if (!cached) {
+    cached = durationFormatters.map((make) => make(locale));
+    durationFormatterCache.set(locale, cached);
+  }
+  return cached;
+};
 
 const selectDurationFormatter = (
   milliseconds: number | bigint,
+  locale: Locale = "en",
 ): [Intl.NumberFormat, number] => {
   const ms = Number(milliseconds);
   const tier = durationDivisors.reduce(
     (acc, divisor, i) => (Math.abs(ms) >= divisor ? i : acc),
     0,
   );
-  return [durationFormatters[tier], ms / durationDivisors[tier]!];
+  return [getDurationFormatters(locale)[tier], ms / durationDivisors[tier]!];
 };
 
 export const latencyFormatter = (milliseconds?: number): string => {
-  const [fmt, value] = selectDurationFormatter(milliseconds ?? 0);
+  return latencyFormatterWithLocale(milliseconds, "en");
+};
+
+export const latencyFormatterWithLocale = (
+  milliseconds?: number,
+  locale: Locale = "en",
+): string => {
+  const [fmt, value] = selectDurationFormatter(milliseconds ?? 0, locale);
   return fmt.format(value ?? 0);
 };
 
@@ -64,9 +87,10 @@ export const usdFormatter = (
   number?: number | bigint | Decimal,
   minimumFractionDigits = 2,
   maximumFractionDigits = 6,
+  locale: Locale = "en",
 ) => {
   const numberToFormat = number instanceof Decimal ? number.toNumber() : number;
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat(locale === "zh-CN" ? "zh-CN" : "en-US", {
     style: "currency",
     currency: "USD",
 
@@ -82,7 +106,14 @@ const SUB_CENT_THRESHOLD = 0.01;
 /** Upper bound on the widening, so a dust value cannot stretch a table cell. */
 const MAX_SUB_CENT_FRACTION_DIGITS = 10;
 
-export const costFormatter = (totalCost?: number) => {
+export const costFormatter = (totalCost?: number): string => {
+  return costFormatterWithLocale(totalCost, "en");
+};
+
+export const costFormatterWithLocale = (
+  totalCost?: number,
+  locale: Locale = "en",
+): string => {
   const cost = totalCost ?? 0;
 
   if (
@@ -90,19 +121,19 @@ export const costFormatter = (totalCost?: number) => {
     cost !== 0 &&
     Math.abs(cost) < SUB_CENT_THRESHOLD
   ) {
-    return usdFormatter(cost, 2, subCentFractionDigits(cost));
+    return usdFormatter(cost, 2, subCentFractionDigits(cost), locale);
   }
 
-  return usdFormatter(cost, 2, 2);
+  return usdFormatter(cost, 2, 2, locale);
 };
 
 /** Cent precision; a non-zero cost that would round to $0.00 reads "<$0.01". */
 export const centCostFormatter = (cost: number) => {
   if (cost !== 0 && Math.abs(cost) < SUB_CENT_THRESHOLD / 2) {
-    return `${cost < 0 ? "-" : ""}<${usdFormatter(SUB_CENT_THRESHOLD, 2, 2)}`;
+    return `${cost < 0 ? "-" : ""}<${usdFormatter(SUB_CENT_THRESHOLD, 2, 2, "en")}`;
   }
 
-  return usdFormatter(cost, 2, 2);
+  return usdFormatter(cost, 2, 2, "en");
 };
 
 /** Returns the fraction digits that render a sub-cent cost to ~3 significant digits. */
@@ -117,10 +148,11 @@ export const formatTokenCounts = (
   outputUsage?: number | null,
   totalUsage?: number | null,
   showLabels = false,
+  locale: Locale = "en",
 ): string => {
   if (!inputUsage && !outputUsage && !totalUsage) return "";
 
   return showLabels
-    ? `${numberFormatter(inputUsage ?? 0, 0)} prompt → ${numberFormatter(outputUsage ?? 0, 0)} completion (∑ ${numberFormatter(totalUsage ?? 0, 0)})`
-    : `${numberFormatter(inputUsage ?? 0, 0)} → ${numberFormatter(outputUsage ?? 0, 0)} (∑ ${numberFormatter(totalUsage ?? 0, 0)})`;
+    ? `${numberFormatter(inputUsage ?? 0, 0, undefined, locale)} prompt → ${numberFormatter(outputUsage ?? 0, 0, undefined, locale)} completion (∑ ${numberFormatter(totalUsage ?? 0, 0, undefined, locale)})`
+    : `${numberFormatter(inputUsage ?? 0, 0, undefined, locale)} → ${numberFormatter(outputUsage ?? 0, 0, undefined, locale)} (∑ ${numberFormatter(totalUsage ?? 0, 0, undefined, locale)})`;
 };

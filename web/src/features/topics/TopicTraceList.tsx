@@ -13,6 +13,8 @@ import { type DataTablePeekViewProps } from "@/src/components/table/peek";
 import { Button } from "@/src/components/design-system/Button/Button";
 import { cn } from "@/src/utils/tailwind";
 import { useReadPath } from "@/src/features/events/hooks/useReadPath";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 import {
   type FacetRow,
   type TopicTracesResult,
@@ -64,6 +66,7 @@ export function TopicTraceList({
   headerRef,
   divider,
 }: TopicTraceListProps) {
+  const t = useTranslation(topicsMessages);
   const { rows } = traces;
   const onScrollCapture = (event: UIEvent<HTMLElement>) => {
     const target = event.target as HTMLElement;
@@ -80,7 +83,7 @@ export function TopicTraceList({
   const columns: LangfuseColumnDef<FacetRow>[] = [
     {
       accessorKey: "traceId",
-      header: () => <span className={FIRST_CELL}>Trace ID</span>,
+      header: () => <span className={FIRST_CELL}>{t("traceId")}</span>,
       size: 208,
       minSize: 128,
       cell: ({ row }) => (
@@ -97,12 +100,12 @@ export function TopicTraceList({
     },
     {
       accessorKey: "summary",
-      header: () => <span className={CELL}>Summary</span>,
+      header: () => <span className={CELL}>{t("summary")}</span>,
       size: 300,
       minSize: 180,
       isFlexWidth: true,
       cell: ({ row }) => {
-        const summary = row.original.summary || "No applicable summary.";
+        const summary = row.original.summary || t("noApplicableSummary");
         return (
           <p className={cn("truncate", CELL)} title={summary}>
             {summary}
@@ -113,7 +116,7 @@ export function TopicTraceList({
   ];
   return (
     <section
-      aria-label="Topic traces"
+      aria-label={t("topicTracesAria")}
       ref={tracePanelRef}
       onScrollCapture={onScrollCapture}
       className={cn(
@@ -135,15 +138,15 @@ export function TopicTraceList({
             )}
             <span
               className="truncate font-mono text-xs"
-              title={`~${totalCount.toLocaleString()} traces`}
+              title={t("tracesLabel", { count: totalCount })}
             >
-              {`~${totalCount.toLocaleString()} traces`}
+              {`~${totalCount.toLocaleString()}`}
             </span>
           </p>
           {tracingHref && (
             <Button
               href={tracingHref}
-              text="Open in Tracing"
+              text={t("openInTracing")}
               variant="ghost"
               size="sm"
               icon={ExternalLink}
@@ -178,7 +181,7 @@ export function TopicTraceList({
         }}
         className="min-h-0 overscroll-contain"
         cellPadding="relaxed"
-        noResultsMessage="No trace summaries."
+        noResultsMessage={t("noTraceSummaries")}
         peekView={peekView}
       />
       {traces.hasMore && <TopicTraceLoadMore traces={traces} />}

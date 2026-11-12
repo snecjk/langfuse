@@ -89,10 +89,10 @@ claim. The matrix supersedes it for current status.
 | B3 | 全局通知/toast | `features/notifications`, `ErrorNotification`, `SuccessNotification` | 已登录 | 成功/错误/警告、带操作、上报 | `notifications` | 源码完成 | 部分验证（ErrorNotification.clienttest 覆盖切换更新） | 服务端原文（原始错误诊断保留） |
 | B4 | 顶部横幅/banner | `top-banner`, `payment-banner`, `preview-deployment-banner`, `cloud-status-notification` | 已登录 | 各横幅文案与操作 | `notifications` | 源码完成 | 未验证 | — |
 | B5 | 主题/外观切换 | `theming/ThemeToggle` | 已登录 | 明暗/系统 | `navigation` | 部分迁移 | 未验证 | — |
-| B6 | 通用数据表格 chrome | `components/table/*`, `DataTableToolbar`, `DataTablePagination`, `DataTableRefreshButton`, `DataTableSelectAllBanner`, `DataTableColumnVisibilityFilter`, `DataTableRowHeightSwitch` | 已登录 | 分页、全选、列显示、行高、搜索模式、筛选构建器、刷新、导出、空态 | `table` | 部分迁移 | 部分验证（DataTableToolbar.clienttest 覆盖切换保留草稿/选中） | — |
-| B7 | 通用筛选器 | `features/filters`, `search-bar`, `natural-language-filters` | 已登录 | 过滤构建器、搜索栏、AI 过滤、已应用/清除 | — | 部分迁移（筛选侧栏 chrome 已迁移；filter-builder/search-bar 残余） | 未验证 | — |
+| B6 | 通用数据表格 chrome | `components/table/*`, `DataTableToolbar`, `DataTablePagination`, `DataTableRefreshButton`, `DataTableSelectAllBanner`, `DataTableColumnVisibilityFilter`, `DataTableRowHeightSwitch` | 已登录 | 分页、全选、列显示、行高、搜索模式、筛选构建器、刷新、导出、空态 | `table` | 源码完成（通用组件 chrome 已全量迁移 t()；页面级表格逐页迁移中） | 部分验证（DataTableToolbar.clienttest 覆盖切换保留草稿/选中） | — |
+| B7 | 通用筛选器 | `features/filters`, `search-bar`, `natural-language-filters` | 已登录 | 过滤构建器、搜索栏、AI 过滤、已应用/清除 | — | 源码完成（filter-builder、MultiSelect 硬编码文案已迁移 t()；search-bar 无硬编码残余） | 未验证 | — |
 | B8 | 通用日期/时间选择器 | `components/date-picker`, `global-time-range` | 已登录 | 预设、相对时间、自定义范围 | — | 未迁移 | 未验证 | — |
-| B9 | 通用对话框/表单原语 | `components/design-system/*` (Dialog, Form, PasswordInput, Confirm, Dropzone …) | 已登录 | 按钮、占位符、工具提示、密码显隐、确认/错误/加载、aria | — | 未迁移 | 未验证 | — |
+| B9 | 通用对话框/表单原语 | `components/design-system/*` (Dialog, Form, PasswordInput, Confirm, Dropzone …) | 已登录 | 按钮、占位符、工具提示、密码显隐、确认/错误/加载、aria | — | 部分迁移（PasswordInput Show/Hide 及 Dropzone 文案已迁移 t()；Dialog/Confirm/DialogController 尚未迁移） | 未验证 | — |
 
 ## C. Observability & analytics
 
@@ -168,9 +168,9 @@ claim. The matrix supersedes it for current status.
 | # | Scope | Actual owner | Gate | Sub-flows & states | Namespace | Source migration | Verification | Exception |
 |---|-------|--------------|------|--------------------|-----------|------------------|--------------|-----------|
 | H1 | 相对时间/本地时间 | `utils/dates.ts` | 已登录 | 显示格式、相对时间、tooltip | `common`（ locale 参数） | 源码完成 | 已验证（dates 固定时钟双语场景） | 机器标识（ISO/时区不变） |
-| H2 | 数字/金额/缩写 | 数字格式化调用点 | 已登录 | 普通数字、金额、缩写 | — | 未迁移 | 未验证 | 机器标识（币种/精度/原值不变） |
-| H3 | 图表 chrome | `features/widgets/chart-library`（prepare→visualise） | 已登录 | 时间轴、数值轴、图例/tooltip/分析 chrome | — | 未迁移 | 未验证 | 机器标识（原数据/排序不变） |
-| H4 | 日期/时间/范围选择器 | date-picker 消费点 | 已登录 | 预设、相对时间、第三方 chrome | — | 未迁移 | 未验证 | 机器标识（时区/区间/时间戳不变） |
+| H2 | 数字/金额/缩写 | 数字格式化调用点 | 已登录 | 普通数字、金额、缩写 | common | 部分迁移（numbers.ts 所有格式化函数已加 locale 参数，核心表格/组件调用点已传递 locale；其余调用点逐步迁移中） | 部分验证（numbers.clienttest.ts 新增 zh-CN/en 格式化测试 14/14 通过） | 机器标识（币种/精度/原值不变） |
+| H3 | 图表 chrome | `features/widgets/chart-library`（prepare→visualise） | 已登录 | 时间轴、数值轴、图例/tooltip/分析 chrome | chart-library | 部分迁移（formatMetric/valueFormatter 已加 locale 参数，LineChart/AreaChart/VerticalBarChart/Histogram/TopListChart/PieChart/PivotTable/Chart/TracesBarListChart 已传递 locale） | 部分验证（chart-library utils.clienttest.ts 22/22 通过） | 机器标识（原数据/排序不变） |
+| H4 | 日期/时间/范围选择器 | date-picker 消费点 | 已登录 | 预设、相对时间、第三方 chrome | common | 部分迁移（DatePicker 已加 locale prop 并传入 date-fns zh-CN/en-US；filter-builder 通过 useInterfaceLocale 传递；formatDateRange 尚未加 locale） | 部分验证（date-picker.clienttest.ts 现有测试通过，需补充中文场景） | 机器标识（时区/区间/时间戳不变） |
 
 ---
 

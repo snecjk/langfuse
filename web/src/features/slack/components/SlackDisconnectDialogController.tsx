@@ -5,6 +5,8 @@ import { showErrorToast } from "@/src/features/notifications/showErrorToast";
 import { api, reportTrpcErrorWithoutToast } from "@/src/utils/api";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
 import { SlackDisconnectDialog } from "@/src/features/slack/components/SlackDisconnectDialog/SlackDisconnectDialog";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 
 interface SlackDisconnectDialogControllerProps {
   /** Project ID for the Slack integration */
@@ -29,21 +31,22 @@ export const SlackDisconnectDialogController = ({
   onError,
   children,
 }: SlackDisconnectDialogControllerProps) => {
+  const t = useTranslation(integrationMessages);
   const disconnectMutation = api.slack.disconnect.useMutation({
     onSuccess: () => {
       showSuccessToast({
         operation: "slack.disconnect",
-        title: "Slack Disconnected",
-        description: "Successfully disconnected from your Slack workspace.",
+        title: t("slackDisconnectSuccess"),
+        description: t("slackDisconnectSuccessDesc"),
       });
 
       onSuccess?.();
     },
     onError: (error) => {
-      const errorMessage = error.message || "Failed to disconnect from Slack";
+      const errorMessage = error.message || t("slackDisconnectFailedFallback");
 
       showErrorToast(
-        "Disconnection Failed",
+        t("slackDisconnectFailed"),
         errorMessage,
         classifyTrpcToastError(error, "slack.disconnect"),
       );

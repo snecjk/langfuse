@@ -6,6 +6,8 @@ import { TopicGrid } from "./TopicGrid";
 import { TopicTreemap } from "./TopicTreemap";
 import { prepareTopicGrid } from "./prepare-topic-grid";
 import { type TopicsResultsView } from "./TopicsResultsViewSelect";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 
 type MobileTopicVisualizationProps = {
   view: TopicsResultsView;
@@ -19,10 +21,14 @@ type MobileTopicVisualizationProps = {
   onSelectTrace: (traceId: string | null) => void;
 };
 
-function gridMessage(query: MobileTopicVisualizationProps["mapResult"]) {
-  if (query.error) return `Grid could not load: ${query.error.message}`;
-  if (!query.data) return "Loading grid…";
-  return query.data.reason ?? "This run has no saved embedding projection.";
+function gridMessage(
+  query: MobileTopicVisualizationProps["mapResult"],
+  t: ReturnType<typeof useTranslation<typeof topicsMessages>>,
+) {
+  if (query.error)
+    return t("gridCouldNotLoad", { message: query.error.message });
+  if (!query.data) return t("loadingGrid");
+  return query.data.reason ?? t("noSavedEmbeddingProjection");
 }
 
 export function MobileTopicVisualization({
@@ -36,6 +42,7 @@ export function MobileTopicVisualization({
   onSelectTopic,
   onSelectTrace,
 }: MobileTopicVisualizationProps) {
+  const t = useTranslation(topicsMessages);
   function selectMapTopic(topicId: string | null) {
     // Fitting the camera leaves the trace filters and active panel intact.
     if (topicId !== null) onSelectTopic(topicId);
@@ -54,14 +61,14 @@ export function MobileTopicVisualization({
       </div>
     ) : (
       <p className="text-muted-foreground p-4 text-sm">
-        No topics in this time range. Browse traces to read their summaries.
+        {t("noTopicsInRange")} {t("browseTraces")}
       </p>
     );
   }
   if (!facet.map) {
     return (
       <p className="text-muted-foreground p-4 text-sm">
-        No map published for this facet. Browse topics or traces instead.
+        {t("noMapPublished")} {t("browseTopicsOrTraces")}
       </p>
     );
   }
@@ -86,7 +93,7 @@ export function MobileTopicVisualization({
   if (mapResult.error || !mapResult.data || mapResult.data.status !== "ready") {
     return (
       <p className="text-muted-foreground p-4 text-sm">
-        {gridMessage(mapResult)}
+        {gridMessage(mapResult, t)}
       </p>
     );
   }

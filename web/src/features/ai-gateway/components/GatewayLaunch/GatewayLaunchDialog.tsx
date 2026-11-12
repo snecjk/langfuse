@@ -17,24 +17,29 @@ import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePos
 import { GatewayHero } from "@/src/features/ai-gateway/components/GatewayLaunch/GatewayHero";
 import { GATEWAY_OVERVIEW_DOCS_URL } from "@/src/features/ai-gateway/constants/gatewayDocsUrls";
 import { buildGatewayPagePath } from "@/src/features/ai-gateway/fns/gatewayUrls/buildGatewayPagePath";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 
 const copy = {
   admin: {
-    title: "Introducing Langfuse AI Gateway",
-    lead: "Route Claude Code, Codex, OpenCode, and your own apps through Langfuse. Each call becomes a full trace, along with who made it and what it cost.",
-    points: [
-      "Use one key for Anthropic and OpenAI",
-      "Track spend by person, team, and key",
-      "Approve and remove models for entire company",
-      "Record full traces, not just token counts",
-    ],
+    titleKey: "launchDialogAdminTitle",
+    leadKey: "launchDialogAdminLead",
+    pointKeys: [
+      "launchDialogAdminPoint1",
+      "launchDialogAdminPoint2",
+      "launchDialogAdminPoint3",
+      "launchDialogAdminPoint4",
+    ] as const,
   },
   member: {
-    title: "Get your own AI Gateway key",
-    lead: "Access Anthropic and OpenAI models with a single key you create yourself.",
-    points: ["Create your own keys", "One key for Anthropic and OpenAI models"],
+    titleKey: "launchDialogMemberTitle",
+    leadKey: "launchDialogMemberLead",
+    pointKeys: [
+      "launchDialogMemberPoint1",
+      "launchDialogMemberPoint2",
+    ] as const,
   },
-};
+} as const;
 
 export function GatewayLaunchDialog({
   organizationId,
@@ -49,13 +54,17 @@ export function GatewayLaunchDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const t = useTranslation(gatewayMessages);
   const capture = usePostHogClientCapture();
   const router = useRouter();
   // Menus inside the dialog portal here, so the modal does not hide them from assistive tech.
   const [popoverContainer, setPopoverContainer] =
     useState<HTMLDivElement | null>(null);
-  const { title, lead, points } =
+  const { titleKey, leadKey, pointKeys } =
     copy[state === "get-key" ? "member" : "admin"];
+  const title = t(titleKey);
+  const lead = t(leadKey);
+  const points = pointKeys.map((k) => t(k));
   const setupHref = (orgId: string) => buildGatewayPagePath(orgId);
 
   return (
@@ -103,12 +112,12 @@ export function GatewayLaunchDialog({
                 }
                 className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm"
               >
-                Learn more
+                {t("learnMore")}
                 <ArrowUpRight size="sm" aria-hidden="true" />
               </Link>
               {state === "setup" && setupOptions.length > 1 && (
                 <DropdownMenu
-                  title="Select an organization"
+                  title={t("selectOrganization")}
                   items={setupOptions.map((option) => ({
                     type: "item",
                     id: option.organizationId,
@@ -125,7 +134,7 @@ export function GatewayLaunchDialog({
                       className="gap-1.5"
                       {...getTriggerProps()}
                     >
-                      Set up gateway
+                      {t("setUpGateway")}
                       <DropdownIndicator nudge />
                     </MenuTriggerButton>
                   )}
@@ -139,7 +148,7 @@ export function GatewayLaunchDialog({
                 >
                   <Button
                     variant="primary"
-                    text="Set up gateway"
+                    text={t("setUpGateway")}
                     href={setupHref(organizationId)}
                   />
                 </span>
@@ -152,14 +161,14 @@ export function GatewayLaunchDialog({
                 >
                   <Button
                     variant="primary"
-                    text="Get gateway key"
+                    text={t("getGatewayKey")}
                     href={buildGatewayPagePath(organizationId, "api-keys")}
                   />
                 </span>
               )}
               {state === "ask-admin" && (
                 <p role="status" className="text-muted-foreground text-sm">
-                  Ask your admin to set it up.
+                  {t("askAdminToSetup")}
                 </p>
               )}
             </div>

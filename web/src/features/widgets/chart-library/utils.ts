@@ -5,6 +5,7 @@ import {
 } from "./chart-props";
 import { type DashboardWidgetChartType } from "@langfuse/shared/src/db";
 import { compactNumberFormatter, numberFormatter } from "@/src/utils/numbers";
+import type { Locale } from "@/src/features/i18n/locale";
 
 export const toFullMetricString = (metric: FormattedMetric): string =>
   `${metric.negative ? "-" : ""}${metric.prefix ?? ""}${metric.main}${metric.suffix ?? ""}`;
@@ -366,9 +367,9 @@ const formatWithConstrainedDecimals = ({
  */
 export function formatMetric(
   value: number,
-  options: FormatMetricOptions,
+  options: FormatMetricOptions & { locale?: Locale },
 ): FormattedMetric {
-  const { unit, style, maxCharacters, usdPrecision } = options;
+  const { unit, style, maxCharacters, usdPrecision, locale = "en" } = options;
 
   const negative = value < 0;
   const absValue = Math.abs(value);
@@ -454,7 +455,7 @@ export function formatMetric(
       );
     }
 
-    return applyNegative({ main: compactNumberFormatter(absValue, 3) });
+    return applyNegative({ main: compactNumberFormatter(absValue, 3, locale) });
   }
 
   if (maxCharacters) {
@@ -463,5 +464,5 @@ export function formatMetric(
     );
   }
 
-  return applyNegative({ main: numberFormatter(absValue, 0, 2) });
+  return applyNegative({ main: numberFormatter(absValue, 0, 2, locale) });
 }

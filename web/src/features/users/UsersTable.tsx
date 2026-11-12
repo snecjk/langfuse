@@ -9,7 +9,10 @@ import {
 } from "use-query-params";
 import { DataTableToolbar } from "@/src/components/table/data-table-toolbar";
 import { DataTable } from "@/src/components/table/data-table";
-import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
 import { usersMessages } from "@/src/features/i18n/messages/users";
 import {
   DataTableControls,
@@ -79,6 +82,7 @@ export function UsersTable({
   const router = useRouter();
   const projectId = router.query.projectId as string;
   const t = useTranslation(usersMessages);
+  const locale = useInterfaceLocale();
 
   // The two read paths answer different facet sets from different tables, so
   // they get different configs — and different persistence keys, or a v4-only
@@ -554,7 +558,11 @@ export function UsersTable({
       data: userRowData.rows?.map((t) => ({
         userId: t.id,
         environment: t.environment ?? undefined,
-        totalTraces: compactNumberFormatter(Number(t.traceCount)),
+        totalTraces: compactNumberFormatter(
+          Number(t.traceCount),
+          undefined,
+          locale,
+        ),
         firstEvent: t.firstTrace?.toLocaleString() ?? "No event yet",
         lastEvent: t.lastTrace?.toLocaleString() ?? "No event yet",
         totalEvents: compactNumberFormatter(
@@ -562,8 +570,12 @@ export function UsersTable({
             ? Number(t.totalObservations ?? 0)
             : Number(t.totalTraces ?? 0) + Number(t.totalObservations ?? 0),
         ),
-        totalTokens: compactNumberFormatter(t.totalTokens ?? 0),
-        totalCost: usdFormatter(t.sumCalculatedTotalCost ?? 0, 2, 2),
+        totalTokens: compactNumberFormatter(
+          t.totalTokens ?? 0,
+          undefined,
+          locale,
+        ),
+        totalCost: usdFormatter(t.sumCalculatedTotalCost ?? 0, 2, 2, locale),
       })),
     } as const;
   })();

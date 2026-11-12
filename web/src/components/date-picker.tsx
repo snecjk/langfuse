@@ -6,6 +6,7 @@ import * as React from "react";
 import { Calendar as CalendarIcon, X } from "@langfuse/icons";
 import { DropdownIndicator } from "@/src/components/design-system/DropdownIndicator/DropdownIndicator";
 import { addMinutes, format } from "date-fns";
+import { zhCN, enUS } from "date-fns/locale";
 import { Button } from "@/src/components/ui/button";
 import { Calendar } from "@/src/components/ui/Calendar";
 import {
@@ -17,6 +18,7 @@ import { cn } from "@/src/utils/tailwind";
 import { type DateRange as RDPDateRange } from "react-day-picker";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { setBeginningOfDay, setEndOfDay } from "@/src/utils/dates";
+import type { Locale } from "@/src/features/i18n/locale";
 import { TimePicker } from "@/src/components/ui/TimePicker";
 import {
   TIME_RANGES,
@@ -32,6 +34,7 @@ export function DatePicker({
   className,
   disabled,
   includeTimePicker,
+  locale = "en",
 }: {
   date?: Date | undefined;
   onChange: (date: Date | undefined) => void;
@@ -39,6 +42,7 @@ export function DatePicker({
   className?: string;
   disabled?: boolean;
   includeTimePicker?: boolean;
+  locale?: Locale;
 }) {
   return (
     <div className="flex flex-row gap-2 align-middle">
@@ -55,7 +59,9 @@ export function DatePicker({
           >
             <CalendarIcon size="base" color="default" __rawClassName="mr-2" />
             {date ? (
-              format(date, includeTimePicker ? "PPP pp" : "PPP")
+              format(date, includeTimePicker ? "PPP pp" : "PPP", {
+                locale: locale === "zh-CN" ? zhCN : enUS,
+              })
             ) : (
               <span>Pick a date</span>
             )}

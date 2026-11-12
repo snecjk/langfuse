@@ -4,6 +4,8 @@ import { NumberParam, useQueryParams, withDefault } from "use-query-params";
 import { type AsyncTableData } from "@/src/components/design-system/table/Table";
 import { ConfirmationDialogController } from "@/src/components/design-system/ConfirmationDialogController/ConfirmationDialogController";
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { batchMessages } from "@/src/features/i18n/messages/batch";
 import { api } from "@/src/utils/api";
 import { safeExtract } from "@/src/utils/map-utils";
 import { BatchExportsTable, type BatchExportRow } from "./BatchExportsTable";
@@ -13,6 +15,7 @@ export function ConnectedBatchExportsTable({
 }: {
   projectId: string;
 }) {
+  const t = useTranslation(batchMessages);
   const [paginationState, setPaginationState] = useQueryParams({
     pageIndex: withDefault(NumberParam, 0),
     pageSize: withDefault(NumberParam, 10),
@@ -73,9 +76,9 @@ export function ConnectedBatchExportsTable({
 
   return (
     <ConfirmationDialogController<string>
-      title="Cancel batch export?"
-      text="Are you sure you want to cancel this batch export? This action cannot be undone."
-      confirmLabel="Yes, cancel export"
+      title={t("cancelExportTitle")}
+      text={t("cancelExportText")}
+      confirmLabel={t("cancelExportConfirm")}
       variant="destructive"
       loading={cancelBatchExport.isPending}
       error={cancelBatchExport.error?.message}

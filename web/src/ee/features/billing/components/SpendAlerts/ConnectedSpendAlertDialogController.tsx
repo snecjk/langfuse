@@ -1,4 +1,4 @@
-import { useId, type ComponentProps } from "react";
+import { useId, useMemo, type ComponentProps } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -19,16 +19,14 @@ import { showSuccessToast } from "@/src/features/notifications/showSuccessToast"
 import { showToast } from "@/src/features/notifications/showToast";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
 import { Info } from "@langfuse/icons";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
+// Loose form schema (types only); the translated validation schema is built
+// inside SpendAlertDialog with the active locale's messages.
 const spendAlertSchema = z.object({
-  title: z
-    .string()
-    .min(1, "Title is required")
-    .max(100, "Title must be less than 100 characters"),
-  limit: z.coerce
-    .number()
-    .positive("Limit must be positive")
-    .max(1000000, "Limit must be less than $1,000,000"),
+  title: z.string(),
+  limit: z.coerce.number(),
 });
 
 type SpendAlertFormInput = z.input<typeof spendAlertSchema>;
@@ -59,6 +57,7 @@ export function ConnectedSpendAlertDialogController({
   const createMutation = api.spendAlerts.createSpendAlert.useMutation();
   const updateMutation = api.spendAlerts.updateSpendAlert.useMutation();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
+  const t = useTranslation(enterpriseMessages);
 
   const onSubmit = async (
     state: SpendAlertDialogState,
@@ -80,7 +79,7 @@ export function ConnectedSpendAlertDialogController({
         });
         showSuccessToast({
           operation: "spend_alert.update",
-          title: "Spend alert updated successfully",
+          title: t("spendAlertUpdated"),
           description: "",
         });
       } else {
@@ -95,7 +94,7 @@ export function ConnectedSpendAlertDialogController({
         });
         showSuccessToast({
           operation: "spend_alert.create",
-          title: "Spend alert created successfully",
+          title: t("spendAlertCreated"),
           description: "",
         });
       }
@@ -105,7 +104,10 @@ export function ConnectedSpendAlertDialogController({
       reportNonTrpcError(error, "billing");
       showToast({
         type: "ERROR",
-        title: `Failed to ${state.mode === "edit" ? "update" : "create"} spend alert. Please try again.`,
+        title:
+          state.mode === "edit"
+            ? t("spendAlertUpdateFailed")
+            : t("spendAlertCreateFailed"),
         analytics: classifyTrpcToastError(
           error,
           state.mode === "edit" ? "spend_alert.update" : "spend_alert.create",
@@ -140,8 +142,23 @@ function SpendAlertDialog({
   onSubmit: (data: SpendAlertFormOutput) => Promise<void>;
 }) {
   const formId = useId();
+  const t = useTranslation(enterpriseMessages);
+  const formSchema = useMemo(
+    () =>
+      z.object({
+        title: z
+          .string()
+          .min(1, t("spendAlertTitleRequired"))
+          .max(100, t("spendAlertTitleTooLong")),
+        limit: z.coerce
+          .number()
+          .positive(t("spendAlertLimitPositive"))
+          .max(1000000, t("spendAlertLimitTooHigh")),
+      }),
+    [t],
+  );
   const form = useForm<SpendAlertFormInput, undefined, SpendAlertFormOutput>({
-    resolver: zodResolver(spendAlertSchema),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       title: state.mode === "edit" ? state.alert.title : "",
       limit:
@@ -154,10 +171,17 @@ function SpendAlertDialog({
   return (
     <Dialog
       size="sm"
-      title={state.mode === "edit" ? "Edit Spend Alert" : "Create Spend Alert"}
+      title={
+        state.mode === "edit"
+          ? t("spendAlertEditTitle")
+          : t("spendAlertCreateTitle")
+      }
       actions={[
         {
-          label: state.mode === "edit" ? "Update Alert" : "Create Alert",
+          label:
+            state.mode === "edit"
+              ? t("spendAlertUpdateAction")
+              : t("spendAlertCreateAction"),
           loading: isSubmitting,
           type: "submit",
           form: formId,
@@ -165,9 +189,7 @@ function SpendAlertDialog({
       ]}
     >
       <Dialog.Body>
-        <p className="text-muted-foreground">
-          Get notified when your organization&apos;s spending exceeds a limit.
-        </p>
+        <p className="text-muted-foreground">{t("spendAlertDescription")}</p>
         <Form {...form}>
           <form
             id={formId}
@@ -179,9 +201,12 @@ function SpendAlertDialog({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Alert Title</FormLabel>
+                  <FormLabel>{t("spendAlertTitleLabel")}</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Production Alert" {...field} />
+                    <Input
+                      placeholder={t("spendAlertTitlePlaceholder")}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -192,14 +217,14 @@ function SpendAlertDialog({
               name="limit"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Limit (USD)</FormLabel>
+                  <FormLabel>{t("spendAlertLimitLabel")}</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       min="0.01"
                       step="0.01"
                       max="1000000"
-                      placeholder="100.00"
+                      placeholder={t("spendAlertLimitPlaceholder")}
                       name={field.name}
                       onBlur={field.onBlur}
                       ref={field.ref}
@@ -219,16 +244,13 @@ function SpendAlertDialog({
             <div className="text-muted-foreground text-xs">
               <div className="flex flex-row items-center">
                 <Info size="sm" __rawClassName="mr-2" />
-                <span className="font-bold">How it works</span>
+                <span className="font-bold">{t("spendAlertHowItWorks")}</span>
               </div>
               <ul className="list-disc pl-5">
-                <li>
-                  The limit is evaluated against your upcoming invoice total,
-                  including base fee, running usage fees, discounts, and taxes.
-                </li>
-                <li>Alerts trigger once per billing cycle.</li>
-                <li>You will receive an email when the alert is triggered.</li>
-                <li>Alerts are evaluated with a 90 minute delay.</li>
+                <li>{t("spendAlertHowItWorks1")}</li>
+                <li>{t("spendAlertHowItWorks2")}</li>
+                <li>{t("spendAlertHowItWorks3")}</li>
+                <li>{t("spendAlertHowItWorks4")}</li>
               </ul>
             </div>
           </form>

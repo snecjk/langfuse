@@ -20,10 +20,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/src/components/ui/card";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 
 export default function SlackIntegrationPage() {
   const router = useRouter();
   const projectId = router.query.projectId as string;
+  const t = useTranslation(integrationMessages);
 
   // Handle popup OAuth completion
   useEffect(() => {
@@ -101,16 +104,16 @@ export default function SlackIntegrationPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                Test Integration
+                {t("slackTestIntegrationTitle")}
               </CardTitle>
-              <CardDescription>
-                Test your Slack integration by sending a message to a channel.
-              </CardDescription>
+              <CardDescription>{t("slackTestIntegrationDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <div className="mb-2 flex items-center gap-1.5">
-                  <h4 className="text-sm font-bold">Select Test Channel</h4>
+                  <h4 className="text-sm font-bold">
+                    {t("slackSelectTestChannel")}
+                  </h4>
                   <PrivateChannelsInfoTooltip />
                 </div>
                 <div className="max-w-md">
@@ -119,7 +122,7 @@ export default function SlackIntegrationPage() {
                     selectedChannelId={selectedChannel?.id}
                     selectedChannel={selectedChannel}
                     onChannelSelect={setSelectedChannel}
-                    placeholder="Choose a channel to test"
+                    placeholder={t("slackChooseChannel")}
                     showRefreshButton={true}
                   />
                 </div>
@@ -129,35 +132,43 @@ export default function SlackIntegrationPage() {
                 <div className="space-y-4 border-t pt-4">
                   <div>
                     <h4 className="mb-3 text-sm font-bold">
-                      Channel Information
+                      {t("slackChannelInfo")}
                     </h4>
                     <div className="grid gap-4 md:grid-cols-2">
                       <div>
-                        <p className="text-sm font-bold">Channel Name</p>
+                        <p className="text-sm font-bold">
+                          {t("slackChannelName")}
+                        </p>
                         <p className="text-muted-foreground text-sm">
                           #{selectedChannel.name}
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm font-bold">Channel Type</p>
+                        <p className="text-sm font-bold">
+                          {t("slackChannelType")}
+                        </p>
                         {isManualEntry ? (
                           <span className="text-muted-foreground text-xs">
-                            Available after sending a test message
+                            {t("slackAvailableAfterTest")}
                           </span>
                         ) : (
                           <Badge
                             color="outline"
                             text={
-                              selectedChannel.isPrivate ? "Private" : "Public"
+                              selectedChannel.isPrivate
+                                ? t("slackPrivate")
+                                : t("slackPublic")
                             }
                           />
                         )}
                       </div>
                       <div>
-                        <p className="text-sm font-bold">Channel ID</p>
+                        <p className="text-sm font-bold">
+                          {t("slackChannelId")}
+                        </p>
                         {isManualEntry ? (
                           <span className="text-muted-foreground text-xs">
-                            Available after sending a test message
+                            {t("slackAvailableAfterTest")}
                           </span>
                         ) : (
                           <p className="text-muted-foreground font-mono text-sm">
@@ -194,14 +205,9 @@ export default function SlackIntegrationPage() {
 
               {!selectedChannel && (
                 <div className="text-muted-foreground text-sm">
-                  Select a channel above to view its details and test message
-                  delivery. Private channels appear only for the person who
-                  connected Slack, and only if both they and the app are
-                  members. Invite the app with{" "}
-                  <code className="bg-muted rounded px-1 py-0.5">
-                    /invite @Langfuse
-                  </code>
-                  .
+                  {t("slackNoChannelSelected", {
+                    code: "/invite @Langfuse",
+                  })}
                 </div>
               )}
             </CardContent>

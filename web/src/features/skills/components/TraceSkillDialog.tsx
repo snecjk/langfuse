@@ -1,12 +1,15 @@
 import { CodeSection } from "@/src/components/design-system/CodeSection/CodeSection";
 import { Dialog } from "@/src/components/design-system/Dialog/Dialog";
 import { Tabs } from "@/src/components/design-system/Tabs/Tabs";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 
 export function TraceSkillDialog({
   skill,
 }: {
   skill: { name: string; version: number };
 }) {
+  const t = useTranslation(skillMessages);
   const name = JSON.stringify(skill.name);
   const sdk = `import { LangfuseClient } from "@langfuse/client";
 import { propagateAttributes } from "@langfuse/tracing";
@@ -44,13 +47,13 @@ with propagate_attributes(
   );
 
   return (
-    <Dialog title="Quick Start" size="md">
+    <Dialog title={t("quickStart")} size="md">
       <Dialog.Body>
         <Tabs defaultValue="sdk">
-          <Tabs.List variant="underline" aria-label="Tracing integration">
-            <Tabs.Trigger value="sdk" label="JS/TS SDK" />
-            <Tabs.Trigger value="python-sdk" label="Python SDK" />
-            <Tabs.Trigger value="otel" label="OTEL" />
+          <Tabs.List variant="underline" aria-label={t("tracingIntegration")}>
+            <Tabs.Trigger value="sdk" label={t("jsTsSDK")} />
+            <Tabs.Trigger value="python-sdk" label={t("pythonSDK")} />
+            <Tabs.Trigger value="otel" label={t("otel")} />
           </Tabs.List>
           <Tabs.Content value="sdk">
             <div className="pt-3">

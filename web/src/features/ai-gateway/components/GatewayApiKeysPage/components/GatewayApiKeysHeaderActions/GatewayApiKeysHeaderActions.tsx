@@ -4,6 +4,8 @@ import { Button } from "@/src/components/ui/button";
 import { CreateGatewayApiKeyDialogController } from "@/src/features/ai-gateway/components/GatewayApiKeysPage/components/CreateGatewayApiKeyDialogController/CreateGatewayApiKeyDialogController";
 import { TeamInviteDialogController } from "@/src/features/ai-gateway/components/GatewayApiKeysPage/components/TeamInviteDialogController/TeamInviteDialogController";
 import { UsageInstructionsDialogController } from "@/src/features/ai-gateway/components/GatewayApiKeysPage/components/UsageInstructionsDialogController/UsageInstructionsDialogController";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 
 export type GatewayApiKeysHeaderActionsProps = {
   organizationId: string;
@@ -16,6 +18,7 @@ export function GatewayApiKeysHeaderActions({
   organizationId,
   canInvite,
 }: GatewayApiKeysHeaderActionsProps) {
+  const t = useTranslation(gatewayMessages);
   return (
     <div className="flex items-center gap-2">
       {canInvite ? (
@@ -23,7 +26,7 @@ export function GatewayApiKeysHeaderActions({
           {({ openDialog }) => (
             <Button variant="outline" onClick={openDialog}>
               <UserPlus size="base" __rawClassName="mr-1.5" />
-              Notify team
+              {t("notifyTeam")}
             </Button>
           )}
         </TeamInviteDialogController>
@@ -32,7 +35,7 @@ export function GatewayApiKeysHeaderActions({
         {({ openDialog }) => (
           <Button variant="outline" onClick={openDialog}>
             <BookOpen size="base" __rawClassName="mr-1.5" />
-            Usage instructions
+            {t("usageInstructions")}
           </Button>
         )}
       </UsageInstructionsDialogController>
@@ -40,7 +43,7 @@ export function GatewayApiKeysHeaderActions({
         {({ openDialog }) => (
           <Button onClick={openDialog}>
             <Plus size="base" __rawClassName="mr-1.5" />
-            Create key
+            {t("createKey")}
           </Button>
         )}
       </CreateGatewayApiKeyDialogController>

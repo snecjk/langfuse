@@ -5,6 +5,8 @@ import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePos
 import { showSuccessToast } from "@/src/features/notifications/showSuccessToast";
 import { showToast } from "@/src/features/notifications/showToast";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export function ConnectedDeleteSpendAlertDialogController({
   orgId,
@@ -18,6 +20,7 @@ export function ConnectedDeleteSpendAlertDialogController({
   >["children"];
 }) {
   const capture = usePostHogClientCapture();
+  const t = useTranslation(enterpriseMessages);
 
   const deleteMutation = api.spendAlerts.deleteSpendAlert.useMutation();
 
@@ -33,7 +36,7 @@ export function ConnectedDeleteSpendAlertDialogController({
       });
       showSuccessToast({
         operation: "spend_alert.delete",
-        title: "Spend alert deleted successfully",
+        title: t("spendAlertDeleted"),
         description: "",
       });
       onSuccess();
@@ -41,7 +44,7 @@ export function ConnectedDeleteSpendAlertDialogController({
       reportNonTrpcError(error, "billing");
       showToast({
         type: "ERROR",
-        title: "Failed to delete spend alert. Please try again.",
+        title: t("spendAlertDeleteFailed"),
         analytics: classifyTrpcToastError(error, "spend_alert.delete"),
       });
       throw error;
@@ -50,9 +53,9 @@ export function ConnectedDeleteSpendAlertDialogController({
 
   return (
     <ConfirmationDialogController<string>
-      title="Delete Spend Alert"
-      text="Are you sure you want to delete this spend alert? This action cannot be undone and you will no longer receive notifications for this threshold."
-      confirmLabel="Delete Alert"
+      title={t("spendAlertDeleteTitle")}
+      text={t("spendAlertDeleteText")}
+      confirmLabel={t("spendAlertDeleteAction")}
       variant="destructive"
       loading={deleteMutation.isPending}
       error={deleteMutation.error?.message}

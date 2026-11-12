@@ -6,6 +6,8 @@ import type {
   GatewayIngestionSettings,
   GatewayProject,
 } from "@/src/features/ai-gateway/components/GatewaySetupPage/types/gatewaySetup";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 
 export type IngestionProjectRowProps = {
   settings: GatewayIngestionSettings;
@@ -19,15 +21,16 @@ export function IngestionProjectRow({
   projects,
   onChange,
 }: IngestionProjectRowProps) {
+  const t = useTranslation(gatewayMessages);
   const targetOptions = [
-    { value: "new" as const, label: "new" },
+    { value: "new" as const, label: t("newProjectLabel") },
     projects.length > 0
-      ? { value: "existing" as const, label: "existing" }
+      ? { value: "existing" as const, label: t("existingProjectLabel") }
       : {
           value: "existing" as const,
-          label: "existing",
+          label: t("existingProjectLabel"),
           disabled: true as const,
-          disabledReason: "This organization has no projects yet.",
+          disabledReason: t("noProjectsYet"),
         },
   ];
   const projectOptions = projects.map((project) => ({
@@ -51,22 +54,24 @@ export function IngestionProjectRow({
 
   return (
     <div className="flex flex-wrap items-center gap-2 text-sm">
-      <span>{isNewProject ? "Record in a" : "Record in an"}</span>
+      <span>
+        {isNewProject ? t("recordInNewProject") : t("recordInExistingProject")}
+      </span>
       <div className="w-fit">
         <SelectInput
-          aria-label="New or existing project"
-          placeholder="new"
+          aria-label={t("newOrExistingProject")}
+          placeholder={t("newProjectLabel")}
           value={settings.projectTarget}
           options={targetOptions}
           onValueChange={handleTargetChange}
         />
       </div>
-      <span>{isNewProject ? "project named" : "project"}</span>
+      <span>{isNewProject ? t("projectNamed") : t("projectLabel")}</span>
       {isNewProject ? (
         <div className="ph-no-capture w-fit">
           <Input
             layout="inline"
-            aria-label="Project name"
+            aria-label={t("projectName")}
             value={settings.newProjectName}
             onChange={handleNameChange}
             error={settings.newProjectName.trim().length === 0}
@@ -75,9 +80,9 @@ export function IngestionProjectRow({
       ) : (
         <div className="ph-no-capture w-fit">
           <SelectInput
-            aria-label="Ingestion project"
-            placeholder="Select a project"
-            search={{ placeholder: "Search projects" }}
+            aria-label={t("ingestionProject")}
+            placeholder={t("selectProject")}
+            search={{ placeholder: t("searchProjects") }}
             value={settings.existingProjectId ?? ""}
             options={projectOptions}
             onValueChange={handleProjectChange}

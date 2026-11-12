@@ -1,4 +1,5 @@
 import React from "react";
+import { useInterfaceLocale } from "@/src/features/i18n/I18nProvider";
 import { Separator } from "@/src/components/ui/separator";
 import { numberFormatter } from "@/src/utils/numbers";
 import { Skeleton } from "@/src/components/ui/skeleton";
@@ -19,6 +20,7 @@ export function LevelCountsDisplay({
   counts,
   isLoading,
 }: LevelCountsDisplayProps) {
+  const locale = useInterfaceLocale();
   if (isLoading) {
     return (
       <div className="flex min-h-6 items-center">
@@ -39,7 +41,7 @@ export function LevelCountsDisplay({
                 {symbol}{" "}
                 {customNumberFormatter
                   ? customNumberFormatter(count)
-                  : numberFormatter(count, 0)}
+                  : numberFormatter(count, 0, undefined, locale)}
               </span>
             </div>
             {index < nonZeroCounts.length - 1 && (

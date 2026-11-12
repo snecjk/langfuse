@@ -32,6 +32,8 @@ import { useLangfuseCloudRegion } from "@/src/features/organizations/hooks";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
 import { api } from "@/src/utils/api";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 type ProposedChange = {
   flag: FeaturePreviewFlag;
@@ -50,6 +52,7 @@ export function OrganizationFeaturePreviewsSettings({
   const session = useSession();
   const { isLangfuseCloud } = useLangfuseCloudRegion();
   const capture = usePostHogClientCapture();
+  const t = useTranslation(enterpriseMessages);
   const canOpenPersonalPreviews = canOpenPersonalFeaturePreviews({
     session: session.data,
     isLangfuseCloud,
@@ -84,16 +87,19 @@ export function OrganizationFeaturePreviewsSettings({
       ]);
       showSuccessToast({
         operation: "organization_feature_preview.update",
-        title: "Feature preview default updated",
-        description: `${featurePreviewLabels[variables.flag]} was ${
-          variables.enabled ? "enabled" : "disabled"
-        } for this organization.`,
+        title: t("featurePreviewsUpdatedTitle"),
+        description: t("featurePreviewsUpdatedDescription", {
+          name: featurePreviewLabels[variables.flag],
+          state: variables.enabled
+            ? t("featurePreviewStateEnabled")
+            : t("featurePreviewStateDisabled"),
+        }),
       });
     },
     onError: (error) => {
       setProposedChange(null);
       showErrorToast(
-        "Failed to update feature preview",
+        t("featurePreviewsUpdateFailed"),
         error.message,
         classifyTrpcToastError(error, "organization_feature_preview.update"),
       );
@@ -103,7 +109,7 @@ export function OrganizationFeaturePreviewsSettings({
   if (defaultsQuery.isError) {
     return (
       <Alert variant="destructive">
-        <Alert.Title>Feature previews unavailable</Alert.Title>
+        <Alert.Title>{t("featurePreviewsUnavailable")}</Alert.Title>
         <Alert.Description>{defaultsQuery.error.message}</Alert.Description>
       </Alert>
     );
@@ -117,7 +123,7 @@ export function OrganizationFeaturePreviewsSettings({
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <Header title="Feature Previews" />
+        <Header title={t("featurePreviewsAdminTitle")} />
         <OrganizationFeaturePreviewIntro
           canOpenPersonalPreviews={canOpenPersonalPreviews}
           onOpenPersonalPreviews={handleOpenFromDescription}
@@ -126,13 +132,9 @@ export function OrganizationFeaturePreviewsSettings({
 
       {experimentalFeaturesEnabled ? (
         <Alert>
-          <Alert.Title>
-            Experimental features enabled deployment-wide
-          </Alert.Title>
+          <Alert.Title>{t("featurePreviewsExperimentalTitle")}</Alert.Title>
           <Alert.Description>
-            Every preview on this page is enabled by the env variable
-            LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES=true. Per-user opt-outs do not
-            disable these previews.
+            {t("featurePreviewsExperimentalDescription")}
           </Alert.Description>
         </Alert>
       ) : null}
@@ -154,8 +156,7 @@ export function OrganizationFeaturePreviewsSettings({
                   (defaultFlag) => defaultFlag === flag,
                 ) ? (
                   <p className="text-muted-foreground text-xs">
-                    Enabled by default on the events-backed view. Turn off to
-                    disable it for this organization.
+                    {t("featurePreviewsDefaultOnHelp")}
                   </p>
                 ) : null}
                 {requiresPersonalEnablement ? (
@@ -166,7 +167,9 @@ export function OrganizationFeaturePreviewsSettings({
                 ) : null}
               </div>
               <Switch
-                aria-label={`Toggle ${featurePreviewLabels[flag]} organization default`}
+                aria-label={t("featurePreviewToggle", {
+                  name: featurePreviewLabels[flag],
+                })}
                 checked={experimentalFeaturesEnabled || selected}
                 disabled={
                   experimentalFeaturesEnabled ||
@@ -184,8 +187,7 @@ export function OrganizationFeaturePreviewsSettings({
       </div>
 
       <p className="text-muted-foreground text-xs">
-        Defaults apply only in this organization. Personal opt-outs apply to
-        user-level previews.
+        {t("featurePreviewsDefaultsFooter")}
       </p>
 
       <AlertDialog
@@ -197,31 +199,36 @@ export function OrganizationFeaturePreviewsSettings({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {proposedChange?.enabled ? "Enable" : "Disable"} feature preview?
+              {proposedChange?.enabled
+                ? t("featurePreviewsEnableConfirm")
+                : t("featurePreviewsDisableConfirm")}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will {proposedChange?.enabled ? "enable" : "disable"}{" "}
-              {proposedChange
-                ? featurePreviewLabels[proposedChange.flag]
-                : "this preview"}{" "}
-              for up to {memberCount} current member
-              {memberCount === 1 ? "" : "s"}. New members inherit enabled
-              organization defaults.
+              {t("featurePreviewsConfirmDescription", {
+                action: proposedChange?.enabled
+                  ? t("featurePreviewsEnableVerb")
+                  : t("featurePreviewsDisableVerb"),
+                name: proposedChange
+                  ? featurePreviewLabels[proposedChange.flag]
+                  : "",
+                count:
+                  memberCount === 1
+                    ? `1 ${t("featurePreviewsMemberSuffixSingular")}`
+                    : `${memberCount} ${t("featurePreviewsMemberSuffix")}`,
+              })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           {proposedChange?.enabled ? (
             <Alert>
-              <Alert.Title>Already enabled for you</Alert.Title>
+              <Alert.Title>{t("featurePreviewsAlreadyEnabled")}</Alert.Title>
               <Alert.Description>
-                This preview is already enabled in your personal Feature Preview
-                settings. Make sure you have tested it before enabling it for
-                the organization.
+                {t("featurePreviewsAlreadyEnabledDescription")}
               </Alert.Description>
             </Alert>
           ) : null}
           <AlertDialogFooter>
             <AlertDialogCancel disabled={updateDefault.isPending}>
-              Cancel
+              {t("retryMigrationCancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               disabled={updateDefault.isPending || proposedChange === null}
@@ -230,7 +237,7 @@ export function OrganizationFeaturePreviewsSettings({
                 updateDefault.mutate({ orgId, ...proposedChange });
               }}
             >
-              Confirm
+              {t("externalMediaStorageSave")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

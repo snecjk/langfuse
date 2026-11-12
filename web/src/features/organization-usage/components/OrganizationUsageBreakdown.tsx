@@ -19,6 +19,11 @@ import {
   type TimeRange,
 } from "@/src/utils/date-range-utils";
 import type { RouterOutput } from "@/src/utils/types";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 type UsageBreakdown = RouterOutput["organizationUsage"]["breakdown"];
 type GroupBy = "project" | "type";
@@ -33,18 +38,21 @@ const TIME_RANGE_PRESETS = [
 
 const UNIT_TYPE_LABELS: Record<
   UsageBreakdown["rows"][number]["unitType"],
-  string
+  Parameters<ReturnType<typeof useTranslation<typeof enterpriseMessages>>>[0]
 > = {
-  traces: "Traces",
-  observations: "Observations",
-  scores: "Scores",
+  traces: "usageUnitTraces",
+  observations: "usageUnitObservations",
+  scores: "usageUnitScores",
 };
 
-const GRANULARITY_LABELS: Record<UsageBreakdown["granularity"], string> = {
-  hour: "hourly",
-  day: "daily",
-  week: "weekly",
-  month: "monthly",
+const GRANULARITY_LABELS: Record<
+  UsageBreakdown["granularity"],
+  Parameters<ReturnType<typeof useTranslation<typeof enterpriseMessages>>>[0]
+> = {
+  hour: "usageGranularityHourly",
+  day: "usageGranularityDaily",
+  week: "usageGranularityWeekly",
+  month: "usageGranularityMonthly",
 };
 
 /**
@@ -53,7 +61,11 @@ const GRANULARITY_LABELS: Record<UsageBreakdown["granularity"], string> = {
  * empty periods keep their slot on the axis. Series are ordered by total,
  * largest first, so the top consumers get the leading palette colors.
  */
-const toChartData = (breakdown: UsageBreakdown, groupBy: GroupBy) => {
+const toChartData = (
+  breakdown: UsageBreakdown,
+  groupBy: GroupBy,
+  t: ReturnType<typeof useTranslation<typeof enterpriseMessages>>,
+) => {
   const totalsBySeries = new Map<string, number>();
   const counts = new Map<string, Map<string, number>>();
 
@@ -87,7 +99,7 @@ const toChartData = (breakdown: UsageBreakdown, groupBy: GroupBy) => {
         label:
           groupBy === "project"
             ? (projectNames.get(series) ?? series)
-            : UNIT_TYPE_LABELS[series as keyof typeof UNIT_TYPE_LABELS],
+            : t(UNIT_TYPE_LABELS[series as keyof typeof UNIT_TYPE_LABELS]),
       },
     ]),
   );
@@ -102,7 +114,10 @@ const toChartData = (breakdown: UsageBreakdown, groupBy: GroupBy) => {
  * grouping, so either view can be rebuilt offline with a pivot. Cells without
  * usage are left out.
  */
-const toCsvRows = (breakdown: UsageBreakdown) => {
+const toCsvRows = (
+  breakdown: UsageBreakdown,
+  t: ReturnType<typeof useTranslation<typeof enterpriseMessages>>,
+) => {
   const projectNames = new Map(
     breakdown.projects.map((project) => [project.id, project.name]),
   );
@@ -111,7 +126,7 @@ const toCsvRows = (breakdown: UsageBreakdown) => {
       bucket_start_utc: row.bucket,
       project_id: row.projectId,
       project_name: projectNames.get(row.projectId) ?? "",
-      unit_type: row.unitType,
+      unit_type: t(UNIT_TYPE_LABELS[row.unitType]),
       units: row.count,
     }))
     .sort(
@@ -122,9 +137,15 @@ const toCsvRows = (breakdown: UsageBreakdown) => {
     );
 };
 
-const toCsvFileName = (breakdown: UsageBreakdown, from: Date, to: Date) => {
+const toCsvFileName = (
+  breakdown: UsageBreakdown,
+  from: Date,
+  to: Date,
+  t: ReturnType<typeof useTranslation<typeof enterpriseMessages>>,
+) => {
   const day = (date: Date) => date.toISOString().slice(0, 10);
-  return `usage-breakdown-${GRANULARITY_LABELS[breakdown.granularity]}-${day(from)}-to-${day(to)}`;
+  const granularity = t(GRANULARITY_LABELS[breakdown.granularity]);
+  return `usage-breakdown-${granularity}-${day(from)}-to-${day(to)}`;
 };
 
 export const OrganizationUsageBreakdown = ({ orgId }: { orgId: string }) => {
@@ -132,6 +153,8 @@ export const OrganizationUsageBreakdown = ({ orgId }: { orgId: string }) => {
     range: "last30Days",
   });
   const [groupBy, setGroupBy] = useState<GroupBy>("project");
+  const t = useTranslation(enterpriseMessages);
+  const locale = useInterfaceLocale();
 
   const absoluteTimeRange = useMemo(
     () => toAbsoluteTimeRange(timeRange),
@@ -151,19 +174,24 @@ export const OrganizationUsageBreakdown = ({ orgId }: { orgId: string }) => {
   );
 
   const chart = useMemo(
-    () => (breakdown.data ? toChartData(breakdown.data, groupBy) : null),
-    [breakdown.data, groupBy],
+    () => (breakdown.data ? toChartData(breakdown.data, groupBy, t) : null),
+    [breakdown.data, groupBy, t],
   );
 
   return (
     <Card className="flex flex-col gap-3 p-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h3 className="font-bold">Usage breakdown</h3>
+          <h3 className="font-bold">{t("usageBreakdownTitle")}</h3>
           <p className="text-muted-foreground text-sm">
             {chart && breakdown.data
-              ? `${numberFormatter(chart.total, 0)} units, ${GRANULARITY_LABELS[breakdown.data.granularity]} buckets (UTC)`
-              : "Units (traces, observations, scores)"}
+              ? t("usageBreakdownSummary", {
+                  count: numberFormatter(chart.total, 0, undefined, locale),
+                  granularity: t(
+                    GRANULARITY_LABELS[breakdown.data.granularity],
+                  ),
+                })
+              : t("usageBreakdownFallback")}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -171,9 +199,16 @@ export const OrganizationUsageBreakdown = ({ orgId }: { orgId: string }) => {
             value={groupBy}
             onValueChange={(value) => setGroupBy(value as GroupBy)}
           >
-            <Tabs.List variant="inset" size="md" aria-label="Group usage by">
-              <Tabs.Trigger value="project" label="By project" />
-              <Tabs.Trigger value="type" label="By type" />
+            <Tabs.List
+              variant="inset"
+              size="md"
+              aria-label={t("usageBreakdownGroupLabel")}
+            >
+              <Tabs.Trigger
+                value="project"
+                label={t("usageBreakdownByProject")}
+              />
+              <Tabs.Trigger value="type" label={t("usageBreakdownByType")} />
             </Tabs.List>
           </Tabs>
           <TimeRangePicker
@@ -182,22 +217,23 @@ export const OrganizationUsageBreakdown = ({ orgId }: { orgId: string }) => {
             timeRangePresets={TIME_RANGE_PRESETS}
             maxRangeMs={USAGE_BREAKDOWN_MAX_RANGE_MS}
           />
-          <Tooltip label="Download as CSV">
+          <Tooltip label={t("usageBreakdownDownloadCsv")}>
             {({ getTriggerProps }) => (
               <IconButton
                 {...getTriggerProps()}
                 icon={DownloadIcon}
-                label="Download usage breakdown as CSV"
+                label={t("usageBreakdownDownloadLabel")}
                 variant="outline"
                 disabled={!chart || chart.total === 0}
                 onClick={() => {
                   if (!breakdown.data || !absoluteTimeRange) return;
                   downloadChartDataCsv(
-                    toCsvRows(breakdown.data),
+                    toCsvRows(breakdown.data, t),
                     toCsvFileName(
                       breakdown.data,
                       absoluteTimeRange.from,
                       absoluteTimeRange.to,
+                      t,
                     ),
                   );
                 }}
@@ -209,7 +245,7 @@ export const OrganizationUsageBreakdown = ({ orgId }: { orgId: string }) => {
       <div className="h-80">
         {breakdown.isError ? (
           <div className="text-muted-foreground flex h-full items-center justify-center rounded-md border border-dashed text-sm">
-            Failed to load usage breakdown
+            {t("usageBreakdownLoadFailed")}
           </div>
         ) : chart && chart.total > 0 ? (
           <VerticalBarChartTimeSeries

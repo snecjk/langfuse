@@ -7,6 +7,8 @@ import { Dialog } from "@/src/components/design-system/Dialog/Dialog";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { classifyMediaValue } from "@/src/components/ui/media/mediaUtils";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export function TestMediaObjectDialog({
   isPending,
@@ -22,6 +24,7 @@ export function TestMediaObjectDialog({
   } | null>(null);
   const formId = useId();
   const inputId = useId();
+  const t = useTranslation(enterpriseMessages);
 
   const handleSubmit = async (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -34,12 +37,12 @@ export function TestMediaObjectDialog({
   return (
     <Dialog
       closeOnInteractionOutside
-      title="Test external media object"
+      title={t("externalMediaStorageTestTitle")}
       actions={[
         {
           disabled: !uri.trim(),
           form: formId,
-          label: "Test",
+          label: t("externalMediaStorageTest"),
           loading: isPending,
           type: "submit",
         },
@@ -47,10 +50,10 @@ export function TestMediaObjectDialog({
     >
       <Dialog.Body>
         <p className="text-muted-foreground text-sm">
-          Enter an s3:// URI to check object access and browser CORS.
+          {t("externalMediaStorageTestHelp")}
         </p>
         <form id={formId} className="grid gap-2" onSubmit={handleSubmit}>
-          <Label htmlFor={inputId}>S3 URI</Label>
+          <Label htmlFor={inputId}>{t("externalMediaStorageS3Uri")}</Label>
           <Input
             id={inputId}
             value={uri}
@@ -82,6 +85,7 @@ function MediaObjectPreview({
   uri: string;
 }) {
   const [hasLoadError, setHasLoadError] = useState(false);
+  const t = useTranslation(enterpriseMessages);
   const descriptor = classifyMediaValue(uri);
   const contentType = descriptor?.contentType ?? "application/octet-stream";
   const fileName =
@@ -95,7 +99,7 @@ function MediaObjectPreview({
           <Image
             className="max-h-80 max-w-full rounded border object-contain"
             src={signedUrl}
-            alt={`Preview ${fileName}`}
+            alt={t("externalMediaStoragePreview")}
             width={640}
             height={360}
             unoptimized
@@ -105,7 +109,7 @@ function MediaObjectPreview({
       case "audio":
         return (
           <audio
-            aria-label={`Preview ${fileName}`}
+            aria-label={t("externalMediaStoragePreview")}
             controls
             className="w-full"
             preload="metadata"
@@ -116,7 +120,7 @@ function MediaObjectPreview({
       case "video":
         return (
           <video
-            aria-label={`Preview ${fileName}`}
+            aria-label={t("externalMediaStoragePreview")}
             controls
             className="w-full"
             preload="metadata"
@@ -140,11 +144,11 @@ function MediaObjectPreview({
 
   return (
     <div className="flex flex-col gap-2" aria-live="polite">
-      <p className="text-sm font-bold">Preview</p>
+      <p className="text-sm font-bold">{t("externalMediaStoragePreview")}</p>
       {previewContent}
       {hasLoadError ? (
         <p className="text-destructive text-sm">
-          The media preview could not be loaded.
+          {t("externalMediaStoragePreviewLoadFailed")}
         </p>
       ) : null}
     </div>

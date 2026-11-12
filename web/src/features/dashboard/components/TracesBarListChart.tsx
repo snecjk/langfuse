@@ -7,6 +7,7 @@ import { NoDataOrLoading } from "@/src/components/NoDataOrLoading";
 import { type QueryType, type ViewVersion } from "@langfuse/shared/query";
 import { formatMetric } from "@/src/features/widgets/chart-library/utils";
 import { BarListChartArea } from "@/src/features/dashboard/components/cards/BarListChartArea";
+import { useInterfaceLocale } from "@/src/features/i18n/I18nProvider";
 import { traceViewQuery } from "@/src/features/dashboard/lib/dashboard-utils";
 import { useScheduledDashboardExecuteQuery } from "@/src/features/dashboard/hooks/DashboardQuerySchedulerProvider";
 import { cn } from "@/src/utils/tailwind";
@@ -34,6 +35,7 @@ export const TracesBarListChart = ({
   metricsVersion: ViewVersion;
   schedulerId?: string;
 }) => {
+  const locale = useInterfaceLocale();
   const isV2 = metricsVersion === "v2";
   const traceNameField = isV2 ? "traceName" : "name";
   const countField = isV2 ? "uniq_traceId" : "count_count";
@@ -135,7 +137,9 @@ export const TracesBarListChart = ({
             maxBars={MAX_BARS}
             metricLabel="Traces"
             unit="traces"
-            metricFormatter={(value) => formatMetric(value, { style: "full" })}
+            metricFormatter={(value) =>
+              formatMetric(value, { style: "full", locale })
+            }
           />
         ) : (
           <NoDataOrLoading

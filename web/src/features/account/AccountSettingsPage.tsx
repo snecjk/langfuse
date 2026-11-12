@@ -1,6 +1,7 @@
 /* eslint-disable @repo/no-abstracted-overlay-trigger, @typescript-eslint/no-deprecated, @typescript-eslint/no-use-before-define -- Legacy UI usage retained during migration to design-system components. */
 import { useTranslation } from "@/src/features/i18n/I18nProvider";
 import { settingsMessages } from "@/src/features/i18n/messages/settings";
+import { accountMessages } from "@/src/features/i18n/messages/account";
 import Header from "@/src/components/layouts/header";
 import { Card } from "@/src/components/ui/card";
 import { Button } from "@/src/components/ui/button";
@@ -45,6 +46,7 @@ const displayNameSchema = z.object({
 
 function UpdateDisplayName() {
   const t = useTranslation(settingsMessages);
+  const tAccount = useTranslation(accountMessages);
   const localizeNameError = (message: string | undefined) => {
     if (message === "Name cannot be empty") return t("nameEmpty");
     if (message === "Name must be at most 100 characters")
@@ -122,7 +124,7 @@ function UpdateDisplayName() {
               disabled={form.getValues().name === ""}
               className="mt-4"
             >
-              Save
+              {tAccount("save")}
             </Button>
           </form>
         </Form>

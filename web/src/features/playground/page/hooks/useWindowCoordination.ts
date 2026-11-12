@@ -5,6 +5,8 @@ import {
   PLAYGROUND_EVENTS,
 } from "../types";
 import { showErrorToast } from "@/src/features/notifications/showErrorToast";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 
 /**
  * Playground window registry for coordinating actions across multiple playground windows
@@ -33,6 +35,7 @@ const playgroundEventBus = new EventTarget();
  * @returns WindowCoordinationReturn interface with coordination functions
  */
 export const useWindowCoordination = (): WindowCoordinationReturn => {
+  const t = useTranslation(skillMessages);
   const [isExecutingAll, setIsExecutingAll] = useState(false);
   const [hasAnyModelConfigured, setHasAnyModelConfigured] = useState(false);
   const executionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -141,8 +144,8 @@ export const useWindowCoordination = (): WindowCoordinationReturn => {
       if (!anyExecuting) {
         // No windows are executing - they must all be empty
         showErrorToast(
-          "No content to execute",
-          "Please add at least one message with content to any window.",
+          t("noContentToExecute"),
+          t("pleaseAddMessageWithContent"),
           {
             operation: "playground.execute",
             errorOrigin: "frontend",
@@ -187,7 +190,7 @@ export const useWindowCoordination = (): WindowCoordinationReturn => {
         setTimeout(checkExecutionCompletion, 1000);
       }
     }, 500); // Check after 500ms
-  }, []);
+  }, [t]);
 
   /**
    * Stop all currently executing playground windows

@@ -23,6 +23,8 @@ import { BlobStorageIntegrationForm } from "@/src/features/blobstorage-integrati
 import { useBlobStorageExternalId } from "@/src/features/blobstorage-integration/useBlobStorageExternalId";
 import { RoleAuthPausedDialog } from "@/src/features/blobstorage-integration/components/RoleAuthPausedDialog";
 import { DialogController } from "@/src/components/design-system/DialogController/DialogController";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 
 // State layer. Owns everything async and entity-scoped: availability
 // derivation, the four mutations, and the entity-action buttons. The form
@@ -53,6 +55,7 @@ export const BlobStorageIntegrationContainer = ({
   const capture = usePostHogClientCapture();
   const { isLangfuseCloud } = useLangfuseCloudRegion();
   const { project } = useQueryProject();
+  const t = useTranslation(integrationMessages);
 
   // Policy context for the export-source selector; the policy itself lives in
   // export-source-policy.ts. null integrationCreatedAt = new row.
@@ -89,7 +92,7 @@ export const BlobStorageIntegrationContainer = ({
     },
     onError: (error) => {
       showErrorToast(
-        "Failed to save integration",
+        t("saveFailed"),
         error.message,
         classifyTrpcToastError(error, "blob_storage.save"),
       );
@@ -111,12 +114,12 @@ export const BlobStorageIntegrationContainer = ({
       showSuccessToast({
         operation: "blob_storage.validate",
         title: data.message,
-        description: `Test file: ${data.testFileName}`,
+        description: t("testFileLabel", { fileName: data.testFileName }),
       });
     },
     onError: (error) => {
       showErrorToast(
-        "Validation failed",
+        t("validateFailed"),
         error.message,
         classifyTrpcToastError(error, "blob_storage.validate"),
       );
@@ -180,51 +183,33 @@ export const BlobStorageIntegrationContainer = ({
             variant="secondary"
             loading={mutValidate.isPending}
             disabled={!config || isDirty}
-            title={
-              isDirty
-                ? "Please save latest changes before validate"
-                : "Test your saved configuration by uploading a small test file to your storage"
-            }
+            title={isDirty ? t("validateTooltipDirty") : t("validateTooltip")}
             onClick={() => {
               mutValidate.mutate({ projectId });
             }}
           >
-            Validate
+            {t("validate")}
           </Button>
           <Button
             variant="secondary"
             loading={mutRunNow.isPending}
             disabled={!config?.enabled || isDirty}
-            title={
-              isDirty
-                ? "Please save latest changes before running an export"
-                : "Trigger an immediate export of all data since the last sync"
-            }
+            title={isDirty ? t("runNowTooltipDirty") : t("runNowTooltip")}
             onClick={() => {
-              if (
-                confirm(
-                  "Are you sure you want to run the blob storage export now? This will export all data since the last sync.",
-                )
-              )
-                mutRunNow.mutate({ projectId });
+              if (confirm(t("runNowConfirm"))) mutRunNow.mutate({ projectId });
             }}
           >
-            Run Now
+            {t("runNow")}
           </Button>
           <Button
             variant="ghost"
             loading={mutDelete.isPending}
             disabled={!config}
             onClick={() => {
-              if (
-                confirm(
-                  "Are you sure you want to reset the Blob Storage integration for this project?",
-                )
-              )
-                mutDelete.mutate({ projectId });
+              if (confirm(t("resetConfirm"))) mutDelete.mutate({ projectId });
             }}
           >
-            Reset
+            {t("reset")}
           </Button>
         </>
       )}

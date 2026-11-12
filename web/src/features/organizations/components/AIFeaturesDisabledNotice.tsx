@@ -3,6 +3,8 @@ import { ExternalLink } from "@langfuse/icons";
 
 import { Button } from "@/src/components/ui/button";
 import { useHasOrganizationAccess } from "@/src/features/rbac/utils/checkOrganizationAccess";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { accountMessages } from "@/src/features/i18n/messages/account";
 
 export function openAIFeaturesSettings(organizationId: string) {
   window.open(
@@ -21,6 +23,7 @@ export function AIFeaturesDisabledNotice({
   children: ReactNode;
   onSettingsOpened?: () => void;
 }) {
+  const t = useTranslation(accountMessages);
   const canUpdateOrgSettings = useHasOrganizationAccess({
     organizationId,
     scope: "organization:update",
@@ -30,9 +33,7 @@ export function AIFeaturesDisabledNotice({
     <div className="flex flex-col gap-3">
       <p className="text-muted-foreground text-sm">
         {children}
-        {!canUpdateOrgSettings
-          ? " Ask your organization administrator to enable AI features in organization settings."
-          : null}
+        {!canUpdateOrgSettings ? ` ${t("aiFeaturesDisabledHelp")}` : null}
       </p>
       {canUpdateOrgSettings && organizationId ? (
         <Button
@@ -44,7 +45,7 @@ export function AIFeaturesDisabledNotice({
           size="sm"
           className="w-fit"
         >
-          Enable in Organization Settings
+          {t("enableAiFeaturesButton")}
           <ExternalLink size="base" color="default" __rawClassName="ml-2" />
         </Button>
       ) : null}

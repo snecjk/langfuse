@@ -5,6 +5,8 @@ import { type Status } from "@/src/components/ui/StatusBadge/StatusBadge";
 import { Button } from "@/src/components/ui/button";
 import { Card } from "@/src/components/ui/card";
 import { IntegrationCardHeader } from "@/src/features/projects/components/IntegrationCardHeader/IntegrationCardHeader";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export type ExternalMediaStorageIntegrationCardProps = {
   projectId: string;
@@ -23,6 +25,7 @@ export function ExternalMediaStorageIntegrationCard({
   isLoading,
   status,
 }: ExternalMediaStorageIntegrationCardProps) {
+  const t = useTranslation(enterpriseMessages);
   return (
     <Card className="p-3">
       <IntegrationCardHeader
@@ -30,11 +33,10 @@ export function ExternalMediaStorageIntegrationCard({
         isLoading={isLoading}
         hasAccess={hasAccess}
       >
-        <span className="font-bold">External Media Storage</span>
+        <span className="font-bold">{t("externalMediaStorageTitle")}</span>
       </IntegrationCardHeader>
       <p className="text-primary mb-4 text-sm">
-        Resolve media referenced by s3:// URIs from your own Amazon S3 or
-        S3-compatible bucket.
+        {t("externalMediaStorageDescription")}
       </p>
       <div className="flex items-center gap-2">
         <ActionButton
@@ -43,14 +45,14 @@ export function ExternalMediaStorageIntegrationCard({
           hasEntitlement={hasEntitlement}
           href={`/project/${projectId}/settings/integrations/external-media-storage`}
         >
-          Configure
+          {t("externalMediaStorageConfigure")}
         </ActionButton>
         <Button asChild variant="ghost">
           <Link
             href="https://langfuse.com/docs/observability/features/multi-modality#external-s3-media"
             target="_blank"
           >
-            Integration Docs ↗
+            {t("externalMediaStorageDocs")}
           </Link>
         </Button>
       </div>

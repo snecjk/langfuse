@@ -1,6 +1,8 @@
 import { Alert } from "@/src/components/design-system/Alert/Alert";
 import { type RouterOutputs } from "@/src/utils/api";
 import { TopicMapExplorer as EmbeddingMapView } from "@/src/features/topics/map/TopicMapExplorer";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 import { TopicMapLoading } from "./TopicMapLoading";
 
 export function TopicEmbeddingMap({
@@ -14,12 +16,13 @@ export function TopicEmbeddingMap({
   fillContainer = false,
   previewOnSelect = false,
 }: TopicEmbeddingMapProps) {
+  const t = useTranslation(topicsMessages);
   if (query.error)
     return (
       <Alert variant="destructive" size="sm">
         <Alert.Description>
           <p className="break-words">
-            Map could not load: {query.error.message}
+            {t("mapCouldNotLoad", { message: query.error.message })}
           </p>
         </Alert.Description>
       </Alert>
@@ -28,7 +31,7 @@ export function TopicEmbeddingMap({
   if (query.data.status !== "ready")
     return (
       <p className="text-muted-foreground rounded-lg border p-4 text-sm">
-        {query.data.reason ?? "This run has no saved embedding projection."}
+        {query.data.reason ?? t("noSavedEmbeddingProjection")}
       </p>
     );
   return (

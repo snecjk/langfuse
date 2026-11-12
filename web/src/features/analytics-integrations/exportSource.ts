@@ -111,22 +111,38 @@ export function getExportSourceFieldState(
   };
 }
 
-// Blocked-save alert body per policy reason.
-const EXPORT_SOURCE_UNAVAILABLE_MESSAGES: Record<
+// Blocked-save alert body per policy reason. The lookup keys match the
+// integrationMessages namespace; callers pass a translate function so the
+// message renders in the user's language.
+type ExportSourceMessageKey =
+  | "exportSourceEnrichedUnavailable"
+  | "exportSourceCloudCutoff"
+  | "exportSourceLegacyWritesDisabled";
+
+const EXPORT_SOURCE_UNAVAILABLE_MESSAGE_KEYS: Record<
   ExportSourceBlockedReason,
-  string
+  ExportSourceMessageKey
 > = {
-  "enriched-unavailable":
-    "This integration is configured to export enriched observations, but this deployment runs LANGFUSE_MIGRATION_V4_WRITE_MODE=legacy and does not write the enriched observations table. Saving is blocked until you select an available export source above.",
-  "cloud-cutoff":
-    "This integration is configured to export legacy traces and observations, which is no longer available for this project. Saving is blocked until you select an available export source above.",
-  // Self-hosted-operator-facing: naming the env var is intentional.
-  "legacy-writes-disabled":
-    "This integration is configured to export legacy traces and observations, but this deployment runs LANGFUSE_MIGRATION_V4_WRITE_MODE=events_only and no longer writes the legacy traces/observations tables. Saving is blocked until you select an available export source above.",
+  "enriched-unavailable": "exportSourceEnrichedUnavailable",
+  "cloud-cutoff": "exportSourceCloudCutoff",
+  "legacy-writes-disabled": "exportSourceLegacyWritesDisabled",
 };
 
 export function getExportSourceUnavailableMessage(
   reason: ExportSourceBlockedReason,
+  t?: (key: ExportSourceMessageKey) => string,
 ): string {
-  return EXPORT_SOURCE_UNAVAILABLE_MESSAGES[reason];
+  const key = EXPORT_SOURCE_UNAVAILABLE_MESSAGE_KEYS[reason];
+  if (t) return t(key);
+  // Fallback map used by non-React callers; the English strings live in the
+  // integrationMessages namespace and stay the source of truth.
+  const fallback: Record<ExportSourceMessageKey, string> = {
+    exportSourceEnrichedUnavailable:
+      "This integration is configured to export enriched observations, but this deployment runs LANGFUSE_MIGRATION_V4_WRITE_MODE=legacy and does not write the enriched observations table. Saving is blocked until you select an available export source above.",
+    exportSourceCloudCutoff:
+      "This integration is configured to export legacy traces and observations, which is no longer available for this project. Saving is blocked until you select an available export source above.",
+    exportSourceLegacyWritesDisabled:
+      "This integration is configured to export legacy traces and observations, but this deployment runs LANGFUSE_MIGRATION_V4_WRITE_MODE=events_only and no longer writes the legacy traces/observations tables. Saving is blocked until you select an available export source above.",
+  };
+  return fallback[key];
 }

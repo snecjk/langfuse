@@ -1,6 +1,8 @@
 import Header from "@/src/components/layouts/header";
 import { Alert } from "@/src/components/design-system/Alert/Alert";
 import { type RouterOutputs } from "@/src/utils/api";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 
 type PostHogIntegrationConfig = NonNullable<
   RouterOutputs["posthogIntegration"]["get"]["config"]
@@ -17,9 +19,10 @@ export const PostHogStatusSection = ({
 }: {
   config: PostHogIntegrationConfig;
 }) => {
+  const t = useTranslation(integrationMessages);
   return (
     <>
-      <Header title="Status" className="mt-8" />
+      <Header title={t("statusTitle")} className="mt-8" />
       {config.lastError && (
         <div className="mb-4">
           <Alert variant="destructive">
@@ -28,8 +31,8 @@ export const PostHogStatusSection = ({
                             enabled integration — so only promise "disabled" when it is. */}
             <Alert.Title>
               {config.enabled
-                ? "Last export failed"
-                : "Export disabled – action required"}
+                ? t("lastExportFailed")
+                : t("lastExportFailedPostHog")}
             </Alert.Title>
             <Alert.Description>
               {config.lastError}
@@ -46,10 +49,10 @@ export const PostHogStatusSection = ({
         </div>
       )}
       <p className="text-primary text-sm">
-        Data synced until:{" "}
+        {t("dataSyncedUntil")}{" "}
         {config.lastSyncAt
           ? new Date(config.lastSyncAt).toLocaleString()
-          : "Never (pending)"}
+          : t("never")}
       </p>
     </>
   );

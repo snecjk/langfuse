@@ -3,6 +3,8 @@ import { api } from "@/src/utils/api";
 import { useEffect, useState } from "react";
 import { showToast } from "@/src/features/notifications/showToast";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export const StripeCustomerPortalButton = ({
   orgId,
@@ -14,6 +16,7 @@ export const StripeCustomerPortalButton = ({
   variant: "secondary" | "default";
 }) => {
   const [loading, setLoading] = useState(false);
+  const t = useTranslation(enterpriseMessages);
 
   useEffect(() => {
     // Make sure loading is always false when the user enters the page, even when navigation back via browser back button
@@ -55,7 +58,7 @@ export const StripeCustomerPortalButton = ({
       } else {
         showToast({
           type: "ERROR",
-          title: "Could not open billing portal",
+          title: t("billingPortalUnavailable"),
           analytics: {
             operation: "billing_portal.open",
             errorOrigin: "backend",
@@ -66,7 +69,7 @@ export const StripeCustomerPortalButton = ({
     } catch (error) {
       showToast({
         type: "ERROR",
-        title: "Failed to open billing portal",
+        title: t("billingPortalOpenFailed"),
         analytics: classifyTrpcToastError(error, "billing_portal.open"),
       });
     } finally {
@@ -82,7 +85,7 @@ export const StripeCustomerPortalButton = ({
       disabled={!orgId || loading}
       title={title}
     >
-      {loading ? "Opening…" : title}
+      {loading ? t("billingOpening") : title}
     </Button>
   );
 };

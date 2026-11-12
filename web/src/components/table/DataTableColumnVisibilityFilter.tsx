@@ -605,7 +605,7 @@ export function DataTableColumnVisibilityFilter<TData, TValue>({
             size={triggerSize}
             title={t("showHideColumns")}
           >
-            <span>Columns</span>
+            <span>{t("columnHeader")}</span>
             <div className="bg-input ml-1 rounded-sm px-1 text-xs">{`${count}/${total}`}</div>
           </Button>
         </Trigger>

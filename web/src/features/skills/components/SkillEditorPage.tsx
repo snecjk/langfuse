@@ -21,8 +21,11 @@ import { parseSkillFrontmatterMetadata } from "@/src/features/skills/utils/parse
 import useProjectIdFromURL from "@/src/hooks/useProjectIdFromURL";
 import { api } from "@/src/utils/api";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 
 export function NewSkillPage() {
+  const t = useTranslation(skillMessages);
   const router = useRouter();
   const projectId = useProjectIdFromURL();
   const canCreate = useHasProjectAccess({
@@ -46,17 +49,16 @@ export function NewSkillPage() {
   return (
     <SkillEditor
       headerProps={{
-        title: metadata?.name.trim() ? metadata.name : "Create skill",
+        title: metadata?.name.trim() ? metadata.name : t("createSkill"),
         help:
           metadata && !metadata.nameError
             ? {
-                description:
-                  "The skill name and description are parsed from the frontmatter in SKILL.md.",
+                description: t("skillNameParsedFromFrontmatter"),
               }
             : undefined,
         breadcrumb: [
-          { name: "Skills", href: `/project/${projectId}/skills` },
-          { name: "New skill" },
+          { name: t("breadcrumbSkills"), href: `/project/${projectId}/skills` },
+          { name: t("newSkill") },
         ],
       }}
       projectId={projectId ?? ""}
@@ -107,6 +109,7 @@ function ExistingSkillSession({
   projectId: string;
   skillName: string;
 }) {
+  const t = useTranslation(skillMessages);
   const router = useRouter();
   const [draftStore, setDraftStore] = useState<SkillEditorStore | null>(null);
   const isDraft = draftStore !== null && router.query.draft === "true";
@@ -158,12 +161,12 @@ function ExistingSkillSession({
     title: skill.data?.name ?? skillName,
     help: skill.data
       ? {
-          description: "Edit SKILL.md to change the skill name.",
+          description: t("editSKILLmdDescription"),
         }
       : undefined,
     breadcrumb: [
-      { name: "Skills", href: `/project/${projectId}/skills` },
-      { name: "Editor" },
+      { name: t("breadcrumbSkills"), href: `/project/${projectId}/skills` },
+      { name: t("breadcrumbEditor") },
     ],
   };
 
@@ -179,8 +182,8 @@ function ExistingSkillSession({
         </div>
       );
     }
-    return <div className="p-6 text-sm">Skill version not found.</div>;
-  }, [error, skill.isPending, history.isPending]);
+    return <div className="p-6 text-sm">{t("skillVersionNotFound")}</div>;
+  }, [error, skill.isPending, history.isPending, t]);
 
   if (
     !error &&
@@ -216,8 +219,8 @@ function ExistingSkillSession({
           draft.getState().actions.syncTags(saved.tags);
         } catch (error) {
           showErrorToast(
-            "Could not resume draft",
-            error instanceof Error ? error.message : "Please try again.",
+            t("couldNotResumeDraft"),
+            error instanceof Error ? error.message : t("tryAgain"),
             classifyTrpcToastError(error, "skill_draft.resume"),
           );
           return;

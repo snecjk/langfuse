@@ -193,7 +193,7 @@ const PivotTableRowComponent: React.FC<{
             (row.isSubtotal || row.isTotal) && "font-bold",
           )}
         >
-          {valueFormatter(row.values[metric], units?.[i])}
+          {valueFormatter(row.values[metric], units?.[i], undefined)}
         </td>
       ))}
     </tr>

@@ -10,6 +10,8 @@ import { createNumberTableColumn } from "@/src/components/design-system/table/co
 import { type LangfuseColumnDef } from "@/src/components/table/types";
 import { type RouterOutputs } from "@/src/utils/api";
 import { costFormatter } from "@/src/utils/numbers";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export type BillingInvoiceRow = Omit<
   RouterOutputs["cloudBilling"]["getInvoices"]["invoices"][number],
@@ -29,16 +31,17 @@ export function BillingInvoiceTable({
   pagination,
   ...tableProps
 }: BillingInvoiceTableProps) {
+  const t = useTranslation(enterpriseMessages);
   const columns = useMemo<LangfuseColumnDef<BillingInvoiceRow>[]>(
     () => [
       createDateTableColumn<BillingInvoiceRow>({
         accessorKey: "created",
-        header: "Date",
+        header: t("billingInvoiceDate"),
         size: 150,
       }),
       createBadgeTableColumn<BillingInvoiceRow>({
         accessorKey: "status",
-        header: "Status",
+        header: t("billingInvoiceStatus"),
         size: 100,
         range: "semantic",
         nullValue: "-",
@@ -59,28 +62,28 @@ export function BillingInvoiceTable({
               accessorFn: (row) =>
                 (row.breakdown?.subscriptionCents ?? 0) / 100,
               id: "subscription",
-              header: "Subscription",
+              header: t("billingInvoiceSubscription"),
               size: 110,
               formatter: costFormatter,
             }),
             createNumberTableColumn<BillingInvoiceRow>({
               accessorFn: (row) => (row.breakdown?.usageCents ?? 0) / 100,
               id: "usage",
-              header: "Usage",
+              header: t("billingInvoiceUsage"),
               size: 90,
               formatter: costFormatter,
             }),
             createNumberTableColumn<BillingInvoiceRow>({
               accessorFn: (row) => (row.breakdown?.discountCents ?? 0) / 100,
               id: "discounts",
-              header: "Discounts",
+              header: t("billingInvoiceDiscounts"),
               size: 100,
               formatter: costFormatter,
             }),
             createNumberTableColumn<BillingInvoiceRow>({
               accessorFn: (row) => (row.breakdown?.taxCents ?? 0) / 100,
               id: "tax",
-              header: "Tax",
+              header: t("billingInvoiceTax"),
               size: 90,
               formatter: costFormatter,
             }),
@@ -89,12 +92,12 @@ export function BillingInvoiceTable({
       createNumberTableColumn<BillingInvoiceRow>({
         accessorFn: (row) => (row.breakdown?.totalCents ?? 0) / 100,
         id: "total",
-        header: "Total",
+        header: t("billingInvoiceTotal"),
         size: 90,
         formatter: costFormatter,
       }),
     ],
-    [showBreakdownColumns],
+    [showBreakdownColumns, t],
   );
   const actions = useCallback<
     NonNullable<TableProps<BillingInvoiceRow>["actions"]>
@@ -105,7 +108,7 @@ export function BillingInvoiceTable({
             {
               id: "view",
               type: "item" as const,
-              title: "View",
+              title: t("billingInvoiceView"),
               icon: ExternalLink,
               href: invoice.hostedInvoiceUrl,
               linkTarget: "_blank" as const,
@@ -117,7 +120,7 @@ export function BillingInvoiceTable({
             {
               id: "pdf",
               type: "item" as const,
-              title: "PDF",
+              title: t("billingInvoicePdf"),
               icon: Download,
               href: invoice.invoicePdfUrl,
               linkTarget: "_blank" as const,
@@ -125,18 +128,18 @@ export function BillingInvoiceTable({
           ]
         : []),
     ],
-    [],
+    [t],
   );
 
   return (
     <div className="space-y-2 pt-4">
-      <h3 className="font-bold">Invoice History</h3>
+      <h3 className="font-bold">{t("billingInvoiceHistory")}</h3>
       <SettingsTable
         tableName="billing-invoices"
         columns={columns}
         actions={actions}
         pagination={pagination}
-        noResultsMessage="No invoices found."
+        noResultsMessage={t("billingInvoicesEmpty")}
         {...tableProps}
       />
     </div>

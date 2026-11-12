@@ -25,6 +25,8 @@ import { MessagePlaceholders } from "./MessagePlaceholders";
 import { CreateOrEditLLMToolDialog } from "./CreateOrEditLLMToolDialog";
 import { CreateOrEditLLMSchemaDialog } from "./CreateOrEditLLMSchemaDialog";
 import useProjectIdFromURL from "@/src/hooks/useProjectIdFromURL";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 
 function usePopoverToDialog<T>() {
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -54,6 +56,7 @@ function usePopoverToDialog<T>() {
 }
 
 export const ConfigurationDropdowns: React.FC = () => {
+  const t = useTranslation(skillMessages);
   const { containerRef, width, isVeryCompact, isCompact } =
     usePlaygroundWindowSize();
   const {
@@ -72,6 +75,9 @@ export const ConfigurationDropdowns: React.FC = () => {
   const variablesCount = promptVariables.length + messagePlaceholders.length;
   const toolsPopoverWidth =
     width > 0 ? Math.min(Math.max(width - 24, 0), 320) : undefined;
+  const toolsLabel = t("tools");
+  const schemaLabel = t("schema");
+  const variablesLabel = t("variables");
 
   // Helper function to get responsive content (text or icon)
   const getResponsiveContent = (
@@ -108,7 +114,7 @@ export const ConfigurationDropdowns: React.FC = () => {
         >
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm" className="h-8 gap-2">
-              {getResponsiveContent("Tools", Wrench)}
+              {getResponsiveContent(toolsLabel, Wrench)}
               {toolsCount > 0 && (
                 <Badge color="filled" size="sm" text={String(toolsCount)} />
               )}
@@ -121,9 +127,9 @@ export const ConfigurationDropdowns: React.FC = () => {
             style={toolsPopoverWidth ? { width: toolsPopoverWidth } : undefined}
           >
             <div className="mb-3">
-              <h4 className="mb-1 text-sm font-bold">Tools</h4>
+              <h4 className="mb-1 text-sm font-bold">{t("tools")}</h4>
               <p className="text-muted-foreground text-xs">
-                Configure tools for your model to use.
+                {t("configureToolsForModel")}
               </p>
             </div>
             {toolsCount > 0 ? (
@@ -133,7 +139,7 @@ export const ConfigurationDropdowns: React.FC = () => {
             ) : (
               <div className="mb-3">
                 <p className="text-muted-foreground text-xs">
-                  No tools attached.
+                  {t("noToolsAttached")}
                 </p>
               </div>
             )}
@@ -164,7 +170,7 @@ export const ConfigurationDropdowns: React.FC = () => {
         >
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm" className="h-8 gap-2">
-              {getResponsiveContent("Schema", Braces)}
+              {getResponsiveContent(schemaLabel, Braces)}
               {hasSchema > 0 && (
                 <Badge color="filled" size="sm" text={String(hasSchema)} />
               )}
@@ -173,9 +179,11 @@ export const ConfigurationDropdowns: React.FC = () => {
           </PopoverTrigger>
           <PopoverContent className="w-80 p-4" align="start">
             <div className="mb-3">
-              <h4 className="mb-1 text-sm font-bold">Structured Output</h4>
+              <h4 className="mb-1 text-sm font-bold">
+                {t("structuredOutput")}
+              </h4>
               <p className="text-muted-foreground text-xs">
-                Configure JSON schema for structured output.
+                {t("configureJSONSchemaForStructuredOutput")}
               </p>
             </div>
             {structuredOutputSchema ? (
@@ -187,7 +195,7 @@ export const ConfigurationDropdowns: React.FC = () => {
             ) : (
               <div className="mb-3">
                 <p className="text-muted-foreground text-xs">
-                  No schema provided.
+                  {t("noSchemaProvided")}
                 </p>
               </div>
             )}
@@ -215,7 +223,7 @@ export const ConfigurationDropdowns: React.FC = () => {
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm" className="h-8 gap-2">
-              {getResponsiveContent("Variables", Variable, "Vars")}
+              {getResponsiveContent(variablesLabel, Variable, t("vars"))}
               {variablesCount > 0 && (
                 <Badge color="filled" size="sm" text={String(variablesCount)} />
               )}
@@ -225,10 +233,10 @@ export const ConfigurationDropdowns: React.FC = () => {
           <PopoverContent className="w-80 p-4" align="start">
             <div className="mb-3">
               <h4 className="mb-1 text-sm font-bold">
-                Variables & Message Placeholders
+                {t("variablesAndMessagePlaceholders")}
               </h4>
               <p className="text-muted-foreground text-xs">
-                Configure variables and message placeholders for your prompts.
+                {t("configureVariablesAndMessagePlaceholders")}
               </p>
             </div>
             {variablesCount > 0 ? (
@@ -238,12 +246,12 @@ export const ConfigurationDropdowns: React.FC = () => {
               >
                 <div className="space-y-4">
                   <div>
-                    <h5 className="mb-2 text-xs font-bold">Variables</h5>
+                    <h5 className="mb-2 text-xs font-bold">{t("variables")}</h5>
                     <Variables />
                   </div>
                   <div>
                     <h5 className="mb-2 text-xs font-bold">
-                      Message Placeholders
+                      {t("messagePlaceholders")}
                     </h5>
                     <MessagePlaceholders />
                   </div>
@@ -252,7 +260,7 @@ export const ConfigurationDropdowns: React.FC = () => {
             ) : (
               <div className="mb-3">
                 <p className="text-muted-foreground text-xs">
-                  No variables or message placeholders defined.
+                  {t("noVariablesOrMessagePlaceholdersDefined")}
                 </p>
               </div>
             )}

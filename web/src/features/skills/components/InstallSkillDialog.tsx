@@ -2,6 +2,8 @@ import { Accordion } from "@/src/components/design-system/Accordion/Accordion";
 import { Dialog } from "@/src/components/design-system/Dialog/Dialog";
 import { Codeblock } from "@/src/components/design-system/Codeblock/Codeblock";
 import { Button } from "@/src/components/design-system/Button/Button";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 import { CliSetupAccordion } from "./CliSetupAccordion";
 import {
   SkillInstallationOptions,
@@ -23,6 +25,7 @@ export function InstallSkillDialog({
   initialValues,
   ...options
 }: InstallSkillDialogProps) {
+  const t = useTranslation(skillMessages);
   const host = useLangfuseBaseUrl();
   const { query: skillOptions, names } = useSkillInstallOptions(
     projectId,
@@ -32,21 +35,24 @@ export function InstallSkillDialog({
   const handleRetry = () => skillOptions.refetch();
 
   return (
-    <Dialog title="Install in your project" size="lg" closeOnInteractionOutside>
+    <Dialog
+      title={t("installInYourProject")}
+      size="lg"
+      closeOnInteractionOutside
+    >
       <Dialog.Body>
-        <p className="text-muted-foreground">
-          Choose what to install, then let your coding agent handle setup or run
-          the command yourself.
-        </p>
+        <p className="text-muted-foreground">{t("chooseWhatToImport")}</p>
         <CliSetupAccordion projectId={projectId} host={host} />
         {skillOptions.isPending && (
-          <p className="text-muted-foreground">Loading installation options…</p>
+          <p className="text-muted-foreground">
+            {t("loadingInstallationOptions")}
+          </p>
         )}
         {!skillOptions.isPending && skillOptions.isError && (
           <div className="flex flex-col items-start gap-2">
-            <p role="alert">Could not load installation options.</p>
+            <p role="alert">{t("couldNotLoadInstallationOptions")}</p>
             <Button
-              text="Try again"
+              text={t("tryAgain")}
               variant="secondary"
               size="sm"
               onClick={handleRetry}
@@ -70,12 +76,13 @@ export function InstallSkillDialog({
 
         <Accordion type="single" collapsible>
           <Accordion.Item value="updates">
-            <Accordion.Trigger size="sm">Updating later</Accordion.Trigger>
+            <Accordion.Trigger size="sm">
+              {t("updatingLater")}
+            </Accordion.Trigger>
             <Accordion.Content>
               <div className="flex min-w-0 flex-col gap-3 py-3">
                 <p className="text-muted-foreground">
-                  Commit <code>langfuse-skills-lock.json</code> to share your
-                  selection. Updates follow labels; pinned versions stay fixed.
+                  {t("commitLockFileDescription")}
                 </p>
                 <Codeblock
                   language="bash"

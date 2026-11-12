@@ -2,6 +2,8 @@ import Link from "next/link";
 import { TriangleAlert } from "@langfuse/icons";
 import { cn } from "@/src/utils/tailwind";
 import type { V4MigrationTopBannerSeverity } from "@/src/features/v4-migration/topBannerContent";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 const STRIP_CLASS: Record<V4MigrationTopBannerSeverity, string> = {
   warning:
@@ -26,7 +28,8 @@ export function V4MigrationTopBannerView({
   message,
   onStatusClick,
 }: V4MigrationTopBannerViewProps) {
-  const fullText = `${message} Check migration status`;
+  const t = useTranslation(enterpriseMessages);
+  const fullText = t("migrationTopBannerTitle", { message });
 
   return (
     <div
@@ -45,13 +48,13 @@ export function V4MigrationTopBannerView({
       >
         {message}{" "}
       </span>
-      <span className="text-sm sm:hidden">Action required:</span>
+      <span className="text-sm sm:hidden">{t("migrationTopBannerAction")}</span>
       <Link
         href="/v4-migration"
         className="shrink-0 text-sm font-bold underline decoration-current/50 underline-offset-2 hover:decoration-current"
         onClick={onStatusClick}
       >
-        Check migration status
+        {t("migrationTopBannerLink")}
       </Link>
     </div>
   );

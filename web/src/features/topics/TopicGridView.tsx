@@ -2,6 +2,8 @@ import { type RouterOutputs } from "@/src/utils/api";
 import { useMemo, useState } from "react";
 import { type DataTablePeekViewProps } from "@/src/components/table/peek";
 import { useElementSize } from "@/src/hooks/useElementSize";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 import { TopicsEmptyState } from "./TopicsEmptyState";
 import {
   type Facet,
@@ -34,13 +36,15 @@ type TopicGridContentProps = Omit<
   "onGenerateTopics" | "canGenerateTopics"
 >;
 
-function gridMessage(mapResult: TopicGridViewProps["mapResult"]) {
-  if (mapResult.error) return `Grid could not load: ${mapResult.error.message}`;
-  if (!mapResult.data) return "Loading grid…";
+function gridMessage(
+  mapResult: TopicGridViewProps["mapResult"],
+  t: ReturnType<typeof useTranslation<typeof topicsMessages>>,
+) {
+  if (mapResult.error)
+    return t("gridCouldNotLoad", { message: mapResult.error.message });
+  if (!mapResult.data) return t("loadingGrid");
   if (mapResult.data.status !== "ready") {
-    return (
-      mapResult.data.reason ?? "This run has no saved embedding projection."
-    );
+    return mapResult.data.reason ?? t("noSavedEmbeddingProjection");
   }
   return null;
 }
@@ -72,6 +76,7 @@ function TopicGridContent({
   useTraces,
   showUnassigned,
 }: TopicGridContentProps) {
+  const t = useTranslation(topicsMessages);
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
   const [headerRef, headerSize] = useElementSize<HTMLDivElement>();
   const { topics, points, perDot, rowsById } = useMemo(
@@ -90,9 +95,7 @@ function TopicGridContent({
   const selectedIndex = selectedTopic
     ? topics.findIndex((topic) => topic.id === selectedTopic.id)
     : null;
-  const message = facet.map
-    ? gridMessage(mapResult)
-    : "No map published for this facet.";
+  const message = facet.map ? gridMessage(mapResult, t) : t("noMapPublished");
 
   return (
     <div className="flex h-full min-h-0 min-w-0 flex-col lg:flex-row">

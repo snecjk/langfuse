@@ -14,6 +14,8 @@ import { MessageSearchProvider } from "@/src/components/ChatMessages/messageSear
 import { MessageSearchToolbar } from "@/src/components/ChatMessages/messageSearch/toolbar";
 import useProjectIdFromURL from "@/src/hooks/useProjectIdFromURL";
 import { Spinner } from "@/src/components/design-system/Spinner/Spinner";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 
 /**
  * PlaygroundPage Component
@@ -37,6 +39,7 @@ import { Spinner } from "@/src/components/design-system/Spinner/Spinner";
  * - Clean single-header design
  */
 export default function PlaygroundPage() {
+  const t = useTranslation(skillMessages);
   const projectId = useProjectIdFromURL();
   const { windowIds, isLoaded, addWindowWithCopy, removeWindowId } =
     usePersistedWindowIds();
@@ -89,8 +92,8 @@ export default function PlaygroundPage() {
 
   const getMessageSearchPageLabel = useCallback(
     (_pageId: string, pageIndex: number) =>
-      windowIds.length > 1 ? `Window ${pageIndex + 1}` : null,
-    [windowIds.length],
+      windowIds.length > 1 ? t("window", { number: pageIndex + 1 }) : null,
+    [windowIds.length, t],
   );
 
   // Don't render until window IDs are loaded
@@ -99,10 +102,9 @@ export default function PlaygroundPage() {
       <Page
         withPadding={false}
         headerProps={{
-          title: "Playground",
+          title: t("playground"),
           help: {
-            description:
-              "A sandbox to test and iterate your prompts across multiple windows",
+            description: t("sandboxDescription"),
             href: "https://langfuse.com/docs/prompt-management/features/playground",
           },
         }}
@@ -116,8 +118,7 @@ export default function PlaygroundPage() {
 
   // Execution status and control states
   const executionStatus = globalIsExecutingAll
-    ? getExecutionStatus() ||
-      `Executing ${windowIds.length} window${windowIds.length === 1 ? "" : "s"}`
+    ? getExecutionStatus() || t("executingWindows", { count: windowIds.length })
     : getExecutionStatus();
   const isRunAllDisabled = globalIsExecutingAll || !hasAnyModelConfigured;
 
@@ -135,10 +136,9 @@ export default function PlaygroundPage() {
         scrollable={false}
         withPadding={false}
         headerProps={{
-          title: "Playground",
+          title: t("playground"),
           help: {
-            description:
-              "A sandbox to test and iterate your prompts across multiple windows",
+            description: t("sandboxDescription"),
             href: "https://langfuse.com/docs/prompt-management/features/playground",
           },
           actionButtonsRight: (
@@ -148,8 +148,7 @@ export default function PlaygroundPage() {
               {/* Window Count Display - Hidden on mobile */}
               <div className="text-muted-foreground hidden items-center gap-2 text-sm md:flex">
                 <span className="whitespace-nowrap">
-                  {windowIds.length} window
-                  {windowIds.length === 1 ? "" : "s"}
+                  {t("windowCount", { count: windowIds.length })}
                 </span>
                 {executionStatus && (
                   <>
@@ -172,8 +171,8 @@ export default function PlaygroundPage() {
                 className="hidden shrink-0 gap-1 md:flex"
                 title={
                   !hasAnyModelConfigured
-                    ? "Please configure a model in Project Settings first"
-                    : "Execute all playground windows simultaneously"
+                    ? t("pleaseConfigureModelFirst")
+                    : t("executeAllPlaygroundWindows")
                 }
               >
                 {globalIsExecutingAll ? (
@@ -182,7 +181,7 @@ export default function PlaygroundPage() {
                   <Play size="base" color="default" />
                 )}
                 <span className="hidden items-center gap-1 lg:inline-flex">
-                  <span>Run All</span>
+                  <span>{t("runAll")}</span>
                   <KeyboardShortcut keys={["Mod", "Enter"]} />
                 </span>
               </Button>

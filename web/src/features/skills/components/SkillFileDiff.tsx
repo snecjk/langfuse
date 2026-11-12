@@ -1,5 +1,7 @@
 import DiffViewer from "@/src/components/DiffViewer";
 import { api } from "@/src/utils/api";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 import { SkillComparisonError } from "./SkillComparisonError";
 
 type FileContent = { content: string } | { sha256Hash: string } | null;
@@ -17,6 +19,7 @@ export function SkillFileDiff({
   oldLabel: string;
   newLabel: string;
 }) {
+  const t = useTranslation(skillMessages);
   const oldHash =
     oldFile && "sha256Hash" in oldFile ? oldFile.sha256Hash : null;
   const newHash =
@@ -47,7 +50,7 @@ export function SkillFileDiff({
   if ((oldHash && oldContent.isPending) || (newHash && newContent.isPending)) {
     return (
       <p role="status" className="text-muted-foreground text-sm">
-        Loading file contents…
+        {t("loadingFileContents")}
       </p>
     );
   }
@@ -59,7 +62,7 @@ export function SkillFileDiff({
   if (!oldString && !newString && (!oldFile || !newFile)) {
     return (
       <p className="text-muted-foreground text-sm">
-        An empty file was {oldFile ? "removed" : "added"}.
+        {oldFile ? t("emptyFileRemoved") : t("emptyFileAdded")}
       </p>
     );
   }
@@ -67,8 +70,8 @@ export function SkillFileDiff({
     <DiffViewer
       oldString={oldString}
       newString={newString}
-      oldLabel={`${oldLabel}${oldFile ? "" : " · File absent"}`}
-      newLabel={`${newLabel}${newFile ? "" : " · File absent"}`}
+      oldLabel={`${oldLabel}${oldFile ? "" : ` · ${t("fileAbsent")}`}`}
+      newLabel={`${newLabel}${newFile ? "" : ` · ${t("fileAbsent")}`}`}
     />
   );
 }

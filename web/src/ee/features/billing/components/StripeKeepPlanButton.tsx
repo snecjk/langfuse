@@ -16,6 +16,8 @@ import { showSuccessToast } from "@/src/features/notifications/showSuccessToast"
 import { showToast } from "@/src/features/notifications/showToast";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
 import { nanoid } from "nanoid";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export const StripeKeepPlanButton = ({
   orgId,
@@ -29,12 +31,13 @@ export const StripeKeepPlanButton = ({
   processing: boolean;
 }) => {
   const [_opId, setOpId] = useState<string | null>(null);
+  const t = useTranslation(enterpriseMessages);
 
   const clearSchedule = api.cloudBilling.clearPlanSwitchSchedule.useMutation({
     onSuccess: () => {
       showSuccessToast({
         operation: "billing_plan.keep",
-        title: "Kept current plan",
+        title: t("billingKeptCurrentPlan"),
         description: "",
       });
       onProcessing(null);
@@ -46,7 +49,7 @@ export const StripeKeepPlanButton = ({
       setOpId(null);
       showToast({
         type: "ERROR",
-        title: "Failed to keep current plan",
+        title: t("billingKeepPlanFailed"),
         analytics: classifyTrpcToastError(error, "billing_plan.keep"),
       });
     },
@@ -56,30 +59,22 @@ export const StripeKeepPlanButton = ({
     <Dialog>
       <DialogTrigger asChild>
         <Button className="w-full" variant="default">
-          Keep Plan
+          {t("billingKeepPlan")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-lg">
-            Confirm Keeping Current Plan
+            {t("billingConfirmKeepPlanTitle")}
           </DialogTitle>
         </DialogHeader>
         <DialogBody className="text-sm">
-          <p>
-            You have a scheduled plan change on your current subscription.
-            Keeping your current plan will remove that schedule and you will
-            remain on your existing plan.
-          </p>
-          <p>
-            Your features and pricing will stay as-is; usage continues to be
-            billed under your current plan. Do you want to keep your current
-            plan and cancel the scheduled change?
-          </p>
+          <p>{t("billingConfirmKeepPlanBody")}</p>
+          <p>{t("billingConfirmKeepPlanBody2")}</p>
         </DialogBody>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="secondary">Go Back</Button>
+            <Button variant="secondary">{t("billingGoBack")}</Button>
           </DialogClose>
           <Button
             variant="default"
@@ -95,7 +90,7 @@ export const StripeKeepPlanButton = ({
             }}
             disabled={processing}
           >
-            {processing ? "Keeping…" : "Confirm Keep Plan"}
+            {processing ? t("billingKeeping") : t("billingConfirmKeepPlan")}
           </Button>
         </DialogFooter>
       </DialogContent>

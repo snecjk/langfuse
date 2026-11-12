@@ -7,6 +7,8 @@ import { GatewayConnectionModelsTable } from "@/src/features/ai-gateway/componen
 import type { useGatewayConnectionModels } from "@/src/features/ai-gateway/components/GatewayConnectionModelsPage/hooks/useGatewayConnectionModels";
 import { useGatewayModelAccess } from "@/src/features/ai-gateway/components/GatewayConnectionModelsPage/hooks/useGatewayModelAccess";
 import type { GatewayConnection } from "@/src/features/ai-gateway/types/gatewayProvider";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 
 type ConnectionModelsEditorProps = {
   organizationId: string;
@@ -27,6 +29,7 @@ export function ConnectionModelsEditor({
   connectionModels,
   filters,
 }: ConnectionModelsEditorProps) {
+  const t = useTranslation(gatewayMessages);
   const {
     isSaving,
     isAddingCustomModel,
@@ -58,7 +61,7 @@ export function ConnectionModelsEditor({
               disabled={isSaving}
               onClick={openDialog}
             >
-              Add custom model
+              {t("addCustomModel")}
             </Button>
           )}
         </AddCustomModelDialogController>
@@ -70,6 +73,7 @@ export function ConnectionModelsEditor({
       addCustomModel,
       testModel,
       isSaving,
+      t,
     ],
   );
 

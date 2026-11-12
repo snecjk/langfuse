@@ -25,14 +25,14 @@ import { Tooltip } from "@/src/components/design-system/Tooltip/Tooltip";
 import Link from "next/link";
 import { Popover, PopoverTrigger } from "@/src/components/ui/popover";
 import { Button } from "@/src/components/ui/button";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 
 const formatRoleLabel = (role: Role) => systemRoleAccessRights[role].name;
 
 const allRoles = Object.keys(orderedRoles) as Role[];
 
 const allProjectRoles = allRoles.filter((role) => role !== "AI_GATEWAY");
-
-const ownerLockedLabel = "Requires owner access";
 
 const roleFilterOptions = allRoles
   .toSorted((a, b) => orderedRoles[b] - orderedRoles[a])
@@ -105,26 +105,28 @@ export function MembersSettingsTable({
   pagination,
   ...tableProps
 }: MembersSettingsTableProps) {
+  const t = useTranslation(evaluationsMessages);
+  const ownerLockedLabel = t("ownerLockedLabel");
   const columns = useMemo<LangfuseColumnDef<MembersSettingsTableRow>[]>(
     () => [
       createUserTableColumn<MembersSettingsTableRow>({
         accessorKey: "user",
-        header: "Name",
+        header: t("name"),
         variant: "avatar",
       }),
       createTextTableColumn<MembersSettingsTableRow>({
         accessorKey: "email",
-        header: "Email",
+        header: t("email"),
         nullValue: "-",
       }),
       createBadgeListTableColumn<MembersSettingsTableRow>({
         accessorKey: "providers",
-        header: "SSO Provider",
+        header: t("ssoProvider"),
         enableHiding: true,
       }),
       {
         accessorKey: "orgRole",
-        header: "Organization Role",
+        header: t("organizationRole"),
         headerTooltip: {
           description:
             "The organization role is the default role for this user across the organization and its projects.",
@@ -201,7 +203,7 @@ export function MembersSettingsTable({
         ? ([
             {
               accessorKey: "projectRole",
-              header: "Project Role",
+              header: t("projectRole"),
               headerTooltip: {
                 description:
                   "The project role applies to this project and overrides the default organization role.",
@@ -209,7 +211,7 @@ export function MembersSettingsTable({
               },
               size: 160,
               cell: ({ row }) => {
-                if (!projectRolesEntitlement) return "N/A on plan";
+                if (!projectRolesEntitlement) return t("naOnPlan");
                 const hasRoleAccess = hasOrgCudAccess || hasProjectCudAccess;
                 const isOwnerLocked =
                   (row.original.projectRole === "OWNER" &&
@@ -252,7 +254,7 @@ export function MembersSettingsTable({
         ? ([
             {
               accessorKey: "featurePreviews",
-              header: "Feature Previews",
+              header: t("featurePreviews"),
               enableHiding: true,
               size: 140,
               cell: ({ row }) => {
@@ -286,7 +288,7 @@ export function MembersSettingsTable({
         : []),
       createDateTableColumn<MembersSettingsTableRow>({
         accessorKey: "createdAt",
-        header: "Member Since",
+        header: t("memberSince"),
         enableHiding: true,
         defaultHidden: true,
         mode: "relative",

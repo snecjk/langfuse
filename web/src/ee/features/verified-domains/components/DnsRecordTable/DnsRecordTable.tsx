@@ -1,6 +1,8 @@
 import { SettingsTable } from "@/src/components/SettingsTable/SettingsTable";
 import { type LangfuseColumnDef } from "@/src/components/table/types";
 import { createTextTableColumn } from "@/src/components/design-system/table/columns/createTextTableColumn";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export function DnsRecordTable({
   recordHost,
@@ -9,6 +11,7 @@ export function DnsRecordTable({
   recordHost: string;
   recordValue: string;
 }) {
+  const t = useTranslation(enterpriseMessages);
   const columns: LangfuseColumnDef<{
     type: string;
     host: string;
@@ -16,20 +19,20 @@ export function DnsRecordTable({
   }>[] = [
     createTextTableColumn({
       accessorKey: "type",
-      header: "Type",
+      header: t("dnsTypeHeader"),
       size: 64,
       enableResizing: false,
     }),
     createTextTableColumn({
       accessorKey: "host",
-      header: "Host",
+      header: t("dnsHostHeader"),
       size: 216,
       enableResizing: false,
       trailingAction: { type: "copy-to-clipboard" },
     }),
     createTextTableColumn({
       accessorKey: "value",
-      header: "Value",
+      header: t("dnsValueHeader"),
       enableResizing: false,
       trailingAction: { type: "copy-to-clipboard" },
     }),

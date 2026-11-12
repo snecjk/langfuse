@@ -2,6 +2,8 @@ import { Check } from "@langfuse/icons";
 import type { GatewayIngestionMode } from "@langfuse/shared";
 
 import type { GATEWAY_INGESTION_MODES } from "@/src/features/ai-gateway/constants/gatewayIngestionModes";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 import { cn } from "@/src/utils/tailwind";
 
 export type IngestionModeCardProps = {
@@ -10,11 +12,24 @@ export type IngestionModeCardProps = {
   onSelect: (mode: GatewayIngestionMode) => void;
 };
 
+const modeTitleKeys = {
+  FULL: "ingestionModeFull",
+  USAGE: "ingestionModeUsage",
+  NONE: "ingestionModeNone",
+} as const;
+
+const modeDescriptionKeys = {
+  FULL: "ingestionModeFullDesc",
+  USAGE: "ingestionModeUsageDesc",
+  NONE: "ingestionModeNoneDesc",
+} as const;
+
 export function IngestionModeCard({
   option,
   selected,
   onSelect,
 }: IngestionModeCardProps) {
+  const t = useTranslation(gatewayMessages);
   const Icon = option.icon;
 
   function handleClick() {
@@ -36,9 +51,9 @@ export function IngestionModeCard({
         {selected ? <Check size="base" __rawClassName="text-primary" /> : null}
       </div>
       <div>
-        <p className="text-sm font-bold">{option.title}</p>
+        <p className="text-sm font-bold">{t(modeTitleKeys[option.value])}</p>
         <p className="text-muted-foreground mt-0.5 text-xs">
-          {option.description}
+          {t(modeDescriptionKeys[option.value])}
         </p>
       </div>
     </button>

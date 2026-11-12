@@ -5,6 +5,8 @@ import { Badge } from "@/src/components/design-system/Badge/Badge";
 import { Button } from "@/src/components/ui/button";
 import { Timeline } from "@/src/components/design-system/Timeline/Timeline";
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 import { type SkillEditorStore } from "./skillEditorStore";
 import { SkillLabelsSelect } from "./SkillMetadataSelect";
 import { SkillVersionComparisonController } from "./SkillVersionComparisonController";
@@ -39,6 +41,7 @@ export function SkillVersionHistory(
         onSelect: (version: number) => Promise<void>;
       },
 ) {
+  const t = useTranslation(skillMessages);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const sortedVersions =
     props.kind === "versions"
@@ -71,14 +74,16 @@ export function SkillVersionHistory(
         )}
       >
         {isCollapsed ? null : (
-          <span className="text-sm font-bold">Versions</span>
+          <span className="text-sm font-bold">{t("versions")}</span>
         )}
         <Button
           type="button"
           variant="ghost"
           size="icon-sm"
           aria-label={
-            isCollapsed ? "Expand version history" : "Collapse version history"
+            isCollapsed
+              ? t("expandVersionHistory")
+              : t("collapseVersionHistory")
           }
           aria-expanded={!isCollapsed}
           onClick={() => setIsCollapsed((collapsed) => !collapsed)}
@@ -99,7 +104,7 @@ export function SkillVersionHistory(
                   <button
                     type="button"
                     className="flex min-w-0 flex-1 flex-col gap-1 text-left"
-                    aria-label="Open local draft"
+                    aria-label={t("openLocalDraft")}
                     aria-current={
                       props.kind === "new" || props.isDraft ? "page" : undefined
                     }
@@ -108,11 +113,11 @@ export function SkillVersionHistory(
                         await props.onSelectDraft();
                     }}
                   >
-                    <Badge color="outline" text="Draft" />
+                    <Badge color="outline" text={t("draftLabel")} />
                     <Badge
                       color="filled"
                       size="md"
-                      text="Unreleased local changes"
+                      text={t("unreleasedLocalChanges")}
                     />
                   </button>
                   {props.kind === "versions" ? (
@@ -120,8 +125,10 @@ export function SkillVersionHistory(
                       {({ openComparison }) => (
                         <IconButton
                           icon={FileDiffIcon}
-                          label={`Compare local draft with version ${props.selectedVersion}`}
-                          title="Compare local draft"
+                          label={t("compareLocalDraft", {
+                            version: props.selectedVersion,
+                          })}
+                          title={t("compareWithLocalDraft")}
                           variant="outline"
                           size="sm"
                           onClick={() =>
@@ -153,7 +160,7 @@ export function SkillVersionHistory(
                       <div className="flex flex-wrap items-center gap-1">
                         <button
                           type="button"
-                          aria-label={`Open version ${version}`}
+                          aria-label={t("openVersion", { version })}
                           aria-current={
                             !props.isDraft && version === props.selectedVersion
                               ? "page"
@@ -199,10 +206,15 @@ export function SkillVersionHistory(
                           ) : null}
                           <span
                             className="text-muted-foreground flex flex-wrap gap-1 text-xs break-words"
-                            title={`Created ${createdAt.toLocaleString()}`}
+                            title={t("createdBy", {
+                              time: createdAt.toLocaleString(),
+                              creator: creator || createdBy,
+                            })}
                           >
-                            {createdAt.toLocaleString()} by{" "}
-                            {creator || createdBy}
+                            {t("createdBy", {
+                              time: createdAt.toLocaleString(),
+                              creator: creator || createdBy,
+                            })}
                           </span>
                         </button>
                         {props.isDraft || version !== props.selectedVersion ? (
@@ -223,13 +235,22 @@ export function SkillVersionHistory(
                                     icon={FileDiffIcon}
                                     label={
                                       props.isDraft
-                                        ? `Compare version ${version} with local draft`
-                                        : `Compare version ${version} with selected version ${props.selectedVersion}`
+                                        ? t("compareVersionWithLocalDraft", {
+                                            version,
+                                          })
+                                        : t(
+                                            "compareVersionWithSelectedVersion",
+                                            {
+                                              version,
+                                              selectedVersion:
+                                                props.selectedVersion,
+                                            },
+                                          )
                                     }
                                     title={
                                       props.isDraft
-                                        ? "Compare with local draft"
-                                        : "Compare with selected version"
+                                        ? t("compareWithLocalDraft")
+                                        : t("compareWithSelectedVersion")
                                     }
                                     variant="outline"
                                     size="sm"
@@ -250,7 +271,7 @@ export function SkillVersionHistory(
             <div className="flex flex-col gap-2 pt-2">
               {props.loadMoreError ? (
                 <p role="alert" className="text-destructive text-xs">
-                  Could not load older versions. Please try again.
+                  {t("couldNotLoadOlderVersions")}
                 </p>
               ) : null}
               <Button
@@ -261,7 +282,7 @@ export function SkillVersionHistory(
                 loading={props.isLoadingMore}
                 onClick={props.onLoadMore}
               >
-                Load older versions
+                {t("loadOlderVersions")}
               </Button>
             </div>
           ) : null}

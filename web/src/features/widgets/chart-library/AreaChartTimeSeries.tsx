@@ -9,6 +9,7 @@ import {
   groupDataByTimeDimension,
   toFullMetricString,
 } from "@/src/features/widgets/chart-library/utils";
+import { useInterfaceLocale } from "@/src/features/i18n/I18nProvider";
 import { prepareDenseSeries } from "@/src/features/widgets/chart-library/prepareDenseSeries";
 import {
   parseChartTimestamp,
@@ -42,6 +43,7 @@ export function AreaChartTimeSeries({
   connectNulls = false,
   hideXAxisLabels = false,
 }: ChartProps) {
+  const locale = useInterfaceLocale();
   const allDimensions = useMemo(() => getUniqueDimensions(data), [data]);
   const groupedData = useMemo(
     () =>
@@ -78,7 +80,7 @@ export function AreaChartTimeSeries({
     return dates.length ? prepareTimeAxis(dates) : timeAxis;
   }, [groupedData, timeAxis]);
   const formatValue = (value: number) =>
-    toFullMetricString(metricFormatter(value, { style: "compact" }));
+    toFullMetricString(metricFormatter(value, { style: "compact", locale }));
   const chartData = useMemo(
     () =>
       groupedData.map((datum) => ({

@@ -10,6 +10,8 @@ import { StripeCustomerPortalButton } from "./StripeCustomerPortalButton";
 import { BillingSwitchPlanDialog } from "./BillingSwitchPlanDialog";
 import { useBillingInformation } from "./useBillingInformation";
 import { StripeCancellationButton } from "./StripeCancellationButton";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export const BillingActionButtons = () => {
   const {
@@ -24,6 +26,7 @@ export const BillingActionButtons = () => {
   });
   const { setOpen } = useSupportDrawer();
   const { setOpen: setMigrationPanelOpen } = useV4MigrationPanel();
+  const t = useTranslation(enterpriseMessages);
 
   // Show pricing page button
   const shouldDisableChangePlan = useMemo(() => {
@@ -44,11 +47,11 @@ export const BillingActionButtons = () => {
             setOpen(true);
           }}
         >
-          Change plan (via support)
+          {t("billingChangePlanViaSupport")}
         </Button>
         <Button variant="secondary" asChild>
           <Link href="https://langfuse.com/pricing" target="_blank">
-            Compare plans
+            {t("billingComparePlans")}
           </Link>
         </Button>
       </div>
@@ -66,7 +69,7 @@ export const BillingActionButtons = () => {
             {hasBillingAccess && (
               <StripeCustomerPortalButton
                 orgId={organization.id}
-                title="Update Billing Details"
+                title={t("billingUpdateDetails")}
                 variant="secondary"
               />
             )}
@@ -78,14 +81,12 @@ export const BillingActionButtons = () => {
         )}
         <Button variant="secondary" asChild>
           <Link href="https://langfuse.com/pricing" target="_blank">
-            Compare plans
+            {t("billingComparePlans")}
           </Link>
         </Button>
       </div>
       {hasActiveSubscription && !hasValidPaymentMethod && !isLoading && (
-        <p className="text-sm text-red-600">
-          You do not have a valid payment method. Please Update Billing Details.
-        </p>
+        <p className="text-sm text-red-600">{t("billingNoPaymentMethod")}</p>
       )}
     </div>
   );

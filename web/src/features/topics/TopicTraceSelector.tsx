@@ -16,6 +16,8 @@ import {
 import { parseTraceInput } from "./parse-trace-input";
 import { TOPICS_BACKFILL_TRACE_LIMIT } from "./backfill-limit";
 import { TOPICS_MAX_SELECTION_RANGE_MS } from "@langfuse/shared/topics";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 import {
   isValidTopicTimeRange,
   relativeTopicTimeRange,
@@ -42,6 +44,7 @@ export function useTopicTraceSelector({
   enabled: boolean;
   filterOptionsEnabled: boolean;
 }) {
+  const t = useTranslation(topicsMessages);
   const [mode, setMode] = useState("filters");
   const [filterMode, setFilterMode] = useState<"builder" | "query">("builder");
   const [filter, setFilter] = useState<FilterState>([]);
@@ -115,13 +118,13 @@ export function useTopicTraceSelector({
       );
       if (pastedIds.length > TOPICS_BACKFILL_TRACE_LIMIT) {
         throw new Error(
-          `Select at most ${TOPICS_BACKFILL_TRACE_LIMIT.toLocaleString()} traces per run.`,
+          t("selectAtMostPerRun", { count: TOPICS_BACKFILL_TRACE_LIMIT }),
         );
       }
     } catch (error) {
       pastedIds = null;
       pasteError =
-        error instanceof Error ? error.message : "Invalid trace IDs.";
+        error instanceof Error ? error.message : t("invalidTraceIds");
     }
   }
   const startTimeFilter: TimeFilter[] = [

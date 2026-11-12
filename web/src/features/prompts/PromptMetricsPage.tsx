@@ -1,5 +1,8 @@
 /* eslint-disable no-nested-ternary, react/no-unstable-nested-components */
-import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
 import { coreMessages } from "@/src/features/i18n/messages/core";
 import { DataTable } from "@/src/components/table/data-table";
 import {
@@ -101,6 +104,7 @@ export default function PromptMetricsPage({
   showControlsInPageHeader = true,
 }: { promptName?: string; showControlsInPageHeader?: boolean } = {}) {
   const t = useTranslation(coreMessages);
+  const locale = useInterfaceLocale();
   const router = useRouter();
   const projectId = useProjectIdFromURL() ?? "";
   const promptNameFromQuery = router.query.promptName;
@@ -260,7 +264,7 @@ export default function PromptMetricsPage({
       accessorKey: "medianCost",
       header: t("medianCost"),
       size: 120,
-      formatter: (value) => usdFormatter(value),
+      formatter: (value) => usdFormatter(value, 2, 2, locale),
       getValue: (value) => {
         if (!promptMetrics.isSuccess) return { type: "loading" };
         if (!value) return undefined;
@@ -274,7 +278,7 @@ export default function PromptMetricsPage({
       header: t("generationsCount"),
       size: 150,
       enableHiding: true,
-      formatter: (value) => numberFormatter(value, 0),
+      formatter: (value) => numberFormatter(value, 0, undefined, locale),
       getValue: (value) =>
         promptMetrics.isSuccess ? (value ?? undefined) : { type: "loading" },
     }),

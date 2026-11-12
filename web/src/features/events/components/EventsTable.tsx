@@ -70,7 +70,10 @@ import { createTextTableColumn } from "@/src/components/design-system/table/colu
 import { type LangfuseColumnDef } from "@/src/components/table/types";
 
 import { cn } from "@/src/utils/tailwind";
-import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
 import { tracingMessages } from "@/src/features/i18n/messages/tracing";
 import { ObservationLevelTag } from "@/src/components/ObservationLevelTag";
 import {
@@ -330,6 +333,7 @@ export default function ObservationsEventsTable({
   showAllEnvironments = false,
 }: EventsTableProps) {
   const t = useTranslation(tracingMessages);
+  const locale = useInterfaceLocale();
   const peekContext = usePeekTableState();
   const hasBatchExportAccess = useHasProjectAccess({
     projectId,
@@ -1160,14 +1164,14 @@ export default function ObservationsEventsTable({
   const selectedItemCount = selectAll ? totalCount : selectedVisibleRowCount;
   const itemCountDisplay =
     selectedItemCount !== null
-      ? compactNumberFormatter(selectedItemCount)
+      ? compactNumberFormatter(selectedItemCount, undefined, locale)
       : "...";
   const selectedUniqueTraceCount = selectAll
     ? uniqueTraceCount
     : selectedTraceIds.length;
   const traceCountDisplay =
     selectedUniqueTraceCount !== null
-      ? `${selectAll ? "~" : ""}${compactNumberFormatter(selectedUniqueTraceCount)}`
+      ? `${selectAll ? "~" : ""}${compactNumberFormatter(selectedUniqueTraceCount, undefined, locale)}`
       : "...";
 
   // Select-all deletes persist the raw filterState into the batch action, but
@@ -1383,7 +1387,7 @@ export default function ObservationsEventsTable({
             pricingTierName={row.original.usagePricingTierName ?? undefined}
           >
             <div className="flex items-center gap-1">
-              <span>{usdFormatter(value)}</span>
+              <span>{usdFormatter(value, 2, 2, locale)}</span>
               <InfoIcon size="sm" />
             </div>
           </BreakdownTooltip>
@@ -1422,7 +1426,7 @@ export default function ObservationsEventsTable({
           enableHiding: true,
           defaultHidden: true,
           enableSorting,
-          formatter: (value) => usdFormatter(value),
+          formatter: (value) => usdFormatter(value, 2, 2, locale),
         }),
         createTextTableColumn<EventsTableRow>({
           accessorFn: (row) =>
@@ -1443,7 +1447,7 @@ export default function ObservationsEventsTable({
       enableHiding: true,
       enableSorting,
       defaultHidden: true,
-      formatter: (value) => numberFormatter(value, 0, 0),
+      formatter: (value) => numberFormatter(value, 0, 0, locale),
     }),
     createNumberTableColumn<EventsTableRow>({
       accessorKey: "toolCalls",
@@ -1452,7 +1456,7 @@ export default function ObservationsEventsTable({
       enableHiding: true,
       enableSorting,
       defaultHidden: true,
-      formatter: (value) => numberFormatter(value, 0, 0),
+      formatter: (value) => numberFormatter(value, 0, 0, locale),
     }),
     {
       accessorKey: "timeToFirstToken",
@@ -1514,7 +1518,7 @@ export default function ObservationsEventsTable({
           enableHiding: true,
           defaultHidden: true,
           enableSorting,
-          formatter: (value) => numberFormatter(value, 0, 0),
+          formatter: (value) => numberFormatter(value, 0, 0, locale),
         }),
         createNumberTableColumn<EventsTableRow>({
           accessorFn: (row) => getCachedInputMetric(row.usageDetails),
@@ -1524,7 +1528,7 @@ export default function ObservationsEventsTable({
           enableHiding: true,
           defaultHidden: true,
           enableSorting,
-          formatter: (value) => numberFormatter(value, 0, 0),
+          formatter: (value) => numberFormatter(value, 0, 0, locale),
         }),
         createNumberTableColumn<EventsTableRow>({
           id: "outputTokens",
@@ -1534,7 +1538,7 @@ export default function ObservationsEventsTable({
           enableHiding: true,
           defaultHidden: true,
           enableSorting,
-          formatter: (value) => numberFormatter(value, 0, 0),
+          formatter: (value) => numberFormatter(value, 0, 0, locale),
         }),
         createNumberTableColumn<EventsTableRow>({
           id: "totalTokens",
@@ -1544,7 +1548,7 @@ export default function ObservationsEventsTable({
           enableHiding: true,
           defaultHidden: true,
           enableSorting,
-          formatter: (value) => numberFormatter(value, 0, 0),
+          formatter: (value) => numberFormatter(value, 0, 0, locale),
         }),
       ] satisfies LangfuseColumnDef<EventsTableRow>[],
     },

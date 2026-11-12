@@ -4,6 +4,8 @@ import { Card } from "@/src/components/ui/card";
 import { numberFormatter, compactNumberFormatter } from "@/src/utils/numbers";
 import { type Plan } from "@langfuse/shared";
 import type { RouterOutput } from "@/src/utils/types";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export const BillingUsageChart = ({
   usage,
@@ -14,9 +16,10 @@ export const BillingUsageChart = ({
   hobbyPlanLimit: number;
   plan: Plan;
 }) => {
+  const t = useTranslation(enterpriseMessages);
   const usageType = usage?.usageType
     ? usage.usageType.charAt(0).toUpperCase() + usage.usageType.slice(1)
-    : "Events";
+    : t("billingEventsFallback");
 
   return (
     <div>
@@ -25,8 +28,8 @@ export const BillingUsageChart = ({
           <>
             <p className="text-muted-foreground text-sm">
               {usage.billingPeriod
-                ? `Consumed ${usageType} in current billing period (updated about once every 60 minutes)`
-                : `Consumed ${usageType} / last 30d`}
+                ? t("billingUsageConsumedPeriod", { type: usageType })
+                : t("billingUsageConsumed30d", { type: usageType })}
             </p>
             <div className="text-3xl font-bold">
               {numberFormatter(usage.usageCount, 0)}
@@ -36,7 +39,9 @@ export const BillingUsageChart = ({
                 <div className="mt-4 flex justify-between">
                   <span className="text-sm">{`${numberFormatter((usage.usageCount / hobbyPlanLimit) * 100)}%`}</span>
                   <span className="text-sm">
-                    Plan limit: {compactNumberFormatter(hobbyPlanLimit)}
+                    {t("billingPlanLimit", {
+                      limit: compactNumberFormatter(hobbyPlanLimit),
+                    })}
                   </span>
                 </div>
                 <div
@@ -64,7 +69,7 @@ export const BillingUsageChart = ({
           </>
         ) : (
           <span className="text-muted-foreground text-sm">
-            Loading (might take a moment) ...
+            {t("billingLoading")}
           </span>
         )}
       </Card>

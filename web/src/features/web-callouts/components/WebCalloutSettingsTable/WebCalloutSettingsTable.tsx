@@ -10,6 +10,8 @@ import { createStatusTableColumn } from "@/src/components/design-system/table/co
 import { createTextTableColumn } from "@/src/components/design-system/table/columns/createTextTableColumn";
 import { type LangfuseColumnDef } from "@/src/components/table/types";
 import { type RouterOutputs } from "@/src/utils/api";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 
 export type WebCalloutEndpoint = RouterOutputs["webCallouts"]["all"][number];
 
@@ -23,33 +25,36 @@ export function WebCalloutSettingsTable({
   onEdit: (endpoint: WebCalloutEndpoint) => void;
   onDelete: (endpoint: WebCalloutEndpoint) => void;
 }) {
+  const t = useTranslation(integrationMessages);
   const columns = useMemo<LangfuseColumnDef<WebCalloutEndpoint>[]>(
     () => [
       createTextTableColumn<WebCalloutEndpoint>({
         accessorKey: "name",
-        header: "Name",
+        header: t("webCalloutEndpointName"),
       }),
       createTextTableColumn<WebCalloutEndpoint>({
         accessorKey: "url",
-        header: "Endpoint",
+        header: t("webCalloutEndpoint"),
         size: 576,
       }),
       createTextTableColumn<WebCalloutEndpoint>({
         accessorKey: "toastMessage",
-        header: "Toast Message",
+        header: t("webCalloutToastMessage"),
       }),
       createTextTableColumn<WebCalloutEndpoint, string[]>({
         accessorKey: "requestHeaderKeys",
-        header: "Headers",
-        mapValue: (headers) => (headers?.length ? headers.join(", ") : "None"),
+        header: t("webCalloutHeaders"),
+        mapValue: (headers) =>
+          headers?.length ? headers.join(", ") : t("webCalloutNone"),
       }),
       createStatusTableColumn<WebCalloutEndpoint, boolean>({
         accessorKey: "enabled",
-        header: "Status",
-        getStatus: (enabled) => (enabled ? "active" : "disabled"),
+        header: t("webCalloutStatus"),
+        getStatus: (enabled) =>
+          enabled ? t("webCalloutActive") : t("webCalloutDisabled"),
       }),
     ],
-    [],
+    [t],
   );
 
   const actions = useCallback<
@@ -59,27 +64,27 @@ export function WebCalloutSettingsTable({
       {
         id: "edit",
         type: "item",
-        title: "Edit endpoint",
+        title: t("webCalloutEdit"),
         icon: Pencil,
         onClick: () => onEdit(endpoint),
       },
       {
         id: "delete",
         type: "item",
-        title: "Delete endpoint",
+        title: t("webCalloutDelete"),
         icon: Trash2,
         variant: "destructive",
         onClick: () => onDelete(endpoint),
       },
     ],
-    [onEdit, onDelete],
+    [onEdit, onDelete, t],
   );
 
   const toolbarActions: SettingsTableProps<WebCalloutEndpoint>["toolbarActions"] =
     [
       {
         id: "add-endpoint",
-        label: "Add endpoint",
+        label: t("webCalloutAdd"),
         variant: "secondary",
         icon: <Plus size="base" aria-hidden="true" />,
         disabled: Boolean(createAction.disabledReason),
@@ -90,7 +95,7 @@ export function WebCalloutSettingsTable({
 
   return (
     <SettingsTable
-      tableName="Web callout endpoints"
+      tableName={t("webCalloutTableName")}
       columns={columns}
       actions={actions}
       toolbarActions={toolbarActions}

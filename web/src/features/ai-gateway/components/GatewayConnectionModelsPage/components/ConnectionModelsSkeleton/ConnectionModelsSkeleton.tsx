@@ -1,15 +1,18 @@
 import type { ReactNode } from "react";
 
 import { Skeleton, SkeletonGroup } from "@/src/components/ui/skeleton";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 
 /**
  * Mirrors the models table: the search field, then `filters` (live, so the provider
  * select stays usable), then the table. Without `filters`, they are skeletons too.
  */
 export function ConnectionModelsSkeleton({ filters }: { filters?: ReactNode }) {
+  const t = useTranslation(gatewayMessages);
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <span className="sr-only">Loading models</span>
+      <span className="sr-only">{t("loadingModels")}</span>
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <SkeletonGroup className="w-full max-w-120 md:w-96">
           <Skeleton className="h-8 w-full" />

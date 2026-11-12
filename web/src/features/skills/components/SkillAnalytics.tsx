@@ -15,6 +15,8 @@ import { PageHeaderControlsPortal } from "@/src/components/layouts/page-header-c
 import { useTableDateRange } from "@/src/hooks/useTableDateRange";
 import { rangeToString, type TimeRange } from "@/src/utils/date-range-utils";
 import { useSkillAnalytics } from "@/src/features/skills/hooks/useSkillAnalytics";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 type SkillAnalyticsProps = {
   projectId: string;
   skillId: string;
@@ -49,6 +51,7 @@ function SkillAnalyticsDashboard({
   paths,
   timeRange,
 }: SkillAnalyticsProps & { timeRange: TimeRange }) {
+  const t = useTranslation(skillMessages);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const { available, loaded, files, handleRefresh } = useSkillAnalytics({
     projectId,
@@ -78,8 +81,8 @@ function SkillAnalyticsDashboard({
       <PageHeaderControlsPortal>
         <IconButton
           icon={RefreshCw}
-          label="Refresh metrics"
-          title="Refresh metrics"
+          label={t("refreshMetrics")}
+          title={t("refreshMetrics")}
           variant="outline"
           onClick={handleRefresh}
           disabled={
@@ -92,32 +95,32 @@ function SkillAnalyticsDashboard({
           <StatusMessage
             level="ERROR"
             size="compact"
-            message={`Could not load some metrics: ${error.message}. Use Refresh metrics to retry.`}
+            message={t("couldNotLoadSomeMetrics", { message: error.message })}
           />
         ) : null}
         <div className="grid shrink-0 grid-cols-1 gap-3 sm:grid-cols-2">
           <Metric
-            label="Available"
+            label={t("available")}
             value={
               available.data
                 ? Number(available.data[0]?.count_count ?? 0)
                 : null
             }
             loading={available.isPending}
-            description="Observations offering this skill version"
+            description={t("availableDescription")}
           />
           <Metric
-            label="Loaded"
+            label={t("loaded")}
             value={
               loaded.data ? Number(loaded.data[0]?.count_count ?? 0) : null
             }
             loading={loaded.isPending}
-            description="Observations loading one or more files"
+            description={t("loadedDescription")}
           />
         </div>
         <section className="flex min-h-28 flex-col gap-2 rounded-lg border pt-2">
           <div className="shrink-0 px-3">
-            <h3 className="text-sm font-bold">File usage</h3>
+            <h3 className="text-sm font-bold">{t("fileUsage")}</h3>
           </div>
           <div className="ph-no-capture flex max-h-48 min-h-0 flex-col overflow-hidden [&_tbody>tr]:h-8 [&_tbody>tr>td:not([colspan])]:py-1 [&_tbody>tr>td:not([colspan])>div]:h-6">
             <Table<FileUsage>
@@ -125,18 +128,18 @@ function SkillAnalyticsDashboard({
               columns={[
                 createTextTableColumn<FileUsage>({
                   accessorKey: "path",
-                  header: "File",
+                  header: t("file"),
                   size: 320,
                   trailingAction: {
                     type: "custom",
                     icon: Filter,
-                    label: "Filter observations by this file",
+                    label: t("filterObservationsByFile"),
                     onClick: ({ row }) => setSelectedFile(row.original.path),
                   },
                 }),
                 createNumberTableColumn<FileUsage>({
                   accessorKey: "loads",
-                  header: "Loads",
+                  header: t("loads"),
                   size: 110,
                   formatter: formatCount,
                 }),

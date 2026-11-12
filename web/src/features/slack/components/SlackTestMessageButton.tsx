@@ -3,6 +3,8 @@ import { Button, type ButtonProps } from "@/src/components/ui/button";
 import { Zap } from "@langfuse/icons";
 import { type SlackChannel } from "./ChannelSelector";
 import { useSlackTestMessage } from "@/src/features/slack/hooks/useSlackTestMessage";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 
 /**
  * Props for the SlackTestMessageButton component
@@ -46,12 +48,13 @@ export const SlackTestMessageButton: React.FC<SlackTestMessageButtonProps> = ({
   disabled = false,
   variant = "default",
   size = "default",
-  buttonText = "Send Test Message",
+  buttonText,
   onSuccess,
   onError,
   showText = true,
   hasAccess = true,
 }) => {
+  const t = useTranslation(integrationMessages);
   const { sendTestMessage, isPending } = useSlackTestMessage({
     projectId,
     onSuccess,
@@ -77,12 +80,12 @@ export const SlackTestMessageButton: React.FC<SlackTestMessageButtonProps> = ({
       {isPending ? (
         <>
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-          {showText && <span>Sending...</span>}
+          {showText && <span>{t("slackSending")}</span>}
         </>
       ) : (
         <>
           <Zap size="base" />
-          {showText && <span>{buttonText}</span>}
+          {showText && <span>{buttonText ?? t("slackSendTestMessage")}</span>}
         </>
       )}
     </Button>

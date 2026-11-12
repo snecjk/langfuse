@@ -14,6 +14,8 @@ import { api } from "@/src/utils/api";
 import { SlackConnectButton } from "@/src/features/slack/components/SlackConnectButton";
 import { SlackDisconnectDialogController } from "@/src/features/slack/components/SlackDisconnectDialogController";
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 
 /**
  * Props for the SlackConnectionCard component
@@ -51,6 +53,7 @@ export const SlackConnectionCard: React.FC<SlackConnectionCardProps> = ({
   onConnectionChange,
   showConnectButton = true,
 }) => {
+  const t = useTranslation(integrationMessages);
   // Connecting and disconnecting a workspace is project integration config,
   // separate from managing the automations that use it.
   const canManageIntegration = useHasProjectAccess({
@@ -85,14 +88,14 @@ export const SlackConnectionCard: React.FC<SlackConnectionCardProps> = ({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            Slack Connection
+            {t("slackConnectionTitle")}
           </CardTitle>
-          <CardDescription>Checking connection status...</CardDescription>
+          <CardDescription>{t("slackConnectionChecking")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-muted-foreground flex items-center gap-2">
             <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-            <span>Loading...</span>
+            <span>{t("slackConnectionLoading")}</span>
           </div>
         </CardContent>
       </Card>
@@ -105,14 +108,14 @@ export const SlackConnectionCard: React.FC<SlackConnectionCardProps> = ({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            Slack Connection
+            {t("slackConnectionTitle")}
           </CardTitle>
-          <CardDescription>Error loading connection status</CardDescription>
+          <CardDescription>{t("slackConnectionErrorTitle")}</CardDescription>
         </CardHeader>
         <CardContent>
           <Alert icon={AlertCircle}>
             <Alert.Description>
-              Failed to load Slack integration status. Please try again.
+              {t("slackConnectionErrorBody")}
             </Alert.Description>
           </Alert>
         </CardContent>
@@ -126,11 +129,9 @@ export const SlackConnectionCard: React.FC<SlackConnectionCardProps> = ({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            Slack Connection
+            {t("slackConnectionTitle")}
           </CardTitle>
-          <CardDescription>
-            Connect your Slack workspace to send notifications
-          </CardDescription>
+          <CardDescription>{t("slackConnectHelp")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {integrationStatus?.error && (
@@ -141,13 +142,12 @@ export const SlackConnectionCard: React.FC<SlackConnectionCardProps> = ({
 
           <div className="space-y-2">
             <p className="text-muted-foreground text-sm">
-              Connect your Slack workspace to enable real-time notifications for
-              your automations.
+              {t("slackConnectBody")}
             </p>
 
             {!canManageIntegration && (
               <p className="text-muted-foreground text-sm">
-                Ask a project admin to connect Slack.
+                {t("slackConnectAskAdmin")}
               </p>
             )}
 
@@ -172,32 +172,32 @@ export const SlackConnectionCard: React.FC<SlackConnectionCardProps> = ({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          Slack Connection
+          {t("slackConnectionTitle")}
         </CardTitle>
-        <CardDescription>Connected to your Slack workspace</CardDescription>
+        <CardDescription>{t("slackConnectedTitle")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Connection Status */}
         <div className="flex items-center gap-2">
           <CheckCircle size="base" __rawClassName="text-green-500" />
-          <span className="text-sm font-bold">Connected</span>
+          <span className="text-sm font-bold">{t("slackConnectedLabel")}</span>
         </div>
 
         {/* Team Information */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold">Workspace:</span>
+            <span className="text-sm font-bold">{t("slackWorkspace")}</span>
             <Badge color="filled" text={integrationStatus.teamName ?? ""} />
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold">Team ID:</span>
+            <span className="text-sm font-bold">{t("slackTeamId")}</span>
             <Badge color="outline" text={integrationStatus.teamId ?? ""} />
           </div>
 
           {integrationStatus.botUserId && (
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold">Bot User:</span>
+              <span className="text-sm font-bold">{t("slackBotUser")}</span>
               <Badge color="outline" text={integrationStatus.botUserId} />
             </div>
           )}
@@ -214,7 +214,7 @@ export const SlackConnectionCard: React.FC<SlackConnectionCardProps> = ({
           >
             {({ isPending, openDialog }) => (
               <Button
-                text="Disconnect"
+                text={t("disconnect")}
                 icon={Unlink}
                 variant="destructive"
                 size="sm"
@@ -225,7 +225,7 @@ export const SlackConnectionCard: React.FC<SlackConnectionCardProps> = ({
           </SlackDisconnectDialogController>
 
           <Button
-            text="Refresh Status"
+            text={t("refreshStatus")}
             variant="secondary"
             size="sm"
             onClick={() => refetchStatus()}

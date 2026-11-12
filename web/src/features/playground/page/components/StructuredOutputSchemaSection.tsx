@@ -18,6 +18,8 @@ import {
   CommandSeparator,
 } from "@/src/components/ui/command";
 import { type PlaygroundSchema } from "@/src/features/playground/page/types";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 
 export type StructuredOutputSchemaDialogRequest = {
   existingLlmSchema?: LlmSchema;
@@ -38,6 +40,7 @@ type StructuredOutputSchemaProps = {
 export const StructuredOutputSchemaPopover = ({
   onOpenSchemaDialog,
 }: StructuredOutputSchemaProps) => {
+  const t = useTranslation(skillMessages);
   const { structuredOutputSchema, setStructuredOutputSchema } =
     usePlaygroundContext();
   const projectId = useProjectIdFromURL();
@@ -110,11 +113,11 @@ export const StructuredOutputSchemaPopover = ({
   return (
     <Command className="flex flex-col">
       <CommandInput
-        placeholder="Search schemas..."
+        placeholder={t("searchSchemas")}
         className="h-8 border-none py-1 pr-1 pl-6 focus:ring-0 focus:ring-offset-0"
       />
       <CommandList className="max-h-[300px] overflow-y-auto">
-        <CommandEmpty>No schemas found.</CommandEmpty>
+        <CommandEmpty>{t("noSchemasFound")}</CommandEmpty>
         <CommandGroup>
           {savedSchemas.map((schema) => (
             <CommandItem
@@ -138,7 +141,7 @@ export const StructuredOutputSchemaPopover = ({
                 variant="ghost"
                 size="icon"
                 className="ml-2 h-7 w-7 shrink-0"
-                aria-label={`Edit schema ${schema.name}`}
+                aria-label={t("editSchema", { name: schema.name })}
                 onClick={(e) => {
                   e.stopPropagation();
                   onOpenSchemaDialog({
@@ -163,7 +166,7 @@ export const StructuredOutputSchemaPopover = ({
           onClick={() => onOpenSchemaDialog({ onSave: handleSelectSchema })}
         >
           <PlusIcon size="base" color="default" __rawClassName="mr-2" />
-          Create new schema
+          {t("createNewSchema")}
         </Button>
       </div>
     </Command>
@@ -174,6 +177,7 @@ export const StructuredOutputSchemaPopover = ({
 export const StructuredOutputSchemaSection = ({
   onOpenSchemaDialog,
 }: StructuredOutputSchemaProps) => {
+  const t = useTranslation(skillMessages);
   const { structuredOutputSchema, setStructuredOutputSchema } =
     usePlaygroundContext();
   const projectId = useProjectIdFromURL();
@@ -280,7 +284,9 @@ export const StructuredOutputSchemaSection = ({
     <ScrollArea className="max-h-[min(45vh,18rem)]">
       {!structuredOutputSchema ? (
         <div className="flex h-16 flex-col items-center justify-center p-4 text-center">
-          <p className="text-muted-foreground text-xs">No schema provided.</p>
+          <p className="text-muted-foreground text-xs">
+            {t("noSchemaProvided")}
+          </p>
         </div>
       ) : (
         <div className="space-y-1">
@@ -292,7 +298,9 @@ export const StructuredOutputSchemaSection = ({
               variant="ghost"
               size="sm"
               className="absolute top-2 right-3 h-6 w-6 p-0"
-              aria-label={`Remove schema ${structuredOutputSchema.name}`}
+              aria-label={t("removeSchema", {
+                name: structuredOutputSchema.name,
+              })}
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
@@ -312,7 +320,7 @@ export const StructuredOutputSchemaSection = ({
                 </h3>
                 {!isSchemaSaved(structuredOutputSchema) ? (
                   <span className="bg-muted text-muted-foreground mt-1 inline-flex rounded px-1 py-0.5 text-xs">
-                    Unsaved
+                    {t("unsaved")}
                   </span>
                 ) : null}
               </div>

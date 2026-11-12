@@ -9,12 +9,15 @@ import {
   clearAllPlaygroundData,
 } from "../storage/windowStorage";
 import { showToast } from "@/src/features/notifications/showToast";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 
 /**
  * Hook to persist window IDs across page refreshes.
  * Manages the list of active playground windows by orchestrating with storage utilities.
  */
 export function usePersistedWindowIds() {
+  const t = useTranslation(skillMessages);
   const [windowIds, setWindowIds] = useState<string[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -45,7 +48,9 @@ export function usePersistedWindowIds() {
       if (windowIds.length >= MULTI_WINDOW_CONFIG.MAX_WINDOWS) {
         showToast({
           type: "ERROR",
-          title: `Maximum window limit of ${MULTI_WINDOW_CONFIG.MAX_WINDOWS} reached`,
+          title: t("maxWindowLimitReached", {
+            max: MULTI_WINDOW_CONFIG.MAX_WINDOWS,
+          }),
           analytics: {
             operation: "playground_window.add",
             errorOrigin: "frontend",
@@ -57,7 +62,7 @@ export function usePersistedWindowIds() {
       setWindowIds((prev) => [...prev, windowId]);
       return windowId;
     },
-    [windowIds],
+    [windowIds, t],
   );
 
   /**
@@ -70,7 +75,9 @@ export function usePersistedWindowIds() {
       if (windowIds.length >= MULTI_WINDOW_CONFIG.MAX_WINDOWS) {
         showToast({
           type: "ERROR",
-          title: `Maximum window limit of ${MULTI_WINDOW_CONFIG.MAX_WINDOWS} reached`,
+          title: t("maxWindowLimitReached", {
+            max: MULTI_WINDOW_CONFIG.MAX_WINDOWS,
+          }),
           analytics: {
             operation: "playground_window.add",
             errorOrigin: "frontend",
@@ -90,7 +97,7 @@ export function usePersistedWindowIds() {
       setWindowIds((prev) => [...prev, newWindowId]);
       return newWindowId;
     },
-    [windowIds],
+    [windowIds, t],
   );
 
   /**
@@ -102,7 +109,7 @@ export function usePersistedWindowIds() {
       if (windowIds.length <= 1) {
         showToast({
           type: "ERROR",
-          title: "Cannot remove the last remaining window",
+          title: t("cannotRemoveLastRemainingWindow"),
           analytics: {
             operation: "playground_window.remove",
             errorOrigin: "frontend",
@@ -115,7 +122,7 @@ export function usePersistedWindowIds() {
       removeWindowState(windowId);
       setWindowIds((prev) => prev.filter((id) => id !== windowId));
     },
-    [windowIds.length],
+    [windowIds.length, t],
   );
 
   /**

@@ -43,6 +43,8 @@ import type { GatewayCredentialSurface } from "@/src/features/ai-gateway/types/a
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
 import { getLiveConnectionNameError } from "@/src/features/ai-gateway/components/GatewaySetupPage/components/ProviderDialogController/fns/getLiveConnectionNameError";
 import { useExistingConnectionNames } from "@/src/features/ai-gateway/components/GatewaySetupPage/components/ProviderDialogController/hooks/useExistingConnectionNames";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 
 export function ProviderDialogController({
   organizationId,
@@ -62,6 +64,7 @@ export function ProviderDialogController({
     openEditDialog: (connection: GatewayConnection) => void;
   }) => ReactNode;
 }) {
+  const t = useTranslation(gatewayMessages);
   const [provider, setProvider] = useState<GatewayProvider>(
     connection?.provider ?? "OPENAI",
   );
@@ -102,8 +105,8 @@ export function ProviderDialogController({
       : null;
   const isError = test.isError || (Boolean(saveError) && !serverNameError);
   const errorTitle = test.isError
-    ? "Credential validation failed"
-    : "Provider credential could not be saved";
+    ? t("credentialValidationError")
+    : t("credentialSaveError");
 
   /** Skips the live check after saving, as the refetched list already holds the saved name. */
   const getNameError = (selectedConnection: GatewayConnection | null) =>
@@ -253,7 +256,7 @@ export function ProviderDialogController({
               ? "aiGateway.updateConnection"
               : "aiGateway.createConnection",
           },
-          title: "Provider credential saved, but its models can't be listed",
+          title: t("modelListingDeniedToast"),
         });
       }
 
@@ -288,18 +291,16 @@ export function ProviderDialogController({
             <DialogHeader>
               <DialogTitle>
                 {selectedConnection
-                  ? "Edit provider credential"
-                  : "Add provider credential"}
+                  ? t("editProviderCredential")
+                  : t("addProviderCredential")}
               </DialogTitle>
             </DialogHeader>
             <DialogBody className="gap-6">
               {isGatewayHipaaNoticeVisible(region) ? (
                 <Alert variant="info" icon={Info}>
-                  <Alert.Title>HIPAA region</Alert.Title>
+                  <Alert.Title>{t("hipaaRegionTitle")}</Alert.Title>
                   <Alert.Description>
-                    Requests are forwarded to the provider you configure, using
-                    your credentials and on your instruction. Make sure you have
-                    a BAA with that provider before sending PHI.
+                    {t("hipaaRegionDescription")}
                   </Alert.Description>
                 </Alert>
               ) : null}
@@ -307,8 +308,8 @@ export function ProviderDialogController({
                 <div>
                   <FieldHeader
                     htmlFor="gateway-provider"
-                    label="Provider"
-                    description="Fixed once the credential is saved."
+                    label={t("providerLabel")}
+                    description={t("providerFixedDescription")}
                   />
                   <Input
                     id="gateway-provider"
@@ -332,8 +333,8 @@ export function ProviderDialogController({
                 <div>
                   <FieldHeader
                     htmlFor="gateway-bedrock-region"
-                    label="AWS region"
-                    description="Fixed once the credential is saved."
+                    label={t("awsRegionLabel")}
+                    description={t("providerFixedDescription")}
                   />
                   <Input
                     id="gateway-bedrock-region"
@@ -365,10 +366,9 @@ export function ProviderDialogController({
               ) : null}
               {selectedConnection && name.trim() !== selectedConnection.name ? (
                 <Alert variant="warning" icon={TriangleAlert}>
-                  <Alert.Title>Renaming changes model slugs</Alert.Title>
+                  <Alert.Title>{t("renameWarningTitle")}</Alert.Title>
                   <Alert.Description>
-                    Requests using model slugs with the old connection name will
-                    stop resolving.
+                    {t("renameWarningDescription")}
                   </Alert.Description>
                 </Alert>
               ) : null}
@@ -381,7 +381,7 @@ export function ProviderDialogController({
                       {test.error?.message ??
                         create.error?.message ??
                         update.error?.message ??
-                        "The credential could not be saved or validated. Check the key and try again."}
+                        t("credentialSaveErrorDescription")}
                     </span>
                   </Alert.Description>
                 </Alert>
@@ -399,7 +399,7 @@ export function ProviderDialogController({
                 loading={test.isPending}
                 onClick={() => testCredential(selectedConnection)}
               >
-                Test
+                {t("testButton")}
               </Button>
               <Button
                 disabled={
@@ -413,7 +413,7 @@ export function ProviderDialogController({
                 loading={isSaving}
                 onClick={() => submit(selectedConnection, closeDialog)}
               >
-                Test and save
+                {t("testAndSaveButton")}
               </Button>
             </DialogFooter>
           </>
@@ -454,11 +454,12 @@ function CredentialTestSuccess({
 }: {
   modelListingDenied: boolean;
 }) {
+  const t = useTranslation(gatewayMessages);
   if (modelListingDenied) return <ModelListingDeniedAlert />;
   return (
     <Alert>
-      <Alert.Title>Provider credential is valid</Alert.Title>
-      <Alert.Description>No changes were saved.</Alert.Description>
+      <Alert.Title>{t("credentialValidTitle")}</Alert.Title>
+      <Alert.Description>{t("credentialValidDescription")}</Alert.Description>
     </Alert>
   );
 }

@@ -13,6 +13,8 @@ import useLocalStorage from "@/src/components/useLocalStorage";
 import { env } from "@/src/env.mjs";
 import { STREAMING_PREF_KEY } from "@/src/features/playground/page/storage/keys";
 import { captureUnknownError } from "@/src/utils/captureUnknownError";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 
 import { GenerationOutput } from "./GenerationOutput";
 import { ChatMessages } from "@/src/components/ChatMessages/ChatMessages";
@@ -45,6 +47,7 @@ export const Messages: React.FC<MessagesContext> = (props) => {
 };
 
 const SubmitButton = () => {
+  const t = useTranslation(skillMessages);
   const { handleSubmit, isStreaming } = usePlaygroundContext();
   const defaultStreamingEnabled =
     env.NEXT_PUBLIC_LANGFUSE_PLAYGROUND_STREAMING_ENABLED_DEFAULT === "true";
@@ -64,7 +67,7 @@ const SubmitButton = () => {
         }}
         loading={isStreaming}
       >
-        <p>Submit</p>
+        <p>{t("submit")}</p>
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -83,11 +86,11 @@ const SubmitButton = () => {
             onClick={(e) => e.preventDefault()}
           >
             <div className="flex flex-col">
-              <span className="font-bold">Stream responses</span>
+              <span className="font-bold">{t("streamResponses")}</span>
               <span className="text-muted-foreground text-xs">
                 {streamingEnabled
-                  ? "Real-time response streaming"
-                  : "Complete response at once"}
+                  ? t("realTimeResponseStreaming")
+                  : t("completeResponseAtOnce")}
               </span>
             </div>
             <Switch

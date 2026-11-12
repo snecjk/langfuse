@@ -1,18 +1,13 @@
 import { Dialog } from "@/src/components/design-system/Dialog/Dialog";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 
 export function RoleAuthPausedDialog() {
+  const t = useTranslation(integrationMessages);
   return (
-    <Dialog
-      title="Integration saved with exports disabled"
-      size="md"
-      closeLabel="Done"
-    >
+    <Dialog title={t("exportsPausedTitle")} size="md" closeLabel={t("done")}>
       <Dialog.Body>
-        <p>
-          Your IAM role does not trust the new external ID yet. Add the trust
-          policy from the AWS setup section to your role, click{" "}
-          <strong>Validate</strong>, then turn exports back on.
-        </p>
+        <p>{t("exportsPausedBody")}</p>
       </Dialog.Body>
     </Dialog>
   );

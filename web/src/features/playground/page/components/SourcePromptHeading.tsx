@@ -1,5 +1,7 @@
 import { Badge } from "@/src/components/design-system/Badge/Badge";
 import { type PlaygroundSourcePrompt } from "@/src/features/playground/page/types";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 
 type SourcePromptHeadingProps = {
   sourcePrompt: PlaygroundSourcePrompt;
@@ -10,6 +12,7 @@ export const SourcePromptHeading: React.FC<SourcePromptHeadingProps> = ({
   sourcePrompt,
   isEdited,
 }) => {
+  const t = useTranslation(skillMessages);
   const version = `v${sourcePrompt.version}`;
 
   return (
@@ -21,7 +24,9 @@ export const SourcePromptHeading: React.FC<SourcePromptHeadingProps> = ({
         {sourcePrompt.name}
       </span>
       <Badge text={version} />
-      {isEdited && <span className="text-foreground shrink-0">· edited</span>}
+      {isEdited && (
+        <span className="text-foreground shrink-0">· {t("edited")}</span>
+      )}
     </div>
   );
 };

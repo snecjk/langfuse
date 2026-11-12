@@ -14,6 +14,10 @@ import { Dialog } from "@/src/components/design-system/Dialog/Dialog";
 import { Switch } from "@/src/components/design-system/Switch/Switch";
 import { Tabs } from "@/src/components/design-system/Tabs/Tabs";
 import { Stepper } from "@/src/components/design-system/Stepper/Stepper";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
+
+type T = ReturnType<typeof useTranslation<typeof topicsMessages>>;
 
 export function ManualTopicsDialog({
   operation,
@@ -38,6 +42,7 @@ export function ManualTopicsDialog({
   onSubmit,
   onConfigure,
 }: ManualTopicsDialogProps) {
+  const t = useTranslation(topicsMessages);
   const minimum = smallSample ? 10 : 100;
   const selectedUpdates = facets.filter((facet) =>
     selectedFacetIds.includes(facet.id),
@@ -48,16 +53,15 @@ export function ManualTopicsDialog({
   const belowMinimum = selectedUpdates.filter(
     (facet) => facet.summaries !== null && facet.summaries < minimum,
   );
-  const facetLabel = selectedUpdates.length === 1 ? "facet" : "facets";
-  const traceLabel = count === 1 ? "trace" : "traces";
+  const facetLabel = selectedUpdates.length === 1 ? t("facet") : t("facets");
   const processingSummary =
     count > 0 ? (
-      `Run ${selectedUpdates.length} ${facetLabel} on ${count.toLocaleString()} ${traceLabel}`
+      t("runOnFacets", {
+        facets: `${selectedUpdates.length} ${facetLabel}`,
+        traces: count.toLocaleString(),
+      })
     ) : (
-      <>
-        Press <em>Preview traces</em> first, then confirm or adjust the batch
-        before starting the run.
-      </>
+      <>{t("runToPreview")}</>
     );
   const storedSummaryCount = selectedUpdates.every(
     (facet) => facet.summaries !== null,
@@ -69,9 +73,11 @@ export function ManualTopicsDialog({
     : null;
   const generationSummary = (
     <>
-      {selectedUpdates.length} {facetLabel} selected
+      {selectedUpdates.length === 1
+        ? t("facetSelected", { count: selectedUpdates.length })
+        : t("facetsSelected", { count: selectedUpdates.length })}
       {storedSummaryCount !== null ? (
-        <> · {storedSummaryCount.toLocaleString()} stored summaries</>
+        <> · {t("summariesLabel", { count: storedSummaryCount })}</>
       ) : null}
     </>
   );
@@ -86,12 +92,14 @@ export function ManualTopicsDialog({
   }
   return (
     <Dialog
-      title="Manual processing"
+      title={t("manualProcessing")}
       size="lg"
       actions={[
         {
           label:
-            operation === "process" ? "Summarize & embed" : "Generate topics",
+            operation === "process"
+              ? t("summarizeAndEmbed")
+              : t("generateTopics"),
           disabled: !canSubmit,
           loading: isSubmitting,
           onClick: onSubmit,
@@ -105,29 +113,32 @@ export function ManualTopicsDialog({
               variant="inset"
               size="md"
               layout="full"
-              aria-label="Manual processing operation"
+              aria-label={t("manualProcessingOperation")}
             >
-              <Tabs.Trigger value="process" label="Summarize traces & embed" />
-              <Tabs.Trigger value="update" label="Generate topics" />
+              <Tabs.Trigger
+                value="process"
+                label={t("summarizeTracesAndEmbed")}
+              />
+              <Tabs.Trigger value="update" label={t("generateTopics")} />
             </Tabs.List>
           </Tabs>
           <p className="text-muted-foreground">
             {operation === "process"
-              ? "Prepare historical or unprocessed traces for topic discovery. New summaries are assigned to existing compatible topics; generate topics afterward to discover new groups."
-              : "Generate topics from stored summaries and embeddings for the selected facets."}
+              ? t("manualProcessDescription")
+              : t("manualUpdateDescription")}
           </p>
           <div className="flex flex-col">
             <Stepper
               number={1}
-              title="Choose facets"
+              title={t("chooseFacets")}
               description={
                 operation === "process"
-                  ? "Choose the facets to summarize and embed your traces for."
-                  : "Facets to run clustering and generate topics for."
+                  ? t("chooseFacetsProcess")
+                  : t("chooseFacetsUpdate")
               }
             >
               <fieldset className="flex min-w-0 flex-col gap-3">
-                <legend className="sr-only">Choose facets</legend>
+                <legend className="sr-only">{t("chooseFacets")}</legend>
                 <div className="flex flex-wrap gap-2">
                   {facets.map((facet) => (
                     <FacetToggle
@@ -140,7 +151,7 @@ export function ManualTopicsDialog({
                   ))}
                 </div>
                 <p className="text-muted-foreground text-xs">
-                  {selectedUpdates.length} of {facets.length} selected
+                  {t("selected", { count: selectedUpdates.length })}
                 </p>
               </fieldset>
             </Stepper>
@@ -148,13 +159,13 @@ export function ManualTopicsDialog({
               number={2}
               title={
                 operation === "process"
-                  ? "Select traces"
-                  : "Select trace summaries"
+                  ? t("selectTraces")
+                  : t("selectTraceSummaries")
               }
               description={
                 operation === "process"
-                  ? "Set your filters or paste trace IDs. Preview matching traces and choose the batch to run. Previewing does not use a model."
-                  : "Use stored summaries of traces that started within this time range for clustering and topic generation."
+                  ? t("selectTracesDescription")
+                  : t("selectTraceSummariesDescription")
               }
             >
               <section hidden={operation !== "process"}>
@@ -177,24 +188,23 @@ export function ManualTopicsDialog({
                 </section>
               ) : null}
             </Stepper>
-            <Stepper number={3} title="Review & Run">
+            <Stepper number={3} title={t("reviewAndRun")}>
               <p role="status" className="ph-no-capture text-muted-foreground">
                 {operation === "process"
                   ? processingSummary
                   : generationSummary}
               </p>
               {operation === "process" ? (
-                <p>
-                  Summarize and embed the selected traces, then assign them to
-                  existing topics.
-                </p>
+                <p>{t("manualProcessRunNote")}</p>
               ) : null}
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                <span className="font-bold">Models</span>
+                <span className="font-bold">{t("modelsStepTitle")}</span>
                 <dl className="flex flex-wrap gap-x-4 gap-y-2">
                   <div className="flex flex-wrap items-baseline gap-1.5">
                     <dt className="text-muted-foreground">
-                      {operation === "process" ? "Summary:" : "Topic naming:"}
+                      {operation === "process"
+                        ? t("summaryNoun")
+                        : t("topicNaming")}
                     </dt>
                     <dd
                       title={
@@ -210,7 +220,9 @@ export function ManualTopicsDialog({
                   </div>
                   {operation === "process" ? (
                     <div className="flex flex-wrap items-baseline gap-1.5">
-                      <dt className="text-muted-foreground">Embedding:</dt>
+                      <dt className="text-muted-foreground">
+                        {t("embeddingModel")}:
+                      </dt>
                       <dd title={models.embedding.connection}>
                         {models.embedding.model}
                       </dd>
@@ -219,7 +231,7 @@ export function ManualTopicsDialog({
                 </dl>
                 <div className="ml-auto">
                   <Button
-                    text="Configure Topics"
+                    text={t("configureTopics")}
                     variant="ghost"
                     size="sm"
                     onClick={onConfigure}
@@ -231,29 +243,27 @@ export function ManualTopicsDialog({
                   <div className="flex items-center gap-1 p-1">
                     <label className="flex items-center gap-2">
                       <Checkbox
-                        aria-label="Reuse existing summaries and embeddings"
+                        aria-label={t("reuseExisting")}
                         checked={reuse}
                         onCheckedChange={handleReuseChange}
                       />
-                      Reuse existing summaries &amp; embeddings
+                      {t("reuseExistingLabel")}
                     </label>
-                    <Tooltip label="Reuse compatible results for the same facet version and models. Source changes are not checked. Turn off to generate fresh results.">
+                    <Tooltip label={t("reuseExistingHelp")}>
                       {({ getTriggerProps }) => (
                         <IconButton
                           {...getTriggerProps()}
                           icon={Info}
-                          label="About reusing summaries and embeddings"
+                          label={t("reuseExisting")}
                           size="sm"
                         />
                       )}
                     </Tooltip>
                   </div>
                   <p>
-                    <span className="font-bold">Model costs: </span>
+                    <span className="font-bold">{t("modelCosts")}: </span>
                     <span className="text-muted-foreground">
-                      {reuse
-                        ? "Only missing or incompatible results incur costs on your linked API keys."
-                        : "Fresh results incur model costs for every selected trace and facet on your linked API keys."}
+                      {reuse ? t("modelCostsFree") : t("modelCostsIncurred")}
                     </span>
                   </p>
                 </>
@@ -261,20 +271,17 @@ export function ManualTopicsDialog({
               {operation === "update" ? (
                 <>
                   <p className="text-muted-foreground text-xs">
-                    Topic naming uses your configured model and incurs model
-                    costs. New groups replace your current topics once the run
-                    succeeds.
+                    {t("topicNamingHelp")}
                   </p>
                   <label className="flex items-start justify-between gap-4 rounded-md border p-3">
                     <span className="flex flex-col gap-1">
-                      <span className="font-bold">Small sample mode</span>
+                      <span className="font-bold">{t("smallSampleMode")}</span>
                       <span className="text-muted-foreground text-xs">
-                        Explore provisional topics with at least 10 summaries
-                        per facet instead of 100.
+                        {t("smallSampleModeHelp")}
                       </span>
                     </span>
                     <Switch
-                      aria-label="Small sample mode"
+                      aria-label={t("smallSampleMode")}
                       checked={smallSample}
                       onCheckedChange={onSmallSampleChange}
                     />
@@ -287,10 +294,12 @@ export function ManualTopicsDialog({
                     <Alert variant="warning" size="sm">
                       <Alert.Description>
                         <p>
-                          {belowMinimum.map((facet) => facet.name).join(", ")}{" "}
-                          will be skipped: fewer than {minimum} summaries.
-                          Summarize more traces, widen the time range, or enable
-                          small sample mode.
+                          {t("belowMinimumSkipped", {
+                            facets: belowMinimum
+                              .map((facet) => facet.name)
+                              .join(", "),
+                            minimum,
+                          })}
                         </p>
                       </Alert.Description>
                     </Alert>
@@ -304,7 +313,7 @@ export function ManualTopicsDialog({
                       <p>{disabledReason}</p>
                       {operation === "update" && noSummaries ? (
                         <Button
-                          text="Go to Summarize traces & embed"
+                          text={t("goToSummarize")}
                           variant="secondary"
                           size="sm"
                           onClick={handleChooseSummarization}
@@ -335,6 +344,7 @@ function FacetToggle({
   operation,
   onToggleFacet,
 }: FacetToggleProps) {
+  const t = useTranslation(topicsMessages);
   function handleCheckedChange(checked: boolean | "indeterminate") {
     onToggleFacet(facet.id, checked === true);
   }
@@ -360,19 +370,19 @@ function FacetToggle({
           title={
             facet.summaries === null
               ? undefined
-              : `${facet.summaries.toLocaleString()} summaries`
+              : t("summariesLabel", { count: facet.summaries })
           }
         >
-          {summaryLabel(facet.summaries)}
+          {summaryLabel(facet.summaries, t)}
         </span>
       ) : null}
     </label>
   );
 }
 
-function summaryLabel(summaries: number | null) {
-  if (summaries === null) return "Not counted";
-  if (summaries === 0) return "No summaries";
+function summaryLabel(summaries: number | null, t: T) {
+  if (summaries === null) return t("notCounted");
+  if (summaries === 0) return t("noSummaries");
   const count =
     summaries > 1_000
       ? compactNumberFormatter(
@@ -380,7 +390,7 @@ function summaryLabel(summaries: number | null) {
           summaries < 10_000 ? 1 : 0,
         ).toLowerCase()
       : summaries.toLocaleString();
-  return `${count} summaries`;
+  return t("summariesCount", { count });
 }
 
 type Model = { model: string; connection: string };

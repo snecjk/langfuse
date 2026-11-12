@@ -6,6 +6,8 @@ import { showErrorToast } from "@/src/features/notifications/showErrorToast";
 import { showSuccessToast } from "@/src/features/notifications/showSuccessToast";
 import { api } from "@/src/utils/api";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 import {
   WebCalloutSettingsTable,
   type WebCalloutEndpoint,
@@ -20,6 +22,7 @@ export function ConnectedWebCalloutSettingsTable({
   onCreate: () => void;
   onEdit: (endpoint: WebCalloutEndpoint) => void;
 }) {
+  const t = useTranslation(integrationMessages);
   const utils = api.useUtils();
   const endpoints = api.webCallouts.all.useQuery({ projectId });
   const deleteMutation = api.webCallouts.delete.useMutation({
@@ -27,13 +30,13 @@ export function ConnectedWebCalloutSettingsTable({
       await utils.webCallouts.invalidate();
       showSuccessToast({
         operation: "web_callout_endpoint.delete",
-        title: "Callout endpoint deleted",
-        description: "The endpoint was removed from this project.",
+        title: t("webCalloutDeleteSuccess"),
+        description: t("webCalloutDeleteSuccessDesc"),
       });
     },
     onError: (error) => {
       showErrorToast(
-        "Failed to delete callout endpoint",
+        t("webCalloutDeleteFailed"),
         error.message,
         classifyTrpcToastError(error, "web_callout_endpoint.delete"),
       );
@@ -45,30 +48,30 @@ export function ConnectedWebCalloutSettingsTable({
     if (endpoints.isError) {
       return {
         status: "error",
-        error: "Failed to load the callout endpoint. Please try again.",
+        error: t("webCalloutLoadFailed"),
       };
     }
     return { status: "success", data: endpoints.data ?? [] };
-  }, [endpoints.data, endpoints.isError, endpoints.isLoading]);
+  }, [endpoints.data, endpoints.isError, endpoints.isLoading, t]);
 
   const disabledReason = useMemo(() => {
     if (endpoints.isLoading) {
-      return "Loading callout endpoint configuration.";
+      return t("webCalloutLoadConfigLoading");
     }
     if (endpoints.isError) {
-      return "Could not load the callout endpoint configuration.";
+      return t("webCalloutLoadConfigFailed");
     }
     if (endpoints.data?.length) {
-      return "Currently you can only create one callout per project.";
+      return t("webCalloutSingleOnly");
     }
     return undefined;
-  }, [endpoints.data, endpoints.isError, endpoints.isLoading]);
+  }, [endpoints.data, endpoints.isError, endpoints.isLoading, t]);
 
   return (
     <ConfirmationDialogController<WebCalloutEndpoint>
-      title="Delete Callout Endpoint"
-      text="This removes the configured endpoint and hides the web callout action."
-      confirmLabel="Delete endpoint"
+      title={t("webCalloutDeleteTitle")}
+      text={t("webCalloutDeleteText")}
+      confirmLabel={t("webCalloutDeleteConfirm")}
       variant="destructive"
       loading={deleteMutation.isPending}
       onConfirm={(endpoint) =>
@@ -78,7 +81,7 @@ export function ConnectedWebCalloutSettingsTable({
       {({ openDialog }) => (
         <WebCalloutSettingsTable
           data={data}
-          noResultsMessage="No callout endpoint configured."
+          noResultsMessage={t("webCalloutNoResults")}
           createAction={{ disabledReason, onClick: onCreate }}
           onEdit={onEdit}
           onDelete={openDialog}

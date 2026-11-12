@@ -3,6 +3,8 @@ import { Dialog } from "@/src/components/design-system/Dialog/Dialog";
 import { type ReactNode } from "react";
 import { type DomainRowData } from "../VerifiedDomainsSettingsTable/VerifiedDomainsSettingsTable";
 import { DnsRecordTable } from "../DnsRecordTable/DnsRecordTable";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export function VerifyDomainDialogController({
   children,
@@ -15,16 +17,17 @@ export function VerifyDomainDialogController({
   verifyingDomainId: string | null;
   onVerify: (row: DomainRowData) => Promise<void>;
 }) {
+  const t = useTranslation(enterpriseMessages);
   return (
     <DialogController<DomainRowData>
       onBeforeClose={() => verifyingDomainId === null}
       renderDialog={({ state: row, closeDialog }) => (
         <Dialog
           size="lg"
-          title={`Verify ${row.domain}`}
+          title={t("verifiedDomainVerifyTitle", { domain: row.domain })}
           actions={[
             {
-              label: "Verify domain",
+              label: t("verifiedDomainVerifyAction"),
               loading: verifyingDomainId === row.id,
               onClick: async () => {
                 try {
@@ -38,16 +41,15 @@ export function VerifyDomainDialogController({
           ]}
         >
           <Dialog.Body>
-            <p className="text-sm font-bold">
-              Add the following TXT record to your DNS provider:
-            </p>
+            <p className="text-sm font-bold">{t("verifiedDomainTxtHelp")}</p>
             <DnsRecordTable
               recordHost={row.recordHost}
               recordValue={row.recordValue}
             />
             <p className="text-muted-foreground text-xs">
-              DNS changes may take up to 24h to propagate. After adding the
-              record, click <span className="font-bold">Verify</span>.
+              {t("verifiedDomainDnsPropagation", {
+                verify: t("verifiedDomainVerifyAction"),
+              })}
             </p>
           </Dialog.Body>
         </Dialog>

@@ -1,6 +1,8 @@
 /* eslint-disable @repo/no-style-props, @repo/no-abstracted-overlay-trigger */
 import * as React from "react";
 import { Check, Loader2 } from "@langfuse/icons";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tableMessages } from "@/src/features/i18n/messages/table";
 import { DropdownIndicator } from "@/src/components/design-system/DropdownIndicator/DropdownIndicator";
 
 import { cn } from "@/src/utils/tailwind";
@@ -70,6 +72,7 @@ export function MultiSelect({
   onOpenChange?: (open: boolean) => void;
   isLoading?: boolean;
 }) {
+  const t = useTranslation(tableMessages);
   const selectedValues = useMemo(() => new Set(values), [values]);
   const optionValues = new Set(options.map((option) => option.value));
   const freeTextInput = getFreeTextInput(
@@ -232,7 +235,7 @@ export function MultiSelect({
             )}
             {/* if isCustomSelectEnabled we always show custom select hence never empty */}
             {!isCustomSelectEnabled && !isLoading && (
-              <InputCommandEmpty>No results found.</InputCommandEmpty>
+              <InputCommandEmpty>{t("noMatchesFound")}</InputCommandEmpty>
             )}
             <InputCommandGroup className={groupClassName}>
               {showSelectAll && (
@@ -381,7 +384,7 @@ export function MultiSelect({
                     onClick={(e) => {
                       e.stopPropagation();
                     }}
-                    placeholder="Enter custom value"
+                    placeholder={t("customValuePlaceholder")}
                     className="h-5 w-full rounded-none border-t-0 border-r-0 border-b-2 border-l-0 border-dotted p-0 text-sm"
                   />
                 </InputCommandItem>

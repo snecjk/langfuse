@@ -5,6 +5,8 @@ import { OverviewSelectionBar } from "@/src/components/table/OverviewSelectionBa
 import type { TableSelectionStore } from "@/src/components/table/table-selection-store";
 import { Button } from "@/src/components/ui/button";
 import type { GatewayModelAccessChange } from "@/src/features/ai-gateway/components/GatewayConnectionModelsPage/types/gatewayModelAccessChange";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 
 export type GatewayConnectionModelsSelectionBarProps = {
   filteredModelIds: string[];
@@ -21,6 +23,7 @@ export function GatewayConnectionModelsSelectionBar({
   selectionStore,
   onSetEnabled,
 }: GatewayConnectionModelsSelectionBarProps) {
+  const t = useTranslation(gatewayMessages);
   const rowSelection = useStore(selectionStore, (state) => state.rowSelection);
   const selectAll = useStore(selectionStore, (state) => state.selectAll);
   const selectionActions = selectionStore.getState().actions;
@@ -50,7 +53,7 @@ export function GatewayConnectionModelsSelectionBar({
         onClick={() => setSelectedEnabled(true)}
       >
         <Play size="base" color="default" __rawClassName="mr-2" />
-        Enable
+        {t("enableAction")}
       </Button>
       <Button
         type="button"
@@ -60,7 +63,7 @@ export function GatewayConnectionModelsSelectionBar({
         onClick={() => setSelectedEnabled(false)}
       >
         <Pause size="base" color="default" __rawClassName="mr-2" />
-        Disable
+        {t("disableAction")}
       </Button>
     </OverviewSelectionBar>
   );

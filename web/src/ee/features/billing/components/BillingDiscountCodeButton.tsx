@@ -17,12 +17,15 @@ import { showSuccessToast } from "@/src/features/notifications/showSuccessToast"
 import { showToast } from "@/src/features/notifications/showToast";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
 import { nanoid } from "nanoid";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export const BillingDiscountCodeButton = ({ orgId }: { orgId: string }) => {
   const [code, setCode] = useState("");
   const [open, setOpen] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [opId, setOpId] = useState<string | null>(null);
+  const t = useTranslation(enterpriseMessages);
 
   const utils = api.useUtils();
 
@@ -30,7 +33,7 @@ export const BillingDiscountCodeButton = ({ orgId }: { orgId: string }) => {
     onSuccess: async () => {
       showSuccessToast({
         operation: "billing_discount.apply",
-        title: "Promotion code applied",
+        title: t("billingPromotionCodeApplied"),
         description: "",
       });
       setProcessing(false);
@@ -47,7 +50,7 @@ export const BillingDiscountCodeButton = ({ orgId }: { orgId: string }) => {
       const analytics = classifyTrpcToastError(err, "billing_discount.apply");
       showToast({
         type: "ERROR",
-        title: err.message || "Failed to apply promotion code",
+        title: err.message || t("billingPromotionCodeFailed"),
         analytics:
           analytics.trpcCode === "BAD_REQUEST"
             ? {
@@ -64,15 +67,17 @@ export const BillingDiscountCodeButton = ({ orgId }: { orgId: string }) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="sm">
-          Add Promotion Code
+          {t("billingPromotionCodeAdd")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-lg">Add Promotion Code</DialogTitle>
+          <DialogTitle className="text-lg">
+            {t("billingPromotionCodeTitle")}
+          </DialogTitle>
         </DialogHeader>
         <DialogBody className="space-y-3 text-sm">
-          <p>Enter a valid promotion code to apply it to your subscription.</p>
+          <p>{t("billingPromotionCodeHelp")}</p>
           <Input
             value={code}
             onChange={(e) => setCode(e.target.value)}
@@ -83,7 +88,7 @@ export const BillingDiscountCodeButton = ({ orgId }: { orgId: string }) => {
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="secondary" disabled={processing}>
-              Cancel
+              {t("retryMigrationCancel")}
             </Button>
           </DialogClose>
           <Button
@@ -99,7 +104,7 @@ export const BillingDiscountCodeButton = ({ orgId }: { orgId: string }) => {
               mutation.mutate({ orgId, code: code.trim(), opId: id });
             }}
           >
-            {processing ? "Applying…" : "Apply"}
+            {processing ? t("billingApplying") : t("billingApply")}
           </Button>
         </DialogFooter>
       </DialogContent>

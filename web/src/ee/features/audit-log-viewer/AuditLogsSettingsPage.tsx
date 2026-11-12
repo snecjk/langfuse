@@ -3,6 +3,8 @@ import { Alert } from "@/src/components/design-system/Alert/Alert";
 import { ConnectedAuditLogsTable } from "@/src/ee/features/audit-log-viewer/AuditLogsTable/ConnectedAuditLogsTable";
 import { useHasEntitlement } from "@/src/features/entitlements/hooks";
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export function AuditLogsSettingsPage(props: { projectId: string }) {
   const hasAccess = useHasProjectAccess({
@@ -10,22 +12,22 @@ export function AuditLogsSettingsPage(props: { projectId: string }) {
     scope: "projectAuditLogs:read",
   });
   const hasEntitlement = useHasEntitlement("audit-logs");
+  const t = useTranslation(enterpriseMessages);
 
   const body = (() => {
     if (!hasEntitlement) {
       return (
         <p className="text-muted-foreground text-sm">
-          Audit logs are an Enterprise feature. Upgrade your plan to track all
-          changes made to your project.
+          {t("auditLogsEnterpriseProject")}
         </p>
       );
     }
     if (!hasAccess) {
       return (
         <Alert>
-          <Alert.Title>Access Denied</Alert.Title>
+          <Alert.Title>{t("accessDenied")}</Alert.Title>
           <Alert.Description>
-            Contact your project administrator to request access.
+            {t("auditLogsProjectAccessDenied")}
           </Alert.Description>
         </Alert>
       );
@@ -37,11 +39,9 @@ export function AuditLogsSettingsPage(props: { projectId: string }) {
 
   return (
     <>
-      <Header title="Audit Logs" />
+      <Header title={t("auditLogsTitle")} />
       <p className="text-muted-foreground mb-2 text-sm">
-        Track who changed what in your project and when. Monitor settings,
-        configurations, and data changes over time. Reach out to the Langfuse
-        team if you require more detailed/filtered audit logs.
+        {t("auditLogsProjectHelp")}
       </p>
       {body}
     </>

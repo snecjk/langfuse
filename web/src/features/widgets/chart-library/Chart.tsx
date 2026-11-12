@@ -27,7 +27,10 @@ import { AlertCircle } from "@langfuse/icons";
 import { BigNumber } from "@/src/features/widgets/chart-library/BigNumber";
 import { PivotTable } from "@/src/features/widgets/chart-library/PivotTable";
 import { type OrderByState } from "@langfuse/shared";
-import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
 import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 
 const DEFAULT_METRIC_THEME = {
@@ -126,6 +129,7 @@ const ChartComponent = ({
   emptyState?: ReactNode;
 }) => {
   const t = useTranslation(widgetMessages);
+  const locale = useInterfaceLocale();
   const [forceRender, setForceRender] = useState(overrideWarning);
   const shouldWarn = data.length > 2000 && !forceRender;
 
@@ -133,8 +137,8 @@ const ChartComponent = ({
     () =>
       metricFormatterOverride ??
       ((value: number, options: FormatMetricOptions) =>
-        formatMetric(value, { ...options, unit: chartConfig?.unit })),
-    [metricFormatterOverride, chartConfig?.unit],
+        formatMetric(value, { ...options, unit: chartConfig?.unit, locale })),
+    [metricFormatterOverride, chartConfig?.unit, locale],
   );
 
   // Time-axis formatting is NOT decided here. Raw time_dimension values flow

@@ -3,6 +3,8 @@ import { isMap, parseDocument, stringify } from "yaml";
 import { Codeblock } from "@/src/components/design-system/Codeblock/Codeblock";
 import { normalizeCodeblockLanguage } from "@/src/utils/normalizeCodeblockLanguage";
 import { MarkdownView } from "@/src/components/ui/MarkdownView";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 
 type SkillFileNavigation = {
   paths: string[];
@@ -20,8 +22,11 @@ export function SkillFilePreview({
   format?: "formatted" | "raw";
   fileNavigation?: SkillFileNavigation;
 }) {
+  const t = useTranslation(skillMessages);
   if (content.length === 0) {
-    return <p className="text-muted-foreground text-sm">This file is empty.</p>;
+    return (
+      <p className="text-muted-foreground text-sm">{t("thisFileIsEmpty")}</p>
+    );
   }
 
   const filename = path.split("/").at(-1)?.toLowerCase() ?? "";
@@ -79,6 +84,7 @@ function MarkdownFilePreview({
   content: string;
   fileNavigation?: SkillFileNavigation;
 }) {
+  const t = useTranslation(skillMessages);
   const handleFileLinkEvent = (event: MouseEvent<HTMLElement>) => {
     if (!fileNavigation || !(event.target instanceof Element)) return;
     if (event.type !== "contextmenu" && event.button > 1) return;
@@ -101,7 +107,7 @@ function MarkdownFilePreview({
     return (
       <div className="flex flex-col gap-3">
         <p role="status" className="text-muted-foreground text-sm">
-          Could not read the skill front matter. Showing the original source.
+          {t("couldNotReadSkillFrontMatter")}
         </p>
         <Codeblock language="text" value={content} variant="read-only" />
       </div>
@@ -117,7 +123,7 @@ function MarkdownFilePreview({
     >
       {parsed.kind === "parsed" ? (
         <section
-          aria-label="Skill front matter"
+          aria-label={t("skillFrontMatter")}
           className="bg-muted/30 rounded-md border p-3"
         >
           <dl className="grid grid-cols-[minmax(0,7rem)_minmax(0,1fr)] gap-x-3 gap-y-1.5 text-sm">

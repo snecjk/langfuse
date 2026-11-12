@@ -5,6 +5,8 @@ import { useShowAccessLoggingSetting } from "@/src/ee/features/access-audit-log/
 import { ConnectedAuditLogsTable } from "@/src/ee/features/audit-log-viewer/AuditLogsTable/ConnectedAuditLogsTable";
 import { useHasEntitlement } from "@/src/features/entitlements/hooks";
 import { useHasOrganizationAccess } from "@/src/features/rbac/utils/checkOrganizationAccess";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export function OrgAuditLogsSettingsPage(props: { orgId: string }) {
   const hasAccess = useHasOrganizationAccess({
@@ -13,22 +15,22 @@ export function OrgAuditLogsSettingsPage(props: { orgId: string }) {
   });
   const hasEntitlement = useHasEntitlement("audit-logs");
   const showAccessLogging = useShowAccessLoggingSetting();
+  const t = useTranslation(enterpriseMessages);
 
   const body = (() => {
     if (!hasEntitlement) {
       return (
         <p className="text-muted-foreground text-sm">
-          Audit logs are an Enterprise feature. Upgrade your plan to track all
-          changes made to your organization.
+          {t("auditLogsEnterpriseOrganization")}
         </p>
       );
     }
     if (!hasAccess) {
       return (
         <Alert>
-          <Alert.Title>Access Denied</Alert.Title>
+          <Alert.Title>{t("accessDenied")}</Alert.Title>
           <Alert.Description>
-            Contact your organization administrator to request access.
+            {t("auditLogsOrganizationAccessDenied")}
           </Alert.Description>
         </Alert>
       );
@@ -40,16 +42,14 @@ export function OrgAuditLogsSettingsPage(props: { orgId: string }) {
     <div className="flex flex-col gap-6">
       {showAccessLogging && (
         <div>
-          <Header title="Access Logging" internal />
+          <Header title={t("auditAccessLoggingTitle")} internal />
           <AccessLoggingSwitch orgId={props.orgId} />
         </div>
       )}
       <div>
-        <Header title="Organization Audit Logs" />
+        <Header title={t("auditLogsOrganizationTitle")} />
         <p className="text-muted-foreground mb-2 text-sm">
-          Track who changed what in your organization and when. Monitor
-          organization settings, project creation/deletion, and membership
-          changes over time.
+          {t("auditLogsOrganizationHelp")}
         </p>
         {body}
       </div>

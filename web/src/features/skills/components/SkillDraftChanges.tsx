@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useStore } from "zustand";
 import { api } from "@/src/utils/api";
 import { compareSkillFiles } from "@/src/features/skills/utils/compareSkillFiles";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 import { type SkillDraftFile, type SkillEditorStore } from "./skillEditorStore";
 import { SkillComparisonError } from "./SkillComparisonError";
 import { SkillFileChanges } from "./SkillFileChanges";
@@ -18,6 +20,7 @@ export function SkillDraftChanges({
   isFirstVersion: boolean;
   comparisonVersion?: number;
 }) {
+  const t = useTranslation(skillMessages);
   const [selectedPath, setSelectedPath] = useState<string>();
   const name = useStore(store, (state) => state.name);
   const baseVersion = useStore(store, (state) => state.baseVersion);
@@ -41,7 +44,7 @@ export function SkillDraftChanges({
   if (hasBaseVersion && !base.data) {
     return (
       <p role="status" className="text-muted-foreground text-sm">
-        Loading base version…
+        {t("loadingBaseVersion")}
       </p>
     );
   }
@@ -60,7 +63,7 @@ export function SkillDraftChanges({
   return (
     <SkillFileChanges
       files={changes}
-      emptyMessage="No file changes in this draft."
+      emptyMessage={t("noFileChangesInDraft")}
       selectedFile={selectedFile}
       onSelectFile={setSelectedPath}
     >
@@ -73,8 +76,10 @@ export function SkillDraftChanges({
               : null
           }
           newFile={newFile}
-          oldLabel={hasBaseVersion ? `Version ${version}` : "New skill"}
-          newLabel="Draft"
+          oldLabel={
+            hasBaseVersion ? t("versionLabel", { version }) : t("newSkillLabel")
+          }
+          newLabel={t("draftLabel")}
         />
       ) : null}
     </SkillFileChanges>

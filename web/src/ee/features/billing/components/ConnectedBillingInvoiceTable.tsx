@@ -8,9 +8,12 @@ import {
   BillingInvoiceTable,
   type BillingInvoiceRow,
 } from "./BillingInvoiceTable";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export function ConnectedBillingInvoiceTable() {
   const { organization, billingProvider } = useBillingInformation();
+  const t = useTranslation(enterpriseMessages);
   const [pagination, setPagination] = useState<
     PaginationBarState &
       (
@@ -38,7 +41,7 @@ export function ConnectedBillingInvoiceTable() {
     if (invoicesQuery.isError) {
       return {
         status: "error",
-        error: "Failed to load invoices. Please try again.",
+        error: t("billingInvoicesLoadFailed"),
       };
     }
     return {

@@ -5,6 +5,8 @@ import { useHasOrganizationAccess } from "@/src/features/rbac/utils/checkOrganiz
 import { VerifiedDomainsSettings } from "@/src/ee/features/verified-domains/components/VerifiedDomainsSettings";
 import { AlertCircle } from "@langfuse/icons";
 import { ConnectedSsoConfigsTable } from "./SsoConfigsTable/ConnectedSsoConfigsTable";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export const SSOSettings = ({ orgId }: { orgId: string }) => {
   const hasEntitlement = useHasEntitlement("cloud-multi-tenant-sso");
@@ -12,13 +14,13 @@ export const SSOSettings = ({ orgId }: { orgId: string }) => {
     organizationId: orgId,
     scope: "organization:update",
   });
+  const t = useTranslation(enterpriseMessages);
 
   const heading = (
     <>
-      <Header title="SSO Configuration" />
+      <Header title={t("ssoTitle")} />
       <p className="text-muted-foreground mb-4 text-sm">
-        Configure Single Sign-On per verified domain. Once active, every user
-        signing in with that domain is redirected to your identity provider.
+        {t("ssoDescription")}
       </p>
     </>
   );
@@ -30,11 +32,8 @@ export const SSOSettings = ({ orgId }: { orgId: string }) => {
         <div>
           {heading}
           <Alert icon={AlertCircle}>
-            <Alert.Title>Not available</Alert.Title>
-            <Alert.Description>
-              Enterprise SSO is not available on your plan. Please upgrade to
-              access this feature.
-            </Alert.Description>
+            <Alert.Title>{t("notAvailable")}</Alert.Title>
+            <Alert.Description>{t("notAvailablePlan")}</Alert.Description>
           </Alert>
         </div>
       </div>
@@ -48,10 +47,8 @@ export const SSOSettings = ({ orgId }: { orgId: string }) => {
         <div>
           {heading}
           <Alert>
-            <Alert.Title>Access Denied</Alert.Title>
-            <Alert.Description>
-              You do not have permission to configure SSO for this organization.
-            </Alert.Description>
+            <Alert.Title>{t("accessDenied")}</Alert.Title>
+            <Alert.Description>{t("noPermissionSso")}</Alert.Description>
           </Alert>
         </div>
       </div>

@@ -13,6 +13,8 @@ import { Tabs } from "@/src/components/design-system/Tabs/Tabs";
 import { showSuccessToast } from "@/src/features/notifications/showSuccessToast";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
 import { api, getTrpcErrorCode, type RouterOutputs } from "@/src/utils/api";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 
 import { LocalSkillImportSource } from "./LocalSkillImportSource";
 import { useLangfuseBaseUrl } from "@/src/features/public-api/hooks/useLangfuseEnvCode";
@@ -31,6 +33,7 @@ export function ImportSkillsDialog({
   projectId: string;
   children: (openDialog: () => void) => ReactNode;
 }) {
+  const t = useTranslation(skillMessages);
   const utils = api.useUtils();
   const capture = usePostHogClientCapture();
   const [tab, setTab] = useState("local");
@@ -127,9 +130,7 @@ export function ImportSkillsDialog({
       );
     } catch (error) {
       setScanError(
-        error instanceof Error
-          ? error.message
-          : "Could not scan this source. Please try again.",
+        error instanceof Error ? error.message : t("couldNotScanSource"),
       );
     } finally {
       inFlight.current = false;
@@ -171,9 +172,7 @@ export function ImportSkillsDialog({
             [skill.path]: {
               status: "error",
               message:
-                error instanceof Error
-                  ? error.message
-                  : "Import failed. Please try again.",
+                error instanceof Error ? error.message : t("importFailed"),
             },
           }));
         }
@@ -186,8 +185,8 @@ export function ImportSkillsDialog({
         utils.skills.invalidate();
         showSuccessToast({
           operation: "skills.import",
-          title: `Imported ${importedCount} ${importedCount === 1 ? "skill" : "skills"}`,
-          description: "The imported copies are available in your skills list.",
+          title: t("importedSkillsCount", { count: importedCount }),
+          description: t("importedCopiesAvailable"),
         });
       }
     } finally {
@@ -247,13 +246,15 @@ export function ImportSkillsDialog({
       onBeforeClose={canCloseDialog}
       renderDialog={({ closeDialog }) => (
         <Dialog
-          title="Import skills"
+          title={t("importSkillsDialogTitle")}
           size="lg"
           actions={
             tab === "local" && discovery
               ? [
                   {
-                    label: `Import ${selectedSkills.length} ${selectedSkills.length === 1 ? "skill" : "skills"}`,
+                    label: t("importSkillsCount", {
+                      count: selectedSkills.length,
+                    }),
                     loading: isImporting,
                     disabled: busy || selectedSkills.length === 0,
                     onClick: createImportHandler(closeDialog),
@@ -268,10 +269,14 @@ export function ImportSkillsDialog({
                 variant="inset"
                 size="md"
                 layout="full"
-                aria-label="Import method"
+                aria-label={t("importMethod")}
               >
-                <Tabs.Trigger value="local" label="Upload" disabled={busy} />
-                <Tabs.Trigger value="cli" label="CLI" disabled={busy} />
+                <Tabs.Trigger
+                  value="local"
+                  label={t("upload")}
+                  disabled={busy}
+                />
+                <Tabs.Trigger value="cli" label={t("cli")} disabled={busy} />
               </Tabs.List>
               <div className="pt-4">
                 <Tabs.Content value="cli">
@@ -294,15 +299,15 @@ export function ImportSkillsDialog({
                     ) : null}
                     {discovery && skills.length === 0 ? (
                       <p role="status" className="text-muted-foreground">
-                        No SKILL.md files found in this source.
+                        {t("noSkillMdFilesFound")}
                       </p>
                     ) : null}
                     {discovery && skills.length > 0 ? (
                       <>
                         <div className="ph-no-capture">
                           <Input
-                            aria-label="Search skills"
-                            placeholder="Search skills by name, description, or path"
+                            aria-label={t("searchSkills")}
+                            placeholder={t("searchSkills")}
                             value={search}
                             onChange={handleSearchChange}
                           />
@@ -310,14 +315,19 @@ export function ImportSkillsDialog({
                         <div className="flex items-center justify-between gap-2">
                           <p role="status">
                             {searchTerm ? `${visibleSkills.length} of ` : ""}
-                            {skills.length}{" "}
-                            {skills.length === 1 ? "skill" : "skills"}{" "}
-                            {searchTerm ? "shown" : "found"}
+                            {t("skillsFound", { count: skills.length })}{" "}
+                            {searchTerm ? t("skillsShown") : ""}
                             {" · "}
-                            {selectedSkills.length} selected
+                            {t("skillsSelected", {
+                              count: selectedSkills.length,
+                            })}
                           </p>
                           <Button
-                            text={`${allVisibleSelected ? "Deselect all" : "Select all"}${searchTerm ? " shown" : ""}`}
+                            text={
+                              allVisibleSelected
+                                ? t("deselectAllShown")
+                                : t("selectAllShown")
+                            }
                             variant="ghost"
                             size="sm"
                             disabled={busy || visibleSelectable.length === 0}
@@ -326,7 +336,7 @@ export function ImportSkillsDialog({
                         </div>
                         {visibleSkills.length === 0 ? (
                           <p role="status" className="text-muted-foreground">
-                            No skills match your search.
+                            {t("noSkillsMatchSearch")}
                           </p>
                         ) : null}
                         <ul className="ph-no-capture flex flex-col divide-y rounded-md border">
@@ -339,8 +349,8 @@ export function ImportSkillsDialog({
                                 : null);
                             const imported = result?.status === "success";
                             const existingStatus = skill.hasChanges
-                              ? "New version"
-                              : "Already up to date";
+                              ? t("newVersion")
+                              : t("alreadyUpToDate");
                             return (
                               <li
                                 key={skill.path}
@@ -374,7 +384,7 @@ export function ImportSkillsDialog({
                                         text={
                                           skill.exists
                                             ? existingStatus
-                                            : "Import"
+                                            : t("import")
                                         }
                                         color={
                                           skill.exists && !skill.hasChanges
@@ -386,7 +396,9 @@ export function ImportSkillsDialog({
                                     ) : null}
                                     {!skill.error ? (
                                       <Badge
-                                        text={`${skill.files.length} ${skill.files.length === 1 ? "file" : "files"}`}
+                                        text={t("filesCount", {
+                                          count: skill.files.length,
+                                        })}
                                         color="outline"
                                         size="sm"
                                       />
@@ -395,8 +407,8 @@ export function ImportSkillsDialog({
                                   {skill.exists && !skill.error ? (
                                     <span className="text-muted-foreground text-xs">
                                       {skill.hasChanges
-                                        ? "Files differ from the latest saved version. Import to create a new version."
-                                        : "Files match the latest saved version."}
+                                        ? t("filesDifferFromLatest")
+                                        : t("filesMatchLatest")}
                                     </span>
                                   ) : null}
                                   <span className="text-muted-foreground text-xs break-all">
@@ -417,7 +429,9 @@ export function ImportSkillsDialog({
                                   ) : null}
                                   {result?.status === "success" ? (
                                     <span className="text-sm" role="status">
-                                      Imported as v{result.version}
+                                      {t("importedAsVersion", {
+                                        version: result.version,
+                                      })}
                                     </span>
                                   ) : null}
                                 </label>
@@ -426,8 +440,7 @@ export function ImportSkillsDialog({
                           })}
                         </ul>
                         <p className="text-muted-foreground text-xs">
-                          Skills with an existing name will get a new version.
-                          Production labels stay unchanged.
+                          {t("existingNameNewVersion")}
                         </p>
                       </>
                     ) : null}

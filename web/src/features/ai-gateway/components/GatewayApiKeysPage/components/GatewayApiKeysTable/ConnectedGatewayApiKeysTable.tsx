@@ -8,6 +8,8 @@ import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePos
 import { usePaginationState } from "@/src/hooks/usePaginationState";
 import { useOrderByState } from "@/src/features/orderBy/hooks/useOrderByState";
 import { useGatewayApiKeysTableData } from "@/src/features/ai-gateway/hooks/useGatewayApiKeysTableData";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 import { api } from "@/src/utils/api";
 import { GatewayApiKeysTable } from "./GatewayApiKeysTable";
 
@@ -22,6 +24,7 @@ export function ConnectedGatewayApiKeysTable({
   /** Replaces the whole table, search included, while there are no keys. */
   emptyState?: ReactNode;
 }) {
+  const t = useTranslation(gatewayMessages);
   const [paginationState, setPaginationState] = usePaginationState(0, 10, {
     page: "pageIndex",
     limit: "pageSize",
@@ -56,17 +59,15 @@ export function ConnectedGatewayApiKeysTable({
     return (
       <div className="flex flex-col gap-4">
         <Alert variant="destructive">
-          <Alert.Title>Gateway keys could not be loaded</Alert.Title>
-          <Alert.Description>
-            Retry to manage keys for this organization.
-          </Alert.Description>
+          <Alert.Title>{t("loadErrorSetup")}</Alert.Title>
+          <Alert.Description>{t("loadErrorSetupDesc")}</Alert.Description>
         </Alert>
         <Button
           className="w-fit"
           variant="secondary"
           onClick={() => apiKeysQuery.refetch()}
         >
-          Retry
+          {t("retry")}
         </Button>
       </div>
     );
@@ -76,9 +77,9 @@ export function ConnectedGatewayApiKeysTable({
 
   return (
     <ConfirmationDialogController<string>
-      title="Revoke gateway key"
-      text="Requests using this key will immediately be rejected. This action cannot be undone."
-      confirmLabel="Revoke key"
+      title={t("revokeGatewayKeyTitle")}
+      text={t("revokeGatewayKeyText")}
+      confirmLabel={t("confirmRevokeKey")}
       variant="destructive"
       loading={revoke.isPending}
       error={revoke.error?.message}

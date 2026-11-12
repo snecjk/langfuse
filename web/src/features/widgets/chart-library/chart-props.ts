@@ -1,4 +1,5 @@
 import type { ComponentType, ReactNode } from "react";
+import type { Locale } from "@/src/features/i18n/locale";
 import type tailwindColors from "tailwindcss/colors";
 
 export interface DataPoint {
@@ -79,6 +80,7 @@ export type FormatMetricOptions = {
   unit?: string;
   style: "full" | "compact";
   maxCharacters?: number;
+  locale?: Locale;
   /**
    * `"cents"` rounds USD to two decimals and shows non-zero values below one
    * cent as `<$0.01`. By default values under $5 keep up to six decimals.
@@ -88,7 +90,7 @@ export type FormatMetricOptions = {
 
 export type MetricFormatterFunction = (
   value: number,
-  options: FormatMetricOptions,
+  options: FormatMetricOptions & { locale?: Locale },
 ) => FormattedMetric;
 
 /** ChartThresholdOperator picks the violation region a chart tints around a threshold. */

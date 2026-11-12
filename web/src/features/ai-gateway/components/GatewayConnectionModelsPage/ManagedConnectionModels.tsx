@@ -8,6 +8,8 @@ import { GatewayLoadError } from "@/src/features/ai-gateway/components/GatewayLo
 import { ConnectionModelsSkeleton } from "@/src/features/ai-gateway/components/GatewayConnectionModelsPage/components/ConnectionModelsSkeleton/ConnectionModelsSkeleton";
 import { ConnectionModelsEditor } from "@/src/features/ai-gateway/components/GatewayConnectionModelsPage/components/ConnectionModelsEditor";
 import { useGatewayConnectionModels } from "@/src/features/ai-gateway/components/GatewayConnectionModelsPage/hooks/useGatewayConnectionModels";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 
 export type ManagedConnectionModelsProps = {
   organizationId: string;
@@ -22,6 +24,7 @@ export function ManagedConnectionModels({
   connectionId,
   filter,
 }: ManagedConnectionModelsProps) {
+  const t = useTranslation(gatewayMessages);
   const connectionModels = useGatewayConnectionModels({
     organizationId,
     connectionId,
@@ -33,7 +36,7 @@ export function ManagedConnectionModels({
       {filter}
       <IconButton
         icon={RefreshCw}
-        label="Refresh models from provider"
+        label={t("refreshFromProvider")}
         variant="outline"
         disabled={isRetrying || !connectionQuery.data}
         onClick={retryDiscovery}
@@ -64,6 +67,7 @@ function ConnectionModelsContent({
   connectionModels,
   filters,
 }: ConnectionModelsContentProps) {
+  const t = useTranslation(gatewayMessages);
   const { connectionQuery, modelsQuery, retryQueries } = connectionModels;
   const connection = connectionQuery.data;
 
@@ -91,10 +95,9 @@ function ConnectionModelsContent({
       <>
         {filters}
         <Alert variant="destructive">
-          <Alert.Title>Models could not be loaded</Alert.Title>
+          <Alert.Title>{t("modelsLoadError")}</Alert.Title>
           <Alert.Description>
-            The provider returned a model discovery error. Refresh the provider
-            before changing model access.
+            {t("modelsLoadErrorDescription")}
           </Alert.Description>
         </Alert>
       </>

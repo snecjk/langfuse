@@ -69,6 +69,15 @@ import {
   getCodingAgentName,
   type MigrationSdkName,
 } from "@/src/features/v4-migration/apiMigrationGuidance";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
+
+type EnterpriseTranslationKey = Parameters<
+  ReturnType<typeof useTranslation<typeof enterpriseMessages>>
+>[0];
 
 // Single source of truth for the v4-migration copy and content. Both surfaces
 // (side panel and modal) render these components — edit copy here only.
@@ -122,6 +131,7 @@ const WALKTHROUGH_VIDEO_URL = "https://www.youtube.com/watch?v=g3YbbqVGt4g";
 // shared by the panel/modal header CTA and the status page.
 export function useCopyMigrationPrompt() {
   const capture = usePostHogClientCapture();
+  const t = useTranslation(enterpriseMessages);
 
   return async () => {
     // Falls back to a hidden textarea on non-secure contexts (plain-HTTP
@@ -130,8 +140,8 @@ export function useCopyMigrationPrompt() {
     capture("v4_migration:coding_agent_prompt_copied");
     showSuccessToast({
       operation: "prompt.copy",
-      title: "Prompt copied",
-      description: "Paste it into Cursor, Codex, or another coding agent.",
+      title: t("migrationPromptCopied"),
+      description: t("migrationPromptCopiedHelp"),
     });
   };
 }
@@ -146,7 +156,8 @@ function Section({
   statusVariant = "action",
   tone = "default",
 }: {
-  title: string;
+  /** Translation key for the section title. */
+  title: EnterpriseTranslationKey;
   /** Number of affected items, shown muted after the title. */
   count?: number;
   /** Right-aligned muted text for transient states (checking, failed). */
@@ -161,6 +172,7 @@ function Section({
   tone?: "default" | "muted";
 }) {
   const capture = usePostHogClientCapture();
+  const t = useTranslation(enterpriseMessages);
   return (
     <Collapsible
       defaultOpen={defaultOpen}
@@ -182,7 +194,7 @@ function Section({
               : "text-foreground font-bold",
           )}
         >
-          {title}
+          {t(title)}
           {typeof count === "number" && (
             // Same count-badge recipe as the "My Views" table button.
             <span className="bg-input rounded-sm px-1 text-xs">{count}</span>
@@ -292,7 +304,7 @@ function CodeBlockWithCopy({
 }: {
   text: string;
   /** Accessible label for the corner button, e.g. "Copy keys". */
-  copyLabel: string;
+  copyLabel: EnterpriseTranslationKey;
   /** Fired after a successful copy (analytics). */
   onCopy?: () => void;
   scrollable?: boolean;
@@ -300,6 +312,7 @@ function CodeBlockWithCopy({
 }) {
   const [copied, setCopied] = useState(false);
   const copiedTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const t = useTranslation(enterpriseMessages);
   // The timeout is an external system: clear it so a panel closed right
   // after copying cannot fire a state update on an unmounted component.
   useEffect(
@@ -331,8 +344,8 @@ function CodeBlockWithCopy({
           if (copiedTimeout.current) clearTimeout(copiedTimeout.current);
           copiedTimeout.current = setTimeout(() => setCopied(false), 2000);
         }}
-        aria-label={copied ? "Copied" : copyLabel}
-        title={copied ? "Copied" : copyLabel}
+        aria-label={copied ? t("migrationCopied") : t(copyLabel)}
+        title={copied ? t("migrationCopied") : t(copyLabel)}
         className="text-muted-foreground absolute top-1 right-1 h-6 w-6"
       >
         {copied ? (
@@ -349,7 +362,7 @@ function SdkUsageSeriesRows({
   series,
   needsAction,
   suffix,
-  unknownSeriesLabel = "Custom instrumentation",
+  unknownSeriesLabel = "migrationCustomInstrumentationLabel",
   hideMissingApiKey = false,
   projectId,
   analyticsSection,
@@ -358,8 +371,8 @@ function SdkUsageSeriesRows({
   /** Drives the per-row status emoji; the suffix carries the text meaning. */
   needsAction: (series: V4MigrationSdkUsageSeries) => boolean;
   suffix: (series: V4MigrationSdkUsageSeries) => ReactNode;
-  /** Row label when the series carries no usable SDK name. */
-  unknownSeriesLabel?: string;
+  /** Translation key for the row label when the series carries no usable SDK name. */
+  unknownSeriesLabel?: EnterpriseTranslationKey;
   /** Omits the empty-key fallback when it is not useful to the user. */
   hideMissingApiKey?: boolean;
   /** Enables the evidence deep link. */
@@ -368,6 +381,8 @@ function SdkUsageSeriesRows({
   analyticsSection: string;
 }) {
   const capture = usePostHogClientCapture();
+  const t = useTranslation(enterpriseMessages);
+  const locale = useInterfaceLocale();
   if (series.length === 0) return null;
 
   return (
@@ -375,7 +390,7 @@ function SdkUsageSeriesRows({
       {series.map((usage) => {
         const sdkLabel =
           usage.canonicalSdkName === null && usage.sdkName === "unknown"
-            ? unknownSeriesLabel
+            ? t(unknownSeriesLabel)
             : formatSdkVersion({
                 language: usage.canonicalSdkName ?? usage.sdkName,
                 version: usage.sdkVersion,
@@ -390,7 +405,7 @@ function SdkUsageSeriesRows({
           if (hideMissingApiKey) {
             return null;
           }
-          return "No API key";
+          return t("migrationNoApiKey");
         })();
         const evidenceHref =
           projectId && usage.eventCount > 0
@@ -418,8 +433,9 @@ function SdkUsageSeriesRows({
                 <span title={usage.publicKey || undefined}>{publicKey}</span>
               ) : null}
               <span>
-                {publicKey ? "· " : ""}last seen{" "}
-                {formatCompactRelativeTime(new Date(usage.lastSeen))}
+                {publicKey ? "· " : ""}
+                {t("migrationLastSeen")}{" "}
+                {formatCompactRelativeTime(new Date(usage.lastSeen), locale)}
               </span>
               {/* Deep link to the exact evidence: the events table filtered by
                   this public key, plus SDK name and version when attributed,
@@ -448,7 +464,7 @@ function SdkUsageSeriesRows({
                     }}
                     className="underline"
                   >
-                    View observations
+                    {t("migrationViewObservations")}
                   </Link>
                 </>
               ) : null}
@@ -475,6 +491,7 @@ export function V4MigrationSdkSection({
   projectId?: string;
 }) {
   const section = getSdkSectionState(sdk);
+  const t = useTranslation(enterpriseMessages);
   if (section.status === "latest" || section.status === "no_data") return null;
 
   const isTransient =
@@ -482,7 +499,7 @@ export function V4MigrationSdkSection({
 
   return (
     <Section
-      title="Update SDK"
+      title="migrationSectionSdk"
       analyticsSection="sdk"
       count={
         isTransient || section.actionableCount === 0
@@ -491,31 +508,33 @@ export function V4MigrationSdkSection({
       }
       meta={
         section.status === "checking"
-          ? "Checking…"
+          ? t("migrationCheckingShort")
           : section.status === "error"
-            ? "Check failed"
+            ? t("migrationCheckFailed")
             : undefined
       }
       defaultOpen={defaultOpen}
     >
       <p className="text-muted-foreground text-sm leading-relaxed">
         {section.status === "checking" ? (
-          "Checking the latest traces for this project…"
+          t("migrationSdkChecking")
         ) : section.status === "error" ? (
-          "We could not check the latest traces for this project. Try again later."
+          t("migrationSdkError")
         ) : (
           <>
-            {section.actionableCount} detected SDK{" "}
             {section.actionableCount === 1
-              ? "configuration needs"
-              : "configurations need"}{" "}
-            an update, based on ingestion seen in the last{" "}
-            {V4_MIGRATION_LOOKBACK_DAYS} days. See{" "}
+              ? t("migrationSdkActionableOne", {
+                  days: V4_MIGRATION_LOOKBACK_DAYS,
+                })
+              : t("migrationSdkActionable", {
+                  count: section.actionableCount,
+                  days: V4_MIGRATION_LOOKBACK_DAYS,
+                })}{" "}
             <ExternalLink
               href={SDK_UPGRADE_URL}
               analytics={{ section: "sdk", link: "sdk_upgrade_docs" }}
             >
-              upgrade path
+              {t("migrationUpgradePath")}
             </ExternalLink>
             .
           </>
@@ -531,7 +550,7 @@ export function V4MigrationSdkSection({
             return <span>· {formatSdkUpgradeRequirement(usage)}</span>;
           }
           if (usage.v4MigrationStatus === "unknown") {
-            return <span>· version not recognized</span>;
+            return <span>{t("migrationVersionNotRecognized")}</span>;
           }
           return null;
         }}
@@ -553,6 +572,7 @@ export function V4MigrationOtelSection({
   projectId?: string;
 }) {
   const section = getOtelSectionState(sdk);
+  const t = useTranslation(enterpriseMessages);
   if (
     sdk.status === "checking" ||
     sdk.status === "error" ||
@@ -562,21 +582,20 @@ export function V4MigrationOtelSection({
 
   return (
     <Section
-      title="Update OTel Instrumentation"
+      title="migrationSectionOtel"
       analyticsSection="otel"
       count={section.delayedCount}
       defaultOpen={defaultOpen}
     >
       <p className="text-muted-foreground text-sm leading-relaxed">
-        Your OpenTelemetry data is using delayed ingestion. For real-time
-        ingestion, upgrade your integration or, if you use OpenTelemetry
-        directly, set <MonoValue>x-langfuse-ingestion-version: 4</MonoValue> on
-        your OTLP exporter.{" "}
+        {t("migrationOtelDelayedBody")}{" "}
+        <MonoValue>x-langfuse-ingestion-version: 4</MonoValue>{" "}
+        {t("migrationOtelExporterTail")}{" "}
         <ExternalLink
           href={OTEL_V4_MIGRATION_URL}
           analytics={{ section: "otel", link: "otel_migration_docs" }}
         >
-          Migration guide
+          {t("migrationOtelMigrationGuide")}
         </ExternalLink>
         .
       </p>
@@ -587,9 +606,9 @@ export function V4MigrationOtelSection({
         needsAction={(usage) => usage.actionLevel === "required"}
         suffix={(usage) =>
           usage.deliveryMode === "delayed" ? (
-            <span>· delayed</span>
+            <span>{t("migrationOtelDelayed")}</span>
           ) : (
-            <span>· real-time</span>
+            <span>{t("migrationOtelRealtimeShort")}</span>
           )
         }
       />
@@ -610,6 +629,7 @@ export function V4MigrationCustomInstrumentationSection({
   projectId?: string;
 }) {
   const section = getCustomInstrumentationSectionState(sdk);
+  const t = useTranslation(enterpriseMessages);
   if (
     sdk.status === "checking" ||
     sdk.status === "error" ||
@@ -619,15 +639,13 @@ export function V4MigrationCustomInstrumentationSection({
 
   return (
     <Section
-      title="Upgrade Instrumentation"
+      title="migrationSectionInstrumentation"
       analyticsSection="custom_instrumentation"
       count={section.series.length}
       defaultOpen={defaultOpen}
     >
       <p className="text-muted-foreground text-sm leading-relaxed">
-        Data is arriving through the ingestion API without a Langfuse SDK
-        header, so this looks like custom instrumentation or a very old SDK
-        version. Please upgrade to the latest version of{" "}
+        {t("migrationCustomInstrumentationBody")}{" "}
         <ExternalLink
           href={SDK_OVERVIEW_URL}
           analytics={{
@@ -635,9 +653,9 @@ export function V4MigrationCustomInstrumentationSection({
             link: "sdk_overview_docs",
           }}
         >
-          any Langfuse SDK
+          {t("migrationAnySdk")}
         </ExternalLink>
-        , or use the{" "}
+        {t("migrationAnySdkTail")}{" "}
         <ExternalLink
           href={OTEL_INTEGRATION_URL}
           analytics={{
@@ -645,14 +663,14 @@ export function V4MigrationCustomInstrumentationSection({
             link: "otel_integration_docs",
           }}
         >
-          OpenTelemetry endpoint
+          {t("migrationOtelEndpoint")}
         </ExternalLink>
         .
       </p>
       <SdkUsageSeriesRows
         series={section.series}
         projectId={projectId}
-        unknownSeriesLabel="Custom instrumentation"
+        unknownSeriesLabel="migrationCustomInstrumentationLabel"
         hideMissingApiKey
         analyticsSection="custom_instrumentation"
         needsAction={() => true}
@@ -670,19 +688,19 @@ export function V4MigrationDetectedInstrumentationSection({
   projectId?: string;
 }) {
   const series = getDetectedInstrumentationSeries(sdk);
+  const t = useTranslation(enterpriseMessages);
   if (series.length === 0) return null;
 
   return (
     <Section
-      title="Detected V4-compatible instrumentation"
+      title="migrationSectionDetected"
       analyticsSection="detected_instrumentation"
       count={series.length}
       statusVariant="done"
       tone="muted"
     >
       <p className="text-muted-foreground text-sm leading-relaxed">
-        These configurations are on a V4-compatible SDK major or use real-time
-        OTel ingestion.
+        {t("migrationDetectedHelp")}
       </p>
       <SdkUsageSeriesRows
         series={series}
@@ -691,13 +709,15 @@ export function V4MigrationDetectedInstrumentationSection({
         needsAction={() => false}
         suffix={(usage) => {
           if (usage.remediationType !== "update_sdk") {
-            return <span>· real-time</span>;
+            return <span>{t("migrationOtelRealtimeShort")}</span>;
           }
           const majorUpgrade = getAvailableSdkMajorUpgrade(usage);
-          if (!majorUpgrade) return <span>· up to date</span>;
+          if (!majorUpgrade) return <span>{t("migrationUpToDateShort")}</span>;
           return (
             <span>
-              · {majorUpgrade.label} is available ·{" "}
+              {t("migrationMajorUpgradeAvailable", {
+                version: majorUpgrade.label,
+              })}{" "}
               <ExternalLink
                 href={majorUpgrade.upgradeGuideUrl}
                 analytics={{
@@ -705,7 +725,7 @@ export function V4MigrationDetectedInstrumentationSection({
                   link: "sdk_major_upgrade_docs",
                 }}
               >
-                Upgrade guide
+                {t("migrationUpgradeGuide")}
               </ExternalLink>
             </span>
           );
@@ -735,27 +755,28 @@ export function V4MigrationEvalsSection({
   defaultOpen?: boolean;
 }) {
   const capture = usePostHogClientCapture();
+  const t = useTranslation(enterpriseMessages);
   return (
     <Section
-      title="Update Evals"
+      title="migrationSectionEvals"
       analyticsSection="evals"
       count={state.status === "loaded" ? state.count : undefined}
       meta={
         state.status === "loading"
-          ? "Checking…"
+          ? t("migrationCheckingShort")
           : state.status === "error"
-            ? "Check failed"
+            ? t("migrationCheckFailed")
             : undefined
       }
       defaultOpen={defaultOpen}
     >
       {state.status === "loading" ? (
         <p className="text-muted-foreground text-sm">
-          Checking configured evals…
+          {t("migrationEvalsChecking")}
         </p>
       ) : state.status === "error" ? (
         <p className="text-muted-foreground text-sm">
-          We could not check configured evals. Try again later.
+          {t("migrationEvalsError")}
         </p>
       ) : state.count > 0 ? (
         <>
@@ -772,19 +793,21 @@ export function V4MigrationEvalsSection({
                 }}
                 className="underline"
               >
-                {state.count}{" "}
-                {state.count === 1 ? "eval targets" : "evals target"} trace
-                input/output
+                {state.count === 1
+                  ? t("migrationEvalsTargetsOne")
+                  : t("migrationEvalsTargets", { count: state.count })}
               </Link>
+            ) : state.count === 1 ? (
+              t("migrationEvalsTargetsOne")
             ) : (
-              <>
-                {state.count}{" "}
-                {state.count === 1 ? "eval targets" : "evals target"} trace
-                input/output
-              </>
+              t("migrationEvalsTargets", { count: state.count })
             )}
-            , which v4 no longer sets. Update{" "}
-            {state.count === 1 ? "it" : "them"} to target observations.
+            {t("migrationEvalsNoLongerSet", {
+              pronoun:
+                state.count === 1
+                  ? t("migrationEvalsUpdateIt")
+                  : t("migrationEvalsUpdateThem"),
+            })}
           </p>
           {assistant && (
             <Button variant="outline" size="sm" onClick={assistant.onMigrate}>
@@ -795,17 +818,17 @@ export function V4MigrationEvalsSection({
                     color="default"
                     __rawClassName="mr-1.5"
                   />
-                  Use Halo
+                  {t("migrationUseHalo")}
                 </>
               ) : (
-                "Update evals"
+                t("migrationUpdateEvals")
               )}
             </Button>
           )}
         </>
       ) : (
         <p className="text-muted-foreground text-sm">
-          No deprecated evals detected.
+          {t("migrationEvalsClean")}
         </p>
       )}
     </Section>
@@ -821,34 +844,35 @@ export function V4MigrationExperimentsSection({
   upgradePath: "sdk" | "api" | null;
   defaultOpen?: boolean;
 }) {
+  const t = useTranslation(enterpriseMessages);
   return (
     <Section
-      title="Update Experiments"
+      title="migrationSectionExperiments"
       analyticsSection="experiments"
       meta={
         state.status === "loading"
-          ? "Checking…"
+          ? t("migrationCheckingShort")
           : state.status === "error"
-            ? "Check failed"
+            ? t("migrationCheckFailed")
             : undefined
       }
       defaultOpen={defaultOpen}
     >
       {state.status === "loading" ? (
         <p className="text-muted-foreground text-sm">
-          Checking experiment instrumentation…
+          {t("migrationExperimentsChecking")}
         </p>
       ) : state.status === "error" ? (
         <p className="text-muted-foreground text-sm">
-          We could not check experiment instrumentation. Try again later.
+          {t("migrationExperimentsError")}
         </p>
       ) : state.result !== "not_required" ? (
         <p className="text-muted-foreground text-sm">
           {upgradePath === "api" ? (
             <>
-              This project called the deprecated{" "}
-              <MonoValue>POST /dataset-run-items</MonoValue>. Replace this
-              direct API call with OTel experiment instrumentation. See the{" "}
+              {t("migrationExperimentsApi")}{" "}
+              <MonoValue>POST /dataset-run-items</MonoValue>
+              {t("migrationExperimentsApiTail")}{" "}
               <ExternalLink
                 href={EXPERIMENT_OTEL_INGESTION_URL}
                 analytics={{
@@ -856,44 +880,36 @@ export function V4MigrationExperimentsSection({
                   link: "experiments_otel_docs",
                 }}
               >
-                OTel experiment instrumentation guide
-              </ExternalLink>{" "}
-              for more details.
+                {t("migrationExperimentsGuide")}
+              </ExternalLink>
+              {t("migrationExperimentsApiTail2")}
             </>
           ) : state.result === "sdk_usage_inconclusive" ? (
             <>
-              This project called <MonoValue>POST /dataset-run-items</MonoValue>{" "}
-              with an SDK version that supports the experiment runner. Review
-              that you are using the experiment runner SDK and not the
-              deprecated{" "}
-              <>
-                <>
-                  <code className="bg-muted px-1 font-mono text-sm">
-                    .link()
-                  </code>{" "}
-                  method. This warning will{" "}
-                </>
-                disappear once you{" "}
-              </>
-              upgrade to latest SDK version.
+              {t("migrationExperimentsInconclusive")}{" "}
+              <MonoValue>POST /dataset-run-items</MonoValue>
+              {t("migrationExperimentsInconclusiveTail")}{" "}
+              <code className="bg-muted px-1 font-mono text-sm">.link()</code>
+              {t("migrationExperimentsInconclusiveTail2")}
             </>
           ) : (
             <>
-              This project called <MonoValue>POST /dataset-run-items</MonoValue>{" "}
-              with an outdated SDK.{" "}
+              {t("migrationExperimentsOutdated")}{" "}
+              <MonoValue>POST /dataset-run-items</MonoValue>
+              {t("migrationExperimentsOutdatedTail")}{" "}
               <ExternalLink
                 href={SDK_UPGRADE_URL}
                 analytics={{ section: "experiments", link: "sdk_upgrade_docs" }}
               >
-                Upgrade the SDK
+                {t("migrationUpgradeSdkLink")}
               </ExternalLink>{" "}
-              and use the experiment runner method.
+              {t("migrationExperimentsOutdatedBody")}
             </>
           )}
         </p>
       ) : (
         <p className="text-muted-foreground text-sm">
-          No experiment instrumentation updates required.
+          {t("migrationExperimentsClean")}
         </p>
       )}
     </Section>
@@ -921,38 +937,39 @@ export function V4MigrationApisSection({
   }[];
   defaultOpen?: boolean;
 }) {
+  const t = useTranslation(enterpriseMessages);
+  const locale = useInterfaceLocale();
   return (
     <Section
-      title="Migrate APIs"
+      title="migrationSectionApis"
       analyticsSection="apis"
       count={state.status === "loaded" ? state.count : undefined}
       meta={
         state.status === "loading"
-          ? "Checking…"
+          ? t("migrationCheckingShort")
           : state.status === "error"
-            ? "Check failed"
+            ? t("migrationCheckFailed")
             : undefined
       }
       defaultOpen={defaultOpen}
     >
       {state.status === "loading" ? (
         <p className="text-muted-foreground text-sm">
-          Checking public API usage…
+          {t("migrationApisChecking")}
         </p>
       ) : state.status === "error" ? (
         <p className="text-muted-foreground text-sm">
-          We could not check public API usage. Try again later.
+          {t("migrationApisError")}
         </p>
       ) : usage.length > 0 ? (
         <>
           <p className="text-muted-foreground mb-2 text-sm">
-            You&apos;ve recently called deprecated endpoints that will stop
-            working after the migration deadline. Please check the{" "}
+            {t("migrationApisDeprecated")}{" "}
             <ExternalLink
               href={DEPRECATED_API_MIGRATION_URL}
               analytics={{ section: "apis", link: "deprecated_api_docs" }}
             >
-              migration guide
+              {t("migrationMigrationGuide")}
             </ExternalLink>
           </p>
           <div className="flex flex-col gap-3">
@@ -990,9 +1007,15 @@ export function V4MigrationApisSection({
                         className="text-muted-foreground text-sm whitespace-nowrap"
                         title={`Last seen at ${row.lastSeen}`}
                       >
-                        {numberFormatter(roundedCount, 0)}{" "}
-                        {roundedCount === 1 ? "call" : "calls"} · last seen{" "}
-                        {formatCompactRelativeTime(new Date(row.lastSeen))}
+                        {numberFormatter(roundedCount, 0, undefined, locale)}{" "}
+                        {roundedCount === 1
+                          ? t("migrationCall")
+                          : t("migrationCalls")}{" "}
+                        · {t("migrationLastSeen")}{" "}
+                        {formatCompactRelativeTime(
+                          new Date(row.lastSeen),
+                          locale,
+                        )}
                       </span>
                     ) : null}
                   </div>
@@ -1009,7 +1032,7 @@ export function V4MigrationApisSection({
                         );
                         const callerName = (() => {
                           if (caller.isOther) {
-                            return "Unknown callers";
+                            return t("migrationUnknownCallers");
                           }
                           if (caller.sdkName) {
                             return `Langfuse ${caller.sdkName === "python" ? "Python" : "JavaScript"} SDK${caller.sdkVersion ? ` ${caller.sdkVersion}` : ""}`;
@@ -1017,7 +1040,9 @@ export function V4MigrationApisSection({
                           if (codingAgent) {
                             return codingAgent;
                           }
-                          return caller.userAgent || "Unknown caller";
+                          return (
+                            caller.userAgent || t("migrationUnknownCaller")
+                          );
                         })();
                         const callerCount = Math.max(
                           1,
@@ -1036,21 +1061,26 @@ export function V4MigrationApisSection({
                               </div>
                               <div className="text-muted-foreground flex flex-wrap items-baseline gap-x-1.5 pl-5 sm:pl-0">
                                 <span>
-                                  {numberFormatter(callerCount, 0)}{" "}
-                                  {callerCount === 1 ? "call" : "calls"} · last
-                                  seen{" "}
+                                  {numberFormatter(
+                                    callerCount,
+                                    0,
+                                    undefined,
+                                    locale,
+                                  )}{" "}
+                                  {callerCount === 1
+                                    ? t("migrationCall")
+                                    : t("migrationCalls")}{" "}
+                                  · {t("migrationLastSeen")}{" "}
                                   {formatCompactRelativeTime(
                                     new Date(caller.lastSeen),
+                                    locale,
                                   )}
                                 </span>
                               </div>
                             </div>
                             {codingAgent && !caller.sdkName ? (
                               <p className="text-muted-foreground mt-1 pl-5 text-xs">
-                                This looks like traffic from a coding agent. If
-                                the call was only exploratory and is not part of
-                                a running service, you may not need to migrate
-                                application code.{" "}
+                                {t("migrationCodingAgentTraffic")}{" "}
                                 <ExternalLink
                                   href={DEPRECATED_API_MIGRATION_URL}
                                   analytics={{
@@ -1058,7 +1088,7 @@ export function V4MigrationApisSection({
                                     link: "deprecated_api_caller_docs",
                                   }}
                                 >
-                                  See docs.
+                                  {t("migrationSeeDocs")}
                                 </ExternalLink>
                               </p>
                             ) : guidance.currentMethod &&
@@ -1067,51 +1097,120 @@ export function V4MigrationApisSection({
                                 {guidance.currentMethod ===
                                 guidance.replacementMethod ? (
                                   <>
-                                    Upgrade to SDK v{guidance.latestMajor},
-                                    where{" "}
-                                    <MonoValue>
-                                      {guidance.replacementMethod}
-                                    </MonoValue>{" "}
-                                    calls the new API
+                                    {t("migrationUpgradeToSdk", {
+                                      major: String(guidance.latestMajor),
+                                      method: "",
+                                    })
+                                      .split(/\{method\}/)
+                                      .reduce<ReactNode[]>(
+                                        (parts, part, index) => {
+                                          if (index === 1) {
+                                            parts.push(
+                                              <MonoValue key="method">
+                                                {guidance.replacementMethod}
+                                              </MonoValue>,
+                                            );
+                                          } else if (part) {
+                                            parts.push(part);
+                                          }
+                                          return parts;
+                                        },
+                                        [],
+                                      )}
                                   </>
                                 ) : (
                                   <>
-                                    Replace{" "}
-                                    <MonoValue>
-                                      {guidance.currentMethod}
-                                    </MonoValue>{" "}
-                                    with{" "}
-                                    <MonoValue>
-                                      {guidance.replacementMethod}
-                                    </MonoValue>
+                                    {t("migrationReplaceMethod", {
+                                      current: "",
+                                      replacement: "",
+                                    })
+                                      .split(/\{current\}|\{replacement\}/)
+                                      .reduce<ReactNode[]>(
+                                        (parts, part, index) => {
+                                          if (index === 1) {
+                                            parts.push(
+                                              <MonoValue key="current">
+                                                {guidance.currentMethod}
+                                              </MonoValue>,
+                                            );
+                                          } else if (index === 3) {
+                                            parts.push(
+                                              <MonoValue key="replacement">
+                                                {guidance.replacementMethod}
+                                              </MonoValue>,
+                                            );
+                                          } else if (part) {
+                                            parts.push(part);
+                                          }
+                                          return parts;
+                                        },
+                                        [],
+                                      )}
                                     {guidance.previousMajorReplacementMethod
-                                      ? ` (SDK v${guidance.latestMajor})`
+                                      ? t("migrationPreviousMajorMethod", {
+                                          major: String(guidance.latestMajor),
+                                        })
                                       : null}
                                   </>
                                 )}
                                 {guidance.previousMajorReplacementMethod &&
                                 guidance.minimumVersion &&
-                                guidance.latestMajor ? (
+                                guidance.latestMajor !== undefined ? (
                                   <>
-                                    . On{" "}
-                                    <MonoValue>
-                                      {guidance.minimumVersion}–
-                                      {guidance.latestMajor - 1}.x
-                                    </MonoValue>
-                                    , use{" "}
-                                    <MonoValue>
-                                      {guidance.previousMajorReplacementMethod}
-                                    </MonoValue>
+                                    {t("migrationPreviousMajorUse", {
+                                      versions: "",
+                                      method: "",
+                                    })
+                                      .split(/\{versions\}|\{method\}/)
+                                      .reduce<ReactNode[]>(
+                                        (parts, part, index) => {
+                                          if (index === 1) {
+                                            parts.push(
+                                              <MonoValue key="versions">
+                                                {guidance.minimumVersion}–
+                                                {guidance.latestMajor! - 1}.x
+                                              </MonoValue>,
+                                            );
+                                          } else if (index === 3) {
+                                            parts.push(
+                                              <MonoValue key="method">
+                                                {
+                                                  guidance.previousMajorReplacementMethod
+                                                }
+                                              </MonoValue>,
+                                            );
+                                          } else if (part) {
+                                            parts.push(part);
+                                          }
+                                          return parts;
+                                        },
+                                        [],
+                                      )}
                                   </>
                                 ) : guidance.requiresUpgrade &&
                                   guidance.minimumVersion ? (
                                   <>
-                                    . First upgrade to SDK v
-                                    {guidance.latestMajor} (
-                                    <MonoValue>
-                                      {guidance.minimumVersion} or newer
-                                    </MonoValue>{" "}
-                                    also works)
+                                    {t("migrationUpgradeFirst", {
+                                      major: String(guidance.latestMajor),
+                                      minimum: "",
+                                    })
+                                      .split(/\{minimum\}/)
+                                      .reduce<ReactNode[]>(
+                                        (parts, part, index) => {
+                                          if (index === 1) {
+                                            parts.push(
+                                              <MonoValue key="minimum">
+                                                {guidance.minimumVersion} or
+                                                newer
+                                              </MonoValue>,
+                                            );
+                                          } else if (part) {
+                                            parts.push(part);
+                                          }
+                                          return parts;
+                                        },
+                                        [],
+                                      )}
                                   </>
                                 ) : null}
                                 .{" "}
@@ -1122,13 +1221,25 @@ export function V4MigrationApisSection({
                                     link: "deprecated_api_caller_docs",
                                   }}
                                 >
-                                  See docs.
+                                  {t("migrationSeeDocs")}
                                 </ExternalLink>
                               </p>
                             ) : (
                               <p className="text-muted-foreground mt-1 pl-5 text-xs">
-                                Migrate calls to{" "}
-                                <MonoValue>{guidance.replacement}</MonoValue>.{" "}
+                                {t("migrationMigrateCalls", { method: "" })
+                                  .split(/\{method\}/)
+                                  .reduce<ReactNode[]>((parts, part, index) => {
+                                    if (index === 1) {
+                                      parts.push(
+                                        <MonoValue key="method">
+                                          {guidance.replacement}
+                                        </MonoValue>,
+                                      );
+                                    } else if (part) {
+                                      parts.push(part);
+                                    }
+                                    return parts;
+                                  }, [])}{" "}
                                 <ExternalLink
                                   href={DEPRECATED_API_MIGRATION_URL}
                                   analytics={{
@@ -1136,7 +1247,7 @@ export function V4MigrationApisSection({
                                     link: "deprecated_api_caller_docs",
                                   }}
                                 >
-                                  See docs.
+                                  {t("migrationSeeDocs")}
                                 </ExternalLink>
                               </p>
                             )}
@@ -1152,9 +1263,7 @@ export function V4MigrationApisSection({
         </>
       ) : (
         <p className="text-muted-foreground text-sm">
-          No deprecated public API usage detected in the last{" "}
-          {V4_MIGRATION_LOOKBACK_DAYS} days. This check refreshes about every 15
-          minutes.
+          {t("migrationApisClean", { days: V4_MIGRATION_LOOKBACK_DAYS })}
         </p>
       )}
     </Section>
@@ -1175,32 +1284,33 @@ export function V4MigrationIntegrationsSection({
   defaultOpen?: boolean;
 }) {
   const capture = usePostHogClientCapture();
+  const t = useTranslation(enterpriseMessages);
   return (
     <Section
-      title="Migrate Integrations"
+      title="migrationSectionIntegrations"
       analyticsSection="integrations"
       count={state.status === "loaded" ? state.count : undefined}
       meta={
         state.status === "loading"
-          ? "Checking…"
+          ? t("migrationCheckingShort")
           : state.status === "error"
-            ? "Check failed"
+            ? t("migrationCheckFailed")
             : undefined
       }
       defaultOpen={defaultOpen}
     >
       {state.status === "loading" ? (
-        <p className="text-muted-foreground text-sm">Checking integrations…</p>
+        <p className="text-muted-foreground text-sm">
+          {t("migrationIntegrationsChecking")}
+        </p>
       ) : state.status === "error" ? (
         <p className="text-muted-foreground text-sm">
-          We could not check integrations. Try again later.
+          {t("migrationIntegrationsError")}
         </p>
       ) : integrations.length > 0 ? (
         <>
           <p className="text-muted-foreground mb-2 text-sm">
-            These exports still read from the old data source. Switching them
-            over can change what downstream consumers receive, so worth a quick
-            check.
+            {t("migrationIntegrationsHelp")}
           </p>
           <div className="flex flex-col">
             {integrations.map((name) => (
@@ -1236,7 +1346,7 @@ export function V4MigrationIntegrationsSection({
                     link: "integration_migration_docs",
                   }}
                 >
-                  Migration guide
+                  {t("migrationIntegrationGuide")}
                 </ExternalLink>
               </div>
             ))}
@@ -1244,7 +1354,7 @@ export function V4MigrationIntegrationsSection({
         </>
       ) : (
         <p className="text-muted-foreground text-sm">
-          No deprecated integration exports detected.
+          {t("migrationIntegrationsClean")}
         </p>
       )}
     </Section>
@@ -1267,12 +1377,13 @@ export function useHasV4MigrationDeadline(): boolean {
 // Docs link and deadline note are shared by the panel/modal header and the
 // account-level status page so both surfaces read the same.
 export function V4MigrationDocsLink() {
+  const t = useTranslation(enterpriseMessages);
   return (
     <ExternalLink
       href={V4_DOCS_URL}
       analytics={{ section: "header", link: "v4_docs" }}
     >
-      See docs.
+      {t("migrationSeeDocs")}
     </ExternalLink>
   );
 }
@@ -1284,33 +1395,30 @@ export function V4MigrationDocsLink() {
  * not their deployment, are the thing left to update.
  */
 export function useV4MigrationTitle(): string {
+  const t = useTranslation(enterpriseMessages);
   return useHasV4MigrationDeadline()
-    ? `Ensure compatibility after ${V4_MIGRATION_DEADLINE_SHORT}`
-    : "Ensure compatibility";
+    ? t("migrationDeadlineTitle", { date: V4_MIGRATION_DEADLINE_SHORT })
+    : t("migrationDeadlineTitleNoDate");
 }
 
 export function V4MigrationDeadlineNote() {
+  const t = useTranslation(enterpriseMessages);
   const hasDeadline = useHasV4MigrationDeadline();
 
   if (!hasDeadline) {
-    return (
-      <p>
-        Some features may stop working if you don&apos;t update integrations
-        before your administrator disables the legacy mode.
-      </p>
-    );
+    return <p>{t("migrationDeadlineNoteNoDate")}</p>;
   }
 
   return (
     <p>
-      After{" "}
+      {t("migrationDeadlineNoteStart")}{" "}
       <ExternalLink
         href={V4_TIMELINE_URL}
         analytics={{ section: "header", link: "v4_timeline" }}
       >
         {V4_MIGRATION_DEADLINE}
       </ExternalLink>{" "}
-      some features may stop working if you don&apos;t update integrations.
+      {t("migrationDeadlineNoteEnd")}
     </p>
   );
 }
@@ -1331,6 +1439,7 @@ export function V4MigrationHeaderContent({
 }) {
   const actionNeeded = readiness === "action-needed";
   const title = useV4MigrationTitle();
+  const t = useTranslation(enterpriseMessages);
 
   return (
     <>
@@ -1344,47 +1453,43 @@ export function V4MigrationHeaderContent({
       </div>
       <div className="text-muted-foreground flex flex-col gap-2 text-sm leading-relaxed">
         <p>
-          Langfuse v4 is live: a re-architecture of our data model and database
-          tables. It is up to 165× more performant in UI and on APIs. It also
-          enables new features such as{" "}
+          {t("migrationHeaderPitch")}{" "}
           <ExternalLink
             href={FULL_TEXT_SEARCH_URL}
             analytics={{ section: "header", link: "full_text_search_docs" }}
           >
-            full-text search
+            {t("migrationHeaderFeatureFullTextSearch")}
           </ExternalLink>
-          , a{" "}
+          ,{" "}
           <ExternalLink
             href={FILTER_SEARCH_BAR_URL}
             analytics={{ section: "header", link: "filter_search_bar_docs" }}
           >
-            new filter search bar
+            {t("migrationHeaderFeatureFilterBar")}
           </ExternalLink>
           ,{" "}
           <ExternalLink
             href={ALERTS_URL}
             analytics={{ section: "header", link: "alerts_docs" }}
           >
-            alerts
+            {t("migrationHeaderFeatureAlerts")}
           </ExternalLink>
           ,{" "}
           <ExternalLink
             href={CODE_EVALUATORS_URL}
             analytics={{ section: "header", link: "code_evaluators_docs" }}
           >
-            code evaluators
+            {t("migrationHeaderFeatureCodeEvaluators")}
           </ExternalLink>
-          , and the{" "}
+          {t("migrationHeaderFeatureJoiner")}{" "}
           <ExternalLink
             href={LANGFUSE_ASSISTANT_URL}
             analytics={{ section: "header", link: "langfuse_assistant_docs" }}
           >
-            Langfuse Halo
+            {t("migrationHeaderFeatureAssistant")}
           </ExternalLink>
-          .
-          {actionNeeded
-            ? " Complete the action items below to avoid disruption."
-            : ""}{" "}
+          {t("migrationHeaderPitchTail")}
+          {actionNeeded ? t("migrationHeaderActionable") : ""}{" "}
           <V4MigrationDocsLink />
         </p>
         {actionNeeded && <V4MigrationDeadlineNote />}
@@ -1405,6 +1510,7 @@ export function V4MigrationAgentUpgradeSection({
 }) {
   const capture = usePostHogClientCapture();
   const handleCopyPrompt = useCopyMigrationPrompt();
+  const t = useTranslation(enterpriseMessages);
 
   const [generatedKeys, setGeneratedKeys] = useState<{
     projectId: string;
@@ -1450,8 +1556,8 @@ export function V4MigrationAgentUpgradeSection({
       .catch((error) => {
         console.error(error);
         showErrorToast(
-          "Could not create API keys",
-          "Something went wrong. Please try again.",
+          t("migrationApiKeysCreateFailed"),
+          t("migrationApiKeysCreateFailedHelp"),
           classifyTrpcToastError(error, "project_api_key.create"),
         );
       });
@@ -1466,7 +1572,7 @@ export function V4MigrationAgentUpgradeSection({
       disabled={missingApiKeyAccess || mutCreateProjectApiKey.isPending}
       onClick={handleCreateKeys}
     >
-      Create API keys
+      {t("migrationCreateKeys")}
     </Button>
   );
 
@@ -1482,22 +1588,22 @@ export function V4MigrationAgentUpgradeSection({
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2 text-base font-bold">
-          Upgrade using coding agents
+          {t("migrationUpgradeWithAgents")}
         </div>
         <p className="text-muted-foreground text-sm">
-          Paste prompt into Claude Code or other coding agents
+          {t("migrationUpgradeWithAgentsHelp")}
         </p>
       </div>
       <div className="flex flex-col gap-2">
         <RainbowButton className="w-full" onClick={handleCopyPrompt}>
           <Copy size="base" __rawClassName="mr-1.5" />
-          <span className="min-w-0 truncate" title="Copy prompt">
-            Copy prompt
+          <span className="min-w-0 truncate" title={t("migrationCopyPrompt")}>
+            {t("migrationCopyPrompt")}
           </span>
         </RainbowButton>
         <CodeBlockWithCopy
           text={V4_CODING_AGENT_PROMPT}
-          copyLabel="Copy prompt to clipboard"
+          copyLabel="migrationCopyPromptAria"
           onCopy={() => capture("v4_migration:coding_agent_prompt_copied")}
           scrollable
           className="my-3"
@@ -1506,7 +1612,7 @@ export function V4MigrationAgentUpgradeSection({
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-2">
               <p className="text-muted-foreground min-w-0 text-sm leading-relaxed">
-                Create project API keys to give your agent access
+                {t("migrationCreateKeysHelp")}
               </p>
               {!envBlock &&
                 (missingApiKeyAccess ? (
@@ -1516,8 +1622,7 @@ export function V4MigrationAgentUpgradeSection({
                     openDelay={200}
                     content={
                       <div className="w-80 p-3 text-sm">
-                        Only users with admin access can create project API
-                        keys. Please contact your admins.
+                        {t("migrationAdminKeysOnly")}
                       </div>
                     }
                   >
@@ -1538,7 +1643,7 @@ export function V4MigrationAgentUpgradeSection({
             {envBlock && (
               <CodeBlockWithCopy
                 text={envBlock}
-                copyLabel="Copy keys"
+                copyLabel="migrationCopyKeys"
                 onCopy={() => capture("v4_migration:project_keys_copied")}
               />
             )}
@@ -1563,6 +1668,7 @@ export function V4MigrationDetailsContent({
   const router = useRouter();
   const capture = usePostHogClientCapture();
   const { openWithMode: openSupportDrawerWithMode } = useSupportDrawer();
+  const t = useTranslation(enterpriseMessages);
 
   const routeProjectId = router.query.projectId;
   const projectId =
@@ -1641,17 +1747,17 @@ export function V4MigrationDetailsContent({
     migrationData.exports.status === "loaded" &&
     migrationData.exports.count === 0;
   const cleanSectionLabels = [
-    evalsClean ? "evals" : null,
-    experimentsClean ? "experiments" : null,
-    apisClean ? "APIs" : null,
-    exportsClean ? "integrations" : null,
+    evalsClean ? t("migrationSectionEvals") : null,
+    experimentsClean ? t("migrationSectionExperiments") : null,
+    apisClean ? t("migrationSectionApis") : null,
+    exportsClean ? t("migrationSectionIntegrations") : null,
   ].filter((label): label is string => label !== null);
   const joinedCleanLabels =
     cleanSectionLabels.length > 1
-      ? `${cleanSectionLabels.slice(0, -1).join(", ")} and ${cleanSectionLabels[cleanSectionLabels.length - 1]}`
+      ? `${cleanSectionLabels.slice(0, -1).join(", ")}${t("migrationCleanJoiner")}${cleanSectionLabels[cleanSectionLabels.length - 1]}`
       : cleanSectionLabels[0];
   const cleanSummary = joinedCleanLabels
-    ? `${joinedCleanLabels.charAt(0).toUpperCase()}${joinedCleanLabels.slice(1)} are up to date.`
+    ? t("migrationCleanSummary", { items: joinedCleanLabels })
     : null;
 
   const handleEmailEngineer = () => {
@@ -1693,13 +1799,12 @@ export function V4MigrationDetailsContent({
 
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2 text-base font-bold">
-          Action items
+          {t("migrationActionItems")}
         </div>
         <p className="text-muted-foreground text-sm">
-          SDK, instrumentation, experiment, and API checks cover activity from
-          the last {V4_MIGRATION_LOOKBACK_DAYS} days. API and experiment usage
-          counts refresh about every 15 minutes, so recent calls may not appear
-          yet.
+          {t("migrationActionItemsHelp", {
+            days: V4_MIGRATION_LOOKBACK_DAYS,
+          })}
         </p>
         <div>
           <V4MigrationSdkSection
@@ -1774,12 +1879,12 @@ export function V4MigrationDetailsContent({
             <div className="flex w-full items-center gap-2.5 py-2.5">
               <V4MigrationStatusDot variant="neutral" />
               <span className="text-muted-foreground flex min-w-0 items-center gap-1.5 text-sm">
-                Compare traces while you upgrade
+                {t("migrationCompareTraces")}
                 <HoverCard
                   openDelay={200}
                   content={
                     <div className="w-80 p-3 text-sm">
-                      The latest SDK no longer sets trace input and output;{" "}
+                      {t("migrationCompareTracesHelp")}{" "}
                       <ExternalLink
                         href={OBSERVATIONS_DATA_MODEL_URL}
                         analytics={{
@@ -1787,7 +1892,7 @@ export function V4MigrationDetailsContent({
                           link: "observations_data_model_docs",
                         }}
                       >
-                        v4 infers them from observations
+                        {t("migrationCompareTracesDocs")}
                       </ExternalLink>
                       .
                     </div>
@@ -1796,7 +1901,7 @@ export function V4MigrationDetailsContent({
                   {({ getTriggerProps }) => (
                     <button
                       type="button"
-                      aria-label="Why compare traces?"
+                      aria-label={t("migrationWhyCompare")}
                       className="shrink-0"
                       {...getTriggerProps()}
                     >
@@ -1819,7 +1924,7 @@ export function V4MigrationDetailsContent({
       <Separator />
 
       <div className="flex flex-col gap-2">
-        <p className="text-base font-bold">Need help?</p>
+        <p className="text-base font-bold">{t("migrationNeedHelp")}</p>
         <div className="text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
           <a
             href={V4_DOCS_URL}
@@ -1828,7 +1933,7 @@ export function V4MigrationDetailsContent({
             onClick={() => capture("v4_migration:panel_docs_link_clicked")}
             className="underline"
           >
-            Docs
+            {t("migrationDocs")}
           </a>
           <span>·</span>
           <button
@@ -1836,7 +1941,7 @@ export function V4MigrationDetailsContent({
             onClick={handleEmailEngineer}
             className="underline"
           >
-            Email an engineer
+            {t("migrationEmailEngineer")}
           </button>
           <span>·</span>
           <a
@@ -1846,7 +1951,7 @@ export function V4MigrationDetailsContent({
             onClick={() => capture("v4_migration:contact_book_call_clicked")}
             className="underline"
           >
-            Book a call
+            {t("migrationBookCall")}
           </a>
           {env.NEXT_PUBLIC_LANGFUSE_CLOUD_REGION && (
             <>
@@ -1860,7 +1965,7 @@ export function V4MigrationDetailsContent({
                 }
                 className="underline"
               >
-                Walkthrough video
+                {t("migrationWalkthroughVideo")}
               </a>
             </>
           )}

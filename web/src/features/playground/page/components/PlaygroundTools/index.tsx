@@ -19,6 +19,8 @@ import {
 } from "@/src/components/ui/command";
 
 import { type PlaygroundTool } from "@/src/features/playground/page/types";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 
 export type PlaygroundToolDialogRequest = {
   existingLlmTool?: LlmTool;
@@ -39,6 +41,7 @@ type PlaygroundToolsPopoverProps = {
 export const PlaygroundToolsPopover = ({
   onOpenToolDialog,
 }: PlaygroundToolsPopoverProps) => {
+  const t = useTranslation(skillMessages);
   const { setTools } = usePlaygroundContext();
   const projectId = useProjectIdFromURL();
 
@@ -95,11 +98,11 @@ export const PlaygroundToolsPopover = ({
   return (
     <Command className="flex flex-col">
       <CommandInput
-        placeholder="Search tools..."
+        placeholder={t("searchTools")}
         className="h-8 border-none py-1 pr-1 pl-6 focus:ring-0 focus:ring-offset-0"
       />
       <CommandList className="max-h-[300px] overflow-y-auto">
-        <CommandEmpty>No tools found.</CommandEmpty>
+        <CommandEmpty>{t("noToolsFound")}</CommandEmpty>
         <CommandGroup>
           {savedTools.map((tool) => (
             <CommandItem
@@ -123,7 +126,7 @@ export const PlaygroundToolsPopover = ({
                 variant="ghost"
                 size="icon"
                 className="ml-2 h-7 w-7 shrink-0"
-                aria-label={`Edit tool ${tool.name}`}
+                aria-label={t("editTool", { name: tool.name })}
                 onClick={(e) => {
                   e.stopPropagation();
                   onOpenToolDialog({
@@ -152,7 +155,7 @@ export const PlaygroundToolsPopover = ({
           }
         >
           <PlusIcon size="base" color="default" __rawClassName="mr-2" />
-          Create new tool
+          {t("createNewTool")}
         </Button>
       </div>
     </Command>
@@ -165,6 +168,7 @@ type PlaygroundToolsProps = {
 
 // Main component for embedding in CollapsibleSection content
 export const PlaygroundTools = ({ onOpenToolDialog }: PlaygroundToolsProps) => {
+  const t = useTranslation(skillMessages);
   const { tools, setTools } = usePlaygroundContext();
   const projectId = useProjectIdFromURL();
 
@@ -255,7 +259,9 @@ export const PlaygroundTools = ({ onOpenToolDialog }: PlaygroundToolsProps) => {
     <ScrollArea className="[&>[data-radix-scroll-area-viewport]]:max-h-[min(45vh,18rem)]">
       {tools.length === 0 ? (
         <div className="flex h-16 flex-col items-center justify-center p-4 text-center">
-          <p className="text-muted-foreground text-xs">No tools attached.</p>
+          <p className="text-muted-foreground text-xs">
+            {t("noToolsAttached")}
+          </p>
         </div>
       ) : (
         <div className="space-y-1">
@@ -284,7 +290,7 @@ export const PlaygroundTools = ({ onOpenToolDialog }: PlaygroundToolsProps) => {
                   variant="ghost"
                   size="sm"
                   className="absolute top-2 right-3 h-6 w-6 p-0"
-                  aria-label={`Remove tool ${tool.name}`}
+                  aria-label={t("removeTool", { name: tool.name })}
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
@@ -308,7 +314,7 @@ export const PlaygroundTools = ({ onOpenToolDialog }: PlaygroundToolsProps) => {
                     </h3>
                     {!isToolSaved(tool) ? (
                       <span className="bg-muted text-muted-foreground mt-1 inline-flex rounded px-1 py-0.5 text-xs">
-                        Unsaved
+                        {t("unsaved")}
                       </span>
                     ) : null}
                   </div>

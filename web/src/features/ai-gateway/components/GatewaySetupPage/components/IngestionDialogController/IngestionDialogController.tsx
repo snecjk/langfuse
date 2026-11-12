@@ -9,6 +9,8 @@ import type {
   GatewayProject,
 } from "@/src/features/ai-gateway/components/GatewaySetupPage/types/gatewaySetup";
 import { showSuccessToast } from "@/src/features/notifications/showSuccessToast";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 
 export type IngestionDialogControllerProps = {
   organizationId: string;
@@ -23,6 +25,7 @@ export function IngestionDialogController({
   projects,
   children,
 }: IngestionDialogControllerProps) {
+  const t = useTranslation(gatewayMessages);
   const { saveIngestion, isSaving } = useSaveGatewayIngestion(
     organizationId,
     "overview",
@@ -33,8 +36,8 @@ export function IngestionDialogController({
     if (isSaved) {
       showSuccessToast({
         operation: "aiGateway.updateConfig",
-        title: "Ingestion settings saved",
-        description: "New gateway requests use these settings.",
+        title: t("ingestionSaved"),
+        description: t("ingestionSavedDescription"),
       });
     }
     return isSaved;

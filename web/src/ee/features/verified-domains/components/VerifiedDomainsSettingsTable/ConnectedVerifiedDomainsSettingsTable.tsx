@@ -10,6 +10,8 @@ import {
   type DomainRowData,
 } from "./VerifiedDomainsSettingsTable";
 import { VerifyDomainDialogController } from "../VerifyDomainDialogController/VerifyDomainDialogController";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export function ConnectedVerifiedDomainsSettingsTable({
   orgId,
@@ -21,6 +23,7 @@ export function ConnectedVerifiedDomainsSettingsTable({
   const [verifyingDomainId, setVerifyingDomainId] = useState<string | null>(
     null,
   );
+  const t = useTranslation(enterpriseMessages);
 
   const verifyMutation = api.verifiedDomain.verify.useMutation({
     onSuccess: (_, variables) => {
@@ -29,13 +32,15 @@ export function ConnectedVerifiedDomainsSettingsTable({
       const domain = query.data?.find((row) => row.id === variables.id);
       showSuccessToast({
         operation: "verified_domain.verify",
-        title: "Domain verified",
-        description: `${domain?.domain ?? "Domain"} is now verified.`,
+        title: t("verifiedDomainVerifiedToast"),
+        description: t("verifiedDomainVerifiedDescription", {
+          domain: domain?.domain ?? t("verifiedDomainLabel"),
+        }),
       });
     },
     onError: (err) =>
       showErrorToast(
-        "Verification failed",
+        t("verifiedDomainVerifyFailed"),
         err.message,
         classifyTrpcToastError(err, "verified_domain.verify"),
       ),
@@ -48,13 +53,15 @@ export function ConnectedVerifiedDomainsSettingsTable({
       const domain = query.data?.find((row) => row.id === variables.id);
       showSuccessToast({
         operation: "verified_domain.remove",
-        title: "Domain removed",
-        description: `${domain?.domain ?? "Domain"} has been removed.`,
+        title: t("verifiedDomainRemovedToast"),
+        description: t("verifiedDomainRemovedDescription", {
+          domain: domain?.domain ?? t("verifiedDomainLabel"),
+        }),
       });
     },
     onError: (err) =>
       showErrorToast(
-        "Failed to remove domain",
+        t("verifiedDomainRemoveFailed"),
         err.message,
         classifyTrpcToastError(err, "verified_domain.remove"),
       ),
@@ -64,22 +71,22 @@ export function ConnectedVerifiedDomainsSettingsTable({
     if (query.isError) {
       return {
         status: "error",
-        error: "Failed to load verified domains. Please try again.",
+        error: t("verifiedDomainsLoadFailed"),
       };
     }
     if (query.isLoading) return { status: "loading" };
     return { status: "success", data: query.data ?? [] };
-  }, [query.isError, query.isLoading, query.data]);
+  }, [query.isError, query.isLoading, query.data, t]);
 
   return (
     <ConfirmationDialogController<DomainRowData>
-      title={(row) => `Remove ${row.domain}?`}
+      title={(row) => t("verifiedDomainRemoveTitle", { domain: row.domain })}
       text={(row) =>
         row.verifiedAt
-          ? "If an SSO configuration exists for this domain, you must remove it first. The domain can be re-verified later."
-          : "This removes the pending claim. The domain can be re-added and verified later."
+          ? t("verifiedDomainRemoveSsoFirst")
+          : t("verifiedDomainRemovePending")
       }
-      confirmLabel="Remove"
+      confirmLabel={t("verifiedDomainRemoveAction")}
       variant="destructive"
       loading={deleteMutation.isPending}
       onConfirm={async (row) => {

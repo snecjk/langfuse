@@ -4,8 +4,11 @@ import { DropdownMenu } from "@/src/components/design-system/DropdownMenu/Dropdo
 import { IconButton } from "@/src/components/design-system/IconButton/IconButton";
 import { AnalyzeControl } from "./AnalyzeControl";
 import { type TopicsActions } from "./prepare-topics-actions";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 
 export function TopicsHeaderActions({ actions }: { actions: TopicsActions }) {
+  const t = useTranslation(topicsMessages);
   return (
     <div className="ph-no-capture flex shrink-0 items-center justify-end gap-1">
       {actions.automatic && (
@@ -18,7 +21,7 @@ export function TopicsHeaderActions({ actions }: { actions: TopicsActions }) {
         </div>
       )}
       <DropdownMenu
-        ariaLabel="Topics actions"
+        ariaLabel={t("topicsActions")}
         placement="bottom-end"
         items={[
           ...actions.menu.map((action) => ({
@@ -49,7 +52,7 @@ export function TopicsHeaderActions({ actions }: { actions: TopicsActions }) {
           <IconButton
             {...getTriggerProps()}
             icon={EllipsisVertical}
-            label="Topics actions"
+            label={t("topicsActions")}
             size="sm"
           />
         )}

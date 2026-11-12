@@ -10,6 +10,8 @@ import {
 import { useProjectV4MigrationData } from "@/src/features/v4-migration/hooks/useV4MigrationData";
 import { getProjectMigrationReadiness } from "@/src/features/v4-migration/migrationData";
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export const V4MigrationPanel = ({
   showCloseButton = true,
@@ -20,6 +22,7 @@ export const V4MigrationPanel = ({
 }) => {
   const { open, setOpen, targetProject } = useV4MigrationPanel();
   const { project: routeProject } = useQueryProject();
+  const t = useTranslation(enterpriseMessages);
 
   // Prefer the route's project so the panel follows navigation while open;
   // targetProject only decides on project-less routes (home, status page),
@@ -62,7 +65,7 @@ export const V4MigrationPanel = ({
           size="icon"
           className="absolute top-2 right-2"
           onClick={() => setOpen(false)}
-          aria-label="Close"
+          aria-label={t("migrationPanelClose")}
         >
           <X size="base" color="default" />
         </Button>

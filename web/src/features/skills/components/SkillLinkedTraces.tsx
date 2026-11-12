@@ -7,6 +7,8 @@ import { Tabs } from "@/src/components/design-system/Tabs/Tabs";
 import { TableHeaderControls } from "@/src/components/table/TableHeaderControls";
 import { useTableDateRange } from "@/src/hooks/useTableDateRange";
 import { rangeToString, type TimeRange } from "@/src/utils/date-range-utils";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 
 export function SkillLinkedTraces({
   projectId,
@@ -25,6 +27,7 @@ export function SkillLinkedTraces({
     onClear: () => void;
   };
 }) {
+  const t = useTranslation(skillMessages);
   const [usage, setUsage] = useState<SkillUsage>("both");
   const selectedUsage = fileFilter ? "loaded" : usage;
   const { timeRange: localTimeRange, setTimeRange } =
@@ -58,15 +61,15 @@ export function SkillLinkedTraces({
         <div className="flex min-h-0 flex-1 flex-col gap-3">
           <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 px-4">
             <div className="flex min-w-0 flex-wrap items-center gap-2">
-              <h3 className="text-sm font-bold">Observations</h3>
+              <h3 className="text-sm font-bold">{t("observations")}</h3>
               {fileFilter ? (
                 <span className="ph-no-capture max-w-64 min-w-0">
                   <Badge
-                    label="File"
+                    label={t("file")}
                     text={fileFilter.path}
                     trailingIcon={X}
                     color="filled"
-                    aria-label={`Clear file filter: ${fileFilter.path}`}
+                    aria-label={t("clearFileFilter", { path: fileFilter.path })}
                     onDismiss={() => {
                       setUsage("loaded");
                       fileFilter.onClear();
@@ -78,22 +81,22 @@ export function SkillLinkedTraces({
             <Tabs.List
               variant="inset"
               size="sm"
-              aria-label="Skill usage filter"
+              aria-label={t("skillUsageFilter")}
             >
               <Tabs.Trigger
                 value="both"
-                label="Any"
-                tooltip="Observations where this skill was available or loaded"
+                label={t("any")}
+                tooltip={t("observationsWhereSkillAvailableOrLoaded")}
               />
               <Tabs.Trigger
                 value="available"
-                label="Available"
-                tooltip="Observations offering this skill"
+                label={t("availableTab")}
+                tooltip={t("observationsOfferingThisSkill")}
               />
               <Tabs.Trigger
                 value="loaded"
-                label="Loaded"
-                tooltip="Observations loading one or more skill files"
+                label={t("loadedTab")}
+                tooltip={t("observationsLoadingSkillFiles")}
               />
             </Tabs.List>
           </div>

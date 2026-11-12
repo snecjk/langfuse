@@ -27,13 +27,15 @@ import { usePostHogIntegration } from "@/src/features/posthog-integration/usePos
 import { api } from "@/src/utils/api";
 import { type RouterOutput } from "@/src/utils/types";
 import { Card } from "@/src/components/ui/card";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 
 export default function PostHogIntegrationPage() {
   const router = useRouter();
   const projectId = router.query.projectId as string;
+  const t = useTranslation(integrationMessages);
 
   const { hasAccess, query: state, status } = usePostHogIntegration(projectId);
 
@@ -42,40 +44,29 @@ export default function PostHogIntegrationPage() {
   return (
     <ContainerPage
       headerProps={{
-        title: "PostHog Integration",
+        title: t("posthogTitle"),
         breadcrumb: [
-          { name: "Settings", href: `/project/${projectId}/settings` },
+          { name: t("settings"), href: `/project/${projectId}/settings` },
         ],
         actionButtonsLeft: status && <StatusBadge type={status} />,
         actionButtonsRight: (
           <Button
             href="https://langfuse.com/integrations/analytics/posthog"
-            text="Integration Docs"
+            text={t("integrationDocsShort")}
             variant="secondary"
           />
         ),
       }}
     >
       <p className="text-primary mb-4 text-sm">
-        We have teamed up with{" "}
-        <Link href="https://posthog.com" className="underline">
-          PostHog
-        </Link>{" "}
-        (OSS product analytics) to make Langfuse events/metrics available in
-        your PostHog dashboards. Upon activation, all historical data from your
-        project will be synced. After the initial sync, new data is
-        automatically synced every hour to keep your PostHog dashboards up to
-        date.
+        {t("posthogHelp", {
+          link: "PostHog",
+        })}
       </p>
-      {!hasAccess && (
-        <p className="text-sm">
-          You current role does not grant you access to these settings, please
-          reach out to your project admin or owner.
-        </p>
-      )}
+      {!hasAccess && <p className="text-sm">{t("noAccess")}</p>}
       {hasAccess && (
         <>
-          <Header title="Configuration" />
+          <Header title={t("configuration")} />
           <Card className="p-3">
             <PostHogLogo className="text-foreground mb-4 w-36" />
             {!state.data || !project ? (

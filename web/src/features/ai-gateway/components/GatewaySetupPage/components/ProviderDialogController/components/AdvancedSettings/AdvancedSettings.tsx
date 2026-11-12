@@ -7,14 +7,10 @@ import { IconButton } from "@/src/components/design-system/IconButton/IconButton
 import { Input } from "@/src/components/design-system/Input/Input";
 import { FieldHeader } from "@/src/features/ai-gateway/components/GatewaySetupPage/components/ProviderDialogController/components/FieldHeader";
 import type { GatewayApiFamily } from "@/src/features/ai-gateway/types/gatewayProvider";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 
 export type ExtraHeaderRow = { id: string; key: string; value: string };
-
-const defaultBaseUrls: Record<GatewayApiFamily, string> = {
-  OPENAI: "OpenAI default: https://api.openai.com/v1",
-  ANTHROPIC:
-    "Anthropic default: https://api.anthropic.com (excluding /v1/messages)",
-};
 
 export function AdvancedSettings({
   provider,
@@ -34,6 +30,7 @@ export function AdvancedSettings({
   onBaseURLChange: (baseURL: string) => void;
   onHeadersChange: (headers: ExtraHeaderRow[]) => void;
 }) {
+  const t = useTranslation(gatewayMessages);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleBaseURLChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -68,8 +65,8 @@ export function AdvancedSettings({
       <ExpandToggle
         expanded={isExpanded}
         onExpandedChange={setIsExpanded}
-        label="Show advanced settings"
-        expandedLabel="Hide advanced settings"
+        label={t("showAdvancedSettings")}
+        expandedLabel={t("hideAdvancedSettings")}
         variant="icon"
         iconPosition="right"
         size="sm"
@@ -79,19 +76,23 @@ export function AdvancedSettings({
         <div id="gateway-advanced-settings" className="space-y-6 border-t pt-6">
           <div className="ph-no-capture">
             <FieldHeader
-              label="API Base URL"
+              label={t("apiBaseUrlLabel")}
               htmlFor="gateway-base-url"
               description={
                 <>
-                  Leave blank to use the default base URL.{" "}
-                  {isEditing ? "Changing it requires a new secret key. " : null}
-                  {defaultBaseUrls[provider]}
+                  {t("apiBaseUrlDescription", {
+                    extra: isEditing ? t("apiBaseUrlChangeWarning") : "",
+                    default:
+                      provider === "OPENAI"
+                        ? t("apiBaseUrlDefaultOpenai")
+                        : t("apiBaseUrlDefaultAnthropic"),
+                  })}
                 </>
               }
             />
             <Input
               id="gateway-base-url"
-              placeholder="default"
+              placeholder={t("apiBaseUrlPlaceholder")}
               value={baseURL}
               onChange={handleBaseURLChange}
             />
@@ -102,9 +103,9 @@ export function AdvancedSettings({
             className="ph-no-capture space-y-2"
           >
             <FieldHeader
-              label="Extra Headers"
+              label={t("extraHeadersLabel")}
               id="gateway-extra-headers"
-              description="Optional HTTP headers sent with every request to the provider. Header values are stored encrypted."
+              description={t("extraHeadersDescription")}
             />
             {headers.map((header) => (
               <ExtraHeaderField
@@ -120,7 +121,7 @@ export function AdvancedSettings({
               <Button
                 variant="ghost"
                 icon={PlusIcon}
-                text="Add Header"
+                text={t("addHeader")}
                 onClick={handleAddHeader}
               />
             </div>
@@ -142,6 +143,7 @@ function ExtraHeaderField({
   onChange: (id: string, field: "key" | "value", value: string) => void;
   onRemove: (id: string) => void;
 }) {
+  const t = useTranslation(gatewayMessages);
   const handleKeyChange = (event: ChangeEvent<HTMLInputElement>) => {
     onChange(header.id, "key", event.target.value);
   };
@@ -157,22 +159,22 @@ function ExtraHeaderField({
   return (
     <div className="flex flex-row gap-2">
       <Input
-        aria-label="Header name"
-        placeholder="Header name"
+        aria-label={t("headerName")}
+        placeholder={t("headerName")}
         value={header.key}
         onChange={handleKeyChange}
       />
       <Input
-        aria-label="Header value"
+        aria-label={t("headerValue")}
         type="password"
         autoComplete="new-password"
-        placeholder={isStored ? "***" : "Header value"}
+        placeholder={isStored ? "***" : t("headerValue")}
         value={header.value}
         onChange={handleValueChange}
       />
       <IconButton
         icon={TrashIcon}
-        label="Remove header"
+        label={t("removeHeader")}
         onClick={handleRemove}
       />
     </div>

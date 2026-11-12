@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
 import { format, isToday, isYesterday } from "date-fns";
+import { zhCN as dateFnsZhCN } from "date-fns/locale";
 import { CircleAlert, History } from "@langfuse/icons";
 import { Button } from "@/src/components/design-system/Button/Button";
 import { Tooltip } from "@/src/components/design-system/Tooltip/Tooltip";
@@ -8,10 +9,15 @@ import { type RouterOutputs } from "@/src/utils/api";
 import { costFormatter } from "@/src/utils/numbers";
 import { cn } from "@/src/utils/tailwind";
 import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
+import {
   busy,
   executionBadgeTypes,
-  executionLabels,
-  operationLabels,
+  executionLabel,
+  operationLabel,
 } from "./topic-run-labels";
 import { TopicsErrorMessage } from "./TopicsErrorMessage";
 
@@ -28,28 +34,25 @@ function formatCount(count: number) {
   return count.toLocaleString("en-US");
 }
 
-function plural(count: number) {
-  return count === 1 ? "trace" : "traces";
-}
-
 function traceCount(run: Run) {
   return Math.max(0, ...run.facets.map((facet) => facet.counts.requested));
 }
 
-function dayLabel(date: Date, now: Date) {
-  if (isToday(date)) return "Today";
-  if (isYesterday(date)) return "Yesterday";
+function dayLabel(date: Date, now: Date, locale: "en" | "zh-CN") {
+  if (isToday(date)) return locale === "zh-CN" ? "今天" : "Today";
+  if (isYesterday(date)) return locale === "zh-CN" ? "昨天" : "Yesterday";
   return format(
     date,
     date.getFullYear() === now.getFullYear() ? "MMM d" : "MMM d, yyyy",
+    { locale: locale === "zh-CN" ? dateFnsZhCN : undefined },
   );
 }
 
-function groupByDay(runs: Run[]) {
+function groupByDay(runs: Run[], locale: "en" | "zh-CN") {
   const now = new Date();
   const groups: { label: string; runs: Run[] }[] = [];
   for (const run of runs) {
-    const label = dayLabel(new Date(run.createdAt), now);
+    const label = dayLabel(new Date(run.createdAt), now, locale);
     const last = groups.at(-1);
     if (last?.label === label) last.runs.push(run);
     else groups.push({ label, runs: [run] });
@@ -57,25 +60,30 @@ function groupByDay(runs: Run[]) {
   return groups;
 }
 
-function problemReason(run: Run) {
+function problemReason(
+  run: Run,
+  t: ReturnType<typeof useTranslation<typeof topicsMessages>>,
+) {
   const failed = Math.max(0, ...run.facets.map((f) => f.counts.failed));
-  if (failed > 0) return `${formatCount(failed)} ${plural(failed)} failed`;
+  if (failed > 0) return t("tracesLabel", { count: failed });
   const skipped = Math.max(
     0,
     ...run.facets.map((f) => f.counts.insufficientInput),
   );
-  if (skipped > 0)
-    return `${formatCount(skipped)} ${plural(skipped)} skipped: not enough input`;
+  if (skipped > 0) return t("summariesLabel", { count: skipped });
   return run.error ?? run.facets.find((f) => f.error)?.error ?? null;
 }
 
-function runDetail(run: Run): { text: string; problem: boolean } | null {
+function runDetail(
+  run: Run,
+  t: ReturnType<typeof useTranslation<typeof topicsMessages>>,
+): { text: string; problem: boolean } | null {
   if (run.status === "failed" || run.status === "completed_with_errors") {
-    const reason = problemReason(run);
+    const reason = problemReason(run, t);
     if (reason) return { text: reason, problem: true };
   }
   if (run.input.operation !== "process") return null;
-  const parts = [`${formatCount(traceCount(run))} traces`];
+  const parts = [t("tracesLabel", { count: traceCount(run) })];
   if (run.estimatedCost != null)
     parts.push(
       `${busy(run.status) ? "~" : ""}${costFormatter(run.estimatedCost)}`,
@@ -112,7 +120,8 @@ function CenteredState({
 
 /** Live runs only: StatusBadge draws a dot for running and queued, not for finished runs. */
 function StatusDot({ status }: { status: Run["status"] }) {
-  const label = executionLabels[status];
+  const t = useTranslation(topicsMessages);
+  const label = executionLabel(status, t);
   return (
     <Tooltip label={label} hoverableContent={false}>
       {({ getTriggerProps }) => (
@@ -140,6 +149,7 @@ function ActiveRun({
   run: Run;
   onOpen: (id: string) => void;
 }) {
+  const t = useTranslation(topicsMessages);
   const total = traceCount(run);
   const processed = Math.min(
     total,
@@ -160,9 +170,9 @@ function ActiveRun({
           <StatusDot status={run.status} />
           <span
             className="truncate"
-            title={operationLabels[run.input.operation]}
+            title={operationLabel(run.input.operation, t)}
           >
-            {operationLabels[run.input.operation]}
+            {operationLabel(run.input.operation, t)}
           </span>
         </span>
         <span className="text-muted-foreground font-mono text-xs">
@@ -189,8 +199,9 @@ function ActiveRun({
 }
 
 function RunRow({ run, onOpen }: { run: Run; onOpen: (id: string) => void }) {
-  const name = operationLabels[run.input.operation];
-  const detail = runDetail(run);
+  const t = useTranslation(topicsMessages);
+  const name = operationLabel(run.input.operation, t);
+  const detail = runDetail(run, t);
   return (
     <button
       type="button"
@@ -219,7 +230,7 @@ function RunRow({ run, onOpen }: { run: Run; onOpen: (id: string) => void }) {
       </span>
       <span className="shrink-0">
         <StatusBadge type={executionBadgeTypes[run.status]} showText={false}>
-          {executionLabels[run.status]}
+          {executionLabel(run.status, t)}
         </StatusBadge>
       </span>
     </button>
@@ -227,11 +238,12 @@ function RunRow({ run, onOpen }: { run: Run; onOpen: (id: string) => void }) {
 }
 
 function Empty() {
+  const t = useTranslation(topicsMessages);
   return (
     <CenteredState
       icon={<History size="lg" color="muted" />}
-      title="No runs yet"
-      body="Runs show up here as Topics processes your traces."
+      title={t("noRunsYet")}
+      body={t("noRunsBody")}
     />
   );
 }
@@ -243,14 +255,15 @@ function LoadError({
   message: string;
   onRetry: () => void;
 }) {
+  const t = useTranslation(topicsMessages);
   return (
     <CenteredState
       icon={<CircleAlert size="lg" color="destructive" />}
-      title="Couldn’t load run history"
+      title={t("couldNotLoadHistory")}
       body={message}
     >
       <Button
-        text="Try again"
+        text={t("tryAgain")}
         variant="secondary"
         size="sm"
         onClick={onRetry}
@@ -265,6 +278,7 @@ export function TopicRunHistoryList({
   onOpen,
   onRetry,
 }: TopicRunHistoryListProps) {
+  const locale = useInterfaceLocale();
   if (errorMessage && executions.length === 0) {
     return <LoadError message={errorMessage} onRetry={onRetry} />;
   }
@@ -282,7 +296,7 @@ export function TopicRunHistoryList({
         </div>
       )}
       {active && <ActiveRun run={active} onOpen={onOpen} />}
-      {groupByDay(past).map((group) => (
+      {groupByDay(past, locale).map((group) => (
         <section key={group.runs[0].id} className="px-2 pt-2.5 pb-1">
           <h3 className="text-muted-foreground px-2 text-xs font-bold">
             {group.label}

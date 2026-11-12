@@ -24,9 +24,8 @@ import {
   externalMediaStorageFormSchema,
   type ExternalMediaStorageFormValues,
 } from "@/src/ee/features/external-media-storage/types";
-
-const ROLE_AUTH_UPGRADE_MESSAGE =
-  "IAM role auth is not part of your plan. Upgrade to Enterprise to use it.";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export function ExternalMediaStorageForm({
   formId,
@@ -53,6 +52,7 @@ export function ExternalMediaStorageForm({
     resolver: zodResolver(externalMediaStorageFormSchema),
     defaultValues: initialValues,
   });
+  const t = useTranslation(enterpriseMessages);
   const type = useWatch({ control: form.control, name: "type" }) ?? "S3";
   const authType =
     useWatch({ control: form.control, name: "authType" }) ?? "ACCESS_KEYS";
@@ -83,7 +83,7 @@ export function ExternalMediaStorageForm({
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Storage Provider</FormLabel>
+                  <FormLabel>{t("mediaStorageProvider")}</FormLabel>
                   <FormControl>
                     <SelectInput
                       value={field.value}
@@ -96,15 +96,15 @@ export function ExternalMediaStorageForm({
                           form.setValue("authType", "ACCESS_KEYS");
                         }
                       }}
-                      placeholder="Select a storage provider"
+                      placeholder={t("mediaStorageProviderPlaceholder")}
                       options={[
                         {
                           value: "S3",
-                          label: "Amazon S3",
+                          label: t("mediaStorageAmazonS3"),
                         },
                         {
                           value: "S3_COMPATIBLE",
-                          label: "S3 Compatible Storage",
+                          label: t("mediaStorageS3Compatible"),
                         },
                       ]}
                     />
@@ -120,32 +120,41 @@ export function ExternalMediaStorageForm({
                 name="authType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Authentication</FormLabel>
+                    <FormLabel>{t("mediaStorageAuth")}</FormLabel>
                     <FormControl>
                       <SelectInput
                         value={field.value}
                         onValueChange={field.onChange}
-                        placeholder="Select an authentication method"
+                        placeholder={t("mediaStorageAuthPlaceholder")}
                         options={[
-                          { value: "ACCESS_KEYS", label: "Access keys" },
+                          {
+                            value: "ACCESS_KEYS",
+                            label: t("mediaStorageAccessKeys"),
+                          },
                           isRoleOptionLocked
                             ? {
                                 value: "ROLE_ARN",
-                                label: "IAM role",
+                                label: t("mediaStorageIamRole"),
                                 disabled: true,
-                                disabledReason: ROLE_AUTH_UPGRADE_MESSAGE,
+                                disabledReason: t("upgradeForRoleAuth"),
                                 badges: [
-                                  { text: "Enterprise", color: "outline" },
+                                  {
+                                    text: t("mediaStorageEnterpriseBadge"),
+                                    color: "outline",
+                                  },
                                 ],
                               }
-                            : { value: "ROLE_ARN", label: "IAM role" },
+                            : {
+                                value: "ROLE_ARN",
+                                label: t("mediaStorageIamRole"),
+                              },
                         ]}
                       />
                     </FormControl>
                     <FormDescription>
                       {isRoleOptionLocked
-                        ? ROLE_AUTH_UPGRADE_MESSAGE
-                        : "With an IAM role, Langfuse assumes a role in your AWS account instead of storing access keys."}
+                        ? t("upgradeForRoleAuth")
+                        : t("mediaStorageIamRoleHelp")}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -158,12 +167,12 @@ export function ExternalMediaStorageForm({
               name="bucketName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Bucket Name</FormLabel>
+                  <FormLabel>{t("mediaStorageBucketName")}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
                   <FormDescription>
-                    The S3 bucket containing media.
+                    {t("mediaStorageBucketNameHelp")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -177,12 +186,12 @@ export function ExternalMediaStorageForm({
                   name="endpoint"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Endpoint URL</FormLabel>
+                      <FormLabel>{t("mediaStorageEndpoint")}</FormLabel>
                       <FormControl>
                         <Input {...field} value={field.value ?? ""} />
                       </FormControl>
                       <FormDescription>
-                        The endpoint for your S3-compatible storage.
+                        {t("mediaStorageEndpointHelp")}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -193,7 +202,7 @@ export function ExternalMediaStorageForm({
                   name="forcePathStyle"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Force Path Style</FormLabel>
+                      <FormLabel>{t("mediaStorageForcePathStyle")}</FormLabel>
                       <FormControl>
                         <Switch
                           checked={field.value}
@@ -201,8 +210,7 @@ export function ExternalMediaStorageForm({
                         />
                       </FormControl>
                       <FormDescription>
-                        Enable for MinIO and providers requiring path-style
-                        URLs.
+                        {t("mediaStorageForcePathStyleHelp")}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -216,12 +224,12 @@ export function ExternalMediaStorageForm({
               name="region"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Region</FormLabel>
+                  <FormLabel>{t("mediaStorageRegion")}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
                   <FormDescription>
-                    AWS or S3-compatible storage region.
+                    {t("mediaStorageRegionHelp")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -234,7 +242,7 @@ export function ExternalMediaStorageForm({
                 name="roleArn"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Role ARN</FormLabel>
+                    <FormLabel>{t("mediaStorageRoleArn")}</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -243,7 +251,7 @@ export function ExternalMediaStorageForm({
                       />
                     </FormControl>
                     <FormDescription>
-                      The role in your AWS account that can read media objects.
+                      {t("mediaStorageRoleArnHelp")}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -260,7 +268,7 @@ export function ExternalMediaStorageForm({
                     bucketName={bucketName.trim()}
                     prefix={prefix?.trim()}
                     actions={STORAGE_ROLE_READ_ACTIONS}
-                    description="Let the Langfuse cross-account role assume your role with this external ID, then grant the role read access to the bucket. If the bucket uses SSE-KMS, also allow the role to use kms:Decrypt on the key."
+                    description={t("mediaStorageRoleDescription")}
                   />
                 </RoleAuthSetupSection>
               </div>
@@ -272,12 +280,12 @@ export function ExternalMediaStorageForm({
                   name="accessKeyId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Access Key ID</FormLabel>
+                      <FormLabel>{t("mediaStorageAccessKeyId")}</FormLabel>
                       <FormControl>
                         <Input {...field} value={field.value ?? ""} />
                       </FormControl>
                       <FormDescription>
-                        Access key used to read media objects.
+                        {t("mediaStorageAccessKeyIdHelp")}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -289,7 +297,7 @@ export function ExternalMediaStorageForm({
                   name="secretAccessKey"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Secret Access Key</FormLabel>
+                      <FormLabel>{t("mediaStorageSecretAccessKey")}</FormLabel>
                       <FormControl>
                         <PasswordInput
                           {...field}
@@ -300,9 +308,7 @@ export function ExternalMediaStorageForm({
                         />
                       </FormControl>
                       <FormDescription>
-                        Leave empty to keep the saved secret, unless you change
-                        the storage provider, bucket, endpoint, or Access Key
-                        ID.
+                        {t("mediaStorageSecretAccessKeyHelp")}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -317,15 +323,16 @@ export function ExternalMediaStorageForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Media Prefix{" "}
-                    <span className="text-muted-foreground">(optional)</span>
+                    {t("mediaStoragePrefix")}{" "}
+                    <span className="text-muted-foreground">
+                      {t("mediaStorageOptional")}
+                    </span>
                   </FormLabel>
                   <FormControl>
                     <Input {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormDescription>
-                    Restrict media access to this path, for example
-                    &quot;langfuse-media/&quot;.
+                    {t("mediaStoragePrefixHelp")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

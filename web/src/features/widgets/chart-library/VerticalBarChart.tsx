@@ -7,6 +7,7 @@ import {
   formatMetric,
   toFullMetricString,
 } from "@/src/features/widgets/chart-library/utils";
+import { useInterfaceLocale } from "@/src/features/i18n/I18nProvider";
 
 export function VerticalBarChart({
   data,
@@ -17,6 +18,7 @@ export function VerticalBarChart({
   legendPosition,
   zeroBaseline = false,
 }: ChartProps) {
+  const locale = useInterfaceLocale();
   const categoryBars = useMemo(
     () => (colorBarsByCategory ? prepareCategoryBars(data) : null),
     [colorBarsByCategory, data],
@@ -31,7 +33,7 @@ export function VerticalBarChart({
     [categoryBars, data],
   );
   const formatValue = (value: number) =>
-    toFullMetricString(metricFormatter(value, { style: "compact" }));
+    toFullMetricString(metricFormatter(value, { style: "compact", locale }));
 
   return (
     <DesignSystemBarChart

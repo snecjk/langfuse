@@ -1,6 +1,8 @@
 import { Button } from "@/src/components/design-system/Button/Button";
 import { cn } from "@/src/utils/tailwind";
 import { type AutomaticProcessingState } from "./prepare-topics-actions";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 
 type AnalyzeControlProps = {
   state: AutomaticProcessingState;
@@ -17,11 +19,12 @@ export function AnalyzeControl({
   onClick,
   state,
 }: AnalyzeControlProps) {
+  const t = useTranslation(topicsMessages);
   if (state.status === "off" || state.status === "unconfigured") {
     return (
       <span title={disabledReason} className="inline-flex">
         <Button
-          text="Analyze"
+          text={t("analyze")}
           size="sm"
           disabled={Boolean(disabledReason)}
           onClick={onClick}
@@ -44,7 +47,7 @@ export function AnalyzeControl({
         aria-hidden
         className={cn("inline-flex size-2 rounded-full", DOT[state.status])}
       />
-      {state.status === "on" ? "Auto-analyze: On" : "Auto-analyze: Paused"}
+      {state.status === "on" ? t("autoAnalyzeOn") : t("autoAnalyzePaused")}
     </button>
   );
 }

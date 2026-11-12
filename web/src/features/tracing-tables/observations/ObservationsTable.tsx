@@ -1,5 +1,8 @@
 /* eslint-disable no-nested-ternary, react/no-unstable-nested-components, @typescript-eslint/no-use-before-define */
-import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
 import { tracingMessages } from "@/src/features/i18n/messages/tracing";
 import { api } from "@/src/utils/api";
 import { DataTable } from "@/src/components/table/data-table";
@@ -214,6 +217,7 @@ export default function ObservationsTable({
   showControlsInPageHeader = false,
 }: ObservationsTableProps) {
   const t = useTranslation(tracingMessages);
+  const locale = useInterfaceLocale();
   const capture = usePostHogClientCapture();
   const peekContext = usePeekTableState();
 
@@ -914,7 +918,7 @@ export default function ObservationsTable({
             pricingTierName={row.original.usagePricingTierName ?? undefined}
           >
             <div className="flex items-center gap-1">
-              <span>{usdFormatter(value)}</span>
+              <span>{usdFormatter(value, 2, 2, locale)}</span>
               <InfoIcon size="sm" />
             </div>
           </BreakdownTooltip>
@@ -930,7 +934,7 @@ export default function ObservationsTable({
       enableHiding: true,
       enableSorting,
       defaultHidden: true,
-      formatter: (value) => numberFormatter(value, 0, 0),
+      formatter: (value) => numberFormatter(value, 0, 0, locale),
     }),
     createNumberTableColumn<ObservationsTableRow>({
       accessorKey: "toolCalls",
@@ -939,7 +943,7 @@ export default function ObservationsTable({
       enableHiding: true,
       enableSorting,
       defaultHidden: true,
-      formatter: (value) => numberFormatter(value, 0, 0),
+      formatter: (value) => numberFormatter(value, 0, 0, locale),
     }),
     {
       accessorKey: "timeToFirstToken",
@@ -1152,7 +1156,7 @@ export default function ObservationsTable({
           },
           header: t("tokensPerSecond"),
           size: 200,
-          formatter: (value) => numberFormatter(value, 0, 1),
+          formatter: (value) => numberFormatter(value, 0, 1, locale),
           defaultHidden: true,
           enableHiding: true,
           enableSorting,
@@ -1165,7 +1169,7 @@ export default function ObservationsTable({
           enableHiding: true,
           defaultHidden: true,
           enableSorting,
-          formatter: (value) => numberFormatter(value, 0),
+          formatter: (value) => numberFormatter(value, 0, undefined, locale),
         }),
         createNumberTableColumn<ObservationsTableRow>({
           accessorFn: (row) => row.usage.outputUsage,
@@ -1175,7 +1179,7 @@ export default function ObservationsTable({
           enableHiding: true,
           defaultHidden: true,
           enableSorting,
-          formatter: (value) => numberFormatter(value, 0),
+          formatter: (value) => numberFormatter(value, 0, undefined, locale),
         }),
         createNumberTableColumn<ObservationsTableRow>({
           accessorFn: (row) => row.usage.totalUsage,
@@ -1185,7 +1189,7 @@ export default function ObservationsTable({
           enableHiding: true,
           defaultHidden: true,
           enableSorting,
-          formatter: (value) => numberFormatter(value, 0),
+          formatter: (value) => numberFormatter(value, 0, undefined, locale),
         }),
       ] satisfies LangfuseColumnDef<ObservationsTableRow>[],
     },

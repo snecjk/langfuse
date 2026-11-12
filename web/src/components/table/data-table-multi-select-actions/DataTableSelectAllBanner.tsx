@@ -1,5 +1,8 @@
 /* eslint-disable @repo/no-margin-on-root-elements */
-import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
 import { tableMessages } from "@/src/features/i18n/messages/table";
 import { type MultiSelect } from "@/src/components/table/data-table-toolbar";
 import { Button } from "@/src/components/ui/button";
@@ -14,6 +17,7 @@ export function DataTableSelectAllBanner({
   approximateCount,
 }: MultiSelect) {
   const t = useTranslation(tableMessages);
+  const locale = useInterfaceLocale();
   const totalPages = totalCount ? Math.ceil(totalCount / pageSize) : null;
   // Hide the precise number when the row count is not the affected-entity count.
   const exactCount = approximateCount ? null : totalCount;
@@ -26,7 +30,7 @@ export function DataTableSelectAllBanner({
           <span className="font-bold">
             {exactCount === null
               ? t("matching")
-              : numberFormatter(exactCount, 0)}
+              : numberFormatter(exactCount, 0, undefined, locale)}
           </span>{" "}
           {t("itemsSelected")}{" "}
           <Button
@@ -43,7 +47,9 @@ export function DataTableSelectAllBanner({
       ) : (
         <span className="text-sm">
           {t("allOnPage")}{" "}
-          <span className="font-bold">{numberFormatter(pageSize, 0)}</span>{" "}
+          <span className="font-bold">
+            {numberFormatter(pageSize, 0, undefined, locale)}
+          </span>{" "}
           {t("pageItemsSelected")}{" "}
           <Button
             variant="ghost"
@@ -55,8 +61,8 @@ export function DataTableSelectAllBanner({
             {exactCount === null || totalPages === null
               ? t("selectAllMatching")
               : t("selectAllPages", {
-                  count: numberFormatter(exactCount, 0),
-                  pages: numberFormatter(totalPages, 0),
+                  count: numberFormatter(exactCount, 0, undefined, locale),
+                  pages: numberFormatter(totalPages, 0, undefined, locale),
                 })}
           </Button>
         </span>

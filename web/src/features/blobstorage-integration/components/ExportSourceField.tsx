@@ -27,6 +27,8 @@ import {
   shouldHideExportSourceSelector,
 } from "@/src/features/analytics-integrations/exportSource";
 import { type BlobStorageFormControl } from "@/src/features/blobstorage-integration/components/formValues";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 
 // Export source selector plus the blocked-save alert for a persisted source
 // that is no longer selectable on this deployment.
@@ -39,6 +41,7 @@ export const ExportSourceField = ({
   persistedExportSource: AnalyticsIntegrationExportSource | null | undefined;
   exportSourceCtx: ExportSourceContext;
 }) => {
+  const t = useTranslation(integrationMessages);
   const watchedExportSource = useWatch({ control, name: "exportSource" });
   const exportSourceOptions = getExportSourceOptions(
     persistedExportSource,
@@ -63,7 +66,7 @@ export const ExportSourceField = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel className="flex items-center gap-1.5 pt-2">
-                Export Source
+                {t("exportSource")}
                 <Tooltip>
                   <TooltipTrigger>
                     <Info size="base" color="muted" />
@@ -87,7 +90,7 @@ export const ExportSourceField = ({
                         rel="noopener noreferrer"
                         className="text-muted-foreground hover:text-primary inline-flex items-center gap-1 text-xs hover:underline"
                       >
-                        For further information see
+                        {t("learnMoreProviders")}
                         <ExternalLink size="sm" />
                       </a>
                     </div>
@@ -99,14 +102,16 @@ export const ExportSourceField = ({
                   onValueChange={field.onChange}
                   value={field.value}
                   disabled={exportSourceLocked}
-                  placeholder="Select data to export"
+                  placeholder={t("selectDataToExport")}
                   options={exportSourceOptions.map((option) => {
                     if (option.unavailable) {
                       return {
                         value: option.value,
-                        label: `${option.label} (not available on this deployment)`,
+                        label: t("exportSourceUnavailableLabel", {
+                          label: option.label,
+                        }),
                         disabled: true as const,
-                        disabledReason: "Not available on this deployment.",
+                        disabledReason: t("exportSourceUnavailableReason"),
                       };
                     }
 
@@ -114,10 +119,7 @@ export const ExportSourceField = ({
                   })}
                 />
               </FormControl>
-              <FormDescription>
-                Choose which data sources to export to blob storage. Scores are
-                always included.
-              </FormDescription>
+              <FormDescription>{t("exportSourceHelp")}</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -126,10 +128,10 @@ export const ExportSourceField = ({
 
       {!watchedValidation.ok && (
         <Alert variant="destructive">
-          <Alert.Title>Saved export source is no longer available</Alert.Title>
+          <Alert.Title>{t("exportSourceUnavailableTitle")}</Alert.Title>
           <Alert.Description>
             {/* Reason-specific body; texts live in the shared lookup. */}
-            {getExportSourceUnavailableMessage(watchedValidation.reason)}
+            {getExportSourceUnavailableMessage(watchedValidation.reason, t)}
           </Alert.Description>
         </Alert>
       )}

@@ -26,6 +26,12 @@ type PasswordInputProps = Pick<
   allowPasswordManager?: boolean;
   error?: boolean;
   ref?: Ref<HTMLInputElement>;
+  /**
+   * Accessible name for the show-password toggle. The design system stays
+   * context-free: application callers pass the localized label.
+   */
+  showPasswordLabel?: string;
+  hidePasswordLabel?: string;
 };
 
 export function PasswordInput({
@@ -33,6 +39,8 @@ export function PasswordInput({
   ref,
   disabled,
   error,
+  showPasswordLabel = "Show password",
+  hidePasswordLabel = "Hide password",
   ...props
 }: PasswordInputProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -43,7 +51,7 @@ export function PasswordInput({
       contentLayout="text"
       error={error}
       trailingAction={{
-        label: isPasswordVisible ? "Hide password" : "Show password",
+        label: isPasswordVisible ? hidePasswordLabel : showPasswordLabel,
         icon: VisibilityIcon,
         disabled,
         pressed: isPasswordVisible,

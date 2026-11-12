@@ -5,6 +5,8 @@ import { DialogController } from "@/src/components/design-system/DialogControlle
 import { SelectInput } from "@/src/components/design-system/SelectInput/SelectInput";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
 import { compareSkillFiles } from "@/src/features/skills/utils/compareSkillFiles";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 import { SkillDraftChanges } from "./SkillDraftChanges";
 import { type SkillEditorStore } from "./skillEditorStore";
 import { SkillFileChanges } from "./SkillFileChanges";
@@ -71,6 +73,7 @@ function SkillVersionComparison({
 }: ComparisonProps & {
   initialVersions: { before: number; after: number | "draft" };
 }) {
+  const t = useTranslation(skillMessages);
   const [before, setBefore] = useState(initialVersions.before);
   const [after, setAfter] = useState(initialVersions.after);
   const options = [
@@ -82,7 +85,7 @@ function SkillVersionComparison({
     .sort((a, b) => b - a)
     .map((version) => ({
       value: String(version),
-      label: `Version ${version}`,
+      label: t("versionLabel", { version }),
     }));
 
   function handleBeforeChange(value: string) {
@@ -107,7 +110,7 @@ function SkillVersionComparison({
     if (before === after) {
       return (
         <p role="status" className="text-muted-foreground text-sm">
-          Select two different versions to compare.
+          {t("selectTwoDifferentVersions")}
         </p>
       );
     }
@@ -123,33 +126,33 @@ function SkillVersionComparison({
   }
 
   return (
-    <Dialog title="Compare skill versions" size="xxl">
+    <Dialog title={t("compareSkillVersions")} size="xxl">
       <div className="ph-no-capture flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4">
         <p className="text-muted-foreground text-sm">
-          Compare saved versions or your unsaved local draft.
+          {t("compareSavedVersionsOrDraft")}
         </p>
         <div className="grid shrink-0 grid-cols-2 gap-4">
           <div className="flex min-w-0 flex-col gap-1">
-            <span className="text-sm font-bold">From</span>
+            <span className="text-sm font-bold">{t("from")}</span>
             <SelectInput
-              aria-label="From version"
+              aria-label={t("fromVersion")}
               value={String(before)}
               options={options}
-              placeholder="Select version"
+              placeholder={t("selectVersion")}
               onValueChange={handleBeforeChange}
             />
           </div>
           <div className="flex min-w-0 flex-col gap-1">
-            <span className="text-sm font-bold">To</span>
+            <span className="text-sm font-bold">{t("to")}</span>
             <SelectInput
-              aria-label="To version"
+              aria-label={t("toVersion")}
               value={String(after)}
               options={
                 props.draftStore
-                  ? [{ value: "draft", label: "Local draft" }, ...options]
+                  ? [{ value: "draft", label: t("localDraft") }, ...options]
                   : options
               }
-              placeholder="Select version"
+              placeholder={t("selectVersion")}
               onValueChange={handleAfterChange}
             />
           </div>
@@ -157,12 +160,10 @@ function SkillVersionComparison({
         {props.hasMore ? (
           <div className="flex flex-col items-start gap-2">
             {props.loadMoreError ? (
-              <p role="alert">
-                Could not load older versions. Please try again.
-              </p>
+              <p role="alert">{t("couldNotLoadOlderVersions")}</p>
             ) : null}
             <Button
-              text="Load older versions"
+              text={t("loadOlderVersions")}
               variant="secondary"
               size="sm"
               loading={props.isLoadingMore}
@@ -187,6 +188,7 @@ function SkillVersionFiles({
   before: number;
   after: number;
 }) {
+  const t = useTranslation(skillMessages);
   const [selectedPath, setSelectedPath] = useState<string>();
   const oldVersion = api.skills.byName.useQuery(
     { projectId, name, version: before },
@@ -207,7 +209,7 @@ function SkillVersionFiles({
   if (!oldVersion.data || !newVersion.data) {
     return (
       <p role="status" className="text-muted-foreground text-sm">
-        Loading versions…
+        {t("loadingVersions")}
       </p>
     );
   }
@@ -217,7 +219,7 @@ function SkillVersionFiles({
   return (
     <SkillFileChanges
       files={files}
-      emptyMessage="No file changes between these versions."
+      emptyMessage={t("noFileChangesBetweenVersions")}
       selectedFile={selectedFile}
       onSelectFile={setSelectedPath}
     >
@@ -234,8 +236,8 @@ function SkillVersionFiles({
               ? { sha256Hash: selectedFile.newFile.sha256Hash }
               : null
           }
-          oldLabel={`Version ${before}`}
-          newLabel={`Version ${after}`}
+          oldLabel={t("versionLabel", { version: before })}
+          newLabel={t("versionLabel", { version: after })}
         />
       ) : null}
     </SkillFileChanges>

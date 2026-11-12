@@ -9,6 +9,8 @@ import { featurePreviewLabels } from "@/src/features/feature-flags/available-fla
 import { useInternalFeaturesEnabled } from "@/src/features/feature-flags/hooks/useInternalFeaturesEnabled";
 import { api } from "@/src/utils/api";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 import {
   FeaturePreviewModal,
@@ -29,6 +31,7 @@ export function ControlledFeaturePreviewModal({
   const internalViewEnabled = useInternalFeaturesEnabled();
   const { isV4 } = useReadPath();
   const capture = usePostHogClientCapture();
+  const t = useTranslation(enterpriseMessages);
   const setFeaturePreviewEnabled =
     api.userAccount.setFeaturePreviewEnabled.useMutation({
       onSuccess: async (_data, variables) => {
@@ -39,13 +42,18 @@ export function ControlledFeaturePreviewModal({
         });
         showSuccessToast({
           operation: "user_feature_preview.update",
-          title: "Feature preview updated",
-          description: `${featurePreviewLabels[variables.flag]} preview has been ${variables.enabled ? "enabled" : "disabled"}.`,
+          title: t("featurePreviewUpdated"),
+          description: t("featurePreviewUpdatedDescription", {
+            name: featurePreviewLabels[variables.flag],
+            state: variables.enabled
+              ? t("featurePreviewStateEnabled")
+              : t("featurePreviewStateDisabled"),
+          }),
         });
       },
       onError: (error) => {
         showErrorToast(
-          "Failed to update feature preview",
+          t("featurePreviewUpdateFailed"),
           error.message,
           classifyTrpcToastError(error, "user_feature_preview.update"),
         );
@@ -75,7 +83,7 @@ export function ControlledFeaturePreviewModal({
                 true,
             disabled: !isV4,
             warningReason: !isV4
-              ? `Unified Trace and Session View requires ${V4_PREVIEW_LABEL}.`
+              ? t("featurePreviewUnavailableV4", { label: V4_PREVIEW_LABEL })
               : undefined,
             onToggle: onToggle("unifiedTraceSessionView"),
             isToggling: setFeaturePreviewEnabled.isPending,
@@ -88,7 +96,7 @@ export function ControlledFeaturePreviewModal({
             enabled: isTopicsEnabled,
             disabled: internalViewEnabled,
             warningReason: internalViewEnabled
-              ? "Topics is enabled by Internal view. Switching to External view hides it unless it has been enabled for you separately."
+              ? t("featurePreviewTopicsInternal")
               : undefined,
             onToggle: onToggle("langfuseTopics"),
             isToggling: setFeaturePreviewEnabled.isPending,
@@ -101,9 +109,9 @@ export function ControlledFeaturePreviewModal({
         !isV4 ||
         authSession.data?.environment.enableExperimentalFeatures === true,
       warningReason: !isV4
-        ? `Redesigned Session View is only available on the events-backed session view. Turn on ${V4_PREVIEW_LABEL} to enable it.`
+        ? t("featurePreviewSessionV4", { label: V4_PREVIEW_LABEL })
         : authSession.data?.environment.enableExperimentalFeatures === true
-          ? "This preview is enabled by LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES, so a per-user opt-out does not disable it."
+          ? t("featurePreviewExperimentalEnv")
           : undefined,
       onToggle: onToggle("sessionViewV2"),
       isToggling: setFeaturePreviewEnabled.isPending,
@@ -117,11 +125,11 @@ export function ControlledFeaturePreviewModal({
         !isModernSessionEnabled ||
         authSession.data?.environment.enableExperimentalFeatures === true,
       warningReason: !isV4
-        ? `Redesigned Session View is only available on the events-backed session view. Turn on ${V4_PREVIEW_LABEL} to enable it.`
+        ? t("featurePreviewSessionV4", { label: V4_PREVIEW_LABEL })
         : !isModernSessionEnabled
-          ? "Enable Redesigned Session View before enabling the Session Timeline."
+          ? t("featurePreviewSessionRequires")
           : authSession.data?.environment.enableExperimentalFeatures === true
-            ? "This preview is enabled by LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES, so a per-user opt-out does not disable it."
+            ? t("featurePreviewExperimentalEnv")
             : undefined,
       onToggle: onToggle("sessionViewV2Timeline"),
       isToggling: setFeaturePreviewEnabled.isPending,

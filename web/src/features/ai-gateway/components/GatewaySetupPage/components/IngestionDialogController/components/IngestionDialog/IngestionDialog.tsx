@@ -12,6 +12,8 @@ import type {
   GatewayIngestionSettings,
   GatewayProject,
 } from "@/src/features/ai-gateway/components/GatewaySetupPage/types/gatewaySetup";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 
 export type IngestionDialogProps = {
   config: GatewayConfig | null;
@@ -29,6 +31,7 @@ export function IngestionDialog({
   onSave,
   onSaved,
 }: IngestionDialogProps) {
+  const t = useTranslation(gatewayMessages);
   const [settings, setSettings] = useState(() =>
     getInitialIngestionSettings({ config, projects }),
   );
@@ -39,11 +42,11 @@ export function IngestionDialog({
 
   return (
     <Dialog
-      title="Gateway ingestion"
+      title={t("gatewayIngestion")}
       size="md"
       actions={[
         {
-          label: "Save",
+          label: t("save"),
           onClick: handleSave,
           loading: isSaving,
           disabled: !isIngestionSettingsValid(settings),
@@ -52,10 +55,10 @@ export function IngestionDialog({
     >
       <Dialog.Body>
         <p className="text-muted-foreground">
-          Choose what Langfuse records for requests sent through the gateway.{" "}
+          {t("ingestionDialogDescription")}{" "}
           <Button
             variant="text"
-            text="How ingestion modes work"
+            text={t("ingestionDocsLink")}
             href={GATEWAY_SETUP.docsUrl}
           />
         </p>

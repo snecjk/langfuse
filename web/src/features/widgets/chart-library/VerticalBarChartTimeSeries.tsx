@@ -9,6 +9,7 @@ import {
   groupDataByTimeDimension,
   toFullMetricString,
 } from "@/src/features/widgets/chart-library/utils";
+import { useInterfaceLocale } from "@/src/features/i18n/I18nProvider";
 import {
   parseChartTimestamp,
   prepareTimeAxis,
@@ -31,6 +32,7 @@ export function VerticalBarChartTimeSeries({
   sync,
   hideXAxisLabels = false,
 }: ChartProps) {
+  const locale = useInterfaceLocale();
   const groupedData = useMemo(() => groupDataByTimeDimension(data), [data]);
   const dimensions = useMemo(() => getUniqueDimensions(data), [data]);
   const visibleSeries = useMemo(
@@ -50,8 +52,8 @@ export function VerticalBarChartTimeSeries({
   );
   const formatValue = useMemo(
     () => (value: number) =>
-      toFullMetricString(metricFormatter(value, { style: "compact" })),
-    [metricFormatter],
+      toFullMetricString(metricFormatter(value, { style: "compact", locale })),
+    [metricFormatter, locale],
   );
   const chartData = useMemo(
     () =>

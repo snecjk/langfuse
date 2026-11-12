@@ -3,6 +3,8 @@ import { Button } from "@/src/components/ui/button";
 import { Plus } from "@langfuse/icons";
 import { ConnectedSpendAlertsTable } from "./ConnectedSpendAlertsTable";
 import { ConnectedSpendAlertDialogController } from "./ConnectedSpendAlertDialogController";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 interface SpendAlertsSectionProps {
   orgId: string;
@@ -10,6 +12,7 @@ interface SpendAlertsSectionProps {
 
 export function SpendAlertsSection({ orgId }: SpendAlertsSectionProps) {
   const [refetchTrigger, setRefetchTrigger] = useState(0);
+  const t = useTranslation(enterpriseMessages);
 
   return (
     <ConnectedSpendAlertDialogController
@@ -20,18 +23,16 @@ export function SpendAlertsSection({ orgId }: SpendAlertsSectionProps) {
         <div className="space-y-2">
           <div className="flex items-center justify-between pt-4">
             <div>
-              <h3 className="font-bold">Spend Alerts</h3>
+              <h3 className="font-bold">{t("spendAlertsTitle")}</h3>
               <p className="text-muted-foreground max-w-prose text-sm">
-                Get notified when your organization&apos;s spending exceeds
-                configured thresholds. Alerts may be delayed by up to 90
-                minutes.
+                {t("spendAlertsDescription")}
               </p>
               <p className="text-muted-foreground max-w-prose text-sm"></p>
             </div>
 
             <Button onClick={() => openDialog({ mode: "create" })}>
               <Plus size="base" __rawClassName="mr-2" />
-              Create Alert
+              {t("spendAlertsCreate")}
             </Button>
           </div>
 

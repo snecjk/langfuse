@@ -6,6 +6,8 @@ import { GatewayNoProvidersReadOnlyEmptyState } from "@/src/features/ai-gateway/
 import { buildGatewayModelsUrl } from "@/src/features/ai-gateway/fns/gatewayUrls/buildGatewayModelsUrl";
 import { useGatewayModelCatalog } from "@/src/features/ai-gateway/hooks/useGatewayModelCatalog";
 import { useGatewayModelConnections } from "@/src/features/ai-gateway/hooks/useGatewayModelConnections";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 import { GatewayProviderCard } from "./components/GatewayProviderCard/GatewayProviderCard";
 import { GatewayProviderCardGrid } from "./components/GatewayProviderCardGrid";
 import { ProvidersTabSkeleton } from "./components/ProvidersTabSkeleton";
@@ -18,6 +20,7 @@ export type ReadOnlyProvidersTabProps = {
 export function ReadOnlyProvidersTab({
   organizationId,
 }: ReadOnlyProvidersTabProps) {
+  const t = useTranslation(gatewayMessages);
   const { connections, isError, refetch } =
     useGatewayModelConnections(organizationId);
   const catalog = useGatewayModelCatalog(organizationId, {
@@ -34,10 +37,10 @@ export function ReadOnlyProvidersTab({
   return (
     <div className="flex flex-col gap-4">
       <p className="text-muted-foreground text-sm">
-        The providers your organization routes gateway requests through.{" "}
+        {t("providersPageDescription")}{" "}
         <TextButton
           variant="text"
-          text="About gateway models"
+          text={t("aboutGatewayModels")}
           href={GATEWAY_MODELS_DOCS_URL}
         />
       </p>

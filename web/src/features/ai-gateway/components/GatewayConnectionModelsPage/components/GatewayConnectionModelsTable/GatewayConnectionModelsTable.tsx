@@ -18,6 +18,8 @@ import type { GatewayProvider } from "@/src/features/ai-gateway/types/gatewayPro
 import { CopyModelIdButton } from "@/src/features/ai-gateway/components/GatewayConnectionModelsPage/components/CopyModelIdButton/CopyModelIdButton";
 import { isGatewayModelEnabled } from "@/src/features/ai-gateway/components/GatewayConnectionModelsPage/fns/isGatewayModelEnabled";
 import type { GatewayModelAccessStore } from "@/src/features/ai-gateway/components/GatewayConnectionModelsPage/types/gatewayModelAccessStore";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 import {
   GatewayConnectionModelsSelectionBar,
   type GatewayConnectionModelsSelectionBarProps,
@@ -46,6 +48,7 @@ function GatewayConnectionModelNameCell({
   isSaving: boolean;
   onRemove: (model: string) => void;
 }) {
+  const t = useTranslation(gatewayMessages);
   function handleRemove() {
     onRemove(modelId);
   }
@@ -58,10 +61,10 @@ function GatewayConnectionModelNameCell({
       <CopyModelIdButton connectionName={connectionName} modelId={modelId} />
       {custom ? (
         <>
-          <Badge text="Custom" color="blue" size="sm" />
+          <Badge text={t("customBadge")} color="blue" size="sm" />
           <IconButton
             icon={Trash2}
-            label={`Remove ${modelId}`}
+            label={t("removeModel", { model: modelId })}
             size="xs"
             disabled={isSaving}
             onClick={handleRemove}
@@ -97,6 +100,7 @@ function createGatewayConnectionModelsColumns({
   selectActionColumn,
   toggleModel,
   removeCustomModel,
+  t,
 }: {
   connectionName: string;
   isSaving: boolean;
@@ -104,6 +108,10 @@ function createGatewayConnectionModelsColumns({
   selectActionColumn: LangfuseColumnDef<GatewayConnectionModelRow>;
   toggleModel: (model: string, enabled: boolean) => void;
   removeCustomModel: (model: string) => void;
+  t: (
+    key: "modelColumn" | "routesColumn" | "enabledColumn",
+    params?: Record<string, string>,
+  ) => string;
 }): LangfuseColumnDef<GatewayConnectionModelRow>[] {
   return [
     {
@@ -116,7 +124,7 @@ function createGatewayConnectionModelsColumns({
     {
       accessorKey: "id",
       id: "name",
-      header: "Model",
+      header: t("modelColumn"),
       size: 360,
       minSize: 180,
       enableSorting: true,
@@ -141,7 +149,7 @@ function createGatewayConnectionModelsColumns({
     {
       accessorKey: "id",
       id: "status",
-      header: "Enabled",
+      header: t("enabledColumn"),
       enableSorting: true,
       size: 90,
       minSize: 90,
@@ -192,6 +200,7 @@ export const GatewayConnectionModelsTable = memo(
     onRemoveCustomModel,
     onSetModelsEnabled,
   }: GatewayConnectionModelsTableProps) {
+    const t = useTranslation(gatewayMessages);
     const [search, setSearch] = useState("");
     const [pagination, setPagination] = useState<PaginationState>({
       pageIndex: 0,
@@ -219,6 +228,7 @@ export const GatewayConnectionModelsTable = memo(
           selectActionColumn,
           toggleModel: onToggleModel,
           removeCustomModel: onRemoveCustomModel,
+          t,
         }),
       [
         connectionName,
@@ -227,6 +237,7 @@ export const GatewayConnectionModelsTable = memo(
         selectActionColumn,
         onToggleModel,
         onRemoveCustomModel,
+        t,
       ],
     );
     // Only subscribe to toggles while sorting by status, where they move rows.
@@ -322,7 +333,7 @@ export const GatewayConnectionModelsTable = memo(
               customRowHeights={ROW_HEIGHTS}
               orderBy={orderBy}
               setOrderBy={handleOrderByChange}
-              noResultsMessage="No models match the current search."
+              noResultsMessage={t("noModelsMatch")}
             />
           </div>
         </div>

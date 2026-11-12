@@ -27,9 +27,11 @@ import { useHasOrganizationAccess } from "@/src/features/rbac/utils/checkOrganiz
 import { api } from "@/src/utils/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle } from "@langfuse/icons";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useMemo, useState } from "react";
+import { useForm, type Resolver } from "react-hook-form";
 import { z } from "zod";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 const addDomainSchema = z.object({
   domain: z
@@ -38,12 +40,10 @@ const addDomainSchema = z.object({
     .min(3)
     .max(253)
     .transform((v) => v.toLowerCase())
-    .refine(
-      (v) =>
-        /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/.test(
-          v,
-        ),
-      { message: "Must be a valid domain (e.g. acme.com)" },
+    .refine((v) =>
+      /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/.test(
+        v,
+      ),
     ),
 });
 
@@ -55,13 +55,21 @@ export const VerifiedDomainsSettings = ({ orgId }: { orgId: string }) => {
     organizationId: orgId,
     scope: "organization:update",
   });
+  const t = useTranslation(enterpriseMessages);
+
+  const domainSchema = useMemo(
+    () =>
+      addDomainSchema.refine((value) => Boolean(value.domain), {
+        message: t("verifiedDomainRequired"),
+      }),
+    [t],
+  );
 
   const heading = (
     <>
-      <Header title="Verified Domains" />
+      <Header title={t("verifiedDomainsTitle")} />
       <p className="text-muted-foreground mb-4 text-sm">
-        You can only configure SSO for domains your organization owns. Verify a
-        domain via DNS to enable SSO for it.
+        {t("verifiedDomainsDescription")}
       </p>
     </>
   );
@@ -71,11 +79,8 @@ export const VerifiedDomainsSettings = ({ orgId }: { orgId: string }) => {
       <div>
         {heading}
         <Alert icon={AlertCircle}>
-          <Alert.Title>Not available</Alert.Title>
-          <Alert.Description>
-            Verified Domains and Enterprise SSO are not available on your plan.
-            Please upgrade to access this feature.
-          </Alert.Description>
+          <Alert.Title>{t("notAvailable")}</Alert.Title>
+          <Alert.Description>{t("notAvailableDomainsPlan")}</Alert.Description>
         </Alert>
       </div>
     );
@@ -86,11 +91,8 @@ export const VerifiedDomainsSettings = ({ orgId }: { orgId: string }) => {
       <div>
         {heading}
         <Alert>
-          <Alert.Title>Access Denied</Alert.Title>
-          <Alert.Description>
-            You do not have permission to manage verified domains for this
-            organization.
-          </Alert.Description>
+          <Alert.Title>{t("accessDenied")}</Alert.Title>
+          <Alert.Description>{t("noPermissionDomains")}</Alert.Description>
         </Alert>
       </div>
     );
@@ -99,24 +101,32 @@ export const VerifiedDomainsSettings = ({ orgId }: { orgId: string }) => {
   return (
     <div className="space-y-6">
       <Header
-        title="Verified Domains"
-        actionButtons={<AddDomainButton orgId={orgId} />}
+        title={t("verifiedDomainsTitle")}
+        actionButtons={
+          <AddDomainButton orgId={orgId} domainSchema={domainSchema} />
+        }
       />
       <p className="text-muted-foreground text-sm">
-        You can only configure SSO for domains your organization owns. Verify a
-        domain via DNS to enable SSO for it.
+        {t("verifiedDomainsDescription")}
       </p>
       <ConnectedVerifiedDomainsSettingsTable orgId={orgId} />
     </div>
   );
 };
 
-function AddDomainButton({ orgId }: { orgId: string }) {
+function AddDomainButton({
+  orgId,
+  domainSchema,
+}: {
+  orgId: string;
+  domainSchema: typeof addDomainSchema;
+}) {
   const [open, setOpen] = useState(false);
   const utils = api.useUtils();
+  const t = useTranslation(enterpriseMessages);
 
   const form = useForm<AddDomainInput>({
-    resolver: zodResolver(addDomainSchema),
+    resolver: zodResolver(domainSchema) as Resolver<AddDomainInput>,
     defaultValues: { domain: "" },
   });
 
@@ -125,9 +135,8 @@ function AddDomainButton({ orgId }: { orgId: string }) {
       utils.verifiedDomain.list.invalidate({ orgId });
       showSuccessToast({
         operation: "verified_domain.add",
-        title: "Domain added",
-        description:
-          "Click Verify to view the DNS TXT record, then confirm after adding it.",
+        title: t("verifiedDomainAdded"),
+        description: t("verifiedDomainAddedDescription"),
       });
       form.reset();
       setOpen(false);
@@ -144,11 +153,11 @@ function AddDomainButton({ orgId }: { orgId: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">Add Domain</Button>
+        <Button size="sm">{t("verifiedDomainAddButton")}</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add a domain</DialogTitle>
+          <DialogTitle>{t("verifiedDomainAddTitle")}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -158,9 +167,13 @@ function AddDomainButton({ orgId }: { orgId: string }) {
                 name="domain"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Domain</FormLabel>
+                    <FormLabel>{t("verifiedDomainLabel")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="acme.com" autoFocus {...field} />
+                      <Input
+                        placeholder={t("verifiedDomainPlaceholder")}
+                        autoFocus
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -173,10 +186,10 @@ function AddDomainButton({ orgId }: { orgId: string }) {
                 variant="ghost"
                 onClick={() => setOpen(false)}
               >
-                Cancel
+                {t("retryMigrationCancel")}
               </Button>
               <Button type="submit" loading={createMutation.isPending}>
-                Add
+                {t("verifiedDomainAddButton")}
               </Button>
             </DialogFooter>
           </form>

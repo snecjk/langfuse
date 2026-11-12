@@ -12,6 +12,8 @@ import { DownloadIcon } from "@langfuse/icons";
 import { CustomTooltip } from "@/src/components/design-system/CustomTooltip/CustomTooltip";
 import { useMemo } from "react";
 import { createUserTableColumn } from "@/src/components/design-system/table/columns/createUserTableColumn";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { batchMessages } from "@/src/features/i18n/messages/batch";
 
 export type BatchExportRow =
   RouterOutputs["batchExport"]["all"]["exports"][number];
@@ -31,25 +33,28 @@ export function BatchExportsTable({
   onDownload: (id: string) => void;
   onCancel: (id: string) => void;
 }) {
+  const t = useTranslation(batchMessages);
   const columns = useMemo<LangfuseColumnDef<BatchExportRow>[]>(
     () => [
       createTextTableColumn<BatchExportRow>({
         accessorKey: "name",
-        header: "Name",
+        header: t("name"),
         size: 200,
         tooltip: ({ row }) => {
           const { createdAt, finishedAt, expiresAt } = row.original;
-          return [
-            `Created: ${new Date(createdAt).toLocaleString()}`,
-            `Finished: ${finishedAt ? new Date(finishedAt).toLocaleString() : "-"}`,
-            `Download expires: ${expiresAt ? new Date(expiresAt).toLocaleString() : "-"}`,
-          ].join("\n");
+          return t("nameTooltip", {
+            createdAt: new Date(createdAt).toLocaleString(),
+            finishedAt: finishedAt
+              ? new Date(finishedAt).toLocaleString()
+              : "-",
+            expiresAt: expiresAt ? new Date(expiresAt).toLocaleString() : "-",
+          });
         },
       }),
       {
         accessorKey: "status",
         id: "status",
-        header: "Status",
+        header: t("status"),
         size: 90,
         cell: ({ row }) => {
           const { status, log } = row.original;
@@ -70,7 +75,7 @@ export function BatchExportsTable({
                 <button
                   type="button"
                   {...getTriggerProps()}
-                  aria-label="Export error"
+                  aria-label={t("exportError")}
                 >
                   {badge}
                 </button>
@@ -82,7 +87,7 @@ export function BatchExportsTable({
       {
         accessorKey: "isDownloadable",
         id: "action",
-        header: "Action",
+        header: t("action"),
         size: 130,
         // One state-dependent action per row: Cancel while queued/processing,
         // Download (or Expired) once completed — the states never coexist.
@@ -96,12 +101,14 @@ export function BatchExportsTable({
                 loading={downloadingIds.has(id)}
                 onClick={() => onDownload(id)}
               >
-                Download
+                {t("download")}
               </ActionButton>
             );
           }
           if (status === "COMPLETED" && isExpired) {
-            return <span className="text-muted-foreground">Expired</span>;
+            return (
+              <span className="text-muted-foreground">{t("expired")}</span>
+            );
           }
           if (status === "QUEUED" || status === "PROCESSING") {
             return (
@@ -110,7 +117,7 @@ export function BatchExportsTable({
                 size="sm"
                 onClick={() => onCancel(id)}
               >
-                Cancel
+                {t("cancel")}
               </ActionButton>
             );
           }
@@ -119,7 +126,7 @@ export function BatchExportsTable({
       },
       createDateTableColumn<BatchExportRow>({
         accessorKey: "expiresAt",
-        header: "Expires",
+        header: t("expires"),
         size: 130,
         mode: "relative",
         emptyValue: "-",
@@ -136,18 +143,18 @@ export function BatchExportsTable({
       }),
       createTextTableColumn<BatchExportRow>({
         accessorKey: "format",
-        header: "Format",
+        header: t("format"),
         size: 70,
       }),
       createUserTableColumn<BatchExportRow>({
         accessorKey: "user",
-        header: "Created By",
+        header: t("createdBy"),
         size: 150,
         variant: "avatar",
-        emptyValue: "Unknown",
+        emptyValue: t("unknown"),
       }),
     ],
-    [downloadingIds, hasCancelAccess, onCancel, onDownload],
+    [downloadingIds, hasCancelAccess, onCancel, onDownload, t],
   );
 
   return (

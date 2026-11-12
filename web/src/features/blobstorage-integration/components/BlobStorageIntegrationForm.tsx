@@ -27,6 +27,8 @@ import { StorageProviderFields } from "@/src/features/blobstorage-integration/co
 import { ExportScheduleFields } from "@/src/features/blobstorage-integration/components/ExportScheduleFields";
 import { ExportSourceField } from "@/src/features/blobstorage-integration/components/ExportSourceField";
 import { ExportFieldGroupsField } from "@/src/features/blobstorage-integration/components/ExportFieldGroupsField";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 import { type RevealableExternalId } from "@/src/ee/features/storage-role-auth/components/types";
 
 // Disposable draft layer. The container mounts one instance per entity
@@ -66,6 +68,7 @@ export const BlobStorageIntegrationForm = ({
   // unsaved edits that the persisted entity does not reflect.
   children?: (state: { isDirty: boolean }) => ReactNode;
 }) => {
+  const t = useTranslation(integrationMessages);
   // Block the save when the persisted source is no longer selectable rather
   // than silently rewriting it (LFE-10296). The policy context is fixed for
   // the lifetime of this mount: it derives from the project and config
@@ -77,12 +80,11 @@ export const BlobStorageIntegrationForm = ({
           ctx.addIssue({
             code: "custom",
             path: ["exportSource"],
-            message:
-              "This export source is not available on this deployment. Select an available export source to save.",
+            message: t("exportSourceNotAvailableGeneric"),
           });
         }
       }),
-    [exportSourceCtx],
+    [exportSourceCtx, t],
   );
 
   const blobStorageForm = useForm({
@@ -136,7 +138,7 @@ export const BlobStorageIntegrationForm = ({
             name="compressed"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Gzip Compression</FormLabel>
+                <FormLabel>{t("gzipCompression")}</FormLabel>
                 <FormControl>
                   <div className="mt-1 ml-4">
                     <Switch
@@ -145,10 +147,7 @@ export const BlobStorageIntegrationForm = ({
                     />
                   </div>
                 </FormControl>
-                <FormDescription>
-                  Compress exported files with gzip (.csv.gz, .json.gz,
-                  .jsonl.gz)
-                </FormDescription>
+                <FormDescription>{t("gzipCompressionHelp")}</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -159,7 +158,7 @@ export const BlobStorageIntegrationForm = ({
           name="enabled"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Export enabled</FormLabel>
+              <FormLabel>{t("exportEnabled")}</FormLabel>
               <FormControl>
                 <div className="mt-1 ml-4">
                   <Switch
@@ -175,7 +174,7 @@ export const BlobStorageIntegrationForm = ({
       </form>
       <div className="mt-8 flex gap-2">
         <Button loading={isSaving} onClick={submit}>
-          Save
+          {t("save")}
         </Button>
         {children?.({ isDirty })}
       </div>

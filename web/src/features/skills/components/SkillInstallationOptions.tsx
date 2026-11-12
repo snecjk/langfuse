@@ -3,6 +3,8 @@ import { SkillNameSchema } from "@langfuse/shared";
 import { Tabs } from "@/src/components/design-system/Tabs/Tabs";
 import { Input } from "@/src/components/design-system/Input/Input";
 import { Accordion } from "@/src/components/design-system/Accordion/Accordion";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 import { CopyAgentPromptPanel } from "./CopyAgentPromptPanel";
 import { SkillCliSelector } from "./SkillCliSelector";
 import { shellQuote } from "../utils/shellQuote";
@@ -28,6 +30,7 @@ export function SkillInstallationOptions({
   tags,
   names,
 }: SkillInstallationOptionsProps) {
+  const t = useTranslation(skillMessages);
   const id = useId();
   const [by, setBy] = useState<"all" | "name" | "tag">(initialValues.by);
   const [name, setName] = useState(initialValues.name);
@@ -67,20 +70,16 @@ export function SkillInstallationOptions({
   const target = targets[by];
   const invalidNameError = nameValidation.success
     ? null
-    : "Select a valid skill name.";
+    : t("selectValidSkillName");
   const nameError =
-    names.length === 0
-      ? "No skills available in this project."
-      : invalidNameError;
-  const tagError = selectedTag.trim()
-    ? null
-    : "Enter a tag to generate the install command.";
+    names.length === 0 ? t("noSkillsAvailable") : invalidNameError;
+  const tagError = selectedTag.trim() ? null : t("enterTag");
   const versionError =
     pinnedVersion && !validVersion
-      ? "Enter a positive whole-number version."
+      ? t("enterPositiveWholeNumberVersion")
       : null;
   const errors = {
-    all: names.length === 0 ? "No skills available in this project." : null,
+    all: names.length === 0 ? t("noSkillsAvailable") : null,
     name: nameError ?? versionError,
     tag: tagError,
   };
@@ -114,25 +113,26 @@ Verify the skills are installed in ${JSON.stringify(directory)} and retain langf
         <Accordion type="single" collapsible>
           <Accordion.Item value="configuration">
             <Accordion.Trigger size="sm">
-              Configure install command
+              {t("configureInstallCommand")}
             </Accordion.Trigger>
             <Accordion.Content>
               <div className="flex flex-col gap-3 py-3">
                 <div className="grid min-w-0 gap-4 sm:grid-cols-3">
                   <Tabs value={by} onValueChange={handleByChange}>
                     <Tabs.List
-                      aria-label="Install by"
+                      aria-label={t("installBy")}
                       variant="inset"
                       size="md"
                     >
-                      <Tabs.Trigger value="all" label="All" />
-                      <Tabs.Trigger value="name" label="Name" />
-                      <Tabs.Trigger value="tag" label="Tag" />
+                      <Tabs.Trigger value="all" label={t("all")} />
+                      <Tabs.Trigger value="name" label={t("name")} />
+                      <Tabs.Trigger value="tag" label={t("tag")} />
                     </Tabs.List>
                     <Tabs.Content value="name">
                       <div className="pt-3">
                         <SkillCliSelector
-                          label="Skill name"
+                          label={t("skillName")}
+                          placeholder={t("selectSkillName")}
                           options={names.map((name) => ({
                             value: name,
                             label: name,
@@ -146,7 +146,7 @@ Verify the skills are installed in ${JSON.stringify(directory)} and retain langf
                       <div className="pt-3">
                         {tags.length > 0 ? (
                           <SkillCliSelector
-                            label="Skill tag"
+                            label={t("skillTag")}
                             options={tags.map((tag) => ({
                               value: tag,
                               label: tag,
@@ -160,7 +160,7 @@ Verify the skills are installed in ${JSON.stringify(directory)} and retain langf
                               className="text-muted-foreground text-xs"
                               htmlFor={`${id}-tag`}
                             >
-                              Skill tag
+                              {t("skillTag")}
                             </label>
                             <Input
                               id={`${id}-tag`}
@@ -175,16 +175,16 @@ Verify the skills are installed in ${JSON.stringify(directory)} and retain langf
                   </Tabs>
                   <Tabs value={activeSelector} onValueChange={setSelector}>
                     <Tabs.List
-                      aria-label="Version selection"
+                      aria-label={t("versionSelection")}
                       variant="inset"
                       size="md"
                     >
                       <Tabs.Trigger
                         value="version"
-                        label="Version"
+                        label={t("version")}
                         disabled={by !== "name"}
                       />
-                      <Tabs.Trigger value="label" label="Label" />
+                      <Tabs.Trigger value="label" label={t("label")} />
                     </Tabs.List>
                     <Tabs.Content value="version">
                       <div className="flex min-w-0 flex-col gap-2 pt-3">
@@ -192,7 +192,7 @@ Verify the skills are installed in ${JSON.stringify(directory)} and retain langf
                           className="text-muted-foreground text-xs"
                           htmlFor={`${id}-version`}
                         >
-                          Skill version
+                          {t("skillVersion")}
                         </label>
                         <Input
                           id={`${id}-version`}
@@ -206,7 +206,7 @@ Verify the skills are installed in ${JSON.stringify(directory)} and retain langf
                     <Tabs.Content value="label">
                       <div className="pt-3">
                         <SkillCliSelector
-                          label="Version label"
+                          label={t("versionLabelField")}
                           options={labelOptions.map((label) => ({
                             value: label,
                             label,
@@ -225,11 +225,11 @@ Verify the skills are installed in ${JSON.stringify(directory)} and retain langf
                   </Tabs>
                   <div className="flex min-w-0 flex-col gap-3 sm:pt-10">
                     <SkillCliSelector
-                      label="Install to"
+                      label={t("installTo")}
                       options={[
-                        { value: ".agents/skills", label: "Default" },
-                        { value: ".claude/skills", label: "Claude Code" },
-                        { value: ".cursor/skills", label: "Cursor" },
+                        { value: ".agents/skills", label: t("default") },
+                        { value: ".claude/skills", label: t("claudeCode") },
+                        { value: ".cursor/skills", label: t("cursor") },
                       ].map(({ value, label }) => ({
                         value,
                         label: (

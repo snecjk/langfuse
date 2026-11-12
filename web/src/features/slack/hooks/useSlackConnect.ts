@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { showSuccessToast } from "@/src/features/notifications/showSuccessToast";
 import { showErrorToast } from "@/src/features/notifications/showErrorToast";
 import { api } from "@/src/utils/api";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 
 /** useSlackConnect runs the Slack OAuth popup flow for a project and tracks whether it is pending or failed; it reports the outcome in a toast unless `shouldToast` is false. */
 export function useSlackConnect({
@@ -16,6 +18,7 @@ export function useSlackConnect({
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }) {
+  const t = useTranslation(integrationMessages);
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectError, setConnectError] = useState<string>();
   const popupRef = useRef<Window | null>(null);
@@ -45,11 +48,11 @@ export function useSlackConnect({
 
   const connect = async () => {
     if (!integrationStatus?.installUrl) {
-      const errorMessage = "Install URL not available. Please try again.";
+      const errorMessage = t("slackConnectInstallUrlMissing");
       setConnectError(errorMessage);
       onError?.(new Error(errorMessage));
       if (shouldToast)
-        showErrorToast("Connection Failed", errorMessage, {
+        showErrorToast(t("slackConnectFailed"), errorMessage, {
           operation: "slack.connect",
           errorOrigin: "backend",
           errorCategory: "product_state",
@@ -68,7 +71,7 @@ export function useSlackConnect({
       );
 
       if (!popup) {
-        throw new Error("Popup blocked. Please allow popups and try again.");
+        throw new Error(t("slackConnectPopupBlocked"));
       }
 
       popupRef.current = popup;
@@ -85,8 +88,10 @@ export function useSlackConnect({
           if (shouldToast)
             showSuccessToast({
               operation: "slack.connect",
-              title: "Slack Connected",
-              description: `Successfully connected to ${event.data.teamName}.`,
+              title: t("slackConnectSuccess"),
+              description: t("slackConnectSuccessDesc", {
+                workspace: event.data.teamName,
+              }),
             });
 
           onSuccess?.();
@@ -103,7 +108,7 @@ export function useSlackConnect({
           setIsConnecting(false);
 
           if (shouldToast)
-            showErrorToast("Connection Failed", event.data.error, {
+            showErrorToast(t("slackConnectFailed"), event.data.error, {
               operation: "slack.connect",
               errorOrigin: "backend",
               errorCategory: "internal",
@@ -140,11 +145,13 @@ export function useSlackConnect({
     } catch (error) {
       setIsConnecting(false);
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to connect to Slack";
+        error instanceof Error
+          ? error.message
+          : t("slackConnectFailedFallback");
       setConnectError(errorMessage);
       onError?.(new Error(errorMessage));
       if (shouldToast)
-        showErrorToast("Connection Failed", errorMessage, {
+        showErrorToast(t("slackConnectFailed"), errorMessage, {
           operation: "slack.connect",
           errorOrigin: "frontend",
           errorCategory: "product_state",

@@ -29,6 +29,8 @@ import { api } from "@/src/utils/api";
 import { StripeCancellationButton } from "./StripeCancellationButton";
 import { StripeSwitchPlanButton } from "./StripeSwitchPlanButton";
 import { StripeKeepPlanButton } from "./StripeKeepPlanButton";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export const BillingSwitchPlanDialog = ({
   disabled = false,
@@ -37,6 +39,7 @@ export const BillingSwitchPlanDialog = ({
 }) => {
   const [processingPlanId, setProcessingPlanId] = useState<string | null>(null);
   const [_opId, setOpId] = useState<string | null>(null);
+  const t = useTranslation(enterpriseMessages);
 
   const router = useRouter();
   const {
@@ -61,7 +64,7 @@ export const BillingSwitchPlanDialog = ({
         setOpId(null);
         showToast({
           type: "ERROR",
-          title: "Failed to start checkout session",
+          title: t("billingCheckoutFailed"),
           analytics: classifyTrpcToastError(error, "billing_checkout.start"),
         });
       },
@@ -76,17 +79,17 @@ export const BillingSwitchPlanDialog = ({
       }}
     >
       <DialogTrigger asChild>
-        <Button disabled={disabled}>Change plan</Button>
+        <Button disabled={disabled}>{t("billingChangePlan")}</Button>
       </DialogTrigger>
       <DialogContent className="max-w-5xl">
         <DialogHeader>
           <div className="flex flex-row items-center justify-between">
-            <DialogTitle>Plans</DialogTitle>
+            <DialogTitle>{t("billingPlansTitle")}</DialogTitle>
             <ActionButton
               variant="secondary"
               href="https://langfuse.com/pricing"
             >
-              Comparison of plans
+              {t("billingPlansComparison")}
             </ActionButton>
           </div>
         </DialogHeader>
@@ -109,20 +112,28 @@ export const BillingSwitchPlanDialog = ({
                     <div className="mb-4">
                       {/* Labels above plan title */}
                       <div className="mb-1 h-5 text-xs font-bold text-blue-700">
-                        {isCurrentPlan && <span>Current Plan</span>}
+                        {isCurrentPlan && (
+                          <span>{t("billingCurrentPlanLabel")}</span>
+                        )}
                         {scheduledPlanSwitch &&
                           scheduledPlanSwitch.newPlanId ===
                             product.stripeProductId && (
-                            <span className="ml-1">Starts next period</span>
+                            <span className="ml-1">
+                              {t("billingStartsNextPeriod")}
+                            </span>
                           )}
                         {scheduledPlanSwitch &&
                           currentProductId === product.stripeProductId && (
-                            <span className="ml-1">(Until next period)</span>
+                            <span className="ml-1">
+                              {t("billingUntilNextPeriod")}
+                            </span>
                           )}
                         {!scheduledPlanSwitch &&
                           cancellation?.isCancelled &&
                           currentProductId === product.stripeProductId && (
-                            <span className="ml-1">(Until next period)</span>
+                            <span className="ml-1">
+                              {t("billingUntilNextPeriod")}
+                            </span>
                           )}
                       </div>
                       <h3 className="text-2xl font-bold">
@@ -140,7 +151,7 @@ export const BillingSwitchPlanDialog = ({
                             rel="noreferrer"
                             className="underline"
                           >
-                            usage calculator ↗
+                            {t("billingUsageCalculator")}
                           </a>
                         </div>
                       </div>
@@ -149,7 +160,9 @@ export const BillingSwitchPlanDialog = ({
                       {product.checkout?.description}
                     </div>
                     <div className="space-y-2">
-                      <div className="text-sm font-bold">Main features:</div>
+                      <div className="text-sm font-bold">
+                        {t("billingMainFeatures")}:
+                      </div>
                       <ul className="text-muted-foreground list-inside list-disc space-y-1 text-sm">
                         {product.checkout?.mainFeatures.map(
                           (feature, index) => (
@@ -159,14 +172,14 @@ export const BillingSwitchPlanDialog = ({
                       </ul>
                     </div>
                     <p className="text-muted-foreground mt-auto pt-4 text-xs">
-                      *price per 100k drops with increasing usage
+                      {t("billingPriceFootnote")}
                     </p>
                     <Link
                       href="https://langfuse.com/pricing"
                       target="_blank"
                       className="text-muted-foreground hover:text-foreground block py-4 text-sm"
                     >
-                      Learn more about this plan →
+                      {t("billingLearnMorePlan")}
                     </Link>
                     {/* The default behavior the user is on a paid plan.*/}
                     {currentProductId ? (
@@ -198,8 +211,8 @@ export const BillingSwitchPlanDialog = ({
                               !scheduledPlanSwitch && (
                                 <Button className="w-full" disabled>
                                   {!hasValidPaymentMethod
-                                    ? "Payment method required"
-                                    : "Current plan"}
+                                    ? t("billingPaymentMethodRequired")
+                                    : t("billingCurrentPlanLabel")}
                                 </Button>
                               )}
                           </>
@@ -210,7 +223,7 @@ export const BillingSwitchPlanDialog = ({
                           scheduledPlanSwitch.newPlanId ===
                             product.stripeProductId && (
                             <Button className="w-full" disabled>
-                              Scheduled
+                              {t("billingScheduled")}
                             </Button>
                           )}
 
@@ -236,7 +249,7 @@ export const BillingSwitchPlanDialog = ({
                             )
                           ) : (
                             <Button className="w-full" disabled>
-                              Payment method required
+                              {t("billingPaymentMethodRequired")}
                             </Button>
                           ))}
 
@@ -260,7 +273,7 @@ export const BillingSwitchPlanDialog = ({
                             )
                           ) : (
                             <Button className="w-full" disabled>
-                              Payment method required
+                              {t("billingPaymentMethodRequired")}
                             </Button>
                           ))}
                       </div>
@@ -294,7 +307,9 @@ export const BillingSwitchPlanDialog = ({
                               processingPlanId === product.stripeProductId
                             }
                           >
-                            {product.checkout?.cta ? "Select" : "Select plan"}
+                            {product.checkout?.cta
+                              ? t("billingSelect")
+                              : t("billingSelectPlan")}
                           </ActionButton>
                         </div>
                         {/* Optional checkout CTA button for non-paid plan users */}

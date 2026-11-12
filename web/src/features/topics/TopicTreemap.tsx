@@ -3,6 +3,8 @@ import { useElementSize } from "@/src/hooks/useElementSize";
 import { CustomTooltip } from "@/src/components/design-system/CustomTooltip/CustomTooltip";
 import { cn } from "@/src/utils/tailwind";
 import { compactNumberFormatter } from "@/src/utils/numbers";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 import {
   type TopicDisplay,
   UNASSIGNED_TOPIC_ID,
@@ -147,6 +149,7 @@ function TopicTileButton({
   shareLabel,
   triggerProps,
 }: TopicTileButtonProps) {
+  const t = useTranslation(topicsMessages);
   function selectTopic() {
     onSelect(topic.id);
   }
@@ -164,7 +167,7 @@ function TopicTileButton({
       type="button"
       onClick={selectTopic}
       aria-pressed={isSelected}
-      aria-label={`${topic.name}, ${topic.count} traces`}
+      aria-label={t("topicAria", { name: topic.name, count: topic.count })}
       style={rect}
       className={cn(
         "absolute flex flex-col justify-between overflow-hidden rounded-md text-left",
@@ -210,9 +213,14 @@ function TopicTileButton({
 }
 
 function TopicTile(props: TopicTileProps) {
+  const t = useTranslation(topicsMessages);
   const { topic, share, tier, previewOnSelect, capped } = props;
-  const percentLabel = `${Math.round(share * 100)}% of traces`;
-  const shareLabel = capped ? `${percentLabel} · shown smaller` : percentLabel;
+  const percentLabel = t("percentOfTraces", {
+    percent: Math.round(share * 100),
+  });
+  const shareLabel = capped
+    ? `${percentLabel} · ${t("shownSmaller")}`
+    : percentLabel;
   // Tap-to-preview tiles skip the tooltip; on desktop a capped tile keeps it to explain its size.
   if (previewOnSelect || ((tier === "large" || tier === "medium") && !capped)) {
     return <TopicTileButton {...props} shareLabel={shareLabel} />;
@@ -224,11 +232,11 @@ function TopicTile(props: TopicTileProps) {
         <span className="ph-no-capture flex flex-col gap-0.5">
           <span className="font-bold">{topic.name}</span>
           <span className="text-muted-foreground text-xs">
-            {topic.count.toLocaleString()} traces · {percentLabel}
+            {t("tracesLabel", { count: topic.count })} · {percentLabel}
           </span>
           {capped && (
             <span className="text-muted-foreground text-xs">
-              Shown smaller than its actual share so topics stay readable.
+              {t("shownSmallerReason")}
             </span>
           )}
         </span>
@@ -252,6 +260,7 @@ export function TopicTreemap({
   onSelectTopic,
   previewOnSelect = false,
 }: TopicTreemapProps) {
+  const t = useTranslation(topicsMessages);
   const [previewedId, setPreviewedId] = useState<string | null>(null);
   const [ref, size] = useElementSize<HTMLDivElement>();
   const tiles = size
@@ -284,7 +293,7 @@ export function TopicTreemap({
   }
   return (
     <section
-      aria-label="Topics"
+      aria-label={t("topics")}
       ref={ref}
       className="relative h-full min-h-0 min-w-0 flex-1"
       onClick={dismissPreview}

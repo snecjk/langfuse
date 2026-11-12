@@ -10,12 +10,13 @@ import {
 import { buildGatewayPagePath } from "@/src/features/ai-gateway/fns/gatewayUrls/buildGatewayPagePath";
 import { useGatewayPages } from "@/src/features/ai-gateway/hooks/useGatewayPages";
 import { useQueryOrganization } from "@/src/features/organizations/hooks";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 import { cn } from "@/src/utils/tailwind";
-
-const GATEWAY_TITLE = "AI Gateway";
 
 /** An AI Gateway sub-page; the sidebar lists the sub-pages. */
 export function GatewayPage() {
+  const t = useTranslation(gatewayMessages);
   const router = useRouter();
   const organization = useQueryOrganization();
   const pages = useGatewayPages();
@@ -39,7 +40,7 @@ export function GatewayPage() {
 
   if (!organization || !page || redirectPath) {
     return (
-      <Page withPadding headerProps={{ title: GATEWAY_TITLE }}>
+      <Page withPadding headerProps={{ title: t("pageTitle") }}>
         <NoDataOrLoading isLoading />
       </Page>
     );

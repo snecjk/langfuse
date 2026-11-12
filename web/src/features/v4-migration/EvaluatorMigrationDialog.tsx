@@ -18,6 +18,8 @@ import {
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
 import { useQueryProjectOrOrganization } from "@/src/features/projects/hooks";
 import { useHasOrganizationAccess } from "@/src/features/rbac/utils/checkOrganizationAccess";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 type EvaluatorMigrationScope = { type: "all" } | { type: "single" };
 
@@ -35,9 +37,6 @@ type EvaluatorMigrationDialogProps = {
 };
 
 type SelectedMigrationAction = "assistant";
-
-const ADMIN_REQUEST_MESSAGE =
-  "Hi! Could you enable AI features for our Langfuse organization? I need them to use Halo to upgrade our deprecated evaluators for v4. Thanks!";
 
 export function EvaluatorMigrationDialog({
   open,
@@ -58,6 +57,7 @@ export function EvaluatorMigrationDialog({
   const [selectedAction, setSelectedAction] =
     useState<SelectedMigrationAction | null>(null);
   const [orgAdminNoticeOpen, setOrgAdminNoticeOpen] = useState(false);
+  const t = useTranslation(enterpriseMessages);
 
   const aiFeaturesEnabled = Boolean(organization?.aiFeaturesEnabled);
   const isSingleEvaluator = scope.type === "single";
@@ -123,18 +123,18 @@ export function EvaluatorMigrationDialog({
           <DialogHeader>
             <DialogTitle>
               {effectiveAction === "assistant"
-                ? "Ready to start your evaluator upgrade?"
+                ? t("migrationAgentStartTitle")
                 : isSingleEvaluator
-                  ? "How would you like to upgrade this evaluator?"
-                  : "How would you like to upgrade your evaluators?"}
+                  ? t("migrationAgentSingleTitle")
+                  : t("migrationAgentBulkTitle")}
             </DialogTitle>
           </DialogHeader>
           <DialogBody className="gap-3">
             {effectiveAction === "assistant" ? (
               <p className="text-muted-foreground text-sm">
                 {aiFeaturesEnabled
-                  ? "Halo will review your deprecated evaluators and suggest upgrading all of them at once."
-                  : "Enable AI features in the other tab, then return here to start the upgrade with Halo."}
+                  ? t("migrationAgentReadyHelp")
+                  : t("migrationAgentEnableAiHelp")}
               </p>
             ) : (
               <>
@@ -147,9 +147,9 @@ export function EvaluatorMigrationDialog({
                   >
                     <BotMessageSquare size="base" color="default" />
                     <span className="flex flex-col gap-1">
-                      <span className="font-bold">Use Halo</span>
+                      <span className="font-bold">{t("migrationUseHalo")}</span>
                       <span className="text-muted-foreground text-sm font-normal">
-                        Suggest upgrading all deprecated evaluators at once.
+                        {t("migrationUseHaloHelp")}
                       </span>
                     </span>
                   </Button>
@@ -164,17 +164,14 @@ export function EvaluatorMigrationDialog({
                   <span className="flex flex-col gap-1">
                     <span className="font-bold">
                       {isSingleEvaluator
-                        ? "Upgrade just this evaluator"
-                        : "Upgrade manually"}
+                        ? t("migrationUpgradeSingle")
+                        : t("migrationUpgradeManual")}
                     </span>
                     <span className="text-muted-foreground text-sm font-normal">
                       {isSingleEvaluator ? (
-                        "Open the evaluator upgrade form."
+                        t("migrationUpgradeSingleHelp")
                       ) : (
-                        <>
-                          Click the Upgrade now button on an evaluator to <br />
-                          review it and start each upgrade individually.
-                        </>
+                        <>{t("migrationUpgradeManualHelp")}</>
                       )}
                     </span>
                   </span>
@@ -194,7 +191,7 @@ export function EvaluatorMigrationDialog({
                     setSelectedAction(null);
                   }}
                 >
-                  Back
+                  {t("migrationBack")}
                 </Button>
               ) : null}
               <Button
@@ -202,7 +199,7 @@ export function EvaluatorMigrationDialog({
                 onClick={startAssistant}
                 disabled={!aiFeaturesEnabled}
               >
-                Start upgrade now
+                {t("migrationStartUpgrade")}
               </Button>
             </DialogFooter>
           ) : null}
@@ -212,15 +209,11 @@ export function EvaluatorMigrationDialog({
       <Dialog open={orgAdminNoticeOpen} onOpenChange={setOrgAdminNoticeOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              Ask your organization admin to enable AI features
-            </DialogTitle>
+            <DialogTitle>{t("migrationAdminAiTitle")}</DialogTitle>
           </DialogHeader>
           <DialogBody className="gap-3">
             <p className="text-muted-foreground text-sm">
-              Halo can help you upgrade all deprecated evaluators at once. An
-              organization admin needs to enable AI features for your
-              organization before you can use it.
+              {t("migrationAdminAiHelp")}
             </p>
             <a
               href="https://langfuse.com/security/ai-features"
@@ -228,13 +221,16 @@ export function EvaluatorMigrationDialog({
               rel="noopener noreferrer"
               className="text-primary text-sm underline"
             >
-              Learn more about AI features
+              {t("migrationLearnMoreAi")}
             </a>
             <div className="flex flex-col gap-2">
               <p className="text-muted-foreground text-sm">
-                You can send your admin this message:
+                {t("migrationAdminAiMessageLabel")}
               </p>
-              <CodeBlock language="text" value={ADMIN_REQUEST_MESSAGE} />
+              <CodeBlock
+                language="text"
+                value={t("migrationAdminRequestMessage")}
+              />
             </div>
           </DialogBody>
           <DialogFooter>
@@ -243,7 +239,7 @@ export function EvaluatorMigrationDialog({
               variant="outline"
               onClick={closeOrgAdminNotice}
             >
-              Close
+              {t("migrationClose")}
             </Button>
             {isSingleEvaluator ? (
               <Button
@@ -253,7 +249,7 @@ export function EvaluatorMigrationDialog({
                   onManualUpgrade();
                 }}
               >
-                Start manual upgrade
+                {t("migrationStartManual")}
               </Button>
             ) : null}
           </DialogFooter>

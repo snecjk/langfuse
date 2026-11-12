@@ -129,6 +129,11 @@ export const tableMessages = {
     viewPresetsLabel: "My Views",
     viewPresetsYourDefault: "Your default",
     viewPresetsProjectDefault: "Project default",
+    // Filter builder
+    columnSearchPlaceholder: "Search for column",
+    noOptionsFound: "No options found.",
+    aiFilterPlaceholder: "Describe the filters you want to apply...",
+    customValuePlaceholder: "Enter custom value",
   },
   "zh-CN": {
     search: "搜索…",
@@ -255,5 +260,10 @@ export const tableMessages = {
     viewPresetsLabel: "我的视图",
     viewPresetsYourDefault: "您的默认",
     viewPresetsProjectDefault: "项目默认",
+    // Filter builder
+    columnSearchPlaceholder: "搜索列…",
+    noOptionsFound: "未找到选项。",
+    aiFilterPlaceholder: "描述您想要应用的筛选条件…",
+    customValuePlaceholder: "输入自定义值…",
   },
 } satisfies Messages;

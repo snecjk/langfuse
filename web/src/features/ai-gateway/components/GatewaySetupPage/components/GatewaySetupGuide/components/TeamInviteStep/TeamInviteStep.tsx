@@ -6,16 +6,19 @@ import {
 } from "@/src/features/ai-gateway/components/GatewaySetupPage/components/GatewaySetupGuide/components/TeamInviteStep/components/TeamInviteForm/TeamInviteForm";
 import { TEAM_NOTIFY_COPY } from "@/src/features/ai-gateway/constants/gatewayTeamInvites";
 import type { getSetupStepStatus } from "@/src/features/ai-gateway/components/GatewaySetupPage/components/GatewaySetupGuide/fns/getSetupStepStatus";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 
 export type TeamInviteStepProps = TeamInviteFormProps & {
   status: ReturnType<typeof getSetupStepStatus>;
 };
 
 export function TeamInviteStep({ status, ...formProps }: TeamInviteStepProps) {
+  const t = useTranslation(gatewayMessages);
   return (
     <Stepper
       number={3}
-      title={TEAM_NOTIFY_COPY.title}
+      title={t("teamInviteStepTitle")}
       status={status}
       isCollapsible={false}
       description={
@@ -26,7 +29,7 @@ export function TeamInviteStep({ status, ...formProps }: TeamInviteStepProps) {
               {" "}
               <Button
                 variant="text"
-                text="About roles"
+                text={t("aboutRoles")}
                 href={TEAM_NOTIFY_COPY.rolesDocsUrl}
               />
             </>

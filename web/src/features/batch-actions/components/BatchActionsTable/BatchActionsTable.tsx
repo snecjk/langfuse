@@ -11,6 +11,8 @@ import { createDateTableColumn } from "@/src/components/design-system/table/colu
 import { createUserTableColumn } from "@/src/components/design-system/table/columns/createUserTableColumn";
 import { createTextTableColumn } from "@/src/components/design-system/table/columns/createTextTableColumn";
 import { BatchActionStatus } from "@langfuse/shared";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { batchMessages } from "@/src/features/i18n/messages/batch";
 
 export type BatchActionRow = {
   id: string;
@@ -36,11 +38,12 @@ export function BatchActionsTable({
   data: TableProps<BatchActionRow>["data"];
   pagination: PaginationBarProps;
 }) {
+  const t = useTranslation(batchMessages);
   const columns = useMemo<LangfuseColumnDef<BatchActionRow>[]>(
     () => [
       createTextTableColumn<BatchActionRow>({
         accessorKey: "actionType",
-        header: "Action Type",
+        header: t("actionType"),
         size: 200,
         mapValue: (value) =>
           value
@@ -50,7 +53,7 @@ export function BatchActionsTable({
       }),
       createTextTableColumn<BatchActionRow>({
         accessorKey: "tableName",
-        header: "Table",
+        header: t("table"),
         size: 120,
         mapValue: (value) =>
           value ? value.charAt(0).toUpperCase() + value.slice(1) : undefined,
@@ -67,13 +70,13 @@ export function BatchActionsTable({
 
           return status.toLowerCase();
         },
-        header: "Status",
+        header: t("status"),
         size: 110,
       }),
       {
         accessorKey: "progress",
         id: "progress",
-        header: "Progress",
+        header: t("progress"),
         size: 150,
         cell: ({ row }) => {
           const totalCount = row.original.totalCount;
@@ -91,9 +94,9 @@ export function BatchActionsTable({
               {failedCount > 0 && (
                 <span
                   className="text-destructive truncate text-xs"
-                  title={`${failedCount} failed`}
+                  title={t("failedCount", { count: failedCount })}
                 >
-                  {failedCount} failed
+                  {t("failedCount", { count: failedCount })}
                 </span>
               )}
             </div>
@@ -102,25 +105,25 @@ export function BatchActionsTable({
       },
       createDateTableColumn<BatchActionRow>({
         accessorKey: "createdAt",
-        header: "Created",
+        header: t("created"),
         size: 150,
       }),
       createDateTableColumn<BatchActionRow>({
         accessorKey: "finishedAt",
-        header: "Finished",
+        header: t("finished"),
         size: 150,
       }),
       createUserTableColumn<BatchActionRow>({
         accessorKey: "user",
-        header: "Created By",
+        header: t("createdBy"),
         size: 150,
         variant: "avatar",
-        emptyValue: "Unknown",
+        emptyValue: t("unknown"),
       }),
       {
         accessorKey: "log",
         id: "log",
-        header: "Log",
+        header: t("log"),
         size: 300,
         cell: ({ row }) => {
           const log = row.getValue("log") as string | null;
@@ -149,7 +152,7 @@ export function BatchActionsTable({
         },
       },
     ],
-    [],
+    [t],
   );
 
   return (

@@ -24,6 +24,8 @@ import { resolveApiKeyExpiration } from "@/src/features/apiKey/fns/resolveApiKey
 import { GeneratedKeyContent } from "@/src/features/ai-gateway/components/GatewayApiKeysPage/components/GeneratedKeyContent/GeneratedKeyContent";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
 import { useHasOrganizationAccess } from "@/src/features/rbac/utils/checkOrganizationAccess";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { gatewayMessages } from "@/src/features/i18n/messages/gateway";
 import {
   api,
   reportNonTrpcError,
@@ -38,11 +40,6 @@ type MetadataField = {
 
 type IssuedAs = "user" | "serviceAccount";
 
-const issuedAsDescriptions: Record<IssuedAs, string> = {
-  user: "Stops working if you leave the organization.",
-  serviceAccount: "Keeps working when people leave the organization.",
-};
-
 export function CreateGatewayApiKeyDialogController({
   organizationId,
   children,
@@ -50,6 +47,7 @@ export function CreateGatewayApiKeyDialogController({
   organizationId: string;
   children: (control: { openDialog: () => void }) => ReactNode;
 }) {
+  const t = useTranslation(gatewayMessages);
   const [name, setName] = useState("");
   const [expiryPreset, setExpiryPreset] =
     useState<ApiKeyExpirationPreset>("never");
@@ -136,9 +134,9 @@ export function CreateGatewayApiKeyDialogController({
       renderDialog={() =>
         generatedSecretKey ? (
           <Dialog
-            title="Gateway key created"
+            title={t("gatewayKeyCreatedTitle")}
             size="md"
-            closeLabel="Done"
+            closeLabel={t("done")}
             requireExplicitClose
           >
             <GeneratedKeyContent
@@ -148,11 +146,11 @@ export function CreateGatewayApiKeyDialogController({
           </Dialog>
         ) : (
           <Dialog
-            title="Create gateway key"
+            title={t("createGatewayKeyTitle")}
             size="md"
             actions={[
               {
-                label: "Create key",
+                label: t("createKeyButton"),
                 loading: create.isPending,
                 disabled:
                   create.isPending || expiresAt === undefined || isNameMissing,
@@ -163,7 +161,7 @@ export function CreateGatewayApiKeyDialogController({
             <Dialog.Body>
               {canIssueServiceAccountKeys ? (
                 <div className="flex flex-col gap-1.5">
-                  <Label>Issued as</Label>
+                  <Label>{t("issuedAsLabel")}</Label>
                   <div>
                     <Tabs
                       activationMode="manual"
@@ -173,32 +171,27 @@ export function CreateGatewayApiKeyDialogController({
                       <Tabs.List
                         variant="inset"
                         size="md"
-                        aria-label="Issued as"
+                        aria-label={t("issuedAsLabel")}
                       >
-                        <Tabs.Trigger value="user" label="My user" />
+                        <Tabs.Trigger value="user" label={t("issuedAsUser")} />
                         <Tabs.Trigger
                           value="serviceAccount"
-                          label="Service account"
+                          label={t("issuedAsServiceAccount")}
                         />
                       </Tabs.List>
                     </Tabs>
                   </div>
                   <p className="text-muted-foreground text-xs">
-                    {issuedAsDescriptions[issuedAs]}
+                    {issuedAs === "user"
+                      ? t("issuedAsUserDescription")
+                      : t("issuedAsServiceAccountDescription")}
                   </p>
                 </div>
               ) : null}
-              <CustomTooltip
-                content={
-                  <span>
-                    Shown in the key list. Use it to describe what consumes the
-                    key.
-                  </span>
-                }
-              >
+              <CustomTooltip content={<span>{t("nameFieldTooltip")}</span>}>
                 {({ getTriggerProps }) => (
                   <FormField
-                    label="Name"
+                    label={t("nameFieldLabel")}
                     required
                     registerLabelTooltip={getTriggerProps}
                   >
@@ -208,7 +201,7 @@ export function CreateGatewayApiKeyDialogController({
                         aria-describedby={field.inputDescribedById}
                         maxLength={500}
                         required
-                        placeholder="e.g. claude-local, codex-local, or backend-service"
+                        placeholder={t("nameFieldPlaceholder")}
                         value={name}
                         onChange={(event) => setName(event.target.value)}
                       />
@@ -238,16 +231,19 @@ export function CreateGatewayApiKeyDialogController({
                         color="tertiary"
                         __rawClassName="translate-y-px transition-transform group-data-[state=open]:rotate-90"
                       />
-                      <span>Metadata</span>
+                      <span>{t("metadataLabel")}</span>
                       <span className="text-muted-foreground font-normal">
-                        (optional)
-                        {metadataCount > 0 ? ` · ${metadataCount} set` : ""}
+                        {t("metadataOptional")}
+                        {metadataCount > 0
+                          ? t("metadataSetCount", {
+                              count: String(metadataCount),
+                            })
+                          : ""}
                       </span>
                     </button>
                   </CollapsibleTrigger>
-                  <InfoTooltip label="About gateway key metadata">
-                    Attached to every trace from this key, so you can filter and
-                    group by it.
+                  <InfoTooltip label={t("metadataTooltipLabel")}>
+                    {t("metadataTooltip")}
                   </InfoTooltip>
                 </div>
                 <CollapsibleContent className="mt-2 pl-5.5">
@@ -258,8 +254,8 @@ export function CreateGatewayApiKeyDialogController({
                         className="ph-no-capture flex items-center gap-2"
                       >
                         <Input
-                          aria-label="Metadata key"
-                          placeholder="key"
+                          aria-label={t("metadataKeyAria")}
+                          placeholder={t("metadataKeyPlaceholder")}
                           value={field.key}
                           onChange={(event) =>
                             setMetadata((current) =>
@@ -272,8 +268,8 @@ export function CreateGatewayApiKeyDialogController({
                           }
                         />
                         <Input
-                          aria-label="Metadata value"
-                          placeholder="value"
+                          aria-label={t("metadataValueAria")}
+                          placeholder={t("metadataValuePlaceholder")}
                           value={field.value}
                           onChange={(event) =>
                             setMetadata((current) =>
@@ -288,7 +284,7 @@ export function CreateGatewayApiKeyDialogController({
                         <Button
                           size="icon-xs"
                           variant="ghost"
-                          aria-label="Remove metadata field"
+                          aria-label={t("removeMetadataField")}
                           onClick={() =>
                             setMetadata((current) =>
                               current.filter((item) => item.id !== field.id),
@@ -312,16 +308,16 @@ export function CreateGatewayApiKeyDialogController({
                     }}
                   >
                     <Plus size="base" />
-                    Add metadata
+                    {t("addMetadata")}
                   </button>
                 </CollapsibleContent>
               </Collapsible>
               {create.isError ? (
                 <Alert variant="destructive">
-                  <Alert.Title>Gateway key could not be created</Alert.Title>
+                  <Alert.Title>{t("gatewayKeyCreateError")}</Alert.Title>
                   <Alert.Description>
                     {create.error?.message ??
-                      "Check the metadata and try again."}
+                      t("gatewayKeyCreateErrorDescription")}
                   </Alert.Description>
                 </Alert>
               ) : null}

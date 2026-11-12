@@ -2,6 +2,8 @@ import { type MouseEvent, type ReactNode } from "react";
 import { Badge } from "@/src/components/design-system/Badge/Badge";
 import { type compareSkillFiles } from "@/src/features/skills/utils/compareSkillFiles";
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 
 const statusColors = {
   Modified: "info",
@@ -23,6 +25,7 @@ export function SkillFileChanges({
   onSelectFile: (path: string) => void;
   children: ReactNode;
 }) {
+  const t = useTranslation(skillMessages);
   const changedCount = files.filter(
     (file) => file.status !== "Unchanged",
   ).length;
@@ -40,11 +43,11 @@ export function SkillFileChanges({
   return (
     <>
       <p className="text-muted-foreground text-sm">
-        {changedCount} changed {changedCount === 1 ? "file" : "files"}
+        {t("changedFiles", { count: changedCount })}
       </p>
       <div className="flex min-h-96 flex-1 flex-col gap-4 md:min-h-64 md:flex-row">
         <nav
-          aria-label="Compared files"
+          aria-label={t("comparedFiles")}
           className="max-h-48 shrink-0 overflow-y-auto rounded-md border md:max-h-none md:w-64"
         >
           {files.map((file) => (
@@ -82,7 +85,7 @@ export function SkillFileChanges({
         <div className="min-h-0 min-w-0 flex-1 overflow-auto">
           {selectedFile ? (
             <section
-              aria-label={`Changes to ${selectedFile.path}`}
+              aria-label={t("changesToFile", { path: selectedFile.path })}
               className="flex flex-col gap-3"
             >
               <h3 className="text-sm font-bold break-words">
@@ -90,7 +93,7 @@ export function SkillFileChanges({
               </h3>
               {selectedFile.status === "Unchanged" ? (
                 <p className="text-muted-foreground text-sm">
-                  This file is unchanged.
+                  {t("thisFileIsUnchanged")}
                 </p>
               ) : (
                 <div key={selectedFile.path}>{children}</div>

@@ -17,13 +17,18 @@ import {
   type TopicFacet,
   type TopicFacetOutcome,
 } from "@langfuse/shared/topics";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 import { TopicsErrorMessage } from "./TopicsErrorMessage";
 import {
   busy,
   executionBadgeTypes,
-  executionLabels,
-  operationLabels,
+  executionLabel,
+  operationLabel,
 } from "./topic-run-labels";
+
+type Messages = typeof topicsMessages;
+type T = ReturnType<typeof useTranslation<Messages>>;
 
 type Run = RouterOutputs["topics"]["execution"];
 type FacetProgress = Run["facets"][number];
@@ -48,32 +53,44 @@ type TopicRunDetailsProps = {
   onBack: () => void;
 };
 
-const phaseLabels: Record<string, string> = {
-  queued: "Waiting for a worker",
-  resuming: "Resuming",
-  summarizing: "Summarizing traces",
-  clustering: "Clustering summaries",
-  naming: "Naming topics",
-  assigning: "Assigning traces to topics",
-  processing: "Processing questions",
-};
+function phaseLabel(phase: string, t: T): string {
+  switch (phase) {
+    case "queued":
+      return t("phaseQueued");
+    case "resuming":
+      return t("phaseResuming");
+    case "summarizing":
+      return t("phaseSummarizing");
+    case "clustering":
+      return t("phaseClustering");
+    case "naming":
+      return t("phaseNaming");
+    case "assigning":
+      return t("phaseAssigning");
+    case "processing":
+      return t("phaseProcessing");
+    default:
+      return phase;
+  }
+}
 
-const questionStatuses: Record<
-  TopicFacetOutcome,
-  { label: string; dot: string }
-> = {
-  published: { label: "Topics ready", dot: "bg-dark-green" },
-  assigned: { label: "Topics ready", dot: "bg-dark-green" },
-  pending: { label: "Waiting", dot: "bg-muted-foreground" },
-  awaiting_topics: { label: "Waiting", dot: "bg-muted-foreground" },
-  insufficient_data: { label: "Needs more traces", dot: "bg-dark-yellow" },
-  no_topics: { label: "No topics found", dot: "bg-muted-foreground" },
-  no_applicable_summaries: {
-    label: "No topics found",
-    dot: "bg-muted-foreground",
-  },
-  failed: { label: "Stopped", dot: "bg-dark-red" },
-};
+function questionStatusLabel(outcome: TopicFacetOutcome, t: T): string {
+  switch (outcome) {
+    case "published":
+    case "assigned":
+      return t("questionTopicsReady");
+    case "pending":
+    case "awaiting_topics":
+      return t("questionWaiting");
+    case "insufficient_data":
+      return t("questionNeedsMoreTraces");
+    case "no_topics":
+    case "no_applicable_summaries":
+      return t("questionNoTopicsFound");
+    case "failed":
+      return t("questionStopped");
+  }
+}
 
 function formatCount(count: number) {
   return count.toLocaleString("en-US");
@@ -90,47 +107,52 @@ function canResume(execution: Run) {
 }
 
 /** Regenerate topics groups stored summaries, so its counts are summaries, not traces summarized by the run. */
-function questionStats(progress: FacetProgress, execution: Run) {
+function questionStats(progress: FacetProgress, execution: Run, t: T) {
   const c = progress.counts;
   const runStatus = execution.status;
   const isUpdate = execution.input.operation === "update";
   if (isUpdate && busy(runStatus) && progress.outcome === "pending")
     return c.requested > 0
-      ? `Grouping ${formatCount(c.complete)} summaries into topics`
+      ? t("groupingSummaries", { count: c.complete })
       : null;
   if (!isUpdate && busy(runStatus))
-    return `${formatCount(c.complete)} of ${formatCount(c.requested)} summarized`;
+    return t("summarizedOf", { complete: c.complete, requested: c.requested });
   if (!isUpdate && runStatus === "failed")
-    return `${formatCount(c.complete)} of ${formatCount(c.requested)} summarized · ${formatCount(Math.max(0, c.requested - c.complete))} left`;
-  const summaryNoun = isUpdate ? "summaries" : "summarized";
-  const parts = [
-    c.assigned > 0
-      ? `${formatCount(c.assigned)} in topics`
-      : `${formatCount(c.complete)} ${summaryNoun}`,
-  ];
-  if (c.outlier > 0) parts.push(`${formatCount(c.outlier)} didn’t fit a topic`);
+    return t("summarizedWithLeft", {
+      complete: c.complete,
+      requested: c.requested,
+      left: Math.max(0, c.requested - c.complete),
+    });
+  const parts = [];
+  if (c.assigned > 0) {
+    parts.push(t("inTopics", { count: c.assigned }));
+  } else if (isUpdate) {
+    parts.push(t("summariesLabel", { count: c.complete }));
+  } else {
+    parts.push(t("summarizedLabel", { count: c.complete }));
+  }
+  if (c.outlier > 0) parts.push(t("didNotFitTopic", { count: c.outlier }));
   if (c.insufficientInput > 0)
-    parts.push(`${formatCount(c.insufficientInput)} had too little text`);
+    parts.push(t("tooLittleText", { count: c.insufficientInput }));
   if (c.nonApplicable > 0)
-    parts.push(`${formatCount(c.nonApplicable)} had no issue`);
-  if (c.failed > 0) parts.push(`${formatCount(c.failed)} failed`);
+    parts.push(t("hadNoIssue", { count: c.nonApplicable }));
+  if (c.failed > 0) parts.push(t("failedCount", { count: c.failed }));
   return parts.join(" · ");
 }
 
-function questionNote(progress: FacetProgress, minimum: number | null) {
+function questionNote(progress: FacetProgress, minimum: number | null, t: T) {
   const c = progress.counts;
   if (progress.outcome === "insufficient_data" && minimum !== null)
-    return `Grouping needs at least ${formatCount(minimum)} summaries. Run on more traces, or lower the minimum.`;
+    return t("groupingMinimum", { count: minimum });
   if (progress.outcome === "no_topics") {
     const unclustered = c.complete - c.nonApplicable;
-    if (unclustered <= 0)
-      return "No clear groups formed. Try a larger, more varied set of traces.";
+    if (unclustered <= 0) return t("noClearGroups");
     return c.nonApplicable > 0
-      ? `The other ${formatCount(unclustered)} didn’t form clear groups. Try a larger, more varied set of traces.`
-      : `${formatCount(unclustered)} summaries didn’t form clear groups. Try a larger, more varied set of traces.`;
+      ? t("noClearGroupsOther", { count: unclustered })
+      : t("noClearGroupsAll", { count: unclustered });
   }
   if (progress.outcome === "awaiting_topics")
-    return `${formatCount(c.complete)} summaries are ready. Run Regenerate topics to group them.`;
+    return t("awaitingTopicsNote", { count: c.complete });
   return null;
 }
 
@@ -148,18 +170,27 @@ function QuestionRow({
   name,
   execution,
   minimum,
+  t,
 }: {
   progress: FacetProgress;
   name: string;
   execution: Run;
   minimum: number | null;
+  t: T;
 }) {
-  const status = questionStatuses[progress.outcome] ?? {
-    label: progress.outcome,
-    dot: "bg-muted-foreground",
+  const statusDot = (() => {
+    if (progress.outcome === "published" || progress.outcome === "assigned")
+      return "bg-dark-green";
+    if (progress.outcome === "insufficient_data") return "bg-dark-yellow";
+    if (progress.outcome === "failed") return "bg-dark-red";
+    return "bg-muted-foreground";
+  })();
+  const status = {
+    label: questionStatusLabel(progress.outcome, t),
+    dot: statusDot,
   };
-  const note = questionNote(progress, minimum);
-  const stats = questionStats(progress, execution);
+  const note = questionNote(progress, minimum, t);
+  const stats = questionStats(progress, execution, t);
   const facetError =
     progress.error && progress.error !== execution.error
       ? progress.error
@@ -194,6 +225,7 @@ export function TopicRunDetails({
   retry,
   onBack,
 }: TopicRunDetailsProps) {
+  const t = useTranslation(topicsMessages);
   const isUpdate = execution.input.operation === "update";
   const counts = execution.facets.map((facet) => facet.counts);
   const total = isUpdate
@@ -211,24 +243,21 @@ export function TopicRunDetails({
       ? (execution.input.minimumTraceCount ??
         (execution.input.exploratory ? 10 : 100))
       : null;
-  const name = operationLabels[execution.input.operation];
+  const name = operationLabel(execution.input.operation, t);
   const meta = [
     format(new Date(execution.createdAt), "MMM d, HH:mm"),
     isUpdate
-      ? `${formatCount(total)} summaries`
-      : `${formatCount(total)} traces`,
+      ? t("summariesLabel", { count: total })
+      : t("tracesLabel", { count: total }),
     ...(execution.input.operation === "update" && execution.input.exploratory
-      ? ["small sample"]
+      ? [t("smallSample")]
       : []),
   ].join(" · ");
   const showBar = !isUpdate && total > 0 && (isBusy || failed);
   const summaryLabel = (() => {
-    if (isBusy)
-      return (
-        phaseLabels[execution.phase] ?? execution.phase.replaceAll("_", " ")
-      );
-    if (failed) return isUpdate ? "Summaries" : "Summarized before it stopped";
-    return isUpdate ? "Summaries" : "Summarized";
+    if (isBusy) return phaseLabel(execution.phase, t);
+    if (failed) return isUpdate ? t("summaries") : t("summarizedBeforeStop");
+    return isUpdate ? t("summaries") : t("summarized");
   })();
   const summaryValue = (() => {
     if (isUpdate) return formatCount(total);
@@ -243,7 +272,7 @@ export function TopicRunDetails({
         <div className="flex min-w-0 items-center gap-2">
           <IconButton
             icon={ChevronLeft}
-            label="All runs"
+            label={t("allRuns")}
             variant="ghost"
             size="sm"
             onClick={onBack}
@@ -261,29 +290,26 @@ export function TopicRunDetails({
           type={executionBadgeTypes[execution.status]}
           showText={false}
         >
-          {executionLabels[execution.status]}
+          {executionLabel(execution.status, t)}
         </StatusBadge>
       </header>
       {(failed || resumable) && (
         <div className="px-4 pt-4">
           <Alert variant="destructive" icon={CircleAlert}>
-            <Alert.Title>Run stopped</Alert.Title>
+            <Alert.Title>{t("executionStopped")}</Alert.Title>
             <Alert.Description>
               <div className="text-foreground-secondary flex flex-col gap-0.5">
                 {execution.error && (
                   <p className="break-words">{execution.error}</p>
                 )}
                 {!isUpdate && complete > 0 && (
-                  <p>
-                    {formatCount(complete)} traces are already summarized and
-                    will be kept.
-                  </p>
+                  <p>{t("tracesKept", { count: complete })}</p>
                 )}
               </div>
               {resumable && (
                 <div className="pt-2.5">
                   <Button
-                    text="Resume run"
+                    text={t("resumeRun")}
                     size="sm"
                     loading={retry.isPending}
                     onClick={() => retry.onRetry()}
@@ -324,23 +350,21 @@ export function TopicRunDetails({
           <>
             <div className="flex items-center justify-between gap-2.5">
               <span className="text-muted-foreground text-xs">
-                Estimated processing cost
+                {t("estimatedProcessingCost")}
               </span>
               <span className="font-mono text-xs">
                 ~{costFormatter(execution.estimatedCost)}
               </span>
             </div>
             <p className="text-muted-foreground text-xs">
-              Total for this run’s stored summaries and embeddings. Excludes
-              topic naming and failed calls. May temporarily overcount or change
-              when summaries are replaced or deleted.
+              {t("estimatedCostHelp")}
             </p>
           </>
         )}
       </div>
       <div className="flex flex-col">
         <h3 className="text-muted-foreground px-4 pt-3.5 pb-0.5 text-xs font-bold">
-          Questions
+          {t("questions")}
         </h3>
         <div className="divide-y">
           {execution.facets.map((progress) => (
@@ -349,10 +373,11 @@ export function TopicRunDetails({
               progress={progress}
               name={
                 facets.find((item) => item.id === progress.facetId)?.name ??
-                "Question"
+                t("topic")
               }
               execution={execution}
               minimum={minimum}
+              t={t}
             />
           ))}
         </div>
@@ -370,7 +395,7 @@ export function TopicRunDetails({
             ) : (
               <ChevronRight size="base" color="muted" aria-hidden />
             )}
-            Trace errors
+            {t("traceErrorsLabel")}
             <span className="text-muted-foreground font-mono font-normal">
               {formatCount(traceErrorCount)}
             </span>
@@ -379,7 +404,7 @@ export function TopicRunDetails({
             <div className="flex flex-col gap-2 pl-5">
               {traceErrors.isPending && (
                 <p className="text-muted-foreground text-xs">
-                  Loading trace errors…
+                  {t("loadingTraceErrors")}
                 </p>
               )}
               {traceErrors.errorMessage && (
@@ -387,8 +412,7 @@ export function TopicRunDetails({
               )}
               {traceErrors.data?.expired && (
                 <p className="text-muted-foreground text-xs">
-                  Trace error details have expired. The run counts are still
-                  available.
+                  {t("traceErrorDetailsExpired")}
                 </p>
               )}
               {traceErrors.data?.errors.map((item) => (
@@ -411,7 +435,7 @@ export function TopicRunDetails({
                 !traceErrors.data.expired &&
                 traceErrors.data.errors.length === 0 && (
                   <p className="text-muted-foreground text-xs">
-                    No trace-level errors were recorded.
+                    {t("noTraceLevelErrors")}
                   </p>
                 )}
             </div>

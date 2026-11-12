@@ -21,6 +21,8 @@ import { ObservationFilterBuilder } from "@/src/features/evals/v2/components/Eva
 import { TimeRangePicker } from "@/src/components/date-picker";
 import { TOPICS_MAX_SELECTION_RANGE_MS } from "@langfuse/shared/topics";
 import { TIME_RANGES, type TimeRange } from "@/src/utils/date-range-utils";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 import { TOPICS_BACKFILL_TRACE_LIMIT } from "./backfill-limit";
 import { isValidTopicTimeRange } from "./time-range";
 
@@ -70,6 +72,7 @@ export function TopicTraceSelectorView({
   onRequestColumns,
   erroredColumns,
 }: TopicTraceSelectorViewProps) {
+  const t = useTranslation(topicsMessages);
   const validLimit =
     Number.isSafeInteger(Number(limit)) &&
     Number(limit) >= 1 &&
@@ -85,10 +88,10 @@ export function TopicTraceSelectorView({
       ready.traces.filter((trace) => excludedIds.has(trace.id)).length
     : 0;
   const previewLabel = {
-    idle: "Preview traces",
-    loading: "Loading preview…",
-    ready: "Refresh selection",
-    error: "Preview traces",
+    idle: t("previewTraces"),
+    loading: t("previewLoading"),
+    ready: t("previewRefresh"),
+    error: t("previewTraces"),
   }[preview.status];
   const timeRange: TimeRange =
     timeWindow === "custom"
@@ -124,10 +127,10 @@ export function TopicTraceSelectorView({
         <Tabs.List
           variant="inset"
           size="md"
-          aria-label="Trace selection method"
+          aria-label={t("traceSelectionMethod")}
         >
-          <Tabs.Trigger value="filters" label="Filters" />
-          <Tabs.Trigger value="paste" label="Paste IDs" />
+          <Tabs.Trigger value="filters" label={t("filters")} />
+          <Tabs.Trigger value="paste" label={t("pasteIds")} />
         </Tabs.List>
       </Tabs>
       {mode === "filters" ? (
@@ -143,10 +146,10 @@ export function TopicTraceSelectorView({
               />
             </div>
             <label className="flex flex-col gap-1 text-sm">
-              Maximum traces
+              {t("maximumTraces")}
               <div className="w-28">
                 <Input
-                  aria-label="Maximum traces"
+                  aria-label={t("maximumTraces")}
                   type="number"
                   min={1}
                   value={limit}
@@ -155,13 +158,13 @@ export function TopicTraceSelectorView({
               </div>
             </label>
             <label className="flex w-44 flex-col gap-1 text-sm">
-              Selection
+              {t("selection")}
               <SelectInput
-                aria-label="Trace sampling method"
-                placeholder="Selection"
+                aria-label={t("traceSamplingMethod")}
+                placeholder={t("selection")}
                 options={[
-                  { value: "random", label: "Random sample" },
-                  { value: "latest", label: "Newest first" },
+                  { value: "random", label: t("randomSample") },
+                  { value: "latest", label: t("newestFirst") },
                 ]}
                 value={sampling}
                 onValueChange={handleSamplingChange}
@@ -169,11 +172,10 @@ export function TopicTraceSelectorView({
             </label>
           </div>
           <p className="text-muted-foreground text-xs">
-            Process up to {TOPICS_BACKFILL_TRACE_LIMIT.toLocaleString()}{" "}
-            matching traces per run.
+            {t("upToLimitPerRun", { count: TOPICS_BACKFILL_TRACE_LIMIT })}
           </p>
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-sm font-bold">Filter observations</h3>
+            <h3 className="text-sm font-bold">{t("filterObservations")}</h3>
             <FilterModeToggle mode={filterMode} onChange={onFilterModeChange} />
           </div>
           {filterMode === "builder" ? (
@@ -203,21 +205,20 @@ export function TopicTraceSelectorView({
                 erroredColumns={erroredColumns}
               />
               <p className="text-muted-foreground text-xs">
-                Press Enter to apply your query before previewing.
+                {t("pressEnterToApply")}
               </p>
             </>
           )}
           <p className="text-muted-foreground text-sm">
-            A trace is included when an observation matches all filters in this
-            time range. Topics summarizes the available conversation in the
-            trace, including messages outside these filters.
+            {t("previewDisclaimer")}
           </p>
           {!validLimit && (
             <Alert variant="destructive" size="sm">
               <Alert.Description>
                 <p className="break-words">
-                  Enter between 1 and{" "}
-                  {TOPICS_BACKFILL_TRACE_LIMIT.toLocaleString()} traces.
+                  {t("enterBetweenLimit", {
+                    count: TOPICS_BACKFILL_TRACE_LIMIT,
+                  })}
                 </p>
               </Alert.Description>
             </Alert>
@@ -225,9 +226,7 @@ export function TopicTraceSelectorView({
           {!validRange && (
             <Alert variant="destructive" size="sm">
               <Alert.Description>
-                <p className="break-words">
-                  Choose a start before the end, within a 90-day window.
-                </p>
+                <p className="break-words">{t("chooseValidRange")}</p>
               </Alert.Description>
             </Alert>
           )}
@@ -252,14 +251,12 @@ export function TopicTraceSelectorView({
           {ready ? (
             <>
               <p role="status" className="text-sm">
-                {ready.matchedTraceCount.toLocaleString()} matching traces ·{" "}
-                {selectedCount.toLocaleString()} selected
-                {` · sample of ${ready.selectedTraceCount.toLocaleString()}`}
+                {t("matchingCount", { count: ready.matchedTraceCount })} ·{" "}
+                {t("selectedCount", { count: selectedCount })}
+                {` · ${t("sampleOf", { count: ready.selectedTraceCount })}`}
               </p>
               <p className="text-muted-foreground text-xs">
-                Showing {ready.traces.length.toLocaleString()} preview traces.
-                The matching traces are selected when you run Topics; counts may
-                change as new data arrives. Unchecked traces are excluded.
+                {t("previewDisclaimerDetail", { count: ready.traces.length })}
               </p>
               <TracePreviewTable
                 key={preview.status === "ready" ? preview.seed : undefined}
@@ -271,25 +268,25 @@ export function TopicTraceSelectorView({
             </>
           ) : (
             <p className="text-muted-foreground text-xs">
-              First preview and select your traces. Then choose Summarize &amp;
-              embed to start the run. Previewing does not use a model.
+              {t("previewDisclaimerHint")}
             </p>
           )}
         </>
       ) : (
         <label className="flex flex-col gap-2 text-sm font-bold">
-          Trace IDs or links
+          {t("traceIdsOrLinks")}
           <Textarea
-            aria-label="Trace IDs or links"
+            aria-label={t("traceIdsOrLinks")}
             value={paste}
             onChange={handlePasteChange}
-            placeholder="One trace ID or local trace link per line"
+            placeholder={t("traceIdsOrLinksPlaceholder")}
             className="min-h-32 font-mono text-xs"
           />
           <span className="text-muted-foreground font-normal">
-            Up to {TOPICS_BACKFILL_TRACE_LIMIT.toLocaleString()} unique trace
-            IDs from this project.
-            {pastedCount !== null ? ` ${pastedCount} selected.` : ""}
+            {t("upToUniqueTraceIds", { count: TOPICS_BACKFILL_TRACE_LIMIT })}
+            {pastedCount !== null
+              ? ` ${t("selectedCount", { count: pastedCount })}`
+              : ""}
           </span>
           {pasteError && (
             <span
@@ -316,6 +313,7 @@ function TracePreviewTable({
   excluded: string[];
   onExcludedChange: (ids: string[]) => void;
 }) {
+  const t = useTranslation(topicsMessages);
   const openTrace = (traceId: string) => {
     const basePath = env.NEXT_PUBLIC_BASE_PATH ?? "";
     window.open(
@@ -349,7 +347,7 @@ function TracePreviewTable({
       enableResizing: false,
       header: () => (
         <Checkbox
-          aria-label="Select all previewed traces"
+          aria-label={t("selectAllPreviewed")}
           checked={allChecked}
           disabled={traces.length === 0}
           onCheckedChange={handleSelectAll}
@@ -365,7 +363,7 @@ function TracePreviewTable({
         }
         return (
           <Checkbox
-            aria-label={`Select trace ${row.original.id}`}
+            aria-label={t("selectTraceAria", { id: row.original.id })}
             checked={!excludedIds.has(row.original.id)}
             onCheckedChange={handleCheckedChange}
           />
@@ -374,7 +372,7 @@ function TracePreviewTable({
     },
     {
       accessorKey: "name",
-      header: "Trace",
+      header: t("traceId"),
       size: 300,
       cell: ({ row: { original: trace } }) => {
         function handleClick() {
@@ -401,13 +399,13 @@ function TracePreviewTable({
     },
     {
       accessorKey: "timestamp",
-      header: "Matching time",
+      header: t("matchingTime"),
       size: 176,
       cell: ({ row }) => new Date(row.original.timestamp).toLocaleString(),
     },
     {
       accessorKey: "environment",
-      header: "Environment",
+      header: t("environment"),
       size: 128,
       cell: ({ row }) => (
         <span title={row.original.environment} className="block truncate">
@@ -426,7 +424,7 @@ function TracePreviewTable({
           data: traces.slice(page * 20, (page + 1) * 20),
         }}
         onRowClick={handleRowClick}
-        noResultsMessage="No traces match these filters and time range."
+        noResultsMessage={t("noTracesMatchFilters")}
       />
       {pageCount > 1 && (
         <PaginationBar

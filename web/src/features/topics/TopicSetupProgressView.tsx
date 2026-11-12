@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
 import { useEffect, useState } from "react";
 import { Button } from "@/src/components/design-system/Button/Button";
 import { type TopicSetupStage } from "./topic-setup-flow";
@@ -6,6 +5,8 @@ import {
   type TopicPile,
   TopicPilesIllustration,
 } from "./TopicPilesIllustration";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 
 type TopicSetupProgressFacet = {
   key: string;
@@ -22,11 +23,22 @@ const PILE_SLOTS = [
 
 const TICK_MS = 260;
 
-const STAGE_LABEL: Partial<Record<TopicSetupStage, string>> = {
-  summarizing: "Summarizing traces",
-  grouping: "Finding similar answers",
-  naming: "Naming topics",
-};
+function stageLabel(
+  stage: TopicSetupStage,
+  t: ReturnType<typeof useTranslation<typeof topicsMessages>>,
+): string {
+  switch (stage) {
+    case "summarizing":
+      return t("stageSummarizing");
+    case "grouping":
+      return t("stageGrouping");
+    case "naming":
+      return t("stageNaming");
+    case "done":
+    case "failed":
+      return "";
+  }
+}
 
 /** First analysis in progress: one illustration, one line of copy and one progress bar. */
 export function TopicSetupProgressView({
@@ -38,6 +50,7 @@ export function TopicSetupProgressView({
   stage,
   waiting = false,
 }: TopicSetupProgressViewProps) {
+  const t = useTranslation(topicsMessages);
   const failed = stage === "failed";
   const animate = !failed && !waiting;
   const tick = usePileTick(animate);
@@ -49,7 +62,7 @@ export function TopicSetupProgressView({
   const summarizing = stage === "summarizing";
   const processed = summarizing ? complete : requested;
   const percent = requested === 0 ? 0 : (processed / requested) * 100;
-  const copy = progressCopy(failed, waiting);
+  const copy = progressCopy(failed, waiting, t);
   const piles: TopicPile[] = PILE_SLOTS.map((pile, index) => ({
     ...pile,
     detail: "",
@@ -63,17 +76,17 @@ export function TopicSetupProgressView({
           {copy.title}
         </h2>
         <p className="text-muted-foreground text-sm text-pretty">
-          {failed && !canRetry ? NO_RETRY_DETAIL : copy.detail}
+          {failed && !canRetry ? t("firstAnalysisNoRetry") : copy.detail}
         </p>
       </div>
       {failed ? (
         <div className="flex items-center gap-2">
           {canRetry && onRetry && (
-            <Button text="Retry" loading={retrying} onClick={onRetry} />
+            <Button text={t("retry")} loading={retrying} onClick={onRetry} />
           )}
           {onViewDetails && (
             <Button
-              text="See run details"
+              text={t("seeRunDetails")}
               variant="ghost"
               onClick={onViewDetails}
             />
@@ -84,7 +97,7 @@ export function TopicSetupProgressView({
         <div className="flex w-90 max-w-full flex-col gap-2">
           <div
             role="progressbar"
-            aria-label="Analysis progress"
+            aria-label={t("analysisProgress")}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={Math.round(percent)}
@@ -96,7 +109,7 @@ export function TopicSetupProgressView({
             />
           </div>
           <div className="text-muted-foreground flex justify-between gap-2 text-xs">
-            <span>{STAGE_LABEL[stage]}</span>
+            <span>{stageLabel(stage, t)}</span>
             {requested > 0 && (
               <span className="text-foreground font-mono">
                 {processed.toLocaleString("en-US")} /{" "}
@@ -134,25 +147,24 @@ function pileFill(slots: number, pileIndex: number, tick: number) {
   );
 }
 
-const NO_RETRY_DETAIL =
-  "Topics could not start. Use Regenerate topics in the menu.";
-
-function progressCopy(failed: boolean, waiting: boolean) {
+function progressCopy(
+  failed: boolean,
+  waiting: boolean,
+  t: ReturnType<typeof useTranslation<typeof topicsMessages>>,
+) {
   if (failed)
     return {
-      title: "The first analysis did not finish",
-      detail: "Retry picks up where it stopped.",
+      title: t("firstAnalysisFailedTitle"),
+      detail: t("firstAnalysisFailedDetail"),
     };
   if (waiting)
     return {
-      title: "Waiting for new traces",
-      detail:
-        "Automatic processing is on. Topics appear once new traces are summarized.",
+      title: t("waitingForTracesTitle"),
+      detail: t("waitingForTracesDetail"),
     };
   return {
-    title: "Analyzing your traces",
-    detail:
-      "Runs in the background. Your topics will be here when you're back.",
+    title: t("analyzingTitle"),
+    detail: t("analyzingDetail"),
   };
 }
 

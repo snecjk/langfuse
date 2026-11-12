@@ -15,6 +15,7 @@ import {
   groupDataByTimeDimension,
   toFullMetricString,
 } from "@/src/features/widgets/chart-library/utils";
+import { useInterfaceLocale } from "@/src/features/i18n/I18nProvider";
 import { prepareDenseSeries } from "@/src/features/widgets/chart-library/prepareDenseSeries";
 import {
   parseChartTimestamp,
@@ -85,6 +86,7 @@ export function LineChartTimeSeries({
   hideXAxisLabels = false,
   compactYAxis = false,
 }: ChartProps) {
+  const locale = useInterfaceLocale();
   const allDimensions = useMemo(() => getUniqueDimensions(data), [data]);
   const groupedData = useMemo(
     () =>
@@ -122,8 +124,8 @@ export function LineChartTimeSeries({
   }, [groupedData, timeAxis]);
   const formatValue = useMemo(
     () => (value: number) =>
-      toFullMetricString(metricFormatter(value, { style: "compact" })),
-    [metricFormatter],
+      toFullMetricString(metricFormatter(value, { style: "compact", locale })),
+    [metricFormatter, locale],
   );
   const chartData = useMemo(
     () =>

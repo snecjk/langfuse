@@ -25,6 +25,8 @@ import { SectionHeader } from "@/src/features/evals/v2/components/Evaluators/Tes
 import { PopoverTrigger } from "@/src/components/ui/popover";
 import { JudgeModelPicker } from "@/src/features/evals/v2/components/Evaluators/JudgeModelPicker/JudgeModelPicker";
 import { type JudgeModel } from "@/src/features/evals/v2/judgeModel";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 import {
   TOPIC_SETUP_BACKFILL_DAYS,
   TOPIC_SETUP_WAIT_MINUTES,
@@ -36,11 +38,7 @@ import {
   type TopicSetupWaitMinutes,
 } from "./topic-setup-flow";
 
-const STEP_TITLES: Record<TopicSetupStep, string> = {
-  questions: "Set up topics",
-  traces: "Select traces to analyze",
-  review: "Review",
-};
+type T = ReturnType<typeof useTranslation<typeof topicsMessages>>;
 
 const STEP_NUMBERS: Record<TopicSetupStep, string> = {
   questions: "1 / 3",
@@ -49,10 +47,21 @@ const STEP_NUMBERS: Record<TopicSetupStep, string> = {
 };
 
 const MODEL_ROWS = [
-  { slot: "summary", label: "Summaries" },
-  { slot: "embedding", label: "Embeddings" },
-  { slot: "clustering", label: "Grouping" },
+  { slot: "summary" },
+  { slot: "embedding" },
+  { slot: "clustering" },
 ] as const;
+
+function modelRowLabelKey(slot: (typeof MODEL_ROWS)[number]["slot"]) {
+  switch (slot) {
+    case "summary":
+      return "summaries" as const;
+    case "embedding":
+      return "embeddings" as const;
+    case "clustering":
+      return "grouping" as const;
+  }
+}
 
 export type TopicSetupPastCount =
   | { status: "loading" }
@@ -137,6 +146,16 @@ export function TopicSetupFlowDialog({
   summary,
   waitMinutes,
 }: TopicSetupFlowDialogProps) {
+  const t = useTranslation(topicsMessages);
+  const setupStepLabels: Record<
+    TopicSetupStep,
+    keyof typeof topicsMessages.en
+  > = {
+    questions: "setupStepQuestions",
+    traces: "setupStepTraces",
+    review: "setupStepReview",
+  };
+  const stepTitle = t(setupStepLabels[step]);
   const filterValid = traceFilter.ready;
   const models = { summary, embedding, clustering };
   const onModelChange = {
@@ -177,16 +196,16 @@ export function TopicSetupFlowDialog({
 
   return (
     <Dialog
-      title={`${STEP_TITLES[step]} · ${STEP_NUMBERS[step]}`}
+      title={`${stepTitle} · ${STEP_NUMBERS[step]}`}
       size="lg"
-      {...(viewerBlocked ? { closeLabel: "Close" } : {})}
+      {...(viewerBlocked ? { closeLabel: t("close") } : {})}
     >
       <div className="flex min-h-0 flex-1 flex-col">
         <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 pb-4">
           {step === "questions" ? (
             <>
               <section className="flex flex-col gap-2">
-                <h2 className="text-sm font-bold">What to look for</h2>
+                <h2 className="text-sm font-bold">{t("whatToLookFor")}</h2>
                 <div className="divide-y rounded-md border">
                   {questions.map((question) => (
                     <div
@@ -212,7 +231,7 @@ export function TopicSetupFlowDialog({
               <section className="flex flex-col gap-2">
                 <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                   <h2 className="text-sm font-bold">
-                    Select models for analysis
+                    {t("selectModelsForAnalysis")}
                   </h2>
                   {hasConnection && (
                     <span className="text-muted-foreground text-xs">
@@ -225,13 +244,11 @@ export function TopicSetupFlowDialog({
                 )}
                 {!hasConnection && canAddConnection && (
                   <Alert variant="warning" icon={Plug}>
-                    <Alert.Title>
-                      No AI connection in this project yet
-                    </Alert.Title>
+                    <Alert.Title>{t("noConnectionYet")}</Alert.Title>
                     <Alert.Description>
                       <div className="mt-2">
                         <Button
-                          text="Add connection"
+                          text={t("addConnection")}
                           variant="secondary"
                           size="sm"
                           icon={ArrowUpRight}
@@ -251,9 +268,9 @@ export function TopicSetupFlowDialog({
                         key={row.slot}
                         className="grid gap-1 px-3.5 py-2.75 sm:grid-cols-[140px_minmax(0,1fr)] sm:items-center sm:gap-3"
                       >
-                        <span>{row.label}</span>
+                        <span>{t(modelRowLabelKey(row.slot))}</span>
                         <span className="text-muted-foreground">
-                          No models yet
+                          {t("noModelsYet")}
                         </span>
                       </div>
                     ))}
@@ -266,7 +283,7 @@ export function TopicSetupFlowDialog({
                       return (
                         <ModelRow
                           key={row.slot}
-                          label={row.label}
+                          label={t(modelRowLabelKey(row.slot))}
                           model={model}
                           recommended={
                             model
@@ -293,7 +310,7 @@ export function TopicSetupFlowDialog({
                   aria-expanded={advancedOpen}
                   onClick={() => onAdvancedOpenChange(!advancedOpen)}
                 >
-                  Advanced
+                  {t("advanced")}
                   {advancedOpen ? (
                     <ChevronDown size="base" />
                   ) : (
@@ -303,7 +320,9 @@ export function TopicSetupFlowDialog({
                 {advancedOpen ? (
                   <div className="flex flex-col gap-1.5">
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className="text-sm">Wait before summarizing</span>
+                      <span className="text-sm">
+                        {t("waitBeforeSummarizing")}
+                      </span>
                       <div className="flex gap-1.5">
                         {TOPIC_SETUP_WAIT_MINUTES.map((minutes) => {
                           const selected = waitMinutes === minutes;
@@ -319,15 +338,14 @@ export function TopicSetupFlowDialog({
                               aria-pressed={selected}
                               onClick={() => onWaitMinutesChange(minutes)}
                             >
-                              {minutes} min
+                              {t("minutesUnit", { count: minutes })}
                             </button>
                           );
                         })}
                       </div>
                     </div>
                     <p className="text-muted-foreground text-xs">
-                      A trace is summarized once no new events arrive for this
-                      long, so long-running traces aren&apos;t cut off.
+                      {t("summarizedWhenIdle")}
                     </p>
                   </div>
                 ) : null}
@@ -344,10 +362,10 @@ export function TopicSetupFlowDialog({
               />
               <div className="flex flex-col gap-2">
                 <SectionHeader
-                  title="Sampling rate"
+                  title={t("samplingRate")}
                   meta={null}
-                  description="Set the percentage of matching traces Topics analyzes."
-                  tooltip="Applies to the first backfill and to new traces once automatic processing is on."
+                  description={t("samplingRateDescription")}
+                  tooltip={t("samplingRateTooltip")}
                   trailing={null}
                 />
                 <div className="flex items-center gap-3">
@@ -357,7 +375,7 @@ export function TopicSetupFlowDialog({
                       max={100}
                       step={1}
                       value={[samplePercent]}
-                      aria-label="Sampling rate"
+                      aria-label={t("samplingRateAria")}
                       disabled={!canWrite}
                       onValueChange={(value) =>
                         onSamplePercentChange(value[0] ?? samplePercent)
@@ -369,7 +387,7 @@ export function TopicSetupFlowDialog({
                       type="number"
                       min={1}
                       inputMode="numeric"
-                      aria-label="Sampling rate percent"
+                      aria-label={t("samplingRatePercentAria")}
                       value={String(samplePercent)}
                       disabled={!canWrite}
                       onChange={(event) => {
@@ -384,8 +402,14 @@ export function TopicSetupFlowDialog({
                 </div>
                 <p className="text-muted-foreground text-sm">
                   {pastCount.status === "ready"
-                    ? `~${dailyEstimate(pastCount.dailyTraces, samplePercent)} new traces a day, based on the last ${TOPIC_SETUP_BACKFILL_DAYS} days`
-                    : "Share of new traces analyzed once automatic processing is on"}
+                    ? t("newTracesPerDay", {
+                        count: dailyEstimate(
+                          pastCount.dailyTraces,
+                          samplePercent,
+                        ),
+                        days: TOPIC_SETUP_BACKFILL_DAYS,
+                      })
+                    : t("shareWhenOff")}
                 </p>
               </div>
             </div>
@@ -393,7 +417,7 @@ export function TopicSetupFlowDialog({
           {step === "review" ? (
             <div className="flex flex-col gap-2.5">
               <ReviewRow
-                label="Look for"
+                label={t("lookFor")}
                 onEdit={() => onEdit("questions")}
                 lines={[
                   {
@@ -405,37 +429,43 @@ export function TopicSetupFlowDialog({
                 ]}
               />
               <ReviewRow
-                label="Models"
+                label={t("models")}
                 onEdit={() => onEdit("questions")}
                 lines={[
                   {
-                    key: "Summaries",
+                    key: t("summaries"),
                     value: summary?.model ?? "—",
                     mono: true,
                   },
                   {
-                    key: "Embeddings",
+                    key: t("embeddings"),
                     value: embedding?.model ?? "—",
                     mono: true,
                   },
                   {
-                    key: "Grouping",
+                    key: t("grouping"),
                     value: clustering?.model ?? "—",
                     mono: true,
                   },
                 ]}
               />
               <ReviewRow
-                label="Traces"
+                label={t("traces")}
                 onEdit={() => onEdit("traces")}
                 lines={[
                   {
                     value:
                       pastCount.status === "ready"
-                        ? `${samplePercent}% sampling rate · ~${dailyEstimate(pastCount.dailyTraces, samplePercent)} new / day`
-                        : `${samplePercent}% sampling rate`,
+                        ? t("samplingRateSummary", {
+                            percent: samplePercent,
+                            count: dailyEstimate(
+                              pastCount.dailyTraces,
+                              samplePercent,
+                            ),
+                          })
+                        : t("samplingRateOnly", { percent: samplePercent }),
                   },
-                  { value: backfillLine(pastCount) },
+                  { value: backfillLine(pastCount, t) },
                 ]}
               />
               {notice ? (
@@ -449,12 +479,12 @@ export function TopicSetupFlowDialog({
                 {pastCount.status !== "ready" || pastCount.matched > 0 ? (
                   <span className="flex items-center gap-2">
                     <Clock size="base" aria-hidden="true" />
-                    First results from past traces in ~3–5 min
+                    {t("firstResultsIn")}
                   </span>
                 ) : null}
                 <span className="flex items-center gap-2">
                   <RefreshCw size="base" aria-hidden="true" />
-                  New traces show up {waitMinutes} min after their last activity
+                  {t("newTracesShowUp", { minutes: waitMinutes })}
                 </span>
               </div>
             </div>
@@ -469,7 +499,7 @@ export function TopicSetupFlowDialog({
               <span />
             ) : (
               <Button
-                text="Back"
+                text={t("back")}
                 variant="ghost"
                 disabled={busy}
                 onClick={onBack}
@@ -477,7 +507,7 @@ export function TopicSetupFlowDialog({
             )}
             <div className="flex items-center gap-3">
               <Button
-                text={step === "review" ? "Start analyzing" : "Next"}
+                text={step === "review" ? t("startAnalyzing") : t("next")}
                 variant="primary"
                 loading={busy}
                 disabled={nextDisabled}
@@ -497,13 +527,16 @@ function dailyEstimate(dailyTraces: number, samplePercent: number) {
   return Math.round(perDay).toLocaleString("en-US");
 }
 
-function backfillLine(count: TopicSetupPastCount) {
-  if (count.status === "loading") return "Counting past traces…";
-  if (count.status === "error") return "Could not count past traces";
+function backfillLine(count: TopicSetupPastCount, t: T) {
+  if (count.status === "loading") return t("countingPastTraces");
+  if (count.status === "error") return t("couldNotCountPastTraces");
   if (count.matched === 0)
-    return `No past traces in the last ${TOPIC_SETUP_BACKFILL_DAYS} days`;
-  const window = count.days === 1 ? "day" : `${count.days} days`;
-  return `Include ~${count.matched.toLocaleString("en-US")} past traces from the last ${window}`;
+    return t("noPastTraces", { days: TOPIC_SETUP_BACKFILL_DAYS });
+  const window =
+    count.days === 1
+      ? t("daySingular")
+      : t("daysPlural", { count: count.days });
+  return t("includePastTraces", { count: count.matched, days: window });
 }
 
 function samplePercentFromInput(value: string) {
@@ -550,6 +583,7 @@ function ModelRow({
   providerGroups: Array<[string, string[]]>;
   recommended: boolean;
 }) {
+  const t = useTranslation(topicsMessages);
   const [open, setOpen] = useState(false);
   return (
     <div className="grid gap-1 px-3 py-2 sm:grid-cols-[112px_minmax(0,1fr)] sm:items-center sm:gap-2 sm:py-1.5 sm:pr-1.5">
@@ -567,7 +601,7 @@ function ModelRow({
           <button
             type="button"
             disabled={disabled}
-            aria-label={`${label} model`}
+            aria-label={t("modelAria", { label })}
             title={model ? `${model.provider} / ${model.model}` : undefined}
             className="hover:bg-muted data-[state=open]:bg-muted flex h-8 min-w-0 items-center justify-between gap-2 rounded-md px-2.5 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -580,10 +614,10 @@ function ModelRow({
                     : "text-muted-foreground truncate text-sm"
                 }
               >
-                {model?.model ?? "Select a model"}
+                {model?.model ?? t("selectModel")}
               </span>
               {recommended ? (
-                <Badge text="Recommended" color="success" size="sm" />
+                <Badge text={t("recommended")} color="success" size="sm" />
               ) : null}
             </span>
             <ChevronDown
@@ -606,6 +640,7 @@ function ReviewRow({
   lines: Array<{ key?: string; value: string; mono?: boolean }>;
   onEdit: () => void;
 }) {
+  const t = useTranslation(topicsMessages);
   return (
     <div className="flex flex-col items-start gap-2 rounded-md border px-3.5 py-3 sm:grid sm:grid-cols-[120px_minmax(0,1fr)_auto] sm:items-center sm:gap-3">
       <span className="text-sm font-bold">{label}</span>
@@ -633,20 +668,21 @@ function ReviewRow({
           </div>
         ))}
       </div>
-      <Button text="Edit" variant="ghost" size="sm" onClick={onEdit} />
+      <Button text={t("edit")} variant="ghost" size="sm" onClick={onEdit} />
     </div>
   );
 }
 
 function AskAdminForConnection({ url }: { url: string }) {
+  const t = useTranslation(topicsMessages);
   return (
     <div className="flex flex-col gap-3 rounded-lg border p-4">
       <div className="flex items-center gap-2.5 text-sm font-bold">
         <Lock size="base" aria-hidden="true" />
-        An admin needs to add an AI connection
+        {t("adminNeedsConnection")}
       </div>
       <p className="text-muted-foreground text-sm">
-        You don&apos;t have permission to add one. Share this with an admin:
+        {t("adminConnectionHelp")}
       </p>
       <div className="bg-muted flex items-center gap-2 rounded-md py-1 pr-1 pl-3">
         <span className="min-w-0 flex-1 truncate font-mono text-xs" title={url}>
@@ -654,7 +690,7 @@ function AskAdminForConnection({ url }: { url: string }) {
         </span>
         <IconButton
           icon={Copy}
-          label="Copy link"
+          label={t("copyLink")}
           size="sm"
           onClick={() => copyTextToClipboard(url)}
         />

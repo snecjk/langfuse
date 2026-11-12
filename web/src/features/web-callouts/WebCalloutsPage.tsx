@@ -4,11 +4,14 @@ import { useWebCallouts } from "@/src/features/web-callouts/useWebCallouts";
 import { WebCalloutSettingsPage } from "@/src/features/web-callouts/components/WebCalloutSettingsPage";
 import { RouteParamsPendingFallback } from "@/src/components/RouteParamsPendingFallback/RouteParamsPendingFallback";
 import { useRouter } from "next/router";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 
 export default function WebCalloutsPage() {
   const router = useRouter();
   const projectId = router.query.projectId as string | undefined;
   const { status } = useWebCallouts(projectId);
+  const t = useTranslation(integrationMessages);
 
   if (!projectId) {
     return <RouteParamsPendingFallback />;
@@ -17,9 +20,9 @@ export default function WebCalloutsPage() {
   return (
     <ContainerPage
       headerProps={{
-        title: "Web Callouts",
+        title: t("webCalloutsTitle"),
         breadcrumb: [
-          { name: "Settings", href: `/project/${projectId}/settings` },
+          { name: t("settings"), href: `/project/${projectId}/settings` },
         ],
         actionButtonsLeft: status && <StatusBadge type={status} />,
       }}

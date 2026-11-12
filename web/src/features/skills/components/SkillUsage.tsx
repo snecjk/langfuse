@@ -2,6 +2,8 @@ import { type ReactNode, useState } from "react";
 import { Callout } from "@/src/components/design-system/Callout/Callout";
 import { DialogController } from "@/src/components/design-system/DialogController/DialogController";
 import { useSkillHasRecentUsage } from "@/src/features/skills/hooks/useSkillHasRecentUsage";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 import { TraceSkillDialog } from "./TraceSkillDialog";
 
 export function SkillUsage({
@@ -15,6 +17,7 @@ export function SkillUsage({
   version: number;
   children: ReactNode;
 }) {
+  const t = useTranslation(skillMessages);
   const [dismissed, setDismissed] = useState(false);
   const hasRecentUsage = useSkillHasRecentUsage(projectId, name);
   const showSetup = !dismissed && hasRecentUsage === false;
@@ -34,25 +37,19 @@ export function SkillUsage({
                 actions={[
                   {
                     type: "button",
-                    label: "Quick Start",
+                    label: t("quickStart"),
                     onClick: openDialog,
                   },
                   {
                     type: "link",
-                    label: "Documentation ↗",
+                    label: t("documentation"),
                     href: "https://langfuse.com/docs/skill-management/tracing",
                   },
                 ]}
               >
                 <div className="flex min-w-0 flex-col gap-1">
-                  <p className="font-bold">
-                    No traces linked to this skill in the last 14 days
-                  </p>
-                  <p>
-                    Trace your agent&apos;s model and skill-loading tool calls
-                    to see which skill versions were available and which files
-                    it loaded. Installing a skill alone does not record usage.
-                  </p>
+                  <p className="font-bold">{t("noTracesLinkedToSkill")}</p>
+                  <p>{t("traceSkillUsageDescription")}</p>
                 </div>
               </Callout>
             </div>

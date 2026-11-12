@@ -10,6 +10,8 @@ import { createBadgeTableColumn } from "@/src/components/design-system/table/col
 import { createTextTableColumn } from "@/src/components/design-system/table/columns/createTextTableColumn";
 import { createUserTableColumn } from "@/src/components/design-system/table/columns/createUserTableColumn";
 import { type LangfuseColumnDef } from "@/src/components/table/types";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 
 export type MembershipInvitesSettingsTableRow = {
   email: string;
@@ -35,36 +37,37 @@ export function MembershipInvitesSettingsTable({
   onDelete: (invite: MembershipInvitesSettingsTableRow) => void;
   pagination: PaginationBarProps;
 }) {
+  const t = useTranslation(evaluationsMessages);
   const columns = useMemo<
     LangfuseColumnDef<MembershipInvitesSettingsTableRow>[]
   >(
     () => [
       createTextTableColumn<MembershipInvitesSettingsTableRow>({
         accessorKey: "email",
-        header: "Email",
+        header: t("email"),
       }),
       createBadgeTableColumn<MembershipInvitesSettingsTableRow>({
         accessorKey: "orgRole",
-        header: "Organization Role",
+        header: t("organizationRole"),
       }),
       ...(showProjectRole
         ? [
             createBadgeTableColumn<MembershipInvitesSettingsTableRow>({
               accessorKey: "projectRole",
-              header: "Project Role",
+              header: t("projectRole"),
               nullValue: "-",
             }),
           ]
         : []),
       createUserTableColumn<MembershipInvitesSettingsTableRow>({
         accessorKey: "invitedByUser",
-        header: "Invited By",
+        header: t("invitedBy"),
         variant: "avatar",
         nullValue: "-",
       }),
       createDateTableColumn<MembershipInvitesSettingsTableRow>({
         accessorKey: "createdAt",
-        header: "Invited On",
+        header: t("invitedOn"),
         mode: "relative",
       }),
     ],

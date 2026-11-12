@@ -25,13 +25,9 @@ import {
   type BlobStorageFormControl,
   type BlobStorageFormValues,
 } from "@/src/features/blobstorage-integration/components/formValues";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { integrationMessages } from "@/src/features/i18n/messages/integrations";
 import { type RevealableExternalId } from "@/src/ee/features/storage-role-auth/components/types";
-
-const ROLE_AUTH_SETUP_DESCRIPTION =
-  "Let the Langfuse cross-account role assume your role with this external ID, then grant the role write access to the export prefix. If the bucket uses SSE-KMS, also allow the role to use kms:GenerateDataKey and kms:Decrypt on the key.";
-
-const ROLE_AUTH_UPGRADE_MESSAGE =
-  "IAM role auth is not part of your plan. Upgrade to Enterprise to use it.";
 
 // Provider selection plus the connection fields whose labels and visibility
 // depend on it: bucket/container, endpoint, region, path style, credentials,
@@ -71,6 +67,7 @@ export const StorageProviderFields = ({
     control,
     name: ["roleArn", "bucketName", "prefix"],
   });
+  const t = useTranslation(integrationMessages);
 
   return (
     <>
@@ -79,7 +76,7 @@ export const StorageProviderFields = ({
         name="type"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Storage Provider</FormLabel>
+            <FormLabel>{t("storageProvider")}</FormLabel>
             <FormControl>
               <SelectInput
                 value={field.value}
@@ -100,7 +97,7 @@ export const StorageProviderFields = ({
                   }
                   field.onChange(value);
                 }}
-                placeholder="Select provider"
+                placeholder={t("selectProviderPlaceholder")}
                 options={[
                   { value: BlobStorageIntegrationType.S3, label: "Amazon S3" },
                   {
@@ -118,9 +115,7 @@ export const StorageProviderFields = ({
                 ]}
               />
             </FormControl>
-            <FormDescription>
-              Choose your cloud storage provider
-            </FormDescription>
+            <FormDescription>{t("storageProviderHelp")}</FormDescription>
             <FormMessage />
           </FormItem>
         )}
@@ -133,20 +128,20 @@ export const StorageProviderFields = ({
           <FormItem>
             <FormLabel>
               {integrationType === "AZURE_BLOB_STORAGE"
-                ? "Container Name"
-                : "Bucket Name"}
+                ? t("containerName")
+                : t("bucketName")}
             </FormLabel>
             <FormControl>
               <Input {...field} />
             </FormControl>
             <FormDescription>
               {integrationType === "AZURE_BLOB_STORAGE"
-                ? "Azure container name (3-63 chars, lowercase letters, numbers, and hyphens only)"
+                ? t("azureBucketHelp")
                 : isGcsDefaultCredentials
-                  ? "GCS bucket name. With default credentials it must be listed in LANGFUSE_BLOB_STORAGE_GCS_ALLOWED_BUCKETS"
+                  ? t("gcsBucketHelp")
                   : isGcs
-                    ? "GCS bucket name"
-                    : "The S3 bucket name"}
+                    ? t("gcsBucketSimpleHelp")
+                    : t("s3BucketHelp")}
             </FormDescription>
             <FormMessage />
           </FormItem>
@@ -160,14 +155,14 @@ export const StorageProviderFields = ({
           name="endpoint"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Endpoint URL</FormLabel>
+              <FormLabel>{t("endpointUrl")}</FormLabel>
               <FormControl>
                 <Input {...field} value={field.value || ""} />
               </FormControl>
               <FormDescription>
                 {integrationType === "AZURE_BLOB_STORAGE"
-                  ? "Azure Blob Storage endpoint URL (e.g., https://accountname.blob.core.windows.net)"
-                  : "S3 compatible endpoint URL (e.g., https://play.min.io)"}
+                  ? t("azureEndpointHelp")
+                  : t("s3EndpointHelp")}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -182,14 +177,14 @@ export const StorageProviderFields = ({
           name="region"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Region</FormLabel>
+              <FormLabel>{t("region")}</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
               <FormDescription>
                 {integrationType === "S3"
-                  ? "AWS region (e.g., us-east-1)"
-                  : "S3 compatible storage region (e.g. europe-west1, auto)"}
+                  ? t("awsRegionHelp")
+                  : t("s3RegionHelp")}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -204,7 +199,7 @@ export const StorageProviderFields = ({
           name="forcePathStyle"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Force Path Style</FormLabel>
+              <FormLabel>{t("forcePathStyle")}</FormLabel>
               <FormControl>
                 <div className="mt-1 ml-4">
                   <Switch
@@ -213,9 +208,7 @@ export const StorageProviderFields = ({
                   />
                 </div>
               </FormControl>
-              <FormDescription>
-                Enable for MinIO and some other S3 compatible providers
-              </FormDescription>
+              <FormDescription>{t("forcePathStyleHelp")}</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -232,14 +225,8 @@ export const StorageProviderFields = ({
             <FormItem>
               <span className="flex">
                 <span className="flex-1">
-                  <FormLabel>
-                    Use Application Default Credentials (ADC)
-                  </FormLabel>
-                  <FormDescription>
-                    Write as this deployment&apos;s own GCP identity instead of
-                    a service account key. The bucket must be listed in
-                    LANGFUSE_BLOB_STORAGE_GCS_ALLOWED_BUCKETS.
-                  </FormDescription>
+                  <FormLabel>{t("useAdcLabel")}</FormLabel>
+                  <FormDescription>{t("useAdcDescription")}</FormDescription>
                 </span>
                 <FormControl>
                   <Switch
@@ -260,7 +247,7 @@ export const StorageProviderFields = ({
           name="secretAccessKey"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>GCP Service Account Key (JSON)</FormLabel>
+              <FormLabel>{t("gcpServiceAccountKeyLabel")}</FormLabel>
               <FormControl>
                 <PasswordInput
                   placeholder='{"type": "service_account", ...}'
@@ -268,10 +255,7 @@ export const StorageProviderFields = ({
                   value={field.value || ""}
                 />
               </FormControl>
-              <FormDescription>
-                Stored encrypted. Leave empty to keep the saved key, unless you
-                change the bucket. The key needs write access to the bucket.
-              </FormDescription>
+              <FormDescription>{t("gcpServiceAccountKeyHelp")}</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -284,36 +268,36 @@ export const StorageProviderFields = ({
           name="authType"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Authentication</FormLabel>
+              <FormLabel>{t("authentication")}</FormLabel>
               <FormControl>
                 <SelectInput
                   value={field.value ?? StorageIntegrationAuthType.ACCESS_KEYS}
                   onValueChange={field.onChange}
-                  placeholder="Select authentication"
+                  placeholder={t("selectAuthentication")}
                   options={[
                     {
                       value: StorageIntegrationAuthType.ACCESS_KEYS,
-                      label: "Access keys",
+                      label: t("accessKeys"),
                     },
                     isRoleOptionLocked
                       ? {
                           value: StorageIntegrationAuthType.ROLE_ARN,
-                          label: "IAM role",
+                          label: t("iamRole"),
                           disabled: true,
-                          disabledReason: ROLE_AUTH_UPGRADE_MESSAGE,
+                          disabledReason: t("iamRoleUpgradeRequired"),
                           badges: [{ text: "Enterprise", color: "outline" }],
                         }
                       : {
                           value: StorageIntegrationAuthType.ROLE_ARN,
-                          label: "IAM role",
+                          label: t("iamRole"),
                         },
                   ]}
                 />
               </FormControl>
               <FormDescription>
                 {isRoleOptionLocked
-                  ? ROLE_AUTH_UPGRADE_MESSAGE
-                  : "An IAM role in your AWS account avoids long-lived access keys"}
+                  ? t("iamRoleUpgradeRequired")
+                  : t("iamRoleHelp")}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -327,7 +311,7 @@ export const StorageProviderFields = ({
           name="roleArn"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Role ARN</FormLabel>
+              <FormLabel>{t("roleArn")}</FormLabel>
               <FormControl>
                 <Input
                   placeholder="arn:aws:iam::123456789012:role/langfuse-export"
@@ -335,9 +319,7 @@ export const StorageProviderFields = ({
                   value={field.value ?? ""}
                 />
               </FormControl>
-              <FormDescription>
-                The role Langfuse assumes to write exports to your bucket
-              </FormDescription>
+              <FormDescription>{t("roleArnHelp")}</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -353,7 +335,7 @@ export const StorageProviderFields = ({
               bucketName={bucketName.trim()}
               prefix={prefix?.trim()}
               actions={STORAGE_ROLE_WRITE_ACTIONS}
-              description={ROLE_AUTH_SETUP_DESCRIPTION}
+              description={t("roleAuthSetupDescription")}
             />
           </RoleAuthSetupSection>
         </div>
@@ -368,13 +350,16 @@ export const StorageProviderFields = ({
             <FormItem>
               <FormLabel>
                 {integrationType === "AZURE_BLOB_STORAGE"
-                  ? "Storage Account Name"
+                  ? t("storageAccountName")
                   : integrationType === "S3"
-                    ? "AWS Access Key ID"
-                    : "Access Key ID"}
+                    ? t("awsAccessKeyId")
+                    : t("accessKeyId")}
                 {/* Show optional indicator for S3 types on self-hosted instances with entitlement */}
                 {isSelfHosted && integrationType === "S3" && (
-                  <span className="text-muted-foreground"> (optional)</span>
+                  <span className="text-muted-foreground">
+                    {" "}
+                    {t("optional")}
+                  </span>
                 )}
               </FormLabel>
               <FormControl>
@@ -382,12 +367,12 @@ export const StorageProviderFields = ({
               </FormControl>
               <FormDescription>
                 {integrationType === "AZURE_BLOB_STORAGE"
-                  ? "Your Azure storage account name"
+                  ? t("azureAccessKeyIdHelp")
                   : integrationType === "S3"
                     ? isSelfHosted
-                      ? "Your AWS IAM user access key ID. Leave empty to use host credentials (IAM roles, instance profiles, etc.)"
-                      : "Your AWS IAM user access key ID"
-                    : "Access key for your S3-compatible storage"}
+                      ? t("awsAccessKeyIdSelfHostedHelp")
+                      : t("awsAccessKeyIdHelp")
+                    : t("s3AccessKeyIdHelp")}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -403,13 +388,16 @@ export const StorageProviderFields = ({
             <FormItem>
               <FormLabel>
                 {integrationType === "AZURE_BLOB_STORAGE"
-                  ? "Storage Account Key"
+                  ? t("storageAccountKey")
                   : integrationType === "S3"
-                    ? "AWS Secret Access Key"
-                    : "Secret Access Key"}
+                    ? t("awsSecretAccessKey")
+                    : t("secretAccessKey")}
                 {/* Show optional indicator for S3 types on self-hosted instances with entitlement */}
                 {isSelfHosted && integrationType === "S3" && (
-                  <span className="text-muted-foreground"> (optional)</span>
+                  <span className="text-muted-foreground">
+                    {" "}
+                    {t("optional")}
+                  </span>
                 )}
               </FormLabel>
               <FormControl>
@@ -421,12 +409,12 @@ export const StorageProviderFields = ({
               </FormControl>
               <FormDescription>
                 {integrationType === "AZURE_BLOB_STORAGE"
-                  ? "Your Azure storage account access key"
+                  ? t("azureSecretAccessKeyHelp")
                   : integrationType === "S3"
                     ? isSelfHosted
-                      ? "Your AWS IAM user secret access key. Leave empty to use host credentials (IAM roles, instance profiles, etc.)"
-                      : "Your AWS IAM user secret access key"
-                    : "Secret key for your S3-compatible storage"}
+                      ? t("awsSecretAccessKeySelfHostedHelp")
+                      : t("awsSecretAccessKeyHelp")
+                    : t("s3SecretAccessKeyHelp")}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -439,16 +427,16 @@ export const StorageProviderFields = ({
         name="prefix"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Export Prefix</FormLabel>
+            <FormLabel>{t("exportPrefix")}</FormLabel>
             <FormControl>
               <Input {...field} />
             </FormControl>
             <FormDescription>
               {integrationType === "AZURE_BLOB_STORAGE"
-                ? 'Optional prefix path for exported files in your Azure container (e.g., "langfuse-exports/")'
+                ? t("exportPrefixAzureHelp")
                 : integrationType === "S3"
-                  ? 'Optional prefix path for exported files in your S3 bucket (e.g., "langfuse-exports/")'
-                  : 'Optional prefix path for exported files (e.g., "langfuse-exports/")'}
+                  ? t("exportPrefixS3Help")
+                  : t("exportPrefixHelp")}
             </FormDescription>
             <FormMessage />
           </FormItem>

@@ -52,6 +52,8 @@ import { useSyncMessageSearchMessages } from "@/src/components/ChatMessages/mess
 import { getFinalModelParams } from "@/src/utils/getFinalModelParams";
 import { STREAMING_PREF_KEY } from "@/src/features/playground/page/storage/keys";
 import { captureUnknownError } from "@/src/utils/captureUnknownError";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { skillMessages } from "@/src/features/i18n/messages/skills";
 
 type PlaygroundContextType = {
   windowId: string;
@@ -112,6 +114,7 @@ export const PlaygroundProvider: React.FC<PlaygroundProviderProps> = ({
   children,
   windowId,
 }) => {
+  const t = useTranslation(skillMessages);
   const effectiveWindowId = windowId || MULTI_WINDOW_CONFIG.DEFAULT_WINDOW_ID;
   const capture = usePostHogClientCapture();
   const projectId = useProjectIdFromURL();
@@ -475,8 +478,8 @@ export const PlaygroundProvider: React.FC<PlaygroundProviderProps> = ({
         });
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : "An error occurred";
-        showErrorToast("Error", errorMessage, {
+          err instanceof Error ? err.message : t("anErrorOccurred");
+        showErrorToast(t("error"), errorMessage, {
           operation: "playground.execute",
           errorOrigin: err instanceof TypeError ? "network" : "backend",
           errorCategory: err instanceof TypeError ? "transient" : "internal",
@@ -496,6 +499,7 @@ export const PlaygroundProvider: React.FC<PlaygroundProviderProps> = ({
       structuredOutputSchema,
       sourcePrompt,
       projectId,
+      t,
     ],
   );
 

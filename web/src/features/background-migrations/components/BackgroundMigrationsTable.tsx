@@ -10,26 +10,29 @@ import Page from "@/src/components/layouts/Page";
 import { Button } from "@/src/components/ui/button";
 import { RotateCcw } from "@langfuse/icons";
 import { createTextTableColumn } from "@/src/components/design-system/table/columns/createTextTableColumn";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { enterpriseMessages } from "@/src/features/i18n/messages/enterprise";
 
 export default function BackgroundMigrationsTable() {
   const backgroundMigrations = api.backgroundMigrations.all.useQuery();
+  const t = useTranslation(enterpriseMessages);
 
   const columns = [
     createTextTableColumn<BackgroundMigration>({
       accessorKey: "name",
       enableColumnFilter: false,
-      header: "Name",
+      header: t("backgroundMigrationsNameHeader"),
     }),
     createTextTableColumn<BackgroundMigration>({
       accessorKey: "script",
       enableColumnFilter: false,
-      header: "Script",
+      header: t("backgroundMigrationsScriptHeader"),
     }),
     {
       accessorKey: "args",
       id: "args",
       enableColumnFilter: false,
-      header: "Args",
+      header: t("backgroundMigrationsArgsHeader"),
       size: 80,
       cell: (row) => JSON.stringify(row.getValue()),
     },
@@ -44,24 +47,24 @@ export default function BackgroundMigrationsTable() {
 
         return "queued";
       },
-      header: "Status",
+      header: t("backgroundMigrationsStatusHeader"),
       size: 80,
       enableSorting: false,
     }),
     createTextTableColumn<BackgroundMigration>({
       accessorKey: "failedReason",
       enableColumnFilter: false,
-      header: "Failed Reason",
+      header: t("backgroundMigrationsFailedReasonHeader"),
     }),
     createTextTableColumn<BackgroundMigration, BackgroundMigration["state"]>({
       accessorKey: "state",
       enableColumnFilter: false,
-      header: "State",
+      header: t("backgroundMigrationsStateHeader"),
       mapValue: (value) => JSON.stringify(value),
     }),
     {
       id: "actions",
-      header: "Actions",
+      header: t("backgroundMigrationsActionsHeader"),
       size: 65,
       cell: (row) => {
         const name = row.row.original.name;
@@ -87,7 +90,7 @@ export default function BackgroundMigrationsTable() {
   return (
     <Page
       headerProps={{
-        title: "Background migrations",
+        title: t("backgroundMigrationsTitle"),
       }}
     >
       <DataTableToolbar columns={columns} tableName="background-migrations" />
