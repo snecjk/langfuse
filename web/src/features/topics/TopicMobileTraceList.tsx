@@ -3,7 +3,7 @@ import { ChevronRight } from "@langfuse/icons";
 import {
   PaginationBar,
   type PaginationBarState,
-} from "@/src/components/design-system/PaginationBar/PaginationBar";
+} from "@/src/features/i18n/components/PaginationBar/PaginationBar";
 import { formatCompactRelativeTime } from "@/src/utils/dates";
 import { cn } from "@/src/utils/tailwind";
 import { type TopicTracesResult } from "./facet-topics";

@@ -1,6 +1,7 @@
 import { expect, fn, userEvent, within } from "storybook/test";
 
 import preview from "@/.storybook/preview";
+import { I18nProvider } from "@/src/features/i18n/I18nProvider";
 import { DialogController } from "@/src/components/design-system/DialogController/DialogController";
 import {
   DeleteProjectDialog,
@@ -48,7 +49,9 @@ export const ConfirmsDeletion = meta.story({
     isPending: false,
     onSubmit: fn(),
   },
-  render: renderDialog,
+  render: (args) => (
+    <I18nProvider initialLocale="zh-CN">{renderDialog(args)}</I18nProvider>
+  ),
   play: async ({ args, canvasElement }) => {
     const body = within(canvasElement.ownerDocument.body);
 
@@ -56,7 +59,11 @@ export const ConfirmsDeletion = meta.story({
       body.getByPlaceholderText("acme/my-project"),
       "acme/my-project",
     );
-    await userEvent.click(body.getByRole("button", { name: "Delete project" }));
+    await expect(body.getByRole("dialog", { name: "删除项目" })).toBeVisible();
+    await expect(body.getByPlaceholderText("acme/my-project")).toHaveValue(
+      "acme/my-project",
+    );
+    await userEvent.click(body.getByRole("button", { name: "删除项目" }));
 
     await expect(args.onSubmit).toHaveBeenCalledOnce();
   },

@@ -19,7 +19,7 @@ import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePos
 import { useRouter } from "next/router";
 import { type metricAggregations } from "@langfuse/shared/query";
 import { type z } from "zod";
-import { PaginationBar } from "@/src/components/design-system/PaginationBar/PaginationBar";
+import { PaginationBar } from "@/src/features/i18n/components/PaginationBar/PaginationBar";
 import { type AsyncTableData } from "@/src/components/design-system/table/Table";
 import { assertUnreachable } from "@/src/utils/types";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";

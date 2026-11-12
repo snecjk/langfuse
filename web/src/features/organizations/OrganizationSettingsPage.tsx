@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { settingsMessages } from "@/src/features/i18n/messages/settings";
 import Header from "@/src/components/layouts/header";
 import { Button } from "@/src/components/ui/button";
 import { InfoTooltip } from "@/src/components/ui/InfoTooltip/InfoTooltip";
@@ -38,6 +40,7 @@ type OrganizationSettingsPage = {
 } & ({ content: React.ReactNode } | { href: string });
 
 export function useOrganizationSettingsPages(): OrganizationSettingsPage[] {
+  const t = useTranslation(settingsMessages);
   const { organization } = useQueryProjectOrOrganization();
   const showBillingSettings = useHasEntitlement("cloud-billing");
   const hasAdminApiEntitlement = useHasEntitlement("admin-api");
@@ -74,6 +77,7 @@ export function useOrganizationSettingsPages(): OrganizationSettingsPage[] {
     showBillingSettings && isCloudBillingAvailable && canReadSettings;
 
   return getOrganizationSettingsPages({
+    t,
     organization,
     showBillingSettings: showBillingPage,
     // The billing page embeds the usage breakdown, so the usage page only
@@ -93,6 +97,7 @@ export function useOrganizationSettingsPages(): OrganizationSettingsPage[] {
 }
 
 const getOrganizationSettingsPages = ({
+  t,
   organization,
   showBillingSettings,
   showUsageSettings,
@@ -106,6 +111,10 @@ const getOrganizationSettingsPages = ({
   showOrganizationLlmConnections,
   showFeaturePreviews,
 }: {
+  t: (
+    key: keyof typeof settingsMessages.en,
+    parameters?: Record<string, string | number>,
+  ) => string;
   organization: {
     id: string;
     name: string;
@@ -130,7 +139,7 @@ const getOrganizationSettingsPages = ({
   showFeaturePreviews: boolean;
 }): OrganizationSettingsPage[] => [
   {
-    title: "General",
+    title: t("general"),
     slug: "index",
     section: "Organization",
     cmdKKeywords: ["name", "id", "delete"],
@@ -138,10 +147,10 @@ const getOrganizationSettingsPages = ({
       <div className="flex flex-col gap-6">
         <RenameOrganization />
         <div>
-          <Header title="Debug Information" />
+          <Header title={t("debugInformation")} />
           <Card className="mb-4 p-3">
             <JSONView
-              title="Metadata"
+              title={t("metadata")}
               json={{
                 name: organization.name,
                 id: organization.id,
@@ -162,9 +171,8 @@ const getOrganizationSettingsPages = ({
         <SettingsDangerZone
           items={[
             {
-              title: "Delete this organization",
-              description:
-                "Once you delete an organization, there is no going back. Please be certain.",
+              title: t("deleteOrganization"),
+              description: t("deleteWarning"),
               button: (
                 <DeleteOrganizationDialogController>
                   {({ disabled, openDialog }) => (
@@ -173,7 +181,7 @@ const getOrganizationSettingsPages = ({
                       disabled={disabled !== undefined}
                       onClick={openDialog}
                     >
-                      Delete Organization
+                      {t("deleteOrganizationButton")}
                     </Button>
                   )}
                 </DeleteOrganizationDialogController>
@@ -186,7 +194,7 @@ const getOrganizationSettingsPages = ({
     show: showGeneralSettings,
   },
   {
-    title: "Feature Previews",
+    title: t("featurePreviews"),
     slug: "feature-previews",
     section: "Organization",
     cmdKKeywords: ["feature", "preview", "flags", "beta"],
@@ -194,7 +202,7 @@ const getOrganizationSettingsPages = ({
     show: showFeaturePreviews,
   },
   {
-    title: "API Keys",
+    title: t("apiKeys"),
     slug: "api-keys",
     section: "Organization",
     content: (
@@ -205,7 +213,7 @@ const getOrganizationSettingsPages = ({
     show: showOrgApiKeySettings,
   },
   {
-    title: "LLM Connections",
+    title: t("llmConnections"),
     slug: "llm-connections",
     section: "Organization",
     cmdKKeywords: ["llm", "models", "providers", "credentials"],
@@ -218,18 +226,19 @@ const getOrganizationSettingsPages = ({
           }}
           toolbarContent={
             <div className="flex items-center gap-1">
-              <Header title="Organization LLM Connections" className="mb-0!" />
-              <InfoTooltip label="About organization connections">
-                Connections are available to all current and future projects.
-                Project connections with the same provider take precedence.
+              <Header title={t("organizationConnections")} className="mb-0!" />
+              <InfoTooltip label={t("aboutConnections")}>
+                {t("connectionHelp")}
               </InfoTooltip>
             </div>
           }
           emptyState={
             <LlmConnectionEmptyState
               icon={Building2}
-              title="No organization connections"
-              description={`Organization connections are shared with every project in ${organization.name}.`}
+              title={t("noConnections")}
+              description={t("sharedConnections", {
+                organization: organization.name,
+              })}
             />
           }
         />
@@ -238,7 +247,7 @@ const getOrganizationSettingsPages = ({
     show: showOrganizationLlmConnections,
   },
   {
-    title: "Members",
+    title: t("members"),
     slug: "members",
     section: "Organization",
     cmdKKeywords: ["invite", "user", "rbac"],
@@ -246,7 +255,7 @@ const getOrganizationSettingsPages = ({
     show: showMembers,
   },
   {
-    title: "Audit Logs",
+    title: t("auditLogs"),
     slug: "audit-logs",
     section: "Organization",
     cmdKKeywords: ["audit", "logs", "history", "changes"],
@@ -254,20 +263,20 @@ const getOrganizationSettingsPages = ({
     show: showAuditLogs,
   },
   {
-    title: "Usage",
+    title: t("usage"),
     slug: "usage",
     section: "Organization",
     cmdKKeywords: ["usage", "units", "traces", "observations", "scores"],
     content: (
       <div>
-        <Header title="Usage" />
+        <Header title={t("usage")} />
         <OrganizationUsageBreakdown orgId={organization.id} />
       </div>
     ),
     show: showUsageSettings,
   },
   {
-    title: "Billing",
+    title: t("billing"),
     slug: "billing",
     section: "Organization",
     cmdKKeywords: ["payment", "subscription", "plan", "invoice"],
@@ -275,7 +284,7 @@ const getOrganizationSettingsPages = ({
     show: showBillingSettings,
   },
   {
-    title: "SSO",
+    title: t("sso"),
     slug: "sso",
     section: "Organization",
     cmdKKeywords: [
@@ -294,14 +303,14 @@ const getOrganizationSettingsPages = ({
     show: showSsoSettings,
   },
   {
-    title: "Projects",
+    title: t("projects"),
     slug: "projects",
     section: "Organization",
     href: `/organization/${organization.id}`,
     show: showProjects,
   },
   {
-    title: "V4 migration",
+    title: t("v4Migration"),
     slug: "v4-migration",
     section: "Organization",
     href: "/v4-migration",
@@ -310,6 +319,7 @@ const getOrganizationSettingsPages = ({
 ];
 
 function OrganizationMembersSettings({ orgId }: { orgId: string }) {
+  const t = useTranslation(settingsMessages);
   const [invitesPagination, setInvitesPagination] = useSessionStorage(
     `orgInvites_${orgId}_pagination`,
     { pageIndex: 0, pageSize: 10 },
@@ -332,7 +342,7 @@ function OrganizationMembersSettings({ orgId }: { orgId: string }) {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <Header title="Organization Members" />
+        <Header title={t("organizationMembers")} />
         <ConnectedMembersSettingsTable orgId={orgId} />
       </div>
       {hasViewAccess && (
@@ -341,7 +351,7 @@ function OrganizationMembersSettings({ orgId }: { orgId: string }) {
             membershipInvites.data?.totalCount === 0 ? "hidden" : undefined
           }
         >
-          <Header title="Membership Invites" />
+          <Header title={t("membershipInvites")} />
           <ConnectedMembershipInvitesSettingsTable
             orgId={orgId}
             query={membershipInvites}

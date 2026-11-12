@@ -22,7 +22,31 @@ export type PaginationBarState = {
   pageSize: number;
 };
 
-export type PaginationBarProps =
+export type PaginationBarLabels = {
+  rows: string;
+  rowsPerPage: string;
+  page: string;
+  pageNumber: string;
+  firstPage: string;
+  previousPage: string;
+  nextPage: string;
+  lastPage: string;
+  ofCount: (count: number | null) => string;
+};
+
+const englishLabels: PaginationBarLabels = {
+  rows: "Rows",
+  rowsPerPage: "Rows per page",
+  page: "Page",
+  pageNumber: "Page number",
+  firstPage: "Go to first page",
+  previousPage: "Go to previous page",
+  nextPage: "Go to next page",
+  lastPage: "Go to last page",
+  ofCount: (count) => `of ${count ?? "…"}`,
+};
+
+export type PaginationBarProps = (
   | {
       mode: "offset";
       totalCount: number | null;
@@ -40,16 +64,19 @@ export type PaginationBarProps =
       hasNextPage: boolean;
       isLoadingNextPage?: boolean;
       pageSizeOptions?: number[];
-    };
+    }
+) & { labels?: PaginationBarLabels };
 
 function PageNumberInput({
   currentPage,
   pageCount,
   onNavigate,
+  label,
 }: {
   currentPage: number;
   pageCount: number;
   onNavigate: (pageIndex: number) => void;
+  label: string;
 }) {
   const [value, setValue] = useState<number | string>(currentPage);
 
@@ -66,7 +93,7 @@ function PageNumberInput({
 
   return (
     <Input
-      aria-label="Page number"
+      aria-label={label}
       type="number"
       min={1}
       max={pageCount}
@@ -87,7 +114,12 @@ function PageNumberInput({
 }
 
 export function PaginationBar(props: PaginationBarProps) {
-  const { state, onChange, pageSizeOptions = [10, 20, 30, 40, 50] } = props;
+  const {
+    state,
+    onChange,
+    pageSizeOptions = [10, 20, 30, 40, 50],
+    labels = englishLabels,
+  } = props;
   const totalCount = props.totalCount ?? null;
   const isCursorPagination = props.mode === "cursor";
   const pageCount = Math.max(1, Math.ceil((totalCount ?? 0) / state.pageSize));
@@ -104,10 +136,10 @@ export function PaginationBar(props: PaginationBarProps) {
         {!isCursorPagination && (
           <div className="flex shrink-0 items-center gap-2">
             <span className="text-sm whitespace-nowrap @min-[440px]/pagination:hidden">
-              Rows
+              {labels.rows}
             </span>
             <span className="hidden text-sm whitespace-nowrap @min-[440px]/pagination:block">
-              Rows per page
+              {labels.rowsPerPage}
             </span>
             <Select
               value={`${state.pageSize}`}
@@ -136,18 +168,21 @@ export function PaginationBar(props: PaginationBarProps) {
 
         <div className="flex shrink-0 flex-nowrap items-center gap-x-4 @min-[520px]/pagination:gap-x-6">
           <div className="flex items-center justify-center gap-1 text-sm whitespace-nowrap">
-            Page
+            {labels.page}
             {isCursorPagination ? (
               <span>{currentPage}</span>
             ) : (
               <>
                 <PageNumberInput
                   key={`${currentPage}-${pageCount}`}
+                  label={labels.pageNumber}
                   currentPage={currentPage}
                   pageCount={pageCount}
                   onNavigate={(pageIndex) => onChange({ ...state, pageIndex })}
                 />
-                <span>of {totalCount === null ? "…" : pageCount}</span>
+                <span>
+                  {labels.ofCount(totalCount === null ? null : pageCount)}
+                </span>
               </>
             )}
           </div>
@@ -159,7 +194,7 @@ export function PaginationBar(props: PaginationBarProps) {
                   icon={ChevronsLeft}
                   onClick={() => onChange({ ...state, pageIndex: 0 })}
                   disabled={!canGoBack}
-                  label="Go to first page"
+                  label={labels.firstPage}
                   variant="outline"
                 />
               </span>
@@ -170,7 +205,7 @@ export function PaginationBar(props: PaginationBarProps) {
                 onChange({ ...state, pageIndex: state.pageIndex - 1 })
               }
               disabled={!canGoBack}
-              label="Go to previous page"
+              label={labels.previousPage}
               variant="outline"
             />
             <IconButton
@@ -179,7 +214,7 @@ export function PaginationBar(props: PaginationBarProps) {
                 onChange({ ...state, pageIndex: state.pageIndex + 1 })
               }
               disabled={!canGoForward}
-              label="Go to next page"
+              label={labels.nextPage}
               variant="outline"
             />
             {!isCursorPagination && (
@@ -190,7 +225,7 @@ export function PaginationBar(props: PaginationBarProps) {
                     onChange({ ...state, pageIndex: pageCount - 1 })
                   }
                   disabled={!canGoForward}
-                  label="Go to last page"
+                  label={labels.lastPage}
                   variant="outline"
                 />
               </span>

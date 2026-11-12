@@ -1,4 +1,6 @@
 /* eslint-disable no-nested-ternary, react/no-unstable-nested-components, @typescript-eslint/no-use-before-define */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tracingMessages } from "@/src/features/i18n/messages/tracing";
 import { api } from "@/src/utils/api";
 import { DataTable } from "@/src/components/table/data-table";
 import { TRACING_PAGE_SIZE_OPTIONS } from "@/src/components/table/DataTablePagination";
@@ -211,6 +213,7 @@ export default function ObservationsTable({
   limitRows,
   showControlsInPageHeader = false,
 }: ObservationsTableProps) {
+  const t = useTranslation(tracingMessages);
   const capture = usePostHogClientCapture();
   const peekContext = usePeekTableState();
 
@@ -686,11 +689,13 @@ export default function ObservationsTable({
       }
       showSuccessToast({
         operation: "observation.add_to_annotation_queue",
-        title: "Observations added to queue",
-        description: `Selected observations will be added to queue "${data.queueName}". This may take a minute.`,
+        title: t("observationsAdded"),
+        description: t("observationsQueueDescription", {
+          queue: data.queueName,
+        }),
         link: {
           href: `/project/${projectId}/annotation-queues/${data.queueId}`,
-          text: `View queue "${data.queueName}"`,
+          text: t("viewQueue", { queue: data.queueName }),
         },
       });
     },
@@ -762,7 +767,7 @@ export default function ObservationsTable({
     {
       id: ActionId.ObservationAddToAnnotationQueue,
       type: BatchActionType.Create,
-      label: "Add to Annotation Queue",
+      label: t("addToQueue"),
       description: "Add selected observations to an annotation queue.",
       targetLabel: "Annotation Queue",
       execute: handleAddToAnnotationQueue,
@@ -773,7 +778,7 @@ export default function ObservationsTable({
     {
       id: ActionId.ObservationAddToDataset,
       type: BatchActionType.Create,
-      label: "Add to Dataset",
+      label: t("addToDataset"),
       description: "Add selected observations to a dataset",
       customDialog: true,
       accessCheck: {
@@ -788,26 +793,26 @@ export default function ObservationsTable({
     ...(hideControls ? [] : [selectActionColumn]),
     createDateTableColumn<ObservationsTableRow>({
       accessorKey: "startTime",
-      header: "Start Time",
+      header: t("startTime"),
       size: 150,
       enableHiding: true,
       enableSorting,
     }),
     createItemBadgeTableColumn<ObservationsTableRow>({
       accessorKey: "type",
-      header: "Type",
+      header: t("type"),
       size: 50,
       enableSorting,
     }),
     createTextTableColumn<ObservationsTableRow>({
       accessorKey: "name",
-      header: "Name",
+      header: t("name"),
       size: 150,
       enableSorting,
     }),
     {
       accessorKey: "input",
-      header: "Input",
+      header: t("input"),
       id: "input",
       size: 300,
       cellBackground: "gray",
@@ -833,7 +838,7 @@ export default function ObservationsTable({
     {
       accessorKey: "output",
       id: "output",
-      header: "Output",
+      header: t("output"),
       size: 300,
       cellBackground: "green",
       loadingCell: () => (
@@ -857,7 +862,7 @@ export default function ObservationsTable({
     },
     createTableColumn<ObservationsTableRow, ObservationLevelType>({
       accessorKey: "level",
-      header: "Status",
+      header: t("status"),
       size: 100,
       headerTooltip: {
         description:
@@ -872,7 +877,7 @@ export default function ObservationsTable({
     }),
     createTextTableColumn<ObservationsTableRow>({
       accessorKey: "statusMessage",
-      header: "Status Message",
+      header: t("statusMessage"),
       size: 150,
       headerTooltip: {
         description:
@@ -884,14 +889,14 @@ export default function ObservationsTable({
     }),
     createDurationTableColumn<ObservationsTableRow>({
       accessorKey: "latency",
-      header: "Latency",
+      header: t("latency"),
       size: 100,
       enableHiding: true,
       enableSorting,
     }),
     {
       accessorKey: "totalCost",
-      header: "Total Cost",
+      header: t("totalCost"),
       id: "totalCost",
       size: 120,
       cell: ({ row }) => {
@@ -920,7 +925,7 @@ export default function ObservationsTable({
     },
     createNumberTableColumn<ObservationsTableRow>({
       accessorKey: "toolDefinitions",
-      header: "Available Tools",
+      header: t("availableTools"),
       size: 120,
       enableHiding: true,
       enableSorting,
@@ -929,7 +934,7 @@ export default function ObservationsTable({
     }),
     createNumberTableColumn<ObservationsTableRow>({
       accessorKey: "toolCalls",
-      header: "Tool Calls",
+      header: t("toolCalls"),
       size: 100,
       enableHiding: true,
       enableSorting,
@@ -939,7 +944,7 @@ export default function ObservationsTable({
     {
       accessorKey: "timeToFirstToken",
       id: "timeToFirstToken",
-      header: "Time to First Token",
+      header: t("ttft"),
       size: 150,
       enableHiding: true,
       enableSorting,
@@ -964,7 +969,7 @@ export default function ObservationsTable({
     >({
       id: "tokens",
       accessorFn: (row) => row.usageDetails,
-      header: "Tokens",
+      header: t("tokens"),
       size: 150,
       enableHiding: true,
       enableSorting,
@@ -983,7 +988,7 @@ export default function ObservationsTable({
     {
       accessorKey: "model",
       id: "model",
-      header: "Model",
+      header: t("model"),
       size: 150,
       enableHiding: true,
       enableSorting,
@@ -1003,7 +1008,7 @@ export default function ObservationsTable({
     },
     createIdTableColumn<ObservationsTableRow>({
       accessorKey: "promptName",
-      header: "Prompt",
+      header: t("prompt"),
       headerTooltip: {
         description: "Link to prompt version in Langfuse prompt management.",
         href: "https://langfuse.com/docs/prompt-management/get-started",
@@ -1021,20 +1026,20 @@ export default function ObservationsTable({
     }),
     createTagTableColumn<ObservationsTableRow>({
       accessorKey: "environment",
-      header: "Environment",
+      header: t("environment"),
       size: 150,
       enableHiding: true,
     }),
     createTagsTableColumn<ObservationsTableRow>({
       accessorKey: "traceTags",
-      header: "Trace Tags",
+      header: t("traceTags"),
       size: 250,
       enableHiding: true,
       shouldWrap: !compactRows,
     }),
     {
       accessorKey: "metadata",
-      header: "Metadata",
+      header: t("metadata"),
       size: 300,
       loadingCell: () => (
         <ConnectedIOTableCell isLoading singleLine={compactRows} />
@@ -1061,7 +1066,7 @@ export default function ObservationsTable({
     },
     {
       accessorKey: "scores",
-      header: "Scores",
+      header: t("scores"),
       id: "scores",
       enableHiding: true,
       defaultHidden: true,
@@ -1072,7 +1077,7 @@ export default function ObservationsTable({
     },
     createDateTableColumn<ObservationsTableRow>({
       accessorKey: "endTime",
-      header: "End Time",
+      header: t("endTime"),
       size: 150,
       enableHiding: true,
       enableSorting,
@@ -1080,7 +1085,7 @@ export default function ObservationsTable({
     }),
     createIdTableColumn<ObservationsTableRow>({
       accessorKey: "id",
-      header: "ObservationID",
+      header: t("observationIdentifier"),
       size: 100,
       defaultHidden: true,
       enableSorting,
@@ -1094,7 +1099,7 @@ export default function ObservationsTable({
     }),
     createTextTableColumn<ObservationsTableRow>({
       accessorKey: "traceName",
-      header: "Trace Name",
+      header: t("traceName"),
       size: 150,
       enableHiding: true,
       enableSorting,
@@ -1102,7 +1107,7 @@ export default function ObservationsTable({
     }),
     createIdTableColumn<ObservationsTableRow>({
       accessorKey: "traceId",
-      header: "Trace ID",
+      header: t("traceId"),
       size: 100,
       enableSorting,
       enableHiding: true,
@@ -1110,14 +1115,14 @@ export default function ObservationsTable({
     }),
     createIdTableColumn<ObservationsTableRow>({
       accessorKey: "modelId",
-      header: "Model ID",
+      header: t("modelId"),
       size: 100,
       enableHiding: true,
       defaultHidden: true,
     }),
     createTextTableColumn<ObservationsTableRow>({
       accessorKey: "version",
-      header: "Version",
+      header: t("version"),
       size: 100,
       headerTooltip: {
         description: "Track changes via the version tag.",
@@ -1129,7 +1134,7 @@ export default function ObservationsTable({
     }),
     {
       accessorKey: "usage",
-      header: "Usage",
+      header: t("usage"),
       id: "usage",
       enableHiding: true,
       defaultHidden: true,
@@ -1145,7 +1150,7 @@ export default function ObservationsTable({
             if (!row.latency || !row.usage.outputUsage) return null;
             return row.usage.outputUsage / row.latency;
           },
-          header: "Tokens per second",
+          header: t("tokensPerSecond"),
           size: 200,
           formatter: (value) => numberFormatter(value, 0, 1),
           defaultHidden: true,
@@ -1155,7 +1160,7 @@ export default function ObservationsTable({
         createNumberTableColumn<ObservationsTableRow>({
           accessorFn: (row) => row.usage.inputUsage,
           id: "inputTokens",
-          header: "Input Tokens",
+          header: t("inputTokens"),
           size: 100,
           enableHiding: true,
           defaultHidden: true,
@@ -1165,7 +1170,7 @@ export default function ObservationsTable({
         createNumberTableColumn<ObservationsTableRow>({
           accessorFn: (row) => row.usage.outputUsage,
           id: "outputTokens",
-          header: "Output Tokens",
+          header: t("outputTokens"),
           size: 100,
           enableHiding: true,
           defaultHidden: true,
@@ -1175,7 +1180,7 @@ export default function ObservationsTable({
         createNumberTableColumn<ObservationsTableRow>({
           accessorFn: (row) => row.usage.totalUsage,
           id: "totalTokens",
-          header: "Total Tokens",
+          header: t("totalTokens"),
           size: 100,
           enableHiding: true,
           defaultHidden: true,
@@ -1186,7 +1191,7 @@ export default function ObservationsTable({
     },
     {
       accessorKey: "cost",
-      header: "Cost",
+      header: t("cost"),
       id: "cost",
       enableHiding: true,
       defaultHidden: true,
@@ -1199,7 +1204,7 @@ export default function ObservationsTable({
         createNumberTableColumn<ObservationsTableRow>({
           accessorFn: (row) => row.cost.inputCost,
           id: "inputCost",
-          header: "Input Cost",
+          header: t("inputCost"),
           size: 120,
           formatter: (value, { row }) =>
             formatObservationCost(value, row.original.type),
@@ -1210,7 +1215,7 @@ export default function ObservationsTable({
         createNumberTableColumn<ObservationsTableRow>({
           accessorFn: (row) => row.cost.outputCost,
           id: "outputCost",
-          header: "Output Cost",
+          header: t("outputCost"),
           size: 120,
           formatter: (value, { row }) =>
             formatObservationCost(value, row.original.type),

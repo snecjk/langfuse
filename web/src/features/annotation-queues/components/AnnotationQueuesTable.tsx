@@ -1,4 +1,6 @@
 /* eslint-disable no-nested-ternary, react/no-unstable-nested-components */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 import { DataTable } from "@/src/components/table/data-table";
 import { type LangfuseColumnDef } from "@/src/components/table/types";
 import { api } from "@/src/utils/api";
@@ -64,6 +66,7 @@ function AnnotationQueueScoreConfigs({
 }
 
 export function AnnotationQueuesTable({ projectId }: { projectId: string }) {
+  const t = useTranslation(evaluationsMessages);
   const [rowHeight, setRowHeight, rowHeights] = useRowHeightLocalStorage(
     "annotationQueues",
     "s",
@@ -93,7 +96,7 @@ export function AnnotationQueuesTable({ projectId }: { projectId: string }) {
   const columns: LangfuseColumnDef<RowData>[] = [
     createLinkTableColumn<RowData, RowData["key"]>({
       accessorKey: "key",
-      header: "Name",
+      header: t("name"),
       size: 150,
       isPinnedLeft: true,
       isFixedPosition: true,
@@ -113,27 +116,27 @@ export function AnnotationQueuesTable({ projectId }: { projectId: string }) {
     }),
     createTextTableColumn<RowData>({
       accessorKey: "description",
-      header: "Description",
+      header: t("description"),
       enableHiding: true,
       size: 200,
     }),
     createNumberTableColumn<RowData>({
       accessorKey: "countCompletedItems",
-      header: "Completed Items",
+      header: t("completedItems"),
       enableHiding: true,
       size: 90,
       formatter: (value) => String(value),
     }),
     createNumberTableColumn<RowData>({
       accessorKey: "countPendingItems",
-      header: "Pending Items",
+      header: t("pendingItems"),
       enableHiding: true,
       size: 90,
       formatter: (value) => String(value),
     }),
     {
       accessorKey: "scoreConfigs",
-      header: "Score Configs",
+      header: t("scoreConfigs"),
       id: "scoreConfigs",
       enableHiding: true,
       size: 200,
@@ -151,7 +154,7 @@ export function AnnotationQueuesTable({ projectId }: { projectId: string }) {
     },
     {
       accessorKey: "createdAt",
-      header: "Created",
+      header: t("created"),
       id: "createdAt",
       enableHiding: true,
       size: 150,
@@ -166,7 +169,7 @@ export function AnnotationQueuesTable({ projectId }: { projectId: string }) {
         return !hasAccess ? (
           <Button size="sm" disabled>
             <Lock size="base" __rawClassName="mr-1" />
-            <span className="text-xs">Process queue</span>
+            <span className="text-xs">{t("processQueue")}</span>
           </Button>
         ) : (
           <Button size="sm" asChild>
@@ -174,7 +177,7 @@ export function AnnotationQueuesTable({ projectId }: { projectId: string }) {
               href={`/project/${projectId}/annotation-queues/${key.id}/items`}
             >
               <ClipboardPen size="base" __rawClassName="mr-1" />
-              <span className="text-xs">Process queue</span>
+              <span className="text-xs">{t("processQueue")}</span>
             </Link>
           </Button>
         );
@@ -182,7 +185,7 @@ export function AnnotationQueuesTable({ projectId }: { projectId: string }) {
     },
     {
       accessorKey: "actions",
-      header: "Actions",
+      header: t("actions"),
       id: "actions",
       size: 70,
       isFixedPosition: true,

@@ -1,4 +1,6 @@
 /* eslint-disable @repo/no-abstracted-overlay-trigger, @typescript-eslint/no-deprecated, @typescript-eslint/no-use-before-define -- Legacy UI usage retained during migration to design-system components. */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { settingsMessages } from "@/src/features/i18n/messages/settings";
 import Header from "@/src/components/layouts/header";
 import { Card } from "@/src/components/ui/card";
 import { Button } from "@/src/components/ui/button";
@@ -42,6 +44,13 @@ const displayNameSchema = z.object({
 });
 
 function UpdateDisplayName() {
+  const t = useTranslation(settingsMessages);
+  const localizeNameError = (message: string | undefined) => {
+    if (message === "Name cannot be empty") return t("nameEmpty");
+    if (message === "Name must be at most 100 characters")
+      return t("nameTooLong");
+    return message;
+  };
   const { data: session, update: updateSession } = useSession();
   const utils = api.useUtils();
 
@@ -59,8 +68,8 @@ function UpdateDisplayName() {
       form.reset();
       showSuccessToast({
         operation: "account.display_name_update",
-        title: "Display Name Updated",
-        description: "Your display name has been successfully updated.",
+        title: t("displayNameUpdated"),
+        description: t("displayNameUpdatedHelp"),
       });
     },
     onError: (error) => form.setError("name", { message: error.message }),
@@ -72,20 +81,18 @@ function UpdateDisplayName() {
 
   return (
     <div>
-      <Header title="Display Name" />
+      <Header title={t("displayName")} />
       <Card className="p-3">
         {form.getValues().name !== "" ? (
           <p className="text-primary mb-4 text-sm">
-            Your display name will be updated from &quot;
-            {session?.user?.name ?? ""}
-            &quot; to &quot;
-            <b>{form.watch().name}</b>&quot;.
+            {t("displayNameChanging", {
+              from: session?.user?.name ?? "",
+              to: form.watch().name ?? "",
+            })}
           </p>
         ) : (
           <p className="text-primary mb-4 text-sm">
-            Your display name is currently &quot;
-            <b>{session?.user?.name ?? ""}</b>
-            &quot;.
+            {t("displayNameCurrent", { name: session?.user?.name ?? "" })}
           </p>
         )}
         <Form {...form}>
@@ -102,7 +109,9 @@ function UpdateDisplayName() {
                       className="flex-1"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage>
+                    {localizeNameError(form.formState.errors.name?.message)}
+                  </FormMessage>
                 </FormItem>
               )}
             />
@@ -123,6 +132,7 @@ function UpdateDisplayName() {
 }
 
 function DeleteAccountButton() {
+  const t = useTranslation(settingsMessages);
   const { data: session } = useSession();
   const userEmail = session?.user?.email ?? "";
 
@@ -151,16 +161,16 @@ function DeleteAccountButton() {
       await deleteAccount.mutateAsync();
       showSuccessToast({
         operation: "account.delete",
-        title: "Account Deleted",
-        description: "Your account has been successfully deleted.",
+        title: t("accountDeleted"),
+        description: t("accountDeletedHelp"),
       });
       await new Promise((resolve) => setTimeout(resolve, 2000));
       await signOutCleanly();
     } catch (error) {
       reportNonTrpcError(error, "account");
       showErrorToast(
-        "Failed to Delete Account",
-        error instanceof Error ? error.message : "An unexpected error occurred",
+        t("failedDeleteAccount"),
+        error instanceof Error ? error.message : t("unexpectedError"),
         classifyTrpcToastError(error, "account.delete"),
       );
     }
@@ -169,20 +179,17 @@ function DeleteAccountButton() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="destructive-secondary">Delete Account</Button>
+        <Button variant="destructive-secondary">{t("deleteAccount")}</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">
-            Delete Account
+            {t("deleteAccount")}
           </DialogTitle>
           <DialogDescription>
             {!canDelete && blockingOrganizations.length > 0 ? (
               <div>
-                <p className="mb-2">
-                  You cannot delete your account because you are the last owner
-                  of the following organization(s):
-                </p>
+                <p className="mb-2">{t("deleteAccountBlocked")}</p>
                 <ul className="list-inside list-disc space-y-1">
                   {blockingOrganizations.map((org) => (
                     <li key={org.id}>
@@ -195,13 +202,10 @@ function DeleteAccountButton() {
                     </li>
                   ))}
                 </ul>
-                <p className="mt-2">
-                  Please add another owner or delete these organizations before
-                  deleting your account.
-                </p>
+                <p className="mt-2">{t("deleteAccountBlockedHelp")}</p>
               </div>
             ) : (
-              `To confirm, type your email address "${userEmail}" in the input box`
+              t("confirmEmailInput", { email: userEmail })
             )}
           </DialogDescription>
         </DialogHeader>
@@ -217,7 +221,11 @@ function DeleteAccountButton() {
                       <FormControl>
                         <Input placeholder={userEmail} {...field} />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage>
+                        {form.formState.errors.email
+                          ? t("confirmEmail", { email: userEmail })
+                          : undefined}
+                      </FormMessage>
                     </FormItem>
                   )}
                 />
@@ -231,7 +239,7 @@ function DeleteAccountButton() {
                 disabled={!canDelete}
                 className="w-full"
               >
-                Delete Account
+                {t("deleteAccount")}
               </Button>
             </DialogFooter>
           </form>
@@ -242,6 +250,7 @@ function DeleteAccountButton() {
 }
 
 function SignOutAllSessionsButton() {
+  const t = useTranslation(settingsMessages);
   const signOutAllSessions = api.userAccount.signOutAllSessions.useMutation();
 
   const onConfirm = async () => {
@@ -249,14 +258,14 @@ function SignOutAllSessionsButton() {
       await signOutAllSessions.mutateAsync();
       showSuccessToast({
         operation: "account.revoke_sessions",
-        title: "Signed Out of All Sessions",
-        description: "All sessions have been invalidated.",
+        title: t("allSessionsSignedOut"),
+        description: t("allSessionsInvalidated"),
       });
     } catch (error) {
       reportNonTrpcError(error, "account");
       showErrorToast(
-        "Failed to Sign Out of All Sessions",
-        error instanceof Error ? error.message : "An unexpected error occurred",
+        t("signOutAllFailed"),
+        error instanceof Error ? error.message : t("unexpectedError"),
         classifyTrpcToastError(error, "account.revoke_sessions"),
       );
       throw error;
@@ -273,16 +282,16 @@ function SignOutAllSessionsButton() {
 
   return (
     <ConfirmationDialogController
-      title="Sign Out of All Sessions"
-      text="This will sign you out on this device and every other device where you are currently signed in. You will need to sign in again."
-      confirmLabel="Sign Out of All Sessions"
+      title={t("signOutAll")}
+      text={t("signOutAllConfirm")}
+      confirmLabel={t("signOutAll")}
       variant="destructive"
       loading={signOutAllSessions.isPending}
       onConfirm={onConfirm}
     >
       {({ openDialog }) => (
         <Button variant="destructive-secondary" onClick={openDialog}>
-          Sign Out of All Sessions
+          {t("signOutAll")}
         </Button>
       )}
     </ConfirmationDialogController>
@@ -297,19 +306,25 @@ type AccountSettingsPage = {
 } & ({ content: React.ReactNode } | { href: string });
 
 export function useAccountSettingsPages(): AccountSettingsPage[] {
+  const t = useTranslation(settingsMessages);
   const { data: session } = useSession();
   const userEmail = session?.user?.email ?? "";
 
-  return getAccountSettingsPages({ userEmail });
+  return getAccountSettingsPages({ userEmail, t });
 }
 
 const getAccountSettingsPages = ({
   userEmail,
+  t,
 }: {
   userEmail: string;
+  t: (
+    key: keyof typeof settingsMessages.en,
+    parameters?: Record<string, string | number>,
+  ) => string;
 }): AccountSettingsPage[] => [
   {
-    title: "General",
+    title: t("general"),
     slug: "index",
     cmdKKeywords: [
       "account",
@@ -325,38 +340,34 @@ const getAccountSettingsPages = ({
     content: (
       <div className="flex flex-col gap-6">
         <div>
-          <Header title="Email" />
+          <Header title={t("email")} />
           <Card className="p-3">
             <p className="text-primary text-sm">
-              Your email address: <b>{userEmail}</b>
+              {t("emailAddress")}
+              <b>{userEmail}</b>
             </p>
           </Card>
         </div>
         <UpdateDisplayName />
         <div>
-          <Header title="Password" />
+          <Header title={t("password")} />
           <Card className="p-3">
-            <p className="text-primary mb-4 text-sm">
-              To change your password, we will email a one-time code to your
-              address. Enter the code together with your new password.
-            </p>
+            <p className="text-primary mb-4 text-sm">{t("passwordHelp")}</p>
             <Button asChild variant="secondary">
-              <Link href="/auth/reset-password">Change Password</Link>
+              <Link href="/auth/reset-password">{t("changePassword")}</Link>
             </Button>
           </Card>
         </div>
         <SettingsDangerZone
           items={[
             {
-              title: "Sign out of all sessions",
-              description:
-                "Invalidate every active session for your account, including this device. You will need to sign in again.",
+              title: t("signOutSessionsTitle"),
+              description: t("signOutSessionsHelp"),
               button: <SignOutAllSessionsButton />,
             },
             {
-              title: "Delete your account",
-              description:
-                "You can delete your account if you are not the last owner of any organization. If you are the last owner, please add another owner or delete the organization and all projects first.",
+              title: t("deleteYourAccount"),
+              description: t("deleteAccountHelp"),
               button: <DeleteAccountButton />,
             },
           ]}

@@ -1,4 +1,11 @@
 /* eslint-disable @repo/no-style-props, @repo/component-file-structure */
+import {
+  useInterfaceLocale,
+  useTranslation,
+} from "@/src/features/i18n/I18nProvider";
+import { tableMessages } from "@/src/features/i18n/messages/table";
+import { translate } from "@/src/features/i18n/messages";
+import { type Locale } from "@/src/features/i18n/locale";
 import React, {
   type Dispatch,
   type ReactNode,
@@ -316,35 +323,45 @@ function getSearchDescription(
   metadataFields: string[] | undefined,
   hidePerformanceWarning: boolean | undefined,
   tableAllowsFullTextSearch: boolean | undefined,
+  locale: Locale,
 ): React.ReactNode {
+  const t = (
+    key: keyof typeof tableMessages.en,
+    parameters?: Record<string, string>,
+  ) => translate(locale, tableMessages, key, parameters);
   const fields = metadataFields?.join(", ") ?? "";
   const performanceWarning = !hidePerformanceWarning
-    ? " For improved performance, please filter the table down."
+    ? t("performanceWarning")
     : "";
 
   if (tableAllowsFullTextSearch && searchType?.includes("content")) {
     return (
       <p className="text-primary text-xs font-normal">
-        Searches in Input/Output and {fields}.{performanceWarning}
+        {t("searchContent", { fields })}
+        {performanceWarning}
       </p>
     );
   }
   if (tableAllowsFullTextSearch && searchType?.includes("input")) {
     return (
       <p className="text-primary text-xs font-normal">
-        Searches in Input and {fields}.{performanceWarning}
+        {t("searchInput", { fields })}
+        {performanceWarning}
       </p>
     );
   }
   if (tableAllowsFullTextSearch && searchType?.includes("output")) {
     return (
       <p className="text-primary text-xs font-normal">
-        Searches in Output and {fields}.{performanceWarning}
+        {t("searchOutput", { fields })}
+        {performanceWarning}
       </p>
     );
   }
   return (
-    <p className="text-primary text-xs font-normal">Searches in {fields}.</p>
+    <p className="text-primary text-xs font-normal">
+      {t("searchMetadata", { fields })}
+    </p>
   );
 }
 
@@ -384,6 +401,8 @@ export function DataTableToolbar<TData, TValue>({
   additionalColumnSettings,
   onColumnGroupToggle,
 }: DataTableToolbarProps<TData, TValue> & ToolbarTableIdentity) {
+  const t = useTranslation(tableMessages);
+  const locale = useInterfaceLocale();
   const [searchString, setSearchString] = useState(
     searchConfig?.currentQuery ?? "",
   );
@@ -445,6 +464,7 @@ export function DataTableToolbar<TData, TValue>({
     ? getSearchButtonLabel(
         searchConfig.searchType,
         searchConfig.customDropdownLabels?.metadata,
+        locale,
       )
     : undefined;
 
@@ -482,8 +502,11 @@ export function DataTableToolbar<TData, TValue>({
               autoFocus
               placeholder={
                 searchConfig.tableAllowsFullTextSearch
-                  ? "Search..."
-                  : `Search (${searchConfig.metadataSearchFields?.join(", ")})`
+                  ? t("search")
+                  : t("searchFields", {
+                      fields:
+                        searchConfig.metadataSearchFields?.join(", ") ?? "",
+                    })
               }
               value={searchString}
               onChange={(newValue) => {
@@ -511,6 +534,7 @@ export function DataTableToolbar<TData, TValue>({
                             searchConfig.metadataSearchFields,
                             searchConfig.hidePerformanceWarning,
                             searchConfig.tableAllowsFullTextSearch,
+                            locale,
                           )}
                         />
                       ),
@@ -614,8 +638,8 @@ export function DataTableToolbar<TData, TValue>({
         )}
         {environmentFilter && (
           <MultiSelectFilter
-            title="Environment"
-            label="Env"
+            title={t("environment")}
+            label={t("environmentShort")}
             values={environmentFilter.values}
             onValueChange={environmentFilter.onValueChange}
             options={environmentFilter.options}
@@ -645,7 +669,7 @@ export function DataTableToolbar<TData, TValue>({
                       className="flex h-8 items-center gap-2 text-sm md:hidden"
                     >
                       <Filter size="base" color="default" />
-                      <span>Filters</span>
+                      <span>{t("filters")}</span>
                       {filterState.length > 0 && (
                         <span className="bg-input ml-1 rounded-sm px-1.5 text-xs shadow-xs">
                           {filterState.length}
@@ -658,15 +682,15 @@ export function DataTableToolbar<TData, TValue>({
                     aria-describedby={undefined}
                     className="flex h-[85svh] flex-col gap-0 p-0 [&>button]:hidden"
                   >
-                    <SheetTitle className="sr-only">Filters</SheetTitle>
+                    <SheetTitle className="sr-only">{t("filters")}</SheetTitle>
                     <div className="flex shrink-0 items-center gap-2 border-b px-4 py-3">
                       <span className="text-foreground text-lg font-bold">
-                        Filters
+                        {t("filters")}
                       </span>
                       <Button
                         variant="ghost"
                         size="icon"
-                        aria-label="Close filters"
+                        aria-label={t("closeFilters")}
                         className="ml-auto h-8 w-8 shrink-0"
                         onClick={() => {
                           setLegacyMobileFiltersOpen(false);

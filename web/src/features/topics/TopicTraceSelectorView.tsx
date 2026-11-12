@@ -13,7 +13,7 @@ import { Checkbox } from "@/src/components/design-system/Checkbox/Checkbox";
 import { Tabs } from "@/src/components/design-system/Tabs/Tabs";
 import { SelectInput } from "@/src/components/design-system/SelectInput/SelectInput";
 import { Table } from "@/src/components/design-system/table/Table";
-import { PaginationBar } from "@/src/components/design-system/PaginationBar/PaginationBar";
+import { PaginationBar } from "@/src/features/i18n/components/PaginationBar/PaginationBar";
 import { TableSearchBar } from "@/src/features/search-bar/components/TableSearchBar";
 import { RULE_FIELD_REGISTRY } from "@/src/features/evals/v2/constants/ruleSearchRegistry";
 import { FilterModeToggle } from "@/src/features/evals/v2/components/Evaluators/Testing/components/SampleObservationSelectorBase/components/FilterModeToggle";

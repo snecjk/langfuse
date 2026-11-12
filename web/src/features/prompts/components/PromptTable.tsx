@@ -1,4 +1,6 @@
 /* eslint-disable no-nested-ternary, react/no-unstable-nested-components */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { catalogMessages } from "@/src/features/i18n/messages/catalog";
 import { useEffect, useMemo } from "react";
 import {
   normalizeOrderByForTable,
@@ -77,6 +79,7 @@ function createRow(
 }
 
 export function PromptTable() {
+  const t = useTranslation(catalogMessages);
   const projectId = useProjectIdFromURL() ?? "";
   const { setDetailPageList } = useDetailPageLists();
   const promptMetricsTimeWindow = useMemo(() => {
@@ -295,7 +298,7 @@ export function PromptTable() {
   const promptColumns: LangfuseColumnDef<PromptTableRow>[] = [
     createFolderKeyTableColumn<PromptTableRow>({
       accessorKey: "name",
-      header: "Name",
+      header: t("name"),
       enableSorting: true,
       size: 250,
       getCell: (name, { row }) => {
@@ -322,7 +325,7 @@ export function PromptTable() {
     }),
     createNumberTableColumn<PromptTableRow>({
       accessorKey: "version",
-      header: "Versions",
+      header: t("versions"),
       enableSorting: true,
       size: 70,
       formatter: (value) => String(value),
@@ -333,14 +336,14 @@ export function PromptTable() {
     }),
     createTextTableColumn<PromptTableRow>({
       accessorKey: "type",
-      header: "Type",
+      header: t("type"),
       enableSorting: true,
       size: 60,
       hideBelowMd: true,
     }),
     createDateTableColumn({
       accessorKey: "createdAt",
-      header: "Latest Version Created At",
+      header: t("latestVersionCreated"),
       enableSorting: true,
       size: 200,
       hideBelowMd: true,
@@ -354,7 +357,7 @@ export function PromptTable() {
     }),
     {
       accessorKey: "numberOfObservations",
-      header: "Number of Observations (7d)",
+      header: t("observations7d"),
       id: "numberOfObservations",
       size: 170,
       hideBelowMd: true,
@@ -381,7 +384,7 @@ export function PromptTable() {
     },
     {
       accessorKey: "tags",
-      header: "Tags",
+      header: t("tags"),
       id: "tags",
       enableSorting: true,
       size: 120,
@@ -413,7 +416,7 @@ export function PromptTable() {
     {
       accessorKey: "id",
       id: "actions",
-      header: "Actions",
+      header: t("actions"),
       size: 70,
       enableSorting: false,
       cell: ({ row }) => {

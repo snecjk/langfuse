@@ -11,6 +11,8 @@
  * input so focus and the current query survive panel resizing.
  */
 
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tracingMessages } from "@/src/features/i18n/messages/tracing";
 import { useSearch } from "@/src/features/traces/contexts/SearchProvider";
 import { useSelection } from "@/src/features/traces/contexts/SelectionProvider";
 import { useTraceData } from "@/src/features/traces/contexts/TraceDataProvider";
@@ -127,6 +129,7 @@ function TracePanelNavigationHeaderExpanded({
   isPanelCollapsed,
   onTogglePanel,
 }: TracePanelNavigationHeaderProps) {
+  const t = useTranslation(tracingMessages);
   const { searchInputValue, setSearchInputValue, setSearchQueryImmediate } =
     useSearch();
   const { expandAll, collapseAll, collapsedNodes } = useSelection();
@@ -222,7 +225,7 @@ function TracePanelNavigationHeaderExpanded({
         ) : (
           <FoldVertical size="base" color="default" __rawClassName="mr-2" />
         )}
-        {isEverythingCollapsed ? "Expand all" : "Collapse all"}
+        {isEverythingCollapsed ? t("expandAll") : t("collapseAll")}
       </DropdownMenuItem>
       <DropdownMenuSeparator />
       <TraceViewOptionsMenuItems />
@@ -239,7 +242,7 @@ function TracePanelNavigationHeaderExpanded({
       <CommandInput
         showBorder={false}
         variant="toolbar"
-        placeholder="Search"
+        placeholder={t("search")}
         className="@max-[299px]/navheader:placeholder:text-muted-foreground min-w-0 border-0 pr-0 focus:ring-0 @max-[299px]/navheader:h-[1.625rem]"
         value={searchInputValue}
         onValueChange={setSearchInputValue}
@@ -277,7 +280,9 @@ function TracePanelNavigationHeaderExpanded({
                 onClick={handleToggleTreeNodes}
                 variant="ghost"
                 size="icon"
-                title={isEverythingCollapsed ? "Expand all" : "Collapse all"}
+                title={
+                  isEverythingCollapsed ? t("expandAll") : t("collapseAll")
+                }
                 className="h-7 w-7"
               >
                 {isEverythingCollapsed ? (
@@ -296,8 +301,8 @@ function TracePanelNavigationHeaderExpanded({
                   <Button
                     variant="ghost"
                     size="icon"
-                    title="More"
-                    aria-label="More options"
+                    title={t("more")}
+                    aria-label={t("moreOptions")}
                     className="h-7 w-7"
                   >
                     <MoreVertical size="base" color="default" />
@@ -337,7 +342,7 @@ function TracePanelNavigationHeaderExpanded({
                       disabled={Boolean(graphDisabledReason)}
                     >
                       <span className="flex min-w-0 flex-col">
-                        <span>Graph</span>
+                        <span>{t("graph")}</span>
                         {graphDisabledReason && (
                           <span className="text-muted-foreground text-xs font-normal">
                             {graphDisabledReason}
@@ -353,7 +358,7 @@ function TracePanelNavigationHeaderExpanded({
                     <Button
                       variant="outline"
                       size="sm"
-                      aria-label="Select trace view"
+                      aria-label={t("selectTraceView")}
                       className="h-7 min-w-20 justify-between gap-1 px-2 text-xs font-bold"
                     >
                       {TRACE_VIEW_LABELS[activeView]}
@@ -406,17 +411,18 @@ function ViewModeSwitch({
   graphDisabledReason?: string;
   onSelect: (view: TraceViewMode) => void;
 }) {
+  const t = useTranslation(tracingMessages);
   return (
     <Tabs
       value={activeView}
       onValueChange={(value) => onSelect(value as TraceViewMode)}
     >
-      <Tabs.List variant="inset" size="md" aria-label="Trace view">
-        <Tabs.Trigger value="tree" label="Tree" />
+      <Tabs.List variant="inset" size="md" aria-label={t("traceView")}>
+        <Tabs.Trigger value="tree" label={t("tree")} />
         {/* One Timeline. What it IS depends on the Compact Timeline feature
             preview — see TracePanelNavigation — rather than on a third segment
             the user has to understand. */}
-        <Tabs.Trigger value="timeline" label="Timeline" />
+        <Tabs.Trigger value="timeline" label={t("timeline")} />
         {graphDisabledReason ? (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -424,13 +430,13 @@ function ViewModeSwitch({
                 tabIndex={0}
                 className="focus-visible:ring-ring rounded-sm focus-visible:ring-2 focus-visible:outline-hidden"
               >
-                <Tabs.Trigger value="graph" disabled label="Graph" />
+                <Tabs.Trigger value="graph" disabled label={t("graph")} />
               </span>
             </TooltipTrigger>
             <TooltipContent>{graphDisabledReason}</TooltipContent>
           </Tooltip>
         ) : (
-          <Tabs.Trigger value="graph" label="Graph" />
+          <Tabs.Trigger value="graph" label={t("graph")} />
         )}
       </Tabs.List>
     </Tabs>

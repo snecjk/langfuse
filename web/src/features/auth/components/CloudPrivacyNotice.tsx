@@ -3,12 +3,13 @@ import { authMessages } from "@/src/features/i18n/messages/auth";
 
 export const CloudPrivacyNotice = ({ action }: { action: string }) => {
   const t = useTranslation(authMessages);
-  const localizedAction =
-    action === "signing in"
-      ? t("signingIn")
-      : action === "signing up"
-        ? t("signingUp")
-        : action;
+  const actions: Record<string, string> = {
+    "signing in": t("signingIn"),
+    "signing up": t("signingUp"),
+  };
+  const localizedAction = Object.hasOwn(actions, action)
+    ? actions[action]
+    : action;
   return (
     <div className="text-muted-foreground mx-auto mt-10 max-w-lg text-center text-xs">
       {t("privacyPrefix", { action: localizedAction })}{" "}

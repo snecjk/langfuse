@@ -15,7 +15,7 @@ import { ConnectedCloneDashboardDialogController } from "@/src/features/dashboar
 import { useRouter } from "next/router";
 import { DialogController } from "@/src/components/ui/dialog";
 import { ConfirmationDialogController } from "@/src/components/design-system/ConfirmationDialogController/ConfirmationDialogController";
-import { PaginationBar } from "@/src/components/design-system/PaginationBar/PaginationBar";
+import { PaginationBar } from "@/src/features/i18n/components/PaginationBar/PaginationBar";
 import { type AsyncTableData } from "@/src/components/design-system/table/Table";
 import { assertUnreachable } from "@/src/utils/types";
 import { DashboardTable, type DashboardTableRow } from "./DashboardTable";

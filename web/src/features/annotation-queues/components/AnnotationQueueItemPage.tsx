@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-deprecated -- Legacy UI usage retained during migration to design-system components. */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 import { Card } from "@/src/components/ui/card";
 import { Skeleton } from "@/src/components/ui/skeleton";
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
@@ -84,6 +86,7 @@ function AnnotationQueueRunLoader({
   singleItem,
   sessionReady,
 }: QueuePageProps & { singleItem: boolean; sessionReady: boolean }) {
+  const t = useTranslation(evaluationsMessages);
   const router = useRouter();
   const runId = useId();
   const queryClient = useQueryClient();
@@ -157,8 +160,8 @@ function AnnotationQueueRunLoader({
   if (bootstrap.isError) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3">
-        <p>Unable to load the annotation queue.</p>
-        <Button onClick={() => bootstrap.refetch()}>Try again</Button>
+        <p>{t("queueLoadError")}</p>
+        <Button onClick={() => bootstrap.refetch()}>{t("tryAgain")}</Button>
       </div>
     );
   }
@@ -186,6 +189,7 @@ function AnnotationQueueRunContent({
   run: AnnotationQueueRun;
   dependencies: QueueRunDependencies;
 }) {
+  const t = useTranslation(evaluationsMessages);
   const {
     history,
     progressIndex,
@@ -388,10 +392,7 @@ function AnnotationQueueRunContent({
 
   if (!relevantItem && !(itemId && seenItemIds.includes(itemId))) {
     return (
-      <SplashScreen
-        title="All queue items processed"
-        description="There are no more items left to annotate."
-      />
+      <SplashScreen title={t("allProcessed")} description={t("noItemsLeft")} />
     );
   }
 
@@ -463,7 +464,7 @@ function AnnotationQueueRunContent({
             disabled={isTransitioning || !hasAccess}
             onClick={() => run.actions.retry(dependencies)}
           >
-            Try again
+            {t("tryAgain")}
           </Button>
         </div>
       )}
@@ -473,7 +474,10 @@ function AnnotationQueueRunContent({
             <span className="bg-muted grid h-9 min-w-16 items-center rounded-md p-1 text-center text-sm">
               {progressIndex + 1} / {totalItems}
             </span>
-            <Tooltip label="Previous item" shortcut={{ keys: ["ArrowLeft"] }}>
+            <Tooltip
+              label={t("previousItem")}
+              shortcut={{ keys: ["ArrowLeft"] }}
+            >
               {({ getTriggerProps }) => (
                 <Button
                   {...getTriggerProps()}
@@ -488,7 +492,7 @@ function AnnotationQueueRunContent({
                     shortcutPulse === "back" &&
                       "border-primary/60 bg-accent/60 ring-primary/20 ring-2",
                   )}
-                  aria-label="Previous item"
+                  aria-label={t("previousItem")}
                 >
                   <ArrowLeft size="base" color="default" />
                 </Button>
@@ -505,7 +509,7 @@ function AnnotationQueueRunContent({
               type="button"
               onClick={() => setShowShortcuts(true)}
               className="text-muted-foreground hover:text-foreground hidden items-center gap-1 text-[11px] transition-colors lg:flex"
-              aria-label="Show keyboard shortcuts"
+              aria-label={t("showShortcuts")}
             >
               <KeyboardShortcut size="sm" keys={["?"]} />
               shortcuts
@@ -514,10 +518,7 @@ function AnnotationQueueRunContent({
         )}
         <div className="flex w-full min-w-[265px] items-center justify-end gap-2">
           {!isSingleItem && (
-            <Tooltip
-              label="Skip to next item"
-              shortcut={{ keys: ["ArrowRight"] }}
-            >
+            <Tooltip label={t("nextItem")} shortcut={{ keys: ["ArrowRight"] }}>
               {({ getTriggerProps }) => (
                 <Button
                   {...getTriggerProps()}
@@ -533,7 +534,7 @@ function AnnotationQueueRunContent({
                       "border-primary/60 bg-accent/60 ring-primary/20 ring-2",
                   )}
                   variant="outline"
-                  aria-label="Skip to next item"
+                  aria-label={t("nextItem")}
                 >
                   <ArrowRight size="base" color="default" />
                 </Button>
@@ -543,11 +544,7 @@ function AnnotationQueueRunContent({
           {!!relevantItem &&
             (isPending ? (
               <Tooltip
-                label={
-                  isSingleItem
-                    ? "Mark completed"
-                    : "Mark completed + go to next item"
-                }
+                label={isSingleItem ? t("markCompleted") : t("completeNext")}
                 shortcut={isSingleItem ? undefined : { keys: ["Mod", "Enter"] }}
               >
                 {({ getTriggerProps }) => (
@@ -563,7 +560,7 @@ function AnnotationQueueRunContent({
                       isTransitioning || !hasAccess || objectData.isError
                     }
                   >
-                    <span>Mark Completed</span>
+                    <span>{t("markCompletedButton")}</span>
                     {!isSingleItem && (
                       <span className="hidden md:inline-flex">
                         <KeyboardShortcut
@@ -577,7 +574,7 @@ function AnnotationQueueRunContent({
               </Tooltip>
             ) : (
               <div className="border-dark-green bg-light-green inline-flex h-9 w-full items-center justify-center rounded-md border px-8 text-sm font-bold">
-                Completed
+                {t("completed")}
               </div>
             ))}
         </div>
@@ -587,41 +584,41 @@ function AnnotationQueueRunContent({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-base">
               <Keyboard size="base" />
-              Keyboard shortcuts
+              {t("shortcuts")}
             </DialogTitle>
           </DialogHeader>
           <DialogBody className="gap-4 py-3">
             <div>
               <p className="text-muted-foreground mb-1 text-xs font-bold tracking-wide uppercase">
-                Navigate
+                {t("navigate")}
               </p>
-              <ShortcutRow label="Complete & go to next item">
+              <ShortcutRow label={t("completeNextShortcut")}>
                 <KeyboardShortcut size="sm" keys={["Mod", "Enter"]} />
               </ShortcutRow>
-              <ShortcutRow label="Skip to next item">
+              <ShortcutRow label={t("nextItem")}>
                 <KeyboardShortcut size="sm" keys={["ArrowRight"]} />
               </ShortcutRow>
-              <ShortcutRow label="Previous item">
+              <ShortcutRow label={t("previousItem")}>
                 <KeyboardShortcut size="sm" keys={["ArrowLeft"]} />
               </ShortcutRow>
             </div>
             <div>
               <p className="text-muted-foreground mb-1 text-xs font-bold tracking-wide uppercase">
-                Score the item
+                {t("scoreItem")}
               </p>
-              <ShortcutRow label="Move between score fields">
+              <ShortcutRow label={t("moveScoreFields")}>
                 <KeyboardShortcut size="sm" keys={["ArrowUp"]} />
                 <KeyboardShortcut size="sm" keys={["ArrowDown"]} />
               </ShortcutRow>
-              <ShortcutRow label="Select an option on the focused field">
+              <ShortcutRow label={t("selectOption")}>
                 <KeyboardShortcut size="sm" keys={["1"]} />
                 <span className="text-muted-foreground text-xs">–</span>
                 <KeyboardShortcut size="sm" keys={["9"]} />
               </ShortcutRow>
-              <ShortcutRow label="Edit a field / open a dropdown">
+              <ShortcutRow label={t("editField")}>
                 <KeyboardShortcut size="sm" keys={["Enter"]} />
               </ShortcutRow>
-              <ShortcutRow label="Commit a number / leave a text field">
+              <ShortcutRow label={t("commitField")}>
                 <KeyboardShortcut size="sm" keys={["Escape"]} />
                 <span className="text-muted-foreground text-xs">/</span>
                 <KeyboardShortcut size="sm" keys={["Tab"]} />

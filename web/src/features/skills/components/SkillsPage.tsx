@@ -27,7 +27,7 @@ import { Button as DesignSystemButton } from "@/src/components/design-system/But
 import { DropdownMenu } from "@/src/components/design-system/DropdownMenu/DropdownMenu";
 import { Dialog } from "@/src/components/design-system/Dialog/Dialog";
 import { DialogController } from "@/src/components/design-system/DialogController/DialogController";
-import { PaginationBar } from "@/src/components/design-system/PaginationBar/PaginationBar";
+import { PaginationBar } from "@/src/features/i18n/components/PaginationBar/PaginationBar";
 import { SplashScreen } from "@/src/components/ui/SplashScreen";
 import {
   Table,

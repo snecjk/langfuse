@@ -1,3 +1,8 @@
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
+import { tracingMessages } from "@/src/features/i18n/messages/tracing";
 import { memo } from "react";
 import { UpsertModelFormDialogController } from "@/src/features/models/components/UpsertModelFormDialog/UpsertModelFormDialogController";
 import {
@@ -83,6 +88,8 @@ export const ObservationDetailViewHeader = memo(
     treeNodeTotalCost,
   }: ObservationDetailViewHeaderProps) {
     const { serverScores } = useTraceData();
+    const t = useTranslation(tracingMessages);
+    const locale = useInterfaceLocale();
     const { isAnnotationMode } = useViewPreferences();
     const { isV4: isV4Enabled } = useReadPath();
     const companionTrace = isV4Enabled
@@ -117,6 +124,7 @@ export const ObservationDetailViewHeader = memo(
     const preparedDate = buildLocalIsoDatePresentation({
       date: observation.startTime,
       accuracy: "millisecond",
+      locale,
     });
     if (preparedDate)
       metrics.push({
@@ -278,8 +286,8 @@ export const ObservationDetailViewHeader = memo(
 
     const commentLabel =
       commentCount && !commentDrawerControl.disabled
-        ? `Comments (${commentCount})`
-        : "Comment";
+        ? t("commentCount", { count: commentCount })
+        : t("comment");
     return (
       <UpsertModelFormDialogController
         action="create"
@@ -318,8 +326,8 @@ export const ObservationDetailViewHeader = memo(
                 {({ disabled: annotationDisabled, openDrawer }) => (
                   <ConnectedDetailHeaderActionsMenuController
                     idItems={[
-                      { id: traceId, name: "Trace ID" },
-                      { id: observation.id, name: "Observation ID" },
+                      { id: traceId, name: t("traceId") },
+                      { id: observation.id, name: t("observationId") },
                     ]}
                     observationType={observation.type}
                     projectId={projectId}
@@ -378,7 +386,7 @@ export const ObservationDetailViewHeader = memo(
                               {
                                 id: "add-to",
                                 type: "dropdown",
-                                label: "Add to",
+                                label: t("addTo"),
                                 icon: PlusIcon,
                                 disabled: !observationWithIO,
                                 items: addToItems,
@@ -388,7 +396,7 @@ export const ObservationDetailViewHeader = memo(
                                     {
                                       id: "annotate",
                                       type: "button" as const,
-                                      label: "Annotate",
+                                      label: t("annotate"),
                                       icon: annotationDisabled
                                         ? LockIcon
                                         : SquarePen,
@@ -410,7 +418,7 @@ export const ObservationDetailViewHeader = memo(
                               {
                                 id: "options",
                                 type: "dropdown",
-                                label: "Options",
+                                label: t("options"),
                                 icon: EllipsisVertical,
                                 iconOnly: true,
                                 placement: "trailing",

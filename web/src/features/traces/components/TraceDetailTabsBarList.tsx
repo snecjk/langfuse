@@ -1,3 +1,5 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tracingMessages } from "@/src/features/i18n/messages/tracing";
 import { type ReactNode } from "react";
 
 import { Tabs } from "@/src/components/design-system/Tabs/Tabs";
@@ -6,11 +8,11 @@ import { cn } from "@/src/utils/tailwind";
 
 import type { DetailTab } from "../contexts/SelectionProvider";
 
-const labels: Record<DetailTab, string> = {
-  preview: "Preview",
-  attributes: "Metadata",
-  scores: "Scores",
-  log: "Log View",
+const labels: Record<DetailTab, keyof typeof tracingMessages.en> = {
+  preview: "preview",
+  attributes: "metadata",
+  scores: "scores",
+  log: "logView",
 };
 
 const rowClassName = "flex h-9 shrink-0 items-center border-b";
@@ -59,14 +61,19 @@ function LoadedTraceDetailTabsBarList({
   logViewDescription,
   trailingControls,
 }: TraceDetailTabsBarListProps) {
+  const t = useTranslation(tracingMessages);
   return (
     <div className={rowClassName}>
-      <Tabs.List variant="underline" overflow="menu" aria-label="Detail views">
+      <Tabs.List
+        variant="underline"
+        overflow="menu"
+        aria-label={t("detailViews")}
+      >
         {tabs.map((tab) => (
           <Tabs.Trigger
             key={tab}
             value={tab}
-            label={labels[tab]}
+            label={t(labels[tab])}
             tooltip={tab === "log" ? logViewDescription : undefined}
           />
         ))}

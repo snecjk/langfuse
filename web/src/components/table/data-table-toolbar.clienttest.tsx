@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { vi } from "vitest";
+import { I18nProvider, useLocale } from "@/src/features/i18n/I18nProvider";
 import type { ColumnDefinition } from "@langfuse/shared";
 import { ExperimentDisplaySettings } from "@/src/features/experiments/components/ExperimentDisplaySettings";
 import {
@@ -53,6 +54,35 @@ const baseMultiSelect = (overrides: Partial<MultiSelect>): MultiSelect => ({
 
 const selectedIds = (count: number) =>
   Array.from({ length: count }, (_, i) => `row-${i}`);
+
+it("switches toolbar language without losing an unsubmitted search draft or selection", () => {
+  function LanguageButton() {
+    const { setLocale } = useLocale();
+    return <button onClick={() => setLocale("zh-CN")}>简体中文</button>;
+  }
+  render(
+    <I18nProvider initialLocale="en">
+      <LanguageButton />
+      <DataTableToolbar
+        columns={[]}
+        tableName="test-table"
+        searchConfig={{ tableAllowsFullTextSearch: true, updateQuery: vi.fn() }}
+        multiSelect={baseMultiSelect({
+          totalCount: 500,
+          selectedRowIds: selectedIds(50),
+        })}
+      />
+    </I18nProvider>,
+  );
+  fireEvent.change(screen.getByPlaceholderText("Search..."), {
+    target: { value: "Settings" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "简体中文" }));
+  expect(screen.getByPlaceholderText("搜索…")).toHaveValue("Settings");
+  expect(
+    screen.getByRole("button", { name: "选择全部 500 项（共 10 页）" }),
+  ).toBeInTheDocument();
+});
 
 describe("DataTableToolbar select-all banner gate", () => {
   describe("exact-count tables (v3)", () => {

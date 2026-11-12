@@ -1,4 +1,6 @@
 /* eslint-disable no-nested-ternary */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 import { useRouter } from "next/router";
 import { useMemo, useEffect, useRef } from "react";
 import Page from "@/src/components/layouts/Page";
@@ -40,6 +42,7 @@ import { Spinner } from "@/src/components/design-system/Spinner/Spinner";
  *
  */
 export default function ScoresAnalyticsPage() {
+  const t = useTranslation(evaluationsMessages);
   const router = useRouter();
   const projectId = router.query.projectId as string;
 
@@ -193,8 +196,10 @@ export default function ScoresAnalyticsPage() {
   return (
     <Page
       headerProps={{
-        title: "Scores",
-        breadcrumb: [{ name: "Scores", href: `/project/${projectId}/scores` }],
+        title: t("scores"),
+        breadcrumb: [
+          { name: t("scores"), href: `/project/${projectId}/scores` },
+        ],
         help: {
           description:
             "A score is an evaluation of a trace or observation. It can be created from user feedback, model-based evaluations, or manual review. See docs to learn more.",
@@ -223,9 +228,9 @@ export default function ScoresAnalyticsPage() {
             <div className="bg-destructive/10 flex flex-col items-center justify-center gap-4 rounded-lg border p-12">
               <BarChart3 color="destructive" __rawClassName="h-12 w-12" />
               <div className="text-center">
-                <h3 className="text-lg font-bold">Error Loading Scores</h3>
+                <h3 className="text-lg font-bold">{t("errorLoading")}</h3>
                 <p className="text-muted-foreground mt-2 text-sm">
-                  Failed to load score data. Please try refreshing the page.
+                  {t("loadErrorHelp")}
                 </p>
               </div>
             </div>
@@ -233,10 +238,9 @@ export default function ScoresAnalyticsPage() {
             <div className="bg-muted/20 flex flex-col items-center justify-center gap-4 rounded-lg border p-12">
               <BarChart3 color="muted" __rawClassName="h-12 w-12" />
               <div className="text-center">
-                <h3 className="text-lg font-bold">No Scores Available</h3>
+                <h3 className="text-lg font-bold">{t("noScores")}</h3>
                 <p className="text-muted-foreground mt-2 text-sm">
-                  Create scores by adding evaluations to your traces and
-                  observations.
+                  {t("createScoresHelp")}
                 </p>
               </div>
             </div>
@@ -244,26 +248,22 @@ export default function ScoresAnalyticsPage() {
             <div className="bg-muted/20 flex flex-col items-center justify-center gap-6 rounded-lg border p-12">
               <BarChart3 color="muted" __rawClassName="h-16 w-16" />
               <div className="max-w-2xl text-center">
-                <h3 className="text-2xl font-bold">Select a Score</h3>
+                <h3 className="text-2xl font-bold">{t("selectScore")}</h3>
                 <p className="text-muted-foreground mt-3 text-base">
-                  Choose one or two scores from the dropdowns above to view
-                  analytics
+                  {t("selectScoresHelp")}
                 </p>
                 <div className="text-muted-foreground mt-6 space-y-3 text-sm">
                   <div className="bg-background/50 rounded-lg p-4">
                     <p className="text-foreground mb-1 font-bold">
-                      Single score selected:
+                      {t("singleSelected")}
                     </p>
-                    <p>View distribution and trends over time</p>
+                    <p>{t("trends")}</p>
                   </div>
                   <div className="bg-background/50 rounded-lg p-4">
                     <p className="text-foreground mb-1 font-bold">
-                      Two scores selected:
+                      {t("twoSelected")}
                     </p>
-                    <p>
-                      Compare scores with heatmaps, correlation analysis, and
-                      statistical metrics
-                    </p>
+                    <p>{t("compareHelp")}</p>
                   </div>
                 </div>
               </div>

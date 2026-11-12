@@ -1,3 +1,5 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { settingsMessages } from "@/src/features/i18n/messages/settings";
 import { Card } from "@/src/components/ui/card";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
@@ -21,6 +23,14 @@ import { useSession } from "next-auth/react";
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
 
 export default function RenameProject() {
+  const t = useTranslation(settingsMessages);
+  const localizeNameError = (message: string | undefined) => {
+    if (message === "Must have at least 3 characters")
+      return t("projectNameShort");
+    if (message === "Must have at most 60 characters")
+      return t("projectNameLong");
+    return message;
+  };
   const { update: updateSession } = useSession();
   const utils = api.useUtils();
   const { project } = useQueryProject();
@@ -62,20 +72,18 @@ export default function RenameProject() {
 
   return (
     <div>
-      <Header title="Project Name" />
+      <Header title={t("projectName")} />
       <Card className="mb-4 p-3">
         {form.getValues().name !== "" ? (
           <p className="text-primary mb-4 text-sm">
-            Your Project will be renamed from &quot;
-            {project?.name ?? ""}
-            &quot; to &quot;
-            <b>{form.watch().name}</b>&quot;.
+            {t("renamingProject", {
+              from: project?.name ?? "",
+              to: form.watch().name ?? "",
+            })}
           </p>
         ) : (
           <p className="text-primary mb-4 text-sm">
-            Your Project is currently named &quot;
-            <b>{project?.name ?? ""}</b>
-            &quot;.
+            {t("currentProjectName", { name: project?.name ?? "" })}
           </p>
         )}
         <Form {...form}>
@@ -98,7 +106,7 @@ export default function RenameProject() {
                         disabled={!hasAccess}
                       />
                       {!hasAccess && (
-                        <span title="No access">
+                        <span title={t("noAccess")}>
                           <LockIcon
                             size="base"
                             __rawClassName="text-muted absolute top-1/2 right-3 -translate-y-1/2 transform"
@@ -107,7 +115,9 @@ export default function RenameProject() {
                       )}
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage>
+                    {localizeNameError(form.formState.errors.name?.message)}
+                  </FormMessage>
                 </FormItem>
               )}
             />
@@ -119,7 +129,7 @@ export default function RenameProject() {
                 disabled={form.getValues().name === "" || !hasAccess}
                 className="mt-4"
               >
-                Save
+                {t("save")}
               </Button>
             )}
           </form>

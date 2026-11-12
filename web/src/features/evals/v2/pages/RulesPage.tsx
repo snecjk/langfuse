@@ -1,3 +1,5 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 import { useState } from "react";
 import { Plus } from "@langfuse/icons";
 import { useRouter } from "next/router";
@@ -14,6 +16,7 @@ import {
 import { V4MigrationUpdateRequiredBadge } from "@/src/features/v4-migration/V4MigrationDelayBadge";
 
 export function RulesPage() {
+  const t = useTranslation(evaluationsMessages);
   const router = useRouter();
   const projectId = router.query.projectId as string;
   const [createOpen, setCreateOpen] = useState(false);
@@ -31,18 +34,18 @@ export function RulesPage() {
   return (
     <Page
       headerProps={{
-        title: "Rules",
+        title: t("rules"),
         titleBadges: <V4MigrationUpdateRequiredBadge />,
         help: {
-          description:
-            "Rules define which incoming observations reusable evaluators run on.",
+          description: t("ruleHelp"),
         },
         actionButtonsRight: (
           <Button
             disabled={!hasWriteAccess}
             onClick={() => setCreateOpen(true)}
           >
-            <Plus size="base" color="default" __rawClassName="mr-2" /> New rule
+            <Plus size="base" color="default" __rawClassName="mr-2" />{" "}
+            {t("newRule")}
           </Button>
         ),
         tabsProps: {

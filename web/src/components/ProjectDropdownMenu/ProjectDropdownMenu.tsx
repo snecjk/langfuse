@@ -1,3 +1,9 @@
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
+import { translate } from "@/src/features/i18n/messages";
+import { workspaceMessages } from "@/src/features/i18n/messages/workspace";
 import { DropdownMenu } from "@/src/components/design-system/DropdownMenu/DropdownMenu";
 import { createProjectRoute } from "@/src/features/setup/setupRoutes";
 import { PlusIcon, Settings } from "@langfuse/icons";
@@ -22,6 +28,8 @@ type ProjectDropdownMenuProps = {
 );
 
 export function ProjectDropdownMenu(props: ProjectDropdownMenuProps) {
+  const t = useTranslation(workspaceMessages);
+  const locale = useInterfaceLocale();
   const { children, organizationId, canCreateProjects, getProjectPath } = props;
   const projects = props.state === "loaded" ? props.projects : null;
 
@@ -36,7 +44,9 @@ export function ProjectDropdownMenu(props: ProjectDropdownMenuProps) {
             href: getProjectPath(project.id),
             secondaryAction: {
               href: `/project/${project.id}/settings`,
-              ariaLabel: `Go to settings for ${project.name}`,
+              ariaLabel: translate(locale, workspaceMessages, "settingsFor", {
+                name: project.name,
+              }),
               icon: Settings,
             },
           }))
@@ -44,25 +54,25 @@ export function ProjectDropdownMenu(props: ProjectDropdownMenuProps) {
             type: "loading" as const,
             id: `loading-${index}`,
           })),
-    [getProjectPath, projects],
+    [getProjectPath, projects, locale],
   );
 
   return (
     <DropdownMenu
-      title="Projects"
+      title={t("projects")}
       headerAction={
         canCreateProjects
           ? {
-              text: "New",
-              tooltip: "New project",
+              text: t("new"),
+              tooltip: t("newProject"),
               href: createProjectRoute(organizationId),
               icon: PlusIcon,
             }
           : undefined
       }
       items={items}
-      search={{ placeholder: "Search projects..." }}
-      emptyText="No project found."
+      search={{ placeholder: t("searchProjects") }}
+      emptyText={t("noProjects")}
     >
       {children}
     </DropdownMenu>

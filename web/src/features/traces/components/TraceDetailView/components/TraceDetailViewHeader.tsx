@@ -1,3 +1,8 @@
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
+import { tracingMessages } from "@/src/features/i18n/messages/tracing";
 import { HeaderActionButton } from "@/src/components/HeaderActionButton";
 import { prepareTraceAnnotation } from "@/src/features/scores/lib/prepareTraceAnnotation";
 /**
@@ -126,11 +131,13 @@ function LoadedTraceDetailViewHeader({
   commentCount,
   commentDrawerControl,
 }: TraceDetailViewHeaderProps) {
+  const t = useTranslation(tracingMessages);
+  const locale = useInterfaceLocale();
   const { isAnnotationMode } = useViewPreferences();
   const { isV4 } = useReadPath();
   const isMobile = useIsMobile();
   const mobileActionsTriggerRef = useRef<HTMLButtonElement>(null);
-  const commentActionLabel = commentCount ? "Comments" : "Comment";
+  const commentActionLabel = commentCount ? t("comments") : t("comment");
   const mobileCommentActionLabel =
     commentCount && !commentDrawerControl.disabled
       ? `${commentActionLabel} (${commentCount})`
@@ -143,6 +150,7 @@ function LoadedTraceDetailViewHeader({
   const preparedDate = buildLocalIsoDatePresentation({
     date: trace.timestamp,
     accuracy: "millisecond",
+    locale,
   });
 
   const timestampBadge = preparedDate && (
@@ -174,7 +182,7 @@ function LoadedTraceDetailViewHeader({
                 }
                 options={
                   <ConnectedDetailHeaderActionsMenuController
-                    idItems={[{ id: trace.id, name: "Trace ID" }]}
+                    idItems={[{ id: trace.id, name: t("traceId") }]}
                     projectId={projectId}
                     webCallout={{
                       traceId: trace.id,
@@ -183,7 +191,7 @@ function LoadedTraceDetailViewHeader({
                   >
                     {({ getTriggerProps }) => (
                       <HeaderActionButton
-                        label="Options"
+                        label={t("options")}
                         icon={<EllipsisVertical size="base" color="default" />}
                         {...getTriggerProps()}
                       />
@@ -192,7 +200,7 @@ function LoadedTraceDetailViewHeader({
                 }
                 foldedActions={
                   <ConnectedDetailHeaderActionsMenuController
-                    idItems={[{ id: trace.id, name: "Trace ID" }]}
+                    idItems={[{ id: trace.id, name: t("traceId") }]}
                     projectId={projectId}
                     webCallout={{
                       traceId: trace.id,
@@ -208,7 +216,7 @@ function LoadedTraceDetailViewHeader({
                                 {
                                   type: "item" as const,
                                   id: "annotate",
-                                  title: "Annotate",
+                                  title: t("annotate"),
                                   icon: annotationDisabled
                                     ? LockIcon
                                     : SquarePen,
@@ -258,7 +266,7 @@ function LoadedTraceDetailViewHeader({
                           {
                             type: "submenu" as const,
                             id: "add-to",
-                            title: "Add to",
+                            title: t("addTo"),
                             icon: PlusIcon,
                             items: addToItems,
                           },
@@ -273,7 +281,7 @@ function LoadedTraceDetailViewHeader({
                           <Button
                             variant="outline"
                             size="icon"
-                            aria-label="More actions"
+                            aria-label={t("moreActions")}
                             className="ml-auto shrink-0"
                             {...getTriggerProps({
                               ref: mobileActionsTriggerRef,
@@ -364,7 +372,7 @@ function LoadedTraceDetailViewHeader({
                     >
                       {({ getTriggerProps }) => (
                         <HeaderActionButton
-                          label="Add to"
+                          label={t("addTo")}
                           icon={<PlusIcon size="base" />}
                           {...getTriggerProps()}
                         />
@@ -372,7 +380,7 @@ function LoadedTraceDetailViewHeader({
                     </DropdownMenu>
                     {!isAnnotationMode && (
                       <HeaderActionButton
-                        label="Annotate"
+                        label={t("annotate")}
                         icon={
                           annotationDisabled ? (
                             <LockIcon size="base" />

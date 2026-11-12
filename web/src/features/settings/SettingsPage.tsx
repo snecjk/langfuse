@@ -1,3 +1,5 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { settingsMessages } from "@/src/features/i18n/messages/settings";
 import { type ComponentProps, type ReactNode } from "react";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
@@ -26,6 +28,7 @@ const ACCOUNT_SECTION = "Account Settings";
 const ORGANIZATION_SECTION = "Organization";
 
 export function SettingsPage({ scope }: SettingsPageProps) {
+  const t = useTranslation(settingsMessages);
   const router = useRouter();
   const organization = useQueryOrganization();
   const accountPages = useAccountSettingsPages();
@@ -43,18 +46,25 @@ export function SettingsPage({ scope }: SettingsPageProps) {
 
   if (scope === "organization" && !organization) {
     return (
-      <ContainerPage headerProps={{ title: "Settings" }}>
+      <ContainerPage headerProps={{ title: t("settings") }}>
         <NoDataOrLoading isLoading />
       </ContainerPage>
     );
   }
 
   return (
-    <ContainerPage headerProps={{ title: "Settings" }}>
+    <ContainerPage headerProps={{ title: t("settings") }}>
       <PagedSettingsContainer
         activeSlug={activeSlug}
         pages={pages}
-        sectionHeaders={organizationSectionHeaders(organization?.id, pages)}
+        sectionHeaders={{
+          ...organizationSectionHeaders(organization?.id, pages),
+          [ACCOUNT_SECTION]: (
+            <span className="text-foreground flex h-8 items-center px-2 text-xs font-bold">
+              {t("accountSettings")}
+            </span>
+          ),
+        }}
       />
     </ContainerPage>
   );
@@ -62,6 +72,7 @@ export function SettingsPage({ scope }: SettingsPageProps) {
 
 /** Labels the org section; offers an org picker only when no org is in context */
 function OrganizationSectionHeader() {
+  const t = useTranslation(settingsMessages);
   const session = useSession();
   const organization = useQueryOrganization();
   const organizations = session.data?.user?.organizations;
@@ -69,7 +80,7 @@ function OrganizationSectionHeader() {
   return (
     <div className="flex flex-col gap-1">
       <span className="text-foreground flex h-8 items-center px-2 text-xs font-bold">
-        Org Settings
+        {t("orgSettings")}
       </span>
       {organization ? null : (
         <OrganizationDropdownMenu
@@ -85,7 +96,7 @@ function OrganizationSectionHeader() {
               className="border-border bg-background text-foreground hover:bg-muted flex h-8 w-full items-center justify-between gap-1 rounded-md border px-2 text-sm whitespace-nowrap"
               {...getTriggerProps()}
             >
-              <span>Select organization</span>
+              <span>{t("selectOrganization")}</span>
               <DropdownIndicator size="sm" nudge />
             </button>
           )}

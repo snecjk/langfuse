@@ -41,11 +41,10 @@ export default function EventsPage() {
   return (
     <Page
       headerProps={{
-        title: "Tracing - Events Table (New)",
+        title: t("eventsTitle"),
         divider: false,
         help: {
-          description:
-            "An observation captures a single function call in an application. This view uses the new ClickHouse events table.",
+          description: t("eventsHelp"),
           href: "https://langfuse.com/docs/observability/data-model",
         },
         tabsProps: {

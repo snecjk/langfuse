@@ -5,6 +5,22 @@ The language preference belongs to the current browser, not the account. The
 `langfuse-ui-locale` cookie lasts one year. Blocked cookies allow switching in the
 current page but cannot preserve that choice across reloads.
 
+## Choosing a language
+
+Use the selector at the top of the sign-in/sign-up layout or at the bottom of
+the expanded sidebar. The mobile account menu also offers 简体中文 and English.
+Switching keeps the current URL, filters and unsaved form inputs. The preference
+is saved for this site in this browser; it is not synchronized to your account
+or to another device or hostname.
+
+## Local development
+
+`pnpm run dev:web` serves the local source with hot reload. It requires the
+host-facing development environment and the database, Redis and storage
+dependencies. The default `docker compose up` runs prebuilt release images and
+does not load changes made in this checkout. Do not use that release container
+as evidence that a local translation has or has not taken effect.
+
 ## Ownership
 
 - `locale.ts`: browser-safe preference parsing and cookie serialization.

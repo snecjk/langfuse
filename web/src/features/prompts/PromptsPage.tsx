@@ -1,3 +1,5 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { catalogMessages } from "@/src/features/i18n/messages/catalog";
 import { useRouter } from "next/router";
 import { ActionButton } from "@/src/components/ActionButton";
 import Page from "@/src/components/layouts/Page";
@@ -20,6 +22,7 @@ import { showToast } from "@/src/features/notifications/showToast";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
 
 export default function PromptsPage() {
+  const t = useTranslation(catalogMessages);
   const router = useRouter();
   const projectId = router.query.projectId as string;
   const routeSegments = router.query.folder;
@@ -77,7 +80,7 @@ export default function PromptsPage() {
     } catch (error) {
       showToast({
         type: "ERROR",
-        title: "Failed to export prompts. Please try again.",
+        title: t("exportFailed"),
         analytics: classifyTrpcToastError(error, "prompt.export"),
       });
     } finally {
@@ -123,10 +126,9 @@ export default function PromptsPage() {
   return (
     <Page
       headerProps={{
-        title: "Prompts",
+        title: t("prompts"),
         help: {
-          description:
-            "Manage and version your prompts in Langfuse. Edit and update them via the UI and SDK. Retrieve the production version via the SDKs. Learn more in the docs.",
+          description: t("promptHelp"),
           href: "https://langfuse.com/docs/prompt-management/get-started",
         },
         actionButtonsRight: (
@@ -140,13 +142,13 @@ export default function PromptsPage() {
                   {
                     type: "item",
                     id: "latest",
-                    title: "Latest version per prompt",
+                    title: t("latestVersion"),
                     onClick: () => handleExport("latest"),
                   },
                   {
                     type: "item",
                     id: "all",
-                    title: "All versions",
+                    title: t("allVersions"),
                     onClick: () => handleExport("all"),
                   },
                 ]}
@@ -162,7 +164,7 @@ export default function PromptsPage() {
                       color="default"
                       __rawClassName="mr-1"
                     />
-                    {isExporting ? "Exporting…" : "Export"}
+                    {isExporting ? t("exporting") : t("export")}
                   </Button>
                 )}
               </DropdownMenu>
@@ -181,7 +183,7 @@ export default function PromptsPage() {
                       color="default"
                       __rawClassName="mr-1"
                     />
-                    Import
+                    {t("import")}
                   </Button>
                 )}
               </ImportPromptsButtonDialogController>
@@ -201,7 +203,7 @@ export default function PromptsPage() {
                   : undefined
               }
             >
-              New prompt
+              {t("newPrompt")}
             </ActionButton>
           </>
         ),

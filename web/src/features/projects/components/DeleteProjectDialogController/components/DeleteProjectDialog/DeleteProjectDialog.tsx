@@ -1,3 +1,5 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { settingsMessages } from "@/src/features/i18n/messages/settings";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertTriangle } from "@langfuse/icons";
 import { useId } from "react";
@@ -28,6 +30,7 @@ export type DeleteProjectDialogProps = {
 };
 
 export function DeleteProjectDialog(props: DeleteProjectDialogProps) {
+  const t = useTranslation(settingsMessages);
   const formId = useId();
   const formSchema = z.object({
     name: z.string().includes(props.confirmMessage, {
@@ -44,10 +47,11 @@ export function DeleteProjectDialog(props: DeleteProjectDialogProps) {
 
   return (
     <Dialog
-      title="Delete Project"
+      title={t("deleteProject")}
+      closeLabel={t("cancel")}
       actions={[
         {
-          label: "Delete project",
+          label: t("deleteProjectAction"),
           type: "submit",
           form: formId,
           variant: "destructive",
@@ -60,18 +64,16 @@ export function DeleteProjectDialog(props: DeleteProjectDialogProps) {
           <Dialog.Body>
             {props.gatewayOrganizationName ? (
               <Alert variant="warning" icon={AlertTriangle}>
-                <Alert.Title>This turns off the AI Gateway</Alert.Title>
+                <Alert.Title>{t("gatewayDisabled")}</Alert.Title>
                 <Alert.Description>
-                  {`This project receives the AI Gateway traces of ${props.gatewayOrganizationName}. Deleting it turns off the AI Gateway for the organization until you select a new ingestion project.`}
+                  {t("gatewayDeleteWarning", {
+                    organization: props.gatewayOrganizationName,
+                  })}
                 </Alert.Description>
               </Alert>
             ) : null}
-            <p>
-              Deletion takes time and scales with project size. For very large
-              projects, it can take multiple days. If deletion is slower than
-              you expect, please reach out to support.
-            </p>
-            <p>{`To confirm, type "${props.confirmMessage}" in the input box`}</p>
+            <p>{t("deletionTimeHelp")}</p>
+            <p>{t("confirmInput", { value: props.confirmMessage })}</p>
             <FormField
               control={form.control}
               name="name"
@@ -80,7 +82,11 @@ export function DeleteProjectDialog(props: DeleteProjectDialogProps) {
                   <FormControl>
                     <Input placeholder={props.confirmMessage} {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage>
+                    {form.formState.errors.name
+                      ? t("confirmValue", { value: props.confirmMessage })
+                      : undefined}
+                  </FormMessage>
                 </FormItem>
               )}
             />

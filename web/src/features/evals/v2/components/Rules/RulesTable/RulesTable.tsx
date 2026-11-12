@@ -1,4 +1,6 @@
 /* eslint-disable no-nested-ternary, @typescript-eslint/no-deprecated, react/no-unstable-nested-components -- Legacy UI usage retained during migration to design-system components. */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 import { useMemo, useRef, useState } from "react";
 import { formatDistanceToNowStrict } from "date-fns";
 import {
@@ -87,8 +89,11 @@ function RelativeDate({ date }: { date: Date }) {
 function RuleEvaluatorsCell({
   assignments,
 }: Pick<RuleTableRow, "assignments">) {
+  const t = useTranslation(evaluationsMessages);
   if (assignments.length === 0) {
-    return <span className="text-muted-foreground">No evaluators</span>;
+    return (
+      <span className="text-muted-foreground">{t("noAssignedEvaluators")}</span>
+    );
   }
 
   return (
@@ -120,6 +125,7 @@ export function RulesTable({
   projectId: string;
   hasWriteAccess: boolean;
 }) {
+  const t = useTranslation(evaluationsMessages);
   const router = useRouter();
   const capture = usePostHogClientCapture();
   const utils = api.useUtils();
@@ -248,7 +254,7 @@ export function RulesTable({
       {
         accessorKey: "name",
         id: "name",
-        header: "Name",
+        header: t("name"),
         size: 220,
         isFixedPosition: true,
         enableSorting: true,
@@ -287,7 +293,7 @@ export function RulesTable({
       {
         accessorKey: "enabled",
         id: "enabled",
-        header: "Enabled",
+        header: t("enabled"),
         size: 90,
         enableHiding: true,
         enableSorting: true,
@@ -302,7 +308,7 @@ export function RulesTable({
       createNumberTableColumn<RuleTableRow>({
         accessorFn: (row) => costs.data?.[row.id],
         id: "totalCost",
-        header: "Cost (7d)",
+        header: t("cost7d"),
         size: 110,
         enableHiding: true,
         formatter: (value) => usdFormatter(value, 2, 4),
@@ -316,7 +322,7 @@ export function RulesTable({
       {
         accessorKey: "assignments",
         id: "assignments",
-        header: "Evaluators",
+        header: t("evaluators"),
         size: 240,
         enableHiding: true,
         cell: ({ row }) => (
@@ -326,19 +332,19 @@ export function RulesTable({
       {
         accessorKey: "filter",
         id: "filter",
-        header: "Filters",
+        header: t("filters"),
         size: 300,
         enableHiding: true,
         cell: ({ row }) =>
           isLegacyEvalTarget(row.original.targetObject) ? (
-            <span className="text-muted-foreground">Not available</span>
+            <span className="text-muted-foreground">{t("notAvailable")}</span>
           ) : (
             <RuleFilterPills filter={row.original.filter} />
           ),
       },
       createNumberTableColumn<RuleTableRow>({
         accessorKey: "sampling",
-        header: "Sampling",
+        header: t("sampling"),
         size: 100,
         enableHiding: true,
         enableSorting: true,
@@ -346,7 +352,7 @@ export function RulesTable({
       }),
       createUserTableColumn<RuleTableRow>({
         accessorKey: "createdByUser",
-        header: "Created by",
+        header: t("createdBy"),
         size: 180,
         enableHiding: true,
         variant: "text",
@@ -355,7 +361,7 @@ export function RulesTable({
       {
         accessorKey: "createdAt",
         id: "createdAt",
-        header: "Created at",
+        header: t("createdAt"),
         size: 180,
         enableHiding: true,
         defaultHidden: true,
@@ -365,7 +371,7 @@ export function RulesTable({
       {
         accessorKey: "updatedAt",
         id: "updatedAt",
-        header: "Updated at",
+        header: t("updatedAt"),
         size: 180,
         enableHiding: true,
         enableSorting: true,
@@ -374,7 +380,7 @@ export function RulesTable({
       {
         accessorKey: "id",
         id: "actions",
-        header: "Actions",
+        header: t("actions"),
         size: 180,
         isFixedPosition: true,
         enableSorting: false,
@@ -396,7 +402,8 @@ export function RulesTable({
                   router.push(ruleExecutionsUrl(projectId, row.original.id));
                 }}
               >
-                View traces <ExternalLink size="base" __rawClassName="ml-1" />
+                {t("viewTraces")}{" "}
+                <ExternalLink size="base" __rawClassName="ml-1" />
               </Button>
               <DropdownMenu
                 placement="bottom-end"
@@ -406,7 +413,7 @@ export function RulesTable({
                         {
                           type: "item" as const,
                           id: "edit",
-                          title: "Edit",
+                          title: t("edit"),
                           icon: Pencil,
                           onClick: () => setEditRuleId(row.original.id),
                         },
@@ -415,22 +422,22 @@ export function RulesTable({
                   {
                     type: "item",
                     id: "clone",
-                    title: "Clone",
+                    title: t("clone"),
                     icon: Copy,
                     disabled:
                       hasWriteAccess && navigationAction === "edit"
                         ? undefined
-                        : { reason: "This rule cannot be cloned" },
+                        : { reason: t("cannotCloneRule") },
                     onClick: () => setCloneRule(row.original),
                   },
                   {
                     type: "item",
                     id: "delete",
-                    title: "Delete",
+                    title: t("delete"),
                     icon: Trash2,
                     disabled: hasWriteAccess
                       ? undefined
-                      : { reason: "Missing permission to delete rules" },
+                      : { reason: t("cannotDeleteRule") },
                     onClick: () => setDeleteIds([row.original.id]),
                   },
                 ]}
@@ -440,7 +447,7 @@ export function RulesTable({
                     type="button"
                     variant="ghost"
                     size="icon-xs"
-                    aria-label={`Actions for ${row.original.name}`}
+                    aria-label={t("actionsFor", { name: row.original.name })}
                     {...getTriggerProps()}
                   >
                     <MoreVertical size="sm" color="default" />
@@ -461,6 +468,7 @@ export function RulesTable({
       capture,
       selectActionColumn,
       setEditRuleId,
+      t,
     ],
   );
   const [columnVisibility, setColumnVisibility] =
@@ -636,7 +644,7 @@ export function RulesTable({
                   });
                 },
               }}
-              noResultsMessage="No evaluation rules found."
+              noResultsMessage={t("noRules")}
               onRowClick={(rule) => {
                 const navigationAction = getRuleNavigationAction(rule);
                 if (navigationAction === "remap") {

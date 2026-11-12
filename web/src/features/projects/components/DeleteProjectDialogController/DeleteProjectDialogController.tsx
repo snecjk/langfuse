@@ -1,3 +1,5 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { settingsMessages } from "@/src/features/i18n/messages/settings";
 import { type ReactNode } from "react";
 
 import { Dialog } from "@/src/components/design-system/Dialog/Dialog";
@@ -20,6 +22,7 @@ type DeleteProjectDialogControllerProps = {
 export function DeleteProjectDialogController({
   children,
 }: DeleteProjectDialogControllerProps) {
+  const t = useTranslation(settingsMessages);
   const capture = usePostHogClientCapture();
   const { project, organization } = useQueryProject();
   const confirmMessage = `${organization?.name}/${project?.name}`
@@ -61,8 +64,8 @@ export function DeleteProjectDialogController({
         if (isGatewayIngestionProject && !canManageGateway) {
           return (
             <Dialog
-              title="Project cannot be deleted"
-              text="This project receives the organization's AI Gateway traces. Only members who can manage the AI Gateway can delete it."
+              title={t("projectCannotDelete")}
+              text={t("gatewayDeletePermission")}
             />
           );
         }

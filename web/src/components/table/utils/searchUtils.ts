@@ -1,3 +1,6 @@
+import { type Locale } from "@/src/features/i18n/locale";
+import { translate } from "@/src/features/i18n/messages";
+import { tableMessages } from "@/src/features/i18n/messages/table";
 import type { TracingSearchType } from "@langfuse/shared";
 
 // Helper function to get the current search mode value for the radio group
@@ -16,12 +19,17 @@ export function getSearchMode(
 export function getSearchButtonLabel(
   searchType: TracingSearchType[] | undefined,
   metadataLabel?: string,
+  locale: Locale = "en",
 ): string {
-  if (!searchType) return metadataLabel ?? "IDs / Names";
-  if (searchType.includes("content")) return "Full Text: Content";
-  if (searchType.includes("input")) return "Full Text: Input";
-  if (searchType.includes("output")) return "Full Text: Output";
-  return metadataLabel ?? "IDs / Names";
+  if (!searchType)
+    return metadataLabel ?? translate(locale, tableMessages, "idsNames");
+  if (searchType.includes("content"))
+    return translate(locale, tableMessages, "fullTextContent");
+  if (searchType.includes("input"))
+    return translate(locale, tableMessages, "fullTextInput");
+  if (searchType.includes("output"))
+    return translate(locale, tableMessages, "fullTextOutput");
+  return metadataLabel ?? translate(locale, tableMessages, "idsNames");
 }
 
 export function hasFullTextSearchType(

@@ -1,4 +1,6 @@
 /* eslint-disable @repo/no-abstracted-overlay-trigger */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { catalogMessages } from "@/src/features/i18n/messages/catalog";
 import { Button } from "@/src/components/ui/button";
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
 import { api } from "@/src/utils/api";
@@ -12,6 +14,7 @@ import {
 import useProjectIdFromURL from "@/src/hooks/useProjectIdFromURL";
 
 export function DeletePrompt({ promptName }: { promptName: string }) {
+  const t = useTranslation(catalogMessages);
   const projectId = useProjectIdFromURL();
   const utils = api.useUtils();
   const [isOpen, setIsOpen] = useState(false);
@@ -32,23 +35,27 @@ export function DeletePrompt({ promptName }: { promptName: string }) {
   return (
     <Popover open={isOpen} onOpenChange={() => setIsOpen(!isOpen)}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="xs" disabled={!hasAccess}>
+        <Button
+          variant="ghost"
+          size="xs"
+          disabled={!hasAccess}
+          aria-label={t("deletePrompt")}
+        >
           <Trash size="sm" color="default" />
         </Button>
       </PopoverTrigger>
       <PopoverContent>
-        <h2 className="mb-3 font-bold">Please confirm</h2>
+        <h2 className="mb-3 font-bold">{t("confirm")}</h2>
         <p className="mb-3 text-sm">
-          This action permanently deletes this prompt. All requests to fetch
-          prompt{" "}
+          {t("deletePromptPrefix")}{" "}
           <code className="bg-muted relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm font-bold">
             {promptName}
           </code>{" "}
-          will error.
+          {t("deletePromptSuffix")}
         </p>
         {error && (
           <div className="mb-3 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            <p className="font-bold">Error:</p>
+            <p className="font-bold">{t("error")}</p>
             <p className="whitespace-pre-wrap">{error}</p>
           </div>
         )}
@@ -70,7 +77,7 @@ export function DeletePrompt({ promptName }: { promptName: string }) {
               });
             }}
           >
-            Delete Prompt
+            {t("deletePrompt")}
           </Button>
         </div>
       </PopoverContent>

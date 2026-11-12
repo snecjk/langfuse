@@ -1,3 +1,9 @@
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
+import { translate } from "@/src/features/i18n/messages";
+import { workspaceMessages } from "@/src/features/i18n/messages/workspace";
 import { DropdownMenu } from "@/src/components/design-system/DropdownMenu/DropdownMenu";
 import { PlusIcon, Settings } from "@langfuse/icons";
 import { type Session } from "next-auth";
@@ -20,6 +26,8 @@ type OrganizationDropdownMenuProps = {
 );
 
 export function OrganizationDropdownMenu(props: OrganizationDropdownMenuProps) {
+  const t = useTranslation(workspaceMessages);
+  const locale = useInterfaceLocale();
   const { canCreateOrganizations, children, getOrgPath } = props;
   const organizations = props.state === "loaded" ? props.organizations : null;
 
@@ -46,32 +54,37 @@ export function OrganizationDropdownMenu(props: OrganizationDropdownMenuProps) {
                 href: getOrgPath(organization.id),
                 secondaryAction: {
                   href: `/organization/${organization.id}/settings`,
-                  ariaLabel: `Go to settings for ${organization.name}`,
+                  ariaLabel: translate(
+                    locale,
+                    workspaceMessages,
+                    "settingsFor",
+                    { name: organization.name },
+                  ),
                   icon: Settings,
                 },
               },
             ])
         : [{ type: "loading" as const, id: "loading" }]),
     ],
-    [getOrgPath, organizations],
+    [getOrgPath, organizations, locale],
   );
 
   return (
     <DropdownMenu
-      title="Organizations"
+      title={t("organizations")}
       headerAction={
         canCreateOrganizations
           ? {
-              text: "New",
-              tooltip: "New organization",
+              text: t("new"),
+              tooltip: t("newOrganization"),
               href: createOrganizationRoute,
               icon: PlusIcon,
             }
           : undefined
       }
       items={items}
-      search={{ placeholder: "Search organizations..." }}
-      emptyText="No organization found."
+      search={{ placeholder: t("searchOrganizations") }}
+      emptyText={t("noOrganizations")}
     >
       {children}
     </DropdownMenu>

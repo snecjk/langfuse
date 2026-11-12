@@ -1,6 +1,9 @@
 import { type Messages } from "../messages";
 export const coreMessages = {
   en: {
+    eventsTitle: "Tracing - Events Table (New)",
+    eventsHelp:
+      "An observation captures a single function call in an application. This view uses the new ClickHouse events table.",
     tracing: "Tracing",
     traceHelp:
       "A trace represents a single function/api invocation. Traces contain observations. See [docs](https://langfuse.com/docs/observability/data-model) to learn more.",
@@ -52,6 +55,9 @@ export const coreMessages = {
     noLinkedGeneration: "No linked generation yet",
   },
   "zh-CN": {
+    eventsTitle: "追踪 - 事件表（新版）",
+    eventsHelp:
+      "观察记录应用中的单次函数调用。此视图使用新的 ClickHouse 事件表。",
     tracing: "追踪",
     traceHelp:
       "追踪表示单次函数或 API 调用，其中包含观察。请参阅[文档](https://langfuse.com/docs/observability/data-model)了解更多。",

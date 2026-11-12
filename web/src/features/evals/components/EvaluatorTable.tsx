@@ -1,4 +1,6 @@
 /* eslint-disable no-nested-ternary, @typescript-eslint/no-deprecated, react/no-unstable-nested-components -- Legacy UI usage retained during migration to design-system components. */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 import { encodeFiltersGeneric } from "@langfuse/shared";
 import { LevelCountsDisplay } from "@/src/components/LevelCountsDisplay";
 import { DataTable } from "@/src/components/table/data-table";
@@ -68,14 +70,16 @@ import { V4MigrationBadgeContent } from "@/src/features/v4-migration/V4Migration
 import { buildEvaluatorUpgradeUrl } from "@/src/features/v4-migration/evaluatorMigrationUrls";
 
 function DeprecatedChip() {
+  const t = useTranslation(evaluationsMessages);
   return (
     <span className="bg-light-yellow text-dark-yellow inline-flex w-fit shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-bold whitespace-nowrap">
-      Deprecated
+      {t("deprecated")}
     </span>
   );
 }
 
 export default function EvaluatorTable({ projectId }: { projectId: string }) {
+  const t = useTranslation(evaluationsMessages);
   const router = useRouter();
   const capture = usePostHogClientCapture();
   const v4UpgradeUiEnabled = useV4UpgradeUiEnabled(projectId);
@@ -191,7 +195,7 @@ export default function EvaluatorTable({ projectId }: { projectId: string }) {
   const columns = [
     columnHelper.accessor("scoreName", {
       id: "scoreName",
-      header: "Generated Score Name",
+      header: t("generatedScoreName"),
       enableSorting: true,
       size: 320,
       cell: (row) => {
@@ -223,14 +227,14 @@ export default function EvaluatorTable({ projectId }: { projectId: string }) {
     }),
     createStatusTableColumn<EvaluatorDataRow, string>({
       accessorKey: "status",
-      header: "Status",
+      header: t("status"),
       enableSorting: true,
       size: 80,
       getStatus: (status) => status?.toLowerCase(),
     }),
     createNumberTableColumn<EvaluatorDataRow>({
       accessorKey: "totalCost",
-      header: "Total Cost (7d)",
+      header: t("totalCost7d"),
       enableSorting: false,
       size: 120,
       formatter: (value) => usdFormatter(value, 2, 4),
@@ -242,7 +246,7 @@ export default function EvaluatorTable({ projectId }: { projectId: string }) {
       },
     }),
     columnHelper.accessor("result", {
-      header: "Result",
+      header: t("result"),
       id: "result",
       enableSorting: false,
       size: 150,
@@ -257,7 +261,7 @@ export default function EvaluatorTable({ projectId }: { projectId: string }) {
       },
     }),
     columnHelper.accessor("logs", {
-      header: "Logs",
+      header: t("logs"),
       id: "logs",
       enableSorting: false,
       size: 150,
@@ -288,7 +292,7 @@ export default function EvaluatorTable({ projectId }: { projectId: string }) {
     }),
     columnHelper.accessor("template", {
       id: "template",
-      header: "Referenced Evaluator",
+      header: t("referencedEvaluator"),
       enableSorting: false,
       size: 200,
       loadingCell: (
@@ -312,19 +316,19 @@ export default function EvaluatorTable({ projectId }: { projectId: string }) {
     }),
     createDateTableColumn<EvaluatorDataRow>({
       accessorKey: "createdAt",
-      header: "Created At",
+      header: t("createdAt"),
       enableSorting: true,
       size: 150,
     }),
     createDateTableColumn<EvaluatorDataRow>({
       accessorKey: "updatedAt",
-      header: "Updated At",
+      header: t("updatedAt"),
       enableSorting: true,
       size: 150,
     }),
     columnHelper.accessor("target", {
       id: "target",
-      header: "Runs on",
+      header: t("runsOn"),
       size: 150,
       enableSorting: true,
       enableHiding: true,
@@ -338,7 +342,7 @@ export default function EvaluatorTable({ projectId }: { projectId: string }) {
     }),
     columnHelper.accessor("filter", {
       id: "filter",
-      header: "Filter",
+      header: t("filter"),
       size: 200,
       enableSorting: false,
       enableHiding: true,
@@ -365,13 +369,13 @@ export default function EvaluatorTable({ projectId }: { projectId: string }) {
     }),
     createIdTableColumn<EvaluatorDataRow>({
       accessorKey: "id",
-      header: "Id",
+      header: t("id"),
       size: 100,
       enableSorting: false,
       enableHiding: true,
     }),
     columnHelper.accessor("actions", {
-      header: "Actions",
+      header: t("actions"),
       id: "actions",
       enableSorting: false,
       size: 100,
@@ -383,13 +387,13 @@ export default function EvaluatorTable({ projectId }: { projectId: string }) {
             <IconOnlyButton
               key={id}
               icon={<Pen size="base" />}
-              label="Edit"
+              label={t("edit")}
               aria-label="edit"
               disabledReason={
                 !hasAccess
-                  ? "You don't have permission to edit this evaluator."
+                  ? t("noEditPermission")
                   : row.original.isLegacy && !allowLegacy
-                    ? "Deprecated evaluators are only available in read-only mode."
+                    ? t("deprecatedReadOnly")
                     : undefined
               }
               onClick={(e) => {
@@ -406,7 +410,7 @@ export default function EvaluatorTable({ projectId }: { projectId: string }) {
               icon
               variant="ghost"
               size="icon-xs"
-              title="Delete"
+              title={t("delete")}
             />
           </div>
         );
@@ -522,7 +526,7 @@ export default function EvaluatorTable({ projectId }: { projectId: string }) {
       >
         <DialogContent className="max-h-[90vh] max-w-(--breakpoint-xl) overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit configuration</DialogTitle>
+            <DialogTitle>{t("editConfiguration")}</DialogTitle>
           </DialogHeader>
           {existingEvaluator.isLoading ? (
             <div className="flex items-center justify-center p-4">
@@ -550,9 +554,8 @@ export default function EvaluatorTable({ projectId }: { projectId: string }) {
                 utils.evals.allConfigs.invalidate();
                 showSuccessToast({
                   operation: "evaluator.update",
-                  title: "Evaluator updated successfully",
-                  description:
-                    "Changes will automatically be reflected future evaluator runs",
+                  title: t("evaluatorUpdated"),
+                  description: t("evaluatorUpdatedHelp"),
                 });
               }}
             />

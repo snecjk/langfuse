@@ -6,7 +6,7 @@ import {
 import {
   PaginationBar,
   type PaginationBarProps,
-} from "@/src/components/design-system/PaginationBar/PaginationBar";
+} from "@/src/features/i18n/components/PaginationBar/PaginationBar";
 import {
   Table,
   type TableProps,

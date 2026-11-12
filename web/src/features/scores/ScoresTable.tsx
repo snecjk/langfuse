@@ -1,4 +1,6 @@
 /* eslint-disable no-nested-ternary, react/no-unstable-nested-components, @typescript-eslint/no-use-before-define */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 import { type ViewVersion } from "@langfuse/shared/query";
 import { DataTable } from "@/src/components/table/data-table";
 import {
@@ -204,6 +206,7 @@ export default function ScoresTable({
   showAllEnvironments = false,
   renderTracePeek,
 }: ScoresTableProps) {
+  const t = useTranslation(evaluationsMessages);
   const peekContext = usePeekTableState();
   const hasBatchExportAccess = useHasProjectAccess({
     projectId,
@@ -367,9 +370,8 @@ export default function ScoresTable({
     onSuccess: () => {
       showSuccessToast({
         operation: "score.bulk_delete",
-        title: "Scores deleted",
-        description:
-          "Selected scores will be deleted. Scores are removed asynchronously and may continue to be visible for up to 15 minutes.",
+        title: t("scoresDeleted"),
+        description: t("scoresDeletedHelp"),
       });
     },
     onSettled: () => {
@@ -644,7 +646,7 @@ export default function ScoresTable({
     createIdTableColumn<ScoresTableRow>({
       accessorKey: "id",
       enableColumnFilter: false,
-      header: "Score ID",
+      header: t("scoreId"),
       size: 100,
       enableSorting: false,
       defaultHidden: true,
@@ -652,21 +654,21 @@ export default function ScoresTable({
     }),
     createDateTableColumn<ScoresTableRow>({
       accessorKey: "timestamp",
-      header: "Timestamp",
+      header: t("timestamp"),
       enableHiding: true,
       enableSorting: true,
       size: 150,
     }),
     createTextTableColumn<ScoresTableRow>({
       accessorKey: "name",
-      header: "Name",
+      header: t("name"),
       enableHiding: true,
       enableSorting: true,
       size: 150,
     }),
     {
       accessorKey: "value",
-      header: "Value",
+      header: t("value"),
       id: "value",
       cell: ({ row }) =>
         row.original.dataType === "NUMERIC" && row.original.value !== "" ? (
@@ -682,7 +684,7 @@ export default function ScoresTable({
     },
     createTextTableColumn<ScoresTableRow>({
       accessorKey: "dataType",
-      header: "Data Type",
+      header: t("dataType"),
       enableHiding: true,
       enableSorting: true,
       defaultHidden: true,
@@ -690,7 +692,7 @@ export default function ScoresTable({
     }),
     {
       accessorKey: "source",
-      header: "Source",
+      header: t("source"),
       id: "source",
       enableHiding: true,
       enableSorting: true,
@@ -699,7 +701,7 @@ export default function ScoresTable({
     },
     {
       accessorKey: "level",
-      header: "Level",
+      header: t("level"),
       id: "level",
       enableHiding: true,
       defaultHidden: true,
@@ -716,7 +718,7 @@ export default function ScoresTable({
     },
     createIOTableColumn<ScoresTableRow>({
       accessorKey: "comment",
-      header: "Comment",
+      header: t("comment"),
       enableHiding: true,
       size: 400,
       getCell: (value) => value || undefined,
@@ -724,7 +726,7 @@ export default function ScoresTable({
     }),
     createTagTableColumn<ScoresTableRow>({
       accessorKey: "environment",
-      header: "Environment",
+      header: t("environment"),
       size: 150,
       enableHiding: true,
       defaultHidden: true,
@@ -732,7 +734,7 @@ export default function ScoresTable({
     {
       accessorKey: "traceTags",
       id: "traceTags",
-      header: "Trace Tags",
+      header: t("traceTags"),
       size: 250,
       enableHiding: true,
       defaultHidden: true,
@@ -752,14 +754,14 @@ export default function ScoresTable({
     },
     {
       accessorKey: "metadata",
-      header: "Metadata",
+      header: t("metadata"),
       id: "metadata",
       size: 400,
       loadingCell: () => (
         <ConnectedIOTableCell isLoading singleLine={compactRows} />
       ),
       headerTooltip: {
-        description: "Add metadata to scores to track additional information.",
+        description: t("scoreMetadataHelp"),
         // TODO: docs for metadata on scores
         href: "https://langfuse.com/docs/observability/features/metadata",
       },
@@ -778,7 +780,7 @@ export default function ScoresTable({
     },
     createLinkTableColumn<ScoresTableRow>({
       accessorKey: "traceName",
-      header: "Trace Name",
+      header: t("traceName"),
       enableHiding: true,
       enableSorting: true,
       defaultHidden: true,
@@ -802,7 +804,7 @@ export default function ScoresTable({
     createLinkTableColumn<ScoresTableRow>({
       accessorKey: "traceId",
       enableColumnFilter: true,
-      header: "Trace",
+      header: t("trace"),
       enableSorting: true,
       size: 100,
       getCell: (value) => {
@@ -833,7 +835,7 @@ export default function ScoresTable({
     }),
     createLinkTableColumn<ScoresTableRow>({
       accessorKey: "observationId",
-      header: "Observation",
+      header: t("observation"),
       enableSorting: true,
       size: 100,
       getCell: (observationId, { row }) => {
@@ -865,7 +867,7 @@ export default function ScoresTable({
     }),
     createLinkTableColumn<ScoresTableRow>({
       accessorKey: "executionTraceId",
-      header: "Execution Trace",
+      header: t("executionTrace"),
       enableSorting: false,
       enableHiding: true,
       defaultHidden: true,
@@ -884,7 +886,7 @@ export default function ScoresTable({
     }),
     createLinkTableColumn<ScoresTableRow>({
       accessorKey: "sessionId",
-      header: "Session",
+      header: t("session"),
       enableHiding: true,
       enableSorting: true,
       size: 100,
@@ -902,9 +904,9 @@ export default function ScoresTable({
     }),
     createLinkTableColumn<ScoresTableRow>({
       accessorKey: "userId",
-      header: "User",
+      header: t("user"),
       headerTooltip: {
-        description: "The user ID associated with the trace.",
+        description: t("scoreUserHelp"),
         href: "https://langfuse.com/docs/observability/features/users",
       },
       enableHiding: true,
@@ -926,7 +928,7 @@ export default function ScoresTable({
     }),
     createUserTableColumn<ScoresTableRow, ScoresTableRow["author"]>({
       accessorKey: "author",
-      header: "Author",
+      header: t("author"),
       enableHiding: true,
       defaultHidden: true,
       size: 150,
@@ -944,11 +946,9 @@ export default function ScoresTable({
     }),
     createLinkTableColumn<ScoresTableRow>({
       accessorKey: "jobConfigurationId",
-      header: isV4 ? "Evaluator" : "Eval Configuration ID",
+      header: isV4 ? t("evaluator") : t("evalConfigurationId"),
       headerTooltip: {
-        description: isV4
-          ? "The evaluator associated with the score."
-          : "The Job Configuration ID associated with the score.",
+        description: isV4 ? t("evaluatorScoreHelp") : t("jobScoreHelp"),
         href: "https://langfuse.com/docs/evaluation/evaluation-methods/llm-as-a-judge",
       },
       enableHiding: true,
@@ -989,9 +989,8 @@ export default function ScoresTable({
           {
             id: "score-delete",
             type: BatchActionType.Delete,
-            label: "Delete Scores",
-            description:
-              "This action permanently deletes scores and cannot be undone. Score deletion happens asynchronously and may take up to 15 minutes.",
+            label: t("deleteScores"),
+            description: t("deleteScoresHelp"),
             accessCheck: {
               scope: "traces:delete",
               entitlement: "trace-deletion",
@@ -1162,7 +1161,9 @@ export default function ScoresTable({
   ) {
     return (
       <div className="flex h-full w-full flex-col items-center gap-1 px-8 pt-24 pb-8">
-        <span className="text-muted-foreground text-lg">No scores found</span>
+        <span className="text-muted-foreground text-lg">
+          {t("scoresNotFound")}
+        </span>
         <a
           href="https://langfuse.com/faq/all/what-are-scores"
           className="text-primary text-sm underline"
@@ -1342,7 +1343,7 @@ export default function ScoresTable({
                 columns={columns}
                 noResultsMessage={
                   <div className="flex flex-col items-center">
-                    <span>No scores found.</span>
+                    <span>{t("scoresNotFoundPeriod")}</span>
                     <a
                       href="https://langfuse.com/faq/all/what-are-scores"
                       className="text-primary pointer-events-auto italic underline"

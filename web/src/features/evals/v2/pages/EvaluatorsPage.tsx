@@ -1,4 +1,6 @@
 /* eslint-disable no-nested-ternary, react/no-unstable-nested-components */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 import { showSuccessToast } from "@/src/features/notifications/showSuccessToast";
 import { formatDistanceToNowStrict } from "date-fns";
 import {
@@ -110,6 +112,7 @@ function EvaluatorsOverviewSelectionBar({
     selectedIds: string[];
   }) => void;
 }) {
+  const t = useTranslation(evaluationsMessages);
   const rowSelection = useStore(selectionStore, (state) => state.rowSelection);
   const selectAll = useStore(selectionStore, (state) => state.selectAll);
   const selectedIds = Object.keys(rowSelection).filter(
@@ -131,7 +134,7 @@ function EvaluatorsOverviewSelectionBar({
         onClick={() => onDeleteSelection({ selectAll, selectedIds })}
       >
         <Trash2 size="base" color="default" __rawClassName="sm:mr-2" />
-        <span className="hidden sm:inline">Delete</span>
+        <span className="hidden sm:inline">{t("delete")}</span>
       </Button>
     </OverviewSelectionBar>
   );
@@ -177,6 +180,7 @@ function EvaluatorsTableToolbar({
 }
 
 export default function EvaluatorsPage() {
+  const t = useTranslation(evaluationsMessages);
   const router = useRouter();
   const capture = usePostHogClientCapture();
   const projectId = router.query.projectId as string;
@@ -350,8 +354,8 @@ export default function EvaluatorsPage() {
       });
       showSuccessToast({
         operation: "evaluator.bulk_delete",
-        title: "Evaluators deleted",
-        description: `${deletedCount} evaluator${deletedCount === 1 ? "" : "s"} deleted.`,
+        title: t("deleted"),
+        description: t("deletedCount", { count: deletedCount }),
       });
       await Promise.all([
         utils.evalsV2.list.invalidate({ projectId }),
@@ -373,7 +377,7 @@ export default function EvaluatorsPage() {
       {
         accessorKey: "name",
         id: "name",
-        header: "Name",
+        header: t("name"),
         size: 240,
         isFixedPosition: true,
         enableSorting: true,
@@ -386,7 +390,7 @@ export default function EvaluatorsPage() {
       {
         accessorKey: "status",
         id: "status",
-        header: "Status",
+        header: t("status"),
         size: 100,
         enableHiding: true,
         cell: ({ row }) => {
@@ -421,7 +425,7 @@ export default function EvaluatorsPage() {
       {
         accessorKey: "type",
         id: "type",
-        header: "Type",
+        header: t("type"),
         size: 130,
         enableHiding: true,
         enableSorting: true,
@@ -430,7 +434,7 @@ export default function EvaluatorsPage() {
       createNumberTableColumn<EvaluatorRow>({
         accessorFn: (row) => costs.data?.[row.id],
         id: "totalCost",
-        header: "Cost (7d)",
+        header: t("cost7d"),
         size: 110,
         enableHiding: true,
         formatter: (value) => usdFormatter(value, 2, 4),
@@ -446,7 +450,7 @@ export default function EvaluatorsPage() {
       {
         accessorKey: "model",
         id: "model",
-        header: "Model",
+        header: t("model"),
         size: 180,
         enableHiding: true,
         cell: ({ row }) => {
@@ -462,7 +466,7 @@ export default function EvaluatorsPage() {
       },
       createUserTableColumn<EvaluatorRow>({
         accessorKey: "createdByUser",
-        header: "Created by",
+        header: t("createdBy"),
         size: 90,
         enableHiding: true,
         variant: "text",
@@ -471,7 +475,7 @@ export default function EvaluatorsPage() {
       {
         accessorKey: "createdAt",
         id: "createdAt",
-        header: "Created at",
+        header: t("createdAt"),
         size: 180,
         enableHiding: true,
         defaultHidden: true,
@@ -481,7 +485,7 @@ export default function EvaluatorsPage() {
       {
         accessorKey: "updatedAt",
         id: "updatedAt",
-        header: "Updated at",
+        header: t("updatedAt"),
         size: 180,
         enableHiding: true,
         enableSorting: true,
@@ -490,7 +494,7 @@ export default function EvaluatorsPage() {
       {
         accessorKey: "actions",
         id: "actions",
-        header: "Actions",
+        header: t("actions"),
         size: 130,
         isFixedPosition: true,
         isPinnedRight: true,
@@ -547,6 +551,7 @@ export default function EvaluatorsPage() {
       executionSummaries.isPending,
       router,
       selectActionColumn,
+      t,
     ],
   );
   const [columnVisibility, setColumnVisibility] =
@@ -613,16 +618,15 @@ export default function EvaluatorsPage() {
   return (
     <Page
       headerProps={{
-        title: "Evaluators",
+        title: t("evaluators"),
         titleBadges: <V4MigrationUpdateRequiredBadge />,
         help: {
-          description:
-            "Create reusable evaluator definitions and test them before activation.",
+          description: t("evaluatorHelp"),
         },
         mobileActionButtons: showOnboarding ? (
           <Button size="sm" onClick={openGalleryFromNewEvaluatorButton}>
             <Plus size="base" __rawClassName="mr-2" />
-            New evaluator
+            {t("newEvaluator")}
           </Button>
         ) : undefined,
         actionButtonsRight: (
@@ -680,7 +684,7 @@ export default function EvaluatorsPage() {
             )}
             <Button onClick={openGalleryFromNewEvaluatorButton}>
               <Plus size="base" color="default" __rawClassName="mr-2" />
-              New evaluator
+              {t("newEvaluator")}
             </Button>
           </div>
         ),
@@ -804,7 +808,7 @@ export default function EvaluatorsPage() {
                   onRowClick={(row) =>
                     router.push(`/project/${projectId}/evals/${row.id}`)
                   }
-                  noResultsMessage="No evaluators found."
+                  noResultsMessage={t("noEvaluators")}
                 />
               </div>
             </SearchableTableFilterLayout>

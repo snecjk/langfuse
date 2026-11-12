@@ -1,3 +1,5 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 import { useRouter } from "next/router";
 import ScoresTable from "@/src/features/scores/ScoresTable";
 import { TablePeekViewTraceDetail } from "@/src/components/table/peek/TablePeekViewTraceDetail";
@@ -11,6 +13,7 @@ import {
 import { useReadPath } from "@/src/features/events/hooks/useReadPath";
 
 export default function ScoresPage() {
+  const t = useTranslation(evaluationsMessages);
   const router = useRouter();
   const projectId = router.query.projectId as string;
   const { isV4 } = useReadPath();
@@ -34,10 +37,9 @@ export default function ScoresPage() {
   return (
     <Page
       headerProps={{
-        title: "Scores",
+        title: t("scores"),
         help: {
-          description:
-            "A scores is an evaluation of a traces or observations. It can be created from user feedback, model-based evaluations, or manual review. See docs to learn more.",
+          description: t("scoreHelp"),
           href: "https://langfuse.com/docs/evaluation/overview",
         },
         tabsProps: {

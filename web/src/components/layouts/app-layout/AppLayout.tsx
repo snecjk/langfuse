@@ -9,6 +9,8 @@
  *
  */
 
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { commonMessages } from "@/src/features/i18n/messages/common";
 import { type PropsWithChildren, useEffect } from "react";
 import { useRouter } from "next/router";
 import { signOut, useSession } from "next-auth/react";
@@ -39,6 +41,7 @@ import { useLayoutMetadata } from "./hooks/useLayoutMetadata";
  * - User permissions
  */
 export function AppLayout(props: PropsWithChildren) {
+  const t = useTranslation(commonMessages);
   const router = useRouter();
   const session = useSession();
   const { organization } = useQueryProjectOrOrganization();
@@ -112,10 +115,10 @@ export function AppLayout(props: PropsWithChildren) {
     // every mount (thousands of events / hundreds of users of pure noise).
     return (
       <ErrorPage
-        title="Project Not Found"
-        message="The project you are trying to access does not exist or you do not have access to it."
+        title={t("projectNotFound")}
+        message={t("projectUnavailable")}
         additionalButton={{
-          label: "Go to Home",
+          label: t("goHome"),
           href: "/",
         }}
       />

@@ -1,4 +1,6 @@
 /* eslint-disable no-nested-ternary, react/no-unstable-nested-components, @typescript-eslint/no-use-before-define */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tracingMessages } from "@/src/features/i18n/messages/tracing";
 import { DataTable } from "@/src/components/table/data-table";
 import { TRACING_PAGE_SIZE_OPTIONS } from "@/src/components/table/DataTablePagination";
 import { DataTableToolbar } from "@/src/components/table/data-table-toolbar";
@@ -193,6 +195,7 @@ function TracesTableInternal({
 }: TracesTableProps & {
   openDeleteTraceDialog: (traceId: string) => void;
 }) {
+  const t = useTranslation(tracingMessages);
   const capture = usePostHogClientCapture();
   const peekContext = usePeekTableState();
   const hasTraceDeleteAccess = useHasProjectAccess({
@@ -615,7 +618,7 @@ function TracesTableInternal({
     onSuccess: () => {
       showSuccessToast({
         operation: "trace.bulk_delete",
-        title: "Traces deleted",
+        title: t("tracesDeleted"),
         description:
           "Selected traces will be deleted. Traces are removed asynchronously and may continue to be visible for up to 15 minutes.",
       });
@@ -640,11 +643,11 @@ function TracesTableInternal({
       }
       showSuccessToast({
         operation: "trace.add_to_annotation_queue",
-        title: "Traces added to queue",
-        description: `Selected traces will be added to queue "${data.queueName}". This may take a minute.`,
+        title: t("tracesAdded"),
+        description: t("queueDescription", { queue: data.queueName }),
         link: {
           href: `/project/${projectId}/annotation-queues/${data.queueId}`,
-          text: `View queue "${data.queueName}"`,
+          text: t("viewQueue", { queue: data.queueName }),
         },
       });
     },
@@ -719,7 +722,7 @@ function TracesTableInternal({
           {
             id: ActionId.TraceDelete,
             type: BatchActionType.Delete,
-            label: "Delete Traces",
+            label: t("deleteTraces"),
             description: `This action permanently deletes ${displayCount} traces and cannot be undone. Trace deletion happens asynchronously and may take up to 24 hours.`,
             disabled: selectAll && hasCommentFilter,
             disabledReason:
@@ -735,7 +738,7 @@ function TracesTableInternal({
     {
       id: ActionId.TraceAddToAnnotationQueue,
       type: BatchActionType.Create,
-      label: "Add to Annotation Queue",
+      label: t("addToQueue"),
       description: `Add ${displayCount} selected traces to an annotation queue.`,
       customDialog: true,
       accessCheck: {
@@ -750,21 +753,21 @@ function TracesTableInternal({
     ...(hideControls ? [] : [selectActionColumn]),
     createDateTableColumn<TracesTableRow>({
       accessorKey: "timestamp",
-      header: "Timestamp",
+      header: t("timestamp"),
       size: 150,
       enableHiding: true,
       enableSorting,
     }),
     createTextTableColumn<TracesTableRow>({
       accessorKey: "name",
-      header: "Name",
+      header: t("name"),
       size: 150,
       enableHiding: true,
       enableSorting,
     }),
     {
       accessorKey: "input",
-      header: "Input",
+      header: t("input"),
       id: "input",
       size: 400,
       cellBackground: "gray",
@@ -789,7 +792,7 @@ function TracesTableInternal({
     },
     {
       accessorKey: "output",
-      header: "Output",
+      header: t("output"),
       id: "output",
       size: 400,
       cellBackground: "green",
@@ -815,7 +818,7 @@ function TracesTableInternal({
     {
       accessorKey: "levelCounts",
       id: "levelCounts",
-      header: "Observation Levels",
+      header: t("observationLevels"),
       size: 150,
       loadingCell: <Skeleton className="h-4 w-1/2" />,
       cell: ({ row }) => {
@@ -840,7 +843,7 @@ function TracesTableInternal({
     {
       accessorKey: "latency",
       id: "latency",
-      header: "Latency",
+      header: t("latency"),
       size: 100,
       loadingCell: <Skeleton className="h-4 w-1/2" />,
       cell: ({ row }) => {
@@ -859,7 +862,7 @@ function TracesTableInternal({
     createTokenUsageTableColumn<TracesTableRow, TracesTableRow["usage"]>({
       id: "tokens",
       accessorFn: (row) => row.usage,
-      header: "Tokens",
+      header: t("tokens"),
       size: 180,
       enableSorting,
       enableHiding: true,
@@ -881,7 +884,7 @@ function TracesTableInternal({
     {
       accessorKey: "totalCost",
       id: "totalCost",
-      header: "Total Cost",
+      header: t("totalCost"),
       size: 130,
       loadingCell: <Skeleton className="h-4 w-1/2" />,
       cell: ({ row }) => {
@@ -907,13 +910,13 @@ function TracesTableInternal({
     },
     createTagTableColumn<TracesTableRow>({
       accessorKey: "environment",
-      header: "Environment",
+      header: t("environment"),
       size: 150,
       enableHiding: true,
     }),
     createTagsTableColumn<TracesTableRow>({
       accessorKey: "tags",
-      header: "Tags",
+      header: t("tags"),
       size: 150,
       headerTooltip: {
         description: (
@@ -938,7 +941,7 @@ function TracesTableInternal({
     }),
     {
       accessorKey: "metadata",
-      header: "Metadata",
+      header: t("metadata"),
       size: 400,
       loadingCell: () => (
         <ConnectedIOTableCell isLoading singleLine={compactRows} />
@@ -983,7 +986,7 @@ function TracesTableInternal({
       : [
           {
             accessorKey: "scores",
-            header: "Scores",
+            header: t("scores"),
             id: "scores",
             enableHiding: true,
             defaultHidden: true,
@@ -998,7 +1001,7 @@ function TracesTableInternal({
     createIdTableColumn<TracesTableRow>({
       accessorKey: "sessionId",
       enableColumnFilter: !omittedFilter.includes("sessionId"),
-      header: "Session",
+      header: t("session"),
       size: 150,
       headerTooltip: {
         description: (
@@ -1025,7 +1028,7 @@ function TracesTableInternal({
     }),
     createIdTableColumn<TracesTableRow>({
       accessorKey: "userId",
-      header: "User",
+      header: t("user"),
       size: 150,
       headerTooltip: {
         description: (
@@ -1052,7 +1055,7 @@ function TracesTableInternal({
     }),
     createNumberTableColumn<TracesTableRow, bigint>({
       accessorKey: "observationCount",
-      header: "Observations",
+      header: t("observations"),
       size: 120,
       headerTooltip: {
         description: "The number of observations in the trace.",
@@ -1065,7 +1068,7 @@ function TracesTableInternal({
     }),
     createStatusTableColumn<TracesTableRow, ObservationLevelType>({
       accessorKey: "level",
-      header: "Status",
+      header: t("status"),
       size: 75,
       defaultHidden: true,
       enableHiding: true,
@@ -1083,7 +1086,7 @@ function TracesTableInternal({
     }),
     createTextTableColumn<TracesTableRow>({
       accessorKey: "version",
-      header: "Version",
+      header: t("version"),
       size: 100,
       headerTooltip: {
         description: (
@@ -1109,7 +1112,7 @@ function TracesTableInternal({
     }),
     createTextTableColumn<TracesTableRow>({
       accessorKey: "release",
-      header: "Release",
+      header: t("release"),
       size: 100,
       headerTooltip: {
         description: (
@@ -1136,7 +1139,7 @@ function TracesTableInternal({
     }),
     createIdTableColumn<TracesTableRow>({
       accessorKey: "id",
-      header: "Trace ID",
+      header: t("traceId"),
       size: 90,
       defaultHidden: true,
       enableHiding: true,
@@ -1144,7 +1147,7 @@ function TracesTableInternal({
     }),
     {
       accessorKey: "cost",
-      header: "Cost",
+      header: t("cost"),
       id: "cost",
       enableHiding: true,
       defaultHidden: true,
@@ -1157,7 +1160,7 @@ function TracesTableInternal({
         createNumberTableColumn<TracesTableRow>({
           accessorFn: (row) => row.cost?.inputCost?.toNumber(),
           id: "inputCost",
-          header: "Input Cost",
+          header: t("inputCost"),
           size: 100,
           formatter: (value) => usdFormatter(value),
           getValue: (value, { row }) => {
@@ -1171,7 +1174,7 @@ function TracesTableInternal({
         createNumberTableColumn<TracesTableRow>({
           accessorFn: (row) => row.cost?.outputCost?.toNumber(),
           id: "outputCost",
-          header: "Output Cost",
+          header: t("outputCost"),
           size: 100,
           formatter: (value) => usdFormatter(value),
           getValue: (value, { row }) => {
@@ -1186,7 +1189,7 @@ function TracesTableInternal({
     },
     {
       accessorKey: "usage",
-      header: "Usage",
+      header: t("usage"),
       id: "usage",
       enableHiding: true,
       defaultHidden: true,
@@ -1199,7 +1202,7 @@ function TracesTableInternal({
         createNumberTableColumn<TracesTableRow, bigint>({
           accessorFn: (row) => row.usage.inputUsage,
           id: "inputTokens",
-          header: "Input Tokens",
+          header: t("inputTokens"),
           size: 110,
           formatter: (value) => numberFormatter(value, 0),
           getValue: (value, { row }) =>
@@ -1213,7 +1216,7 @@ function TracesTableInternal({
         createNumberTableColumn<TracesTableRow, bigint>({
           accessorFn: (row) => row.usage.outputUsage,
           id: "outputTokens",
-          header: "Output Tokens",
+          header: t("outputTokens"),
           size: 110,
           formatter: (value) => numberFormatter(value, 0),
           getValue: (value, { row }) =>
@@ -1227,7 +1230,7 @@ function TracesTableInternal({
         createNumberTableColumn<TracesTableRow, bigint>({
           accessorFn: (row) => row.usage.totalUsage,
           id: "totalTokens",
-          header: "Total Tokens",
+          header: t("totalTokens"),
           size: 110,
           formatter: (value) => numberFormatter(value, 0),
           getValue: (value, { row }) =>
@@ -1246,7 +1249,7 @@ function TracesTableInternal({
           createDropdownTableColumn<TracesTableRow, TracesTableRow["id"]>({
             id: "action",
             accessorFn: (row) => row.id,
-            header: "Action",
+            header: t("action"),
             size: 70,
             isFixedPosition: true,
             renderMenu: (traceId) =>
@@ -1496,7 +1499,9 @@ function TracesTableInternal({
                           setSelectedRows({});
                           setSelectAll(false);
                         }}
-                        description={`Add ${displayCount} selected traces to an annotation queue.`}
+                        description={t("selectedQueueDescription", {
+                          count: displayCount,
+                        })}
                         onAddToQueue={handleAddToAnnotationQueue}
                       >
                         {({ openDialog }) => (
@@ -1698,6 +1703,7 @@ const TracesDynamicCell = ({
 
 export default function TracesTable(props: TracesTableProps) {
   const [traceIdToDelete, setTraceIdToDelete] = useState<string | null>(null);
+  const t = useTranslation(tracingMessages);
   const capture = usePostHogClientCapture();
   const utils = api.useUtils();
   const traceMutation = api.traces.deleteMany.useMutation({
@@ -1705,7 +1711,7 @@ export default function TracesTable(props: TracesTableProps) {
       capture("trace:delete", { source: "table-single-row" });
       showSuccessToast({
         operation: "trace.delete",
-        title: "Trace deleted",
+        title: t("traceDeleted"),
         description:
           "Selected trace will be deleted. Traces are removed asynchronously and may continue to be visible for up to 24 hours.",
       });
@@ -1715,9 +1721,9 @@ export default function TracesTable(props: TracesTableProps) {
 
   return (
     <ConfirmationDialogController
-      title="Please confirm"
-      text="This action cannot be undone. It removes all the data associated with this trace."
-      confirmLabel="Delete trace"
+      title={t("confirm")}
+      text={t("deleteWarning")}
+      confirmLabel={t("deleteTrace")}
       variant="destructive"
       loading={traceMutation.isPending}
       onConfirm={async () => {
