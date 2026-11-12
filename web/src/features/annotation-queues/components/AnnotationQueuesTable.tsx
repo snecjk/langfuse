@@ -161,7 +161,7 @@ export function AnnotationQueuesTable({ projectId }: { projectId: string }) {
     },
     {
       accessorKey: "processAction",
-      header: "Process",
+      header: t("processQueue"),
       id: "processAction",
       isFixedPosition: true,
       cell: ({ row }) => {
