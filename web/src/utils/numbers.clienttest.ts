@@ -2,9 +2,10 @@
 
 import { describe, expect, it } from "vitest";
 
-import { centCostFormatter, costFormatter } from "@/src/utils/numbers";
 import {
+  centCostFormatter,
   compactNumberFormatter,
+  costFormatter,
   costFormatterWithLocale,
   latencyFormatterWithLocale,
   numberFormatter,

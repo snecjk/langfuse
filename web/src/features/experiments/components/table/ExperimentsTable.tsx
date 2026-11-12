@@ -138,7 +138,6 @@ function ExperimentsMultiSelectActionMenu({
 }) {
   const router = useRouter();
   const t = useTranslation(experimentMessages);
-  const locale = useInterfaceLocale();
   const capture = usePostHogClientCapture();
   const [showRunEvaluationDialog, setShowRunEvaluationDialog] = useState(false);
   // Page-scoped and in table order, so the first id is the topmost selected

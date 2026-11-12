@@ -3,6 +3,9 @@ import { type ComponentProps } from "react";
 import preview from "../../../.storybook/preview";
 import { TopicsHeaderActions } from "./TopicsHeaderActions";
 import { prepareTopicsActions } from "./prepare-topics-actions";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
+
+const t = (key: keyof typeof topicsMessages.en) => topicsMessages.en[key];
 
 const defaultArgs: ComponentProps<typeof TopicsHeaderActions> = {
   actions: prepareTopicsActions({
@@ -17,6 +20,7 @@ const defaultArgs: ComponentProps<typeof TopicsHeaderActions> = {
     onHistory: fn(),
     showUnassigned: true,
     onShowUnassignedChange: fn(),
+    t,
   }),
 };
 

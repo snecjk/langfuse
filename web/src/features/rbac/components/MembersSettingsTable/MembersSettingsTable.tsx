@@ -306,6 +306,8 @@ export function MembersSettingsTable({
       project,
       projectRolesEntitlement,
       showFeaturePreviews,
+      t,
+      ownerLockedLabel,
       updatingOrgRoleMembershipIds,
       updatingProjectRoleMembershipIds,
     ],

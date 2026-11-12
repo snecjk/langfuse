@@ -170,6 +170,7 @@ export const topicsMessages = {
 
     // Topic groups panel
     topicGroups: "Topic groups",
+    topicMap: "Topic map",
     noTracesAssignedToMap:
       "No traces are assigned to this map yet. Traces are assigned as they are processed.",
     findPatternsTitle: "Find patterns in your summaries",
@@ -718,6 +719,7 @@ export const topicsMessages = {
 
     // Topic groups panel
     topicGroups: "主题分组",
+    topicMap: "主题地图",
     noTracesAssignedToMap:
       "尚无追踪分配到该地图。随着处理进行，追踪会被逐步分配。",
     findPatternsTitle: "在摘要中发现模式",

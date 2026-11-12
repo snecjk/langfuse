@@ -1716,7 +1716,6 @@ const TracesDynamicCell = ({
 export default function TracesTable(props: TracesTableProps) {
   const [traceIdToDelete, setTraceIdToDelete] = useState<string | null>(null);
   const t = useTranslation(tracingMessages);
-  const locale = useInterfaceLocale();
   const capture = usePostHogClientCapture();
   const utils = api.useUtils();
   const traceMutation = api.traces.deleteMany.useMutation({

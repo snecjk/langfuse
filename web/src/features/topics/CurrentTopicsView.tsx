@@ -43,6 +43,8 @@ import {
   topicTraceQuery,
 } from "./topic-trace-filters";
 import { TopicsTraceToolbar } from "./TopicsTraceToolbar";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 
 const OVERVIEW_PANEL_IDS = ["map", "groups"];
 const LOAD_MORE_THRESHOLD_PX = 400;
@@ -61,6 +63,7 @@ export function CurrentTopicsView({
   useTraces,
   showUnassigned,
 }: CurrentTopicsViewProps) {
+  const t = useTranslation(topicsMessages);
   const [selectedTraceId, setSelectedTraceId] = useSessionStorage<
     string | null
   >(`topics-selected-trace:${projectId}`, null);
@@ -137,7 +140,7 @@ export function CurrentTopicsView({
   );
   const mapPanel = (
     <section
-      aria-label="Topic map"
+      aria-label={t("topicMap")}
       className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden"
     >
       {facet.map ? (
@@ -162,14 +165,12 @@ export function CurrentTopicsView({
   );
   const emptyTopics = (
     <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-      <h3 className="text-lg font-bold">Find patterns in your summaries</h3>
+      <h3 className="text-lg font-bold">{t("findPatternsTitle")}</h3>
       <p className="text-muted-foreground max-w-sm text-sm">
-        Generate topics to group similar summaries and discover recurring themes
-        for this facet. Choose a time range and the facets to include in Manual
-        processing.
+        {t("findPatternsBody")}
       </p>
       <Button
-        text="Generate topics"
+        text={t("generateTopics")}
         size="sm"
         disabled={!canGenerateTopics}
         onClick={onGenerateTopics}
@@ -178,7 +179,7 @@ export function CurrentTopicsView({
   );
   const groupsPanel = (
     <section
-      aria-label="Topic groups"
+      aria-label={t("topicGroups")}
       className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-md border"
     >
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain p-2">
@@ -198,8 +199,7 @@ export function CurrentTopicsView({
         {facet.topics.length === 0 &&
           (facet.map?.topics.length ? (
             <p className="text-muted-foreground p-6 text-center text-sm">
-              No traces are assigned to this map yet. Traces are assigned as
-              they are processed.
+              {t("noTracesAssignedToMap")}
             </p>
           ) : (
             emptyTopics
@@ -209,7 +209,7 @@ export function CurrentTopicsView({
   );
   const tracesPanel = (
     <section
-      aria-label="Topic traces"
+      aria-label={t("topicTracesAria")}
       ref={isNarrow ? undefined : tracePanelRef}
       className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-md border"
     >
@@ -273,6 +273,7 @@ function TopicsDetailsTabs({
   groupsPanel,
   tracesPanel,
 }: TopicsDetailsTabsProps) {
+  const t = useTranslation(topicsMessages);
   return (
     <Tabs
       value={value}
@@ -285,10 +286,10 @@ function TopicsDetailsTabs({
           variant="inset"
           size="sm"
           layout="full"
-          aria-label="Topics panels"
+          aria-label={t("topicsPanels")}
         >
-          <Tabs.Trigger value="topics" label="Topics" />
-          <Tabs.Trigger value="traces" label="Traces" />
+          <Tabs.Trigger value="topics" label={t("topics")} />
+          <Tabs.Trigger value="traces" label={t("traces")} />
         </Tabs.List>
       </div>
       <Tabs.Content value="topics" layout="fill">
@@ -307,6 +308,7 @@ function TopicsOverviewSplit({
   mapPanel,
   children,
 }: TopicsOverviewSplitProps) {
+  const t = useTranslation(topicsMessages);
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
     id: isNarrow ? "topics-overview-size-narrow" : "topics-overview-size",
     panelIds: OVERVIEW_PANEL_IDS,
@@ -331,7 +333,7 @@ function TopicsOverviewSplit({
       </ResizablePanel>
       <ResizableHandle
         withHandle
-        aria-label="Resize topic map and groups"
+        aria-label={t("resizeMapAndGroups")}
         className="my-1"
       />
       <ResizablePanel id="groups" minSize="20%">
@@ -346,6 +348,7 @@ function TopicsWorkspaceSplit({
   overviewPanel,
   tracesPanel,
 }: TopicsWorkspaceSplitProps) {
+  const t = useTranslation(topicsMessages);
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
     id: "topics-workspace-size",
     panelIds: WORKSPACE_PANEL_IDS,
@@ -365,7 +368,7 @@ function TopicsWorkspaceSplit({
       </ResizablePanel>
       <ResizableHandle
         withHandle
-        aria-label="Resize topic overview and traces"
+        aria-label={t("resizeOverviewAndTraces")}
         className="mx-1"
       />
       <ResizablePanel id="traces" minSize="25%">

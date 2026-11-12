@@ -71,7 +71,7 @@ export function MembershipInvitesSettingsTable({
         mode: "relative",
       }),
     ],
-    [showProjectRole],
+    [showProjectRole, t],
   );
   const actions = useCallback<
     NonNullable<TableProps<MembershipInvitesSettingsTableRow>["actions"]>

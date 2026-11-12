@@ -437,6 +437,7 @@ function TopicsWorkspaceContent({
           onHistory: openHistory,
           showUnassigned,
           onShowUnassignedChange: setShowUnassigned,
+          t,
         });
         return (
           <Page
