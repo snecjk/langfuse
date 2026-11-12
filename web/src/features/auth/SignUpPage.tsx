@@ -344,7 +344,7 @@ function StandardSignupFlow({
                 <FormItem>
                   <FormLabel>{t("name")}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Jane Doe" {...field} />
+                    <Input placeholder={t("namePlaceholder")} {...field} />
                   </FormControl>
                   <FormMessage>
                     {localizeFormMessage(fieldState.error?.message, t)}
@@ -361,7 +361,7 @@ function StandardSignupFlow({
                 <FormLabel>{t("email")}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="jsdoe@example.com"
+                    placeholder={t("emailPlaceholder")}
                     allowPasswordManager
                     autoComplete="email"
                     {...field}
@@ -577,7 +577,7 @@ function VerifiedSignupFlow({
               <FormItem>
                 <FormLabel>{t("name")}</FormLabel>
                 <FormControl>
-                  <Input placeholder="Jane Doe" {...field} />
+                  <Input placeholder={t("namePlaceholder")} {...field} />
                 </FormControl>
                 <FormMessage>
                   {localizeFormMessage(fieldState.error?.message, t)}
@@ -593,7 +593,7 @@ function VerifiedSignupFlow({
                 <FormLabel>{t("email")}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="jsdoe@example.com"
+                    placeholder={t("emailPlaceholder")}
                     allowPasswordManager
                     autoComplete="email"
                     {...field}

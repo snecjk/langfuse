@@ -13,6 +13,11 @@ export const authFormsMessages = {
     captchaLoadFailed: "Captcha failed to load. Try again",
     hfSpaceHost: "HF Space Host",
     openInNewTab: "Open in new tab",
+    hfSpacesPageTitle: "Langfuse on Hugging Face",
+    hfSpacesHeading: "Langfuse on Hugging Face",
+    hfLogoAlt: "Hugging Face logo",
+    namePlaceholder: "Jane Doe",
+    emailPlaceholder: "jsdoe@example.com",
 
     createAccount: "Create new account",
     noCard: "No credit card required.",
@@ -166,5 +171,10 @@ export const authFormsMessages = {
     captchaLoadFailed: "人机验证加载失败，请重试",
     hfSpaceHost: "HF Space 主机",
     openInNewTab: "在新标签页打开",
+    hfSpacesPageTitle: "Langfuse on Hugging Face",
+    hfSpacesHeading: "Langfuse on Hugging Face",
+    hfLogoAlt: "Hugging Face 徽标",
+    namePlaceholder: "Jane Doe",
+    emailPlaceholder: "jsdoe@example.com",
   },
 } satisfies Messages;

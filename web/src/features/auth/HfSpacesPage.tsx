@@ -22,7 +22,7 @@ export default function HfSpacesPage({ deploymentDomain }: PageProps) {
   return (
     <>
       <Head>
-        <title>Langfuse on Hugging Face</title>
+        <title>{t("hfSpacesPageTitle")}</title>
       </Head>
       <div className="flex flex-1 flex-col py-6 sm:min-h-full sm:justify-center sm:px-6 sm:py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -31,13 +31,13 @@ export default function HfSpacesPage({ deploymentDomain }: PageProps) {
             <PlusIcon size="sm" __rawClassName="ml-1" />
             <img
               src="/assets/huggingface-logo.svg"
-              alt="Hugging Face Logo"
+              alt={t("hfLogoAlt")}
               width={36}
               height={36}
             />
           </div>
           <h2 className="text-primary mt-4 text-center text-2xl leading-9 font-bold tracking-tight">
-            Langfuse on Hugging Face
+            {t("hfSpacesHeading")}
           </h2>
         </div>
 
