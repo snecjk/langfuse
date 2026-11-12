@@ -24,6 +24,9 @@ import {
   ManualTopicsDialog,
   type ManualTopicsDialogProps,
 } from "./ManualTopicsDialog";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
+
+const t = (key: keyof typeof topicsMessages.en) => topicsMessages.en[key];
 
 const facets: ManualTopicsDialogProps["facets"] = [
   {
@@ -139,6 +142,7 @@ const meta = preview.meta({
         .map((facet) => facet.summaries ?? 0),
       traceCount: count,
       smallSample: draft.smallSample,
+      t,
     });
     function changeCriteria(change: Partial<typeof criteria>) {
       setCriteria((current) => ({ ...current, ...change }));

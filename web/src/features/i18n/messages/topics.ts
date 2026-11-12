@@ -1017,6 +1017,14 @@ export const topicsMessages = {
     daySingular: "天",
     daysPlural: "{count} 天",
 
+    // Manual topics selection
+    selectAtLeastOneFacet: "请至少选择一个启用中的分面。",
+    noSummariesAvailable: "所选分面没有可用的摘要。请先生成追踪摘要。",
+    fewerThan10Summaries:
+      "每个所选分面的摘要少于 10 条。请让更多追踪生成摘要或扩大时间范围。",
+    fewerThan100Summaries:
+      "每个所选分面的摘要少于 100 条。请启用小样本模式、让更多追踪生成摘要或扩大时间范围。",
+
     // Errors and loading (page-level)
     couldNotSummarize: "无法生成追踪摘要。",
     couldNotRegenerate: "无法重新生成主题。",

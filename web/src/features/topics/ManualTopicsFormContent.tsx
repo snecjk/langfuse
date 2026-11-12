@@ -102,6 +102,7 @@ export function ManualTopicsFormContent({
       .map((facet) => facet.summaries ?? 0),
     traceCount: selection?.count ?? 0,
     smallSample,
+    t,
   });
   const isCountingSummaries =
     operation === "update" &&
