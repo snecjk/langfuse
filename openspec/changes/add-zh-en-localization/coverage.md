@@ -106,7 +106,7 @@ claim. The matrix supersedes it for current status.
 | C6 | `/project/[projectId]/observations` `/observations/new` | `tracing-tables/observations/*` | 已登录 | 列表、新建、详情 | `tracing`, `table` | 部分迁移 | 部分验证 | — |
 | C7 | `/project/[projectId]/sessions` `/sessions/[sessionId]` | `features/sessions` | 已登录 | 列表、详情、关联追踪、空态 | `sessions` | 部分迁移（列表页标题与列头已迁移；详情页 SessionDetailPage 未迁移） | 未验证 | 用户标识/会话值不翻译 |
 | C8 | `/project/[projectId]/users` `/users/[userId]` | `features/users` | 已登录 | 列表、详情、关联追踪、空态 | `users` | 部分迁移（列表页标题与列头已迁移；详情页 UserDetailPage 未迁移） | 未验证 | 用户标识不翻译 |
-| C9 | `/project/[projectId]/topics` | `features/topics` (`TopicMobileTraceList`, `TopicTraceSelectorView`, 配置/运行弹窗) | 已登录 + `canViewTopics` | 列表、配置/自动处理弹窗、运行详情、网格、追踪选择 | — | 部分迁移 | 未验证 | 用户主题名称/筛选值不翻译 |
+| C9 | `/project/[projectId]/topics` | `features/topics` (`TopicMobileTraceList`, `TopicTraceSelectorView`, 配置/运行弹窗) | 已登录 + `canViewTopics` | 列表、配置/自动处理弹窗、运行详情、网格、追踪选择 | `topics` | 部分迁移（Topics 列表/配置弹窗/运行详情/网格/追踪选择器已迁移；用户主题名与业务筛选值保留） | 未验证 | 用户主题名称/筛选值不翻译 |
 | C10 | `/project/[projectId]/alerts` `/alerts/new` `/alerts/[monitorId]` `/alerts/[monitorId]/edit` | `features/monitors` | RBAC:`alerts:read` + FLAG(v4WriteMode≠legacy) | 列表、新建、编辑、详情、删除 | — | 未迁移 | 未验证 | — |
 | C11 | `/project/[projectId]/events` (v4) | `features/events/EventsPage` | 已登录 | 事件列表、筛选、详情 | — | 部分迁移（EventsPage 接入） | 未验证 | — |
 
@@ -124,7 +124,7 @@ claim. The matrix supersedes it for current status.
 | D8 | `/project/[projectId]/datasets/[datasetId]/compare` `/compare/charts` | 对比页 | RBAC:`datasets:read` | 输出对比、图表 | — | 未迁移 | 未验证 | 用户数据（结果/评分值） |
 | D9 | `/project/[projectId]/datasets/[datasetId]/runs/[runId]` | 运行详情 | RBAC:`datasets:read` | 运行详情 | — | 未迁移 | 未验证 | — |
 | D10 | `/project/[projectId]/experiments` `/experiments/results` | `features/experiments` | FLAG:`experimentsV4Enabled` | 列表、运行、详情、数据集运行、分析 | — | 未迁移 | 未验证 | 用户数据（结果/评分） |
-| D11 | `/project/[projectId]/playground` | `features/playground` | 已登录 | 试验输入、模型选择、结果 | — | 未迁移 | 未验证 | 用户数据（试验输入）、机器标识（模型 ID） |
+| D11 | `/project/[projectId]/playground` | `features/playground` | 已登录 | 试验输入、模型选择、结果 | `skills` | 部分迁移（Skills 列表/文件编辑/版本/导入导出与试验场已迁移；用户文件内容与模型标识保留） | 未验证 | 用户数据（试验输入）、机器标识（模型 ID） |
 | D12 | `/project/[projectId]/skills` `/skills/new` `/skills/[skillName]` | `features/skills/SkillsPage` | RBAC:`skills:read` | 列表、文件显示/编辑、执行配置、结果、空/失败 | — | 部分迁移 | 未验证 | 用户数据（文件内容）、机器标识（模型 ID） |
 
 ## E. Evaluation
@@ -145,23 +145,23 @@ claim. The matrix supersedes it for current status.
 
 | # | Route / entry | Actual owner | Role / toggle gate | Sub-flows & states | Namespace | Source migration | Verification | Exception |
 |---|---------------|--------------|--------------------|--------------------|-----------|------------------|--------------|-----------|
-| F1 | `/organization/[organizationId]/ai-gateway` `/ai-gateway/[page]` | `features/ai-gateway` | 已登录 + `visibleGatewayPages[slug]` | 概览、提供商模型、密钥管理、分析、首次密钥引导、数据不可用 | — | 未迁移 | 未验证 | 机器标识（密钥/模型 ID/协议字段） |
-| F2 | 批量操作/导出 | `features/batch-actions`, `batch-exports` | 已登录 | 任务列表/状态、创建、取消、下载、失败 | — | 未迁移 | 未验证 | 机器标识（任务 ID/导出字段） |
+| F1 | `/organization/[organizationId]/ai-gateway` `/ai-gateway/[page]` | `features/ai-gateway` | 已登录 + `visibleGatewayPages[slug]` | 概览、提供商模型、密钥管理、分析、首次密钥引导、数据不可用 | `gateway` | 部分迁移（AI Gateway 设置/提供商/模型/密钥/引导/分析 chrome 已迁移；密钥与模型标识保留） | 未验证 | 机器标识（密钥/模型 ID/协议字段） |
+| F2 | 批量操作/导出 | `features/batch-actions`, `batch-exports` | 已登录 | 任务列表/状态、创建、取消、下载、失败 | `batch` | 部分迁移（批量任务列表/创建/取消/下载/失败提示已迁移；任务 ID 与机器字段保留） | 未验证 | 机器标识（任务 ID/导出字段） |
 
 ## G. Settings & enterprise
 
 | # | Route / entry | Actual owner | Role / toggle gate | Sub-flows & states | Namespace | Source migration | Verification | Exception |
 |---|---------------|--------------|--------------------|--------------------|-----------|------------------|--------------|-----------|
-| G1 | `/project/[projectId]/settings` `/settings/[page]` | `features/settings/SettingsPage`, `SettingsTable` | 已登录（project 设置权限） | 账户字段、重命名、host、删除/转移、侧栏子入口 | `settings` | 部分迁移 | 部分验证（settings 套件 + delete-project story） | — |
+| G1 | `/project/[projectId]/settings` `/settings/[page]` | `features/settings/SettingsPage`, `SettingsTable` | 已登录（project 设置权限） | 账户字段、重命名、host、删除/转移、侧栏子入口 | `settings`, `account` | 部分迁移（账户/项目/组织入口、重命名、host、删除/转移与侧栏子入口已迁移） | 部分验证（settings 套件 + delete-project story） | — |
 | G2 | `/project/[projectId]/settings/models/[modelId]` | 模型设置 | 已登录 | 模型编辑、连接测试 | — | 未迁移 | 未验证 | 机器标识（模型/字段值） |
-| G3 | `/project/[projectId]/settings/integrations/*` (slack/posthog/mixpanel/blobstorage/external-media-storage/web-callouts) | 各集成表单 | 已登录 | API/LLM 密钥表、连接测试、提供商、集成内部表单 | — | 未迁移 | 未验证 | 机器标识（密钥/字段值不进入字典/日志/截图） |
-| G4 | `/organization/[organizationId]/settings` `/settings/[page]` | `features/organizations/OrganizationSettingsPage`, `RenameOrganization` | RBAC:`organizationSettings:read` | 组织字段、重命名、成员、SSO、域名、保留、账单、审计 | `settings`, `workspace` | 部分迁移 | 未验证 | — |
+| G3 | `/project/[projectId]/settings/integrations/*` (slack/posthog/mixpanel/blobstorage/external-media-storage/web-callouts) | 各集成表单 | 已登录 | API/LLM 密钥表、连接测试、提供商、集成内部表单 | `integrations` | 部分迁移（API/LLM 密钥表、连接测试、Slack/PostHog/Mixpanel/Blob/WebCallouts 内部表单已迁移） | 未验证 | 机器标识（密钥/字段值不进入字典/日志/截图） |
+| G4 | `/organization/[organizationId]/settings` `/settings/[page]` | `features/organizations/OrganizationSettingsPage`, `RenameOrganization` | RBAC:`organizationSettings:read` | 组织字段、重命名、成员、SSO、域名、保留、账单、审计 | `settings` | 部分迁移（组织设置/成员入口已迁移；成员与邀请表由他人域处理） | 未验证 | — |
 | G5 | 成员与邀请 | `features/rbac` / 组织成员 | RBAC:`organizationMembers:CRUD` | 成员/邀请表、角色显示、邀请/撤销/移除、权限错误 | — | 未迁移 | 未验证 | 用户名称不翻译；role/scope 枚举不翻译 |
-| G6 | 企业 SSO / 域名 / 数据保留 / 账单 / 审计 | 企业子页面 | ENT + RBAC | SSO 配置、域名、保留、账单/套餐、审计 | — | 未迁移 | 未验证 | — |
+| G6 | 企业 SSO / 域名 / 数据保留 / 账单 / 审计 | 企业子页面 | ENT + RBAC | SSO 配置、域名、保留、账单/套餐、审计 | `enterprise` | 部分迁移（SSO/域名/数据保留/账单/审计已迁移；缺权限分支未逐状态验证） | 未验证 | — |
 | G7 | `/account/settings` | `features/account/AccountSettingsPage` | 已登录 | 账户字段、重命名、删除、语言 | `settings`, `common` | 部分迁移 | 未验证 | 用户名称不翻译 |
-| G8 | `/admin`（管理员可达产品 UI）/ 功能预览 | `features/feature-previews` | ENT(管理员) | 功能预览开关、管理员入口 | — | 未迁移 | 未验证 | — |
-| G9 | `/background-migrations` | `features/background-migrations` | ENT(管理员) | 迁移配置/进度/失败提示 | — | 未迁移 | 未验证 | 机器标识（迁移状态） |
-| G10 | `/v4-migration` | `features/v4-migration` | FLAG/ENT | 迁移配置/进度 | — | 未迁移 | 未验证 | 机器标识 |
+| G8 | `/admin`（管理员可达产品 UI）/ 功能预览 | `features/feature-previews` | ENT(管理员) | 功能预览开关、管理员入口 | `enterprise` | 部分迁移（管理员可达产品 UI 与功能预览已迁移） | 未验证 | — |
+| G9 | `/background-migrations` | `features/background-migrations` | ENT(管理员) | 迁移配置/进度/失败提示 | `enterprise` | 部分迁移（后台迁移表与重试入口已迁移） | 未验证 | 机器标识（迁移状态） |
+| G10 | `/v4-migration` | `features/v4-migration` | FLAG/ENT | 迁移配置/进度 | `enterprise` | 部分迁移（v4 迁移配置/进度/失败提示与 FAQ 已迁移） | 未验证 | 机器标识 |
 
 ## H. Formatting (dates, numbers, charts)
 
