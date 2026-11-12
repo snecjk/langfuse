@@ -3,6 +3,8 @@ import { useRouter } from "next/router";
 import { DataTable } from "@/src/components/table/data-table";
 import { TRACING_PAGE_SIZE_OPTIONS } from "@/src/components/table/DataTablePagination";
 import { DataTableToolbar } from "@/src/components/table/data-table-toolbar";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { sessionsMessages } from "@/src/features/i18n/messages/sessions";
 import {
   DataTableControlsProvider,
   DataTableControls,
@@ -142,6 +144,7 @@ export default function SessionsTable({
 }: SessionTableProps) {
   const router = useRouter();
   const capture = usePostHogClientCapture();
+  const t = useTranslation(sessionsMessages);
   const sessionsFilterConfig = useMemo(
     () => getSessionFilterConfig(omittedFilter, isV4),
     [isV4, omittedFilter],
@@ -586,7 +589,7 @@ export default function SessionsTable({
     selectActionColumn,
     createLinkTableColumn<SessionTableRow>({
       accessorKey: "id",
-      header: "ID",
+      header: t("id"),
       size: 200,
       isFixedPosition: true,
       getCell: (value) => {
@@ -604,14 +607,14 @@ export default function SessionsTable({
     }),
     createDateTableColumn<SessionTableRow>({
       accessorKey: "createdAt",
-      header: "Created At",
+      header: t("createdAt"),
       size: 150,
       enableHiding: true,
       enableSorting: true,
     }),
     createNumberTableColumn<SessionTableRow>({
       accessorKey: "sessionDuration",
-      header: "Duration",
+      header: t("duration"),
       size: 130,
       enableHiding: true,
       formatter: (value) => formatIntervalSeconds(value),
@@ -625,13 +628,13 @@ export default function SessionsTable({
     }),
     createTagTableColumn<SessionTableRow>({
       accessorKey: "environment",
-      header: "Environment",
+      header: t("environment"),
       size: 150,
       enableHiding: true,
     }),
     {
       accessorKey: "scores",
-      header: "Scores",
+      header: t("scores"),
       id: "scores",
       enableHiding: true,
       defaultHidden: true,
@@ -643,7 +646,7 @@ export default function SessionsTable({
     createLinkListTableColumn<SessionTableRow>({
       accessorKey: "userIds",
       enableColumnFilter: !omittedFilter.includes("userIds"),
-      header: "User IDs",
+      header: t("userIds"),
       size: 200,
       enableHiding: true,
       getCell: (userIds) => {
@@ -658,7 +661,7 @@ export default function SessionsTable({
     }),
     createNumberTableColumn<SessionTableRow>({
       accessorKey: "countTraces",
-      header: "Traces",
+      header: t("traces"),
       size: 100,
       headerTooltip: {
         description: "The number of traces in the session.",
@@ -676,7 +679,7 @@ export default function SessionsTable({
     createNumberTableColumn<SessionTableRow>({
       accessorFn: (row) => row.inputCost?.toNumber(),
       id: "inputCost",
-      header: "Input Cost",
+      header: t("inputCost"),
       size: 110,
       enableHiding: true,
       defaultHidden: true,
@@ -692,7 +695,7 @@ export default function SessionsTable({
     createNumberTableColumn<SessionTableRow>({
       accessorFn: (row) => row.outputCost?.toNumber(),
       id: "outputCost",
-      header: "Output Cost",
+      header: t("outputCost"),
       size: 110,
       enableHiding: true,
       enableSorting: true,
@@ -708,7 +711,7 @@ export default function SessionsTable({
     createNumberTableColumn<SessionTableRow>({
       accessorFn: (row) => row.totalCost?.toNumber(),
       id: "totalCost",
-      header: "Total Cost",
+      header: t("totalCost"),
       size: 110,
       enableHiding: true,
       enableSorting: true,
@@ -722,7 +725,7 @@ export default function SessionsTable({
     }),
     createNumberTableColumn<SessionTableRow>({
       accessorKey: "inputTokens",
-      header: "Input Tokens",
+      header: t("inputTokens"),
       size: 110,
       enableHiding: true,
       defaultHidden: true,
@@ -737,7 +740,7 @@ export default function SessionsTable({
     }),
     createNumberTableColumn<SessionTableRow>({
       accessorKey: "outputTokens",
-      header: "Output Tokens",
+      header: t("outputTokens"),
       size: 110,
       enableHiding: true,
       defaultHidden: true,
@@ -752,7 +755,7 @@ export default function SessionsTable({
     }),
     createNumberTableColumn<SessionTableRow>({
       accessorKey: "totalTokens",
-      header: "Total Tokens",
+      header: t("totalTokens"),
       size: 110,
       enableHiding: true,
       defaultHidden: true,
@@ -768,7 +771,7 @@ export default function SessionsTable({
     createTokenUsageTableColumn<SessionTableRow, number | undefined>({
       id: "usage",
       accessorFn: (row) => row.totalTokens,
-      header: "Usage",
+      header: t("usage"),
       size: 220,
       enableHiding: true,
       enableSorting: true,
@@ -786,7 +789,7 @@ export default function SessionsTable({
     {
       accessorKey: "traceTags",
       id: "traceTags",
-      header: "Trace Tags",
+      header: t("traceTags"),
       size: 250,
       enableHiding: true,
       defaultHidden: true,

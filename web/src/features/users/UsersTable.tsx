@@ -9,6 +9,8 @@ import {
 } from "use-query-params";
 import { DataTableToolbar } from "@/src/components/table/data-table-toolbar";
 import { DataTable } from "@/src/components/table/data-table";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { usersMessages } from "@/src/features/i18n/messages/users";
 import {
   DataTableControls,
   DataTableControlsProvider,
@@ -76,6 +78,7 @@ export function UsersTable({
 }) {
   const router = useRouter();
   const projectId = router.query.projectId as string;
+  const t = useTranslation(usersMessages);
 
   // The two read paths answer different facet sets from different tables, so
   // they get different configs — and different persistence keys, or a v4-only
@@ -384,7 +387,6 @@ export function UsersTable({
 
   const userDetailPath = (userId: string) =>
     `/project/${projectId}/users/${encodeURIComponent(userId)}`;
-
   const handleRowClick = (row: RowData) => {
     if (!row.userId) return;
     router.push(userDetailPath(row.userId));
@@ -394,7 +396,7 @@ export function UsersTable({
     createLinkTableColumn<RowData>({
       accessorKey: "userId",
       enableColumnFilter: true,
-      header: "User ID",
+      header: t("userId"),
       headerTooltip: {
         description:
           "The unique identifier for the user that was logged in Langfuse. See docs for more details on how to set this up.",
@@ -415,13 +417,13 @@ export function UsersTable({
     }),
     createTagTableColumn<RowData>({
       accessorKey: "environment",
-      header: "Environment",
+      header: t("environment"),
       size: 150,
       enableHiding: true,
     }),
     createTextTableColumn<RowData>({
       accessorKey: "firstEvent",
-      header: "First Event",
+      header: t("firstEvent"),
       headerTooltip: {
         description: "The earliest trace recorded for this user.",
       },
@@ -431,7 +433,7 @@ export function UsersTable({
     }),
     createTextTableColumn<RowData>({
       accessorKey: "lastEvent",
-      header: "Last Event",
+      header: t("lastEvent"),
       headerTooltip: {
         description: "The latest trace recorded for this user.",
       },
@@ -441,14 +443,14 @@ export function UsersTable({
     }),
     createTextTableColumn<RowData>({
       accessorKey: "totalTraces",
-      header: "Trace Count",
+      header: t("traceCount"),
       size: 120,
       mapValue: (value) =>
         users.isSuccess ? (value ?? undefined) : { type: "loading" },
     }),
     createTextTableColumn<RowData>({
       accessorKey: "totalEvents",
-      header: "Total Events",
+      header: t("totalEvents"),
       headerTooltip: {
         description:
           "Total number of events for the user, includes traces and observations. See data model for more details.",
@@ -460,7 +462,7 @@ export function UsersTable({
     }),
     createTextTableColumn<RowData>({
       accessorKey: "totalTokens",
-      header: "Total Tokens",
+      header: t("totalTokens"),
       headerTooltip: {
         description:
           "Total number of tokens used for the user across all generations.",
@@ -472,7 +474,7 @@ export function UsersTable({
     }),
     createTextTableColumn<RowData>({
       accessorKey: "totalCost",
-      header: "Total Cost",
+      header: t("totalCost"),
       headerTooltip: {
         description: "Total cost for the user across all generations.",
         href: "https://langfuse.com/docs/model-usage-and-cost",

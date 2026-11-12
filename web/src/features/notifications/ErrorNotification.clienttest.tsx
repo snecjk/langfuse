@@ -201,8 +201,7 @@ describe("ErrorNotification", () => {
       path: "auth.callback",
       traceId: "0123456789abcdef",
       analytics: {
-        operation: "auth.callback" as const,
-        trpcPath: "auth.callback" as const,
+        operation: "session.add_to_annotation_queue" as const,
         errorOrigin: "backend" as const,
         errorCategory: "internal" as const,
         trpcCode: "INTERNAL_SERVER_ERROR" as const,

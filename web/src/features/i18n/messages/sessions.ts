@@ -1,0 +1,38 @@
+import { type Messages } from "../messages";
+
+export const sessionsMessages = {
+  en: {
+    id: "ID",
+    createdAt: "Created At",
+    duration: "Duration",
+    environment: "Environment",
+    scores: "Scores",
+    userIds: "User IDs",
+    traces: "Traces",
+    inputCost: "Input Cost",
+    outputCost: "Output Cost",
+    totalCost: "Total Cost",
+    inputTokens: "Input Tokens",
+    outputTokens: "Output Tokens",
+    totalTokens: "Total Tokens",
+    usage: "Usage",
+    traceTags: "Trace Tags",
+  },
+  "zh-CN": {
+    id: "ID",
+    createdAt: "创建时间",
+    duration: "持续时间",
+    environment: "环境",
+    scores: "评分",
+    userIds: "用户 ID",
+    traces: "追踪数",
+    inputCost: "输入费用",
+    outputCost: "输出费用",
+    totalCost: "总费用",
+    inputTokens: "输入 Token 数",
+    outputTokens: "输出 Token 数",
+    totalTokens: "总 Token 数",
+    usage: "用量",
+    traceTags: "追踪标签",
+  },
+} satisfies Messages;

@@ -5,11 +5,14 @@ import Page from "@/src/components/layouts/Page";
 import { SessionsOnboarding } from "@/src/components/onboarding/SessionsOnboarding";
 import { api } from "@/src/utils/api";
 import { useReadPath } from "@/src/features/events/hooks/useReadPath";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { navigationMessages } from "@/src/features/i18n/messages/navigation";
 
 export default function SessionsPage() {
   const router = useRouter();
   const projectId = router.query.projectId as string;
   const { isV4 } = useReadPath();
+  const t = useTranslation(navigationMessages);
 
   const { data: hasAnySession, isLoading } = api.sessions.hasAny.useQuery(
     { projectId },
@@ -45,7 +48,7 @@ export default function SessionsPage() {
   return (
     <Page
       headerProps={{
-        title: "Sessions",
+        title: t("sessions"),
         help: {
           description: (
             <>

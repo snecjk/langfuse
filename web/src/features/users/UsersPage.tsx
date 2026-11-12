@@ -4,11 +4,14 @@ import { UsersOnboarding } from "@/src/components/onboarding/UsersOnboarding";
 import { useReadPath } from "@/src/features/events/hooks/useReadPath";
 import { api } from "@/src/utils/api";
 import { UsersTable } from "@/src/features/users/UsersTable";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { navigationMessages } from "@/src/features/i18n/messages/navigation";
 
 export default function UsersPage() {
   const router = useRouter();
   const projectId = router.query.projectId as string;
   const { isV4 } = useReadPath();
+  const t = useTranslation(navigationMessages);
 
   // Check if the user has any users
   const { data: hasAnyUser, isLoading } = api.users.hasAny.useQuery(
@@ -45,7 +48,7 @@ export default function UsersPage() {
   return (
     <Page
       headerProps={{
-        title: "Users",
+        title: t("users"),
         help: {
           description: (
             <>

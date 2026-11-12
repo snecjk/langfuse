@@ -86,8 +86,8 @@ claim. The matrix supersedes it for current status.
 | C4 | `/project/[projectId]/traces` | `features/traces/TracesPage`, `TracesTable` | 已登录 | 列表列、筛选、详情跳转 | `tracing`, `table` | 部分迁移 | 部分验证（合并回归） | 用户数据（追踪内容） |
 | C5 | `/project/[projectId]/traces/[traceId]` | `TraceDetailView`, `TraceDetailViewHeader`, `TraceDetailTabsBarList`, `ObservationDetailView*`, `TracePanelNavigationHeader` | 已登录 | 详情头、tab、观察面板、Formatted/Raw、JSON 工具栏、动作菜单 | `tracing` | 部分迁移 | 部分验证 | 用户数据（输入/输出/JSON 不翻译） |
 | C6 | `/project/[projectId]/observations` `/observations/new` | `tracing-tables/observations/*` | 已登录 | 列表、新建、详情 | `tracing`, `table` | 部分迁移 | 部分验证 | — |
-| C7 | `/project/[projectId]/sessions` `/sessions/[sessionId]` | `features/sessions` | 已登录 | 列表、详情、关联追踪、空态 | — | 未迁移 | 未验证 | 用户标识/会话值不翻译 |
-| C8 | `/project/[projectId]/users` `/users/[userId]` | `features/users` | 已登录 | 列表、详情、关联追踪、空态 | — | 未迁移 | 未验证 | 用户标识不翻译 |
+| C7 | `/project/[projectId]/sessions` `/sessions/[sessionId]` | `features/sessions` | 已登录 | 列表、详情、关联追踪、空态 | `sessions` | 部分迁移（列表页标题与列头已迁移；详情页 SessionDetailPage 未迁移） | 未验证 | 用户标识/会话值不翻译 |
+| C8 | `/project/[projectId]/users` `/users/[userId]` | `features/users` | 已登录 | 列表、详情、关联追踪、空态 | `users` | 部分迁移（列表页标题与列头已迁移；详情页 UserDetailPage 未迁移） | 未验证 | 用户标识不翻译 |
 | C9 | `/project/[projectId]/topics` | `features/topics` (`TopicMobileTraceList`, `TopicTraceSelectorView`, 配置/运行弹窗) | 已登录 + `canViewTopics` | 列表、配置/自动处理弹窗、运行详情、网格、追踪选择 | — | 部分迁移 | 未验证 | 用户主题名称/筛选值不翻译 |
 | C10 | `/project/[projectId]/alerts` `/alerts/new` `/alerts/[monitorId]` `/alerts/[monitorId]/edit` | `features/monitors` | RBAC:`alerts:read` + FLAG(v4WriteMode≠legacy) | 列表、新建、编辑、详情、删除 | — | 未迁移 | 未验证 | — |
 | C11 | `/project/[projectId]/events` (v4) | `features/events/EventsPage` | 已登录 | 事件列表、筛选、详情 | — | 部分迁移（EventsPage 接入） | 未验证 | — |
