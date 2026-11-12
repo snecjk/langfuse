@@ -49,8 +49,7 @@ export function useRegenerateTopics({
     if (!rules.isSuccess) return t("checkingActiveFacets");
     if (executionsError)
       return t("couldNotCheckRuns", { message: executionsError });
-    if (executions === undefined)
-      return t("checkingRuns");
+    if (executions === undefined) return t("checkingRuns");
     return null;
   })();
   const candidates = rules.isSuccess ? ruleFacets(facets, rule) : [];

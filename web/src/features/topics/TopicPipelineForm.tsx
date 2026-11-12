@@ -49,9 +49,7 @@ export function useTopicPipelineForm({
       request.current = null;
       return result.id;
     } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : t("couldNotSummarize"),
-      );
+      setError(cause instanceof Error ? cause.message : t("couldNotSummarize"));
       return null;
     }
   }

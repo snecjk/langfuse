@@ -1,0 +1,21 @@
+{
+   "AppID" : "7F01F0B4-A330-423a-833A-828836147C80",
+   "BestResolution" : {
+      "X" : 0,
+      "Y" : 0
+   },
+   "ChangeFileList" : 0,
+   "Description" : "",
+   "FileVersion" : {
+      ".atc" : 0,
+      ".mq" : 0,
+      ".prop" : 0,
+      ".rtd" : 0,
+      ".uip" : 0,
+      ".uis" : 0
+   },
+   "Name" : "ck-ÁÒÑæ¾õÐÑ",
+   "SelID" : 350550,
+   "Version" : "1782309475",
+   "id" : "81fa512e-a923-4c77-b244-073a57e3c4fe"
+}

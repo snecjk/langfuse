@@ -151,7 +151,11 @@ export function MobileTopicsView({
   return (
     <div className="ph-no-capture flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
       <Tabs value={navigation.panel} onValueChange={showPanel} layout="fill">
-        <Tabs.List variant="underline" layout="full" aria-label={t("topicsPanels")}>
+        <Tabs.List
+          variant="underline"
+          layout="full"
+          aria-label={t("topicsPanels")}
+        >
           <Tabs.Trigger value="topics" label={t("topics")} />
           <Tabs.Trigger value="traces" label={t("traces")} />
           <Tabs.Trigger value="visualization" label={t("visualize")} />

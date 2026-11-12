@@ -258,8 +258,7 @@ function TopicSetupSession({
       if (!facet.isBuiltIn || !enabled.has(facet.name) || !version) return [];
       return [{ facetId: facet.id, version }];
     });
-    if (refs.length === 0)
-      throw new Error(t("saveAtLeastOneQuestion"));
+    if (refs.length === 0) throw new Error(t("saveAtLeastOneQuestion"));
     const { traceCount: backfillCount } = await startSetup.mutateAsync({
       projectId,
       requestId,
