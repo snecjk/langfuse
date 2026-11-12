@@ -473,6 +473,15 @@ export const topicsMessages = {
     daySingular: "day",
     daysPlural: "{count} days",
 
+    // Manual topics selection
+    selectAtLeastOneFacet: "Select at least one active facet.",
+    noSummariesAvailable:
+      "No summaries are available for the selected facets. Summarize traces first.",
+    fewerThan10Summaries:
+      "Each selected facet has fewer than 10 summaries. Summarize more traces or widen the time range.",
+    fewerThan100Summaries:
+      "Each selected facet has fewer than 100 summaries. Enable small sample mode, summarize more traces, or widen the time range.",
+
     // Errors and loading (page-level)
     couldNotSummarize: "Could not summarize traces.",
     couldNotRegenerate: "Could not regenerate topics.",
