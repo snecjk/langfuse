@@ -34,6 +34,8 @@ import {
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { cn } from "@/src/utils/tailwind";
 import { isString } from "@/src/utils/types";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tableMessages } from "@/src/features/i18n/messages/table";
 import { PopoverController } from "@/src/components/ui/popover";
 import { ColumnVisibilityHeader } from "@/src/components/table/ColumnVisibilityHeader";
 import {
@@ -136,11 +138,13 @@ function ColumnVisibilityListItem<TData, TValue>({
   toggleColumn,
   columnVisibility,
   isOrderable = false,
+  t,
 }: {
   column: LangfuseColumnDef<TData, TValue>;
   toggleColumn: (columnId: string) => void;
   columnVisibility: VisibilityState;
   isOrderable?: boolean;
+  t: ReturnType<typeof useTranslation<typeof tableMessages>>;
 }) {
   const isFixedPosition = column.isFixedPosition ?? false;
   const { attributes, isDragging, listeners, setNodeRef, transform } =
@@ -186,9 +190,9 @@ function ColumnVisibilityListItem<TData, TValue>({
           )}
           title={
             !column.enableHiding
-              ? "This column may not be hidden"
+              ? t("columnNotHidden")
               : isFixedPosition
-                ? "This column is fixed in position and cannot be hidden"
+                ? t("columnFixedPosition")
                 : undefined
           }
         >
@@ -208,7 +212,7 @@ function ColumnVisibilityListItem<TData, TValue>({
           {...listeners}
           variant="ghost"
           size="xs"
-          title="Drag and drop to reorder columns"
+          title={t("dragReorderColumns")}
           className="invisible shrink-0 group-focus-within:visible group-hover:visible"
         >
           <Menu size="sm" color="default" />
@@ -226,6 +230,7 @@ function GroupVisibilityHeader<TData, TValue>({
   onToggle,
   children,
   toggleAll,
+  t,
 }: {
   column: LangfuseColumnDef<TData, TValue>;
   groupTotalCount: number;
@@ -234,6 +239,7 @@ function GroupVisibilityHeader<TData, TValue>({
   onToggle: () => void;
   children: React.ReactNode;
   toggleAll: () => void;
+  t: ReturnType<typeof useTranslation<typeof tableMessages>>;
 }) {
   const { attributes, isDragging, listeners, setNodeRef, transform } =
     useSortable({
@@ -295,8 +301,8 @@ function GroupVisibilityHeader<TData, TValue>({
             onClick={toggleAll}
           >
             {groupVisibleCount === groupTotalCount
-              ? "Deselect All"
-              : "Select All"}
+              ? t("deselectAll")
+              : t("selectAll")}
           </Button>
           {attributes && listeners && (
             <Button
@@ -304,7 +310,7 @@ function GroupVisibilityHeader<TData, TValue>({
               {...listeners}
               variant="ghost"
               size="xs"
-              title="Drag and drop to reorder columns"
+              title={t("dragReorderColumns")}
               className="invisible group-focus-within:visible group-hover:visible"
             >
               <Menu size="sm" color="default" />
@@ -358,6 +364,7 @@ export function DataTableColumnVisibilityFilter<TData, TValue>({
   onColumnGroupToggle,
 }: ColumnVisibilityProps<TData, TValue>) {
   const capture = usePostHogClientCapture();
+  const t = useTranslation(tableMessages);
   const [openGroups, setOpenGroups] = React.useState<Record<string, boolean>>(
     {},
   );
@@ -496,8 +503,8 @@ export function DataTableColumnVisibilityFilter<TData, TValue>({
               >
                 <span>
                   {count === total
-                    ? "Deselect All Columns"
-                    : "Select All Columns"}
+                    ? t("deselectAllColumns")
+                    : t("selectAllColumns")}
                 </span>
                 <span className="text-muted-foreground text-xs">{`${count}/${total}`}</span>
               </Button>
@@ -549,6 +556,7 @@ export function DataTableColumnVisibilityFilter<TData, TValue>({
                               });
                             }
                           }}
+                          t={t}
                         >
                           <div className="space-y-0.5">
                             {column.columns.map((col) => (
@@ -558,6 +566,7 @@ export function DataTableColumnVisibilityFilter<TData, TValue>({
                                 columnVisibility={columnVisibility}
                                 toggleColumn={toggleColumn}
                                 isOrderable={false}
+                                t={t}
                               />
                             ))}
                           </div>
@@ -572,6 +581,7 @@ export function DataTableColumnVisibilityFilter<TData, TValue>({
                         columnVisibility={columnVisibility}
                         toggleColumn={toggleColumn}
                         isOrderable={isColumnOrderingEnabled}
+                        t={t}
                       />
                     );
                   })}
@@ -590,7 +600,11 @@ export function DataTableColumnVisibilityFilter<TData, TValue>({
     >
       {({ Trigger }) => (
         <Trigger asChild>
-          <Button variant="ghost" size={triggerSize} title="Show/hide columns">
+          <Button
+            variant="ghost"
+            size={triggerSize}
+            title={t("showHideColumns")}
+          >
             <span>Columns</span>
             <div className="bg-input ml-1 rounded-sm px-1 text-xs">{`${count}/${total}`}</div>
           </Button>

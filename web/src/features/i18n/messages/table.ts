@@ -50,6 +50,15 @@ export const tableMessages = {
       "Approximate count over the active column filters and time range only. It excludes full-text search, score, and comment filters, so it can be noticeably higher than the number of matching rows.",
     approximate:
       "Approximate number of matching rows for the active filters and time range, estimated with ClickHouse's HyperLogLog (typically within a few percent of the true count).",
+    columnNotHidden: "This column may not be hidden",
+    columnFixedPosition:
+      "This column is fixed in position and cannot be hidden",
+    dragReorderColumns: "Drag and drop to reorder columns",
+    selectAll: "Select All",
+    deselectAll: "Deselect All",
+    selectAllColumns: "Select All Columns",
+    deselectAllColumns: "Deselect All Columns",
+    showHideColumns: "Show/hide columns",
   },
   "zh-CN": {
     search: "搜索…",
@@ -99,5 +108,13 @@ export const tableMessages = {
       "此估算仅考虑当前列筛选条件和时间范围，不包括全文搜索、评分和评论筛选，因此可能明显高于实际匹配行数。",
     approximate:
       "使用 ClickHouse 的 HyperLogLog 估算当前筛选条件和时间范围内的匹配行数，误差通常在实际数量的几个百分点以内。",
+    columnNotHidden: "此列不可隐藏",
+    columnFixedPosition: "此列固定位置，不可隐藏",
+    dragReorderColumns: "拖动以重新排列列",
+    selectAll: "全部选中",
+    deselectAll: "全部取消",
+    selectAllColumns: "全部选中列",
+    deselectAllColumns: "全部取消列",
+    showHideColumns: "显示/隐藏列",
   },
 } satisfies Messages;
