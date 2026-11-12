@@ -14,6 +14,11 @@ export const catalogMessages = {
 
     prompts: "Prompts",
     datasets: "Datasets",
+    createNewPrompt: "Create new prompt",
+    newPromptHelp:
+      "Manage and version your prompts in Langfuse. Edit and update them via the UI and SDK. Retrieve the production version via the SDKs. Learn more in the docs.",
+    promptImmutable:
+      "Prompts are immutable in Langfuse. To update a prompt, create a new version.",
     exportFailed: "Failed to export prompts. Please try again.",
     promptHelp:
       "Manage and version your prompts in Langfuse. Edit and update them via the UI and SDK. Retrieve the production version via the SDKs. Learn more in the docs.",
@@ -60,6 +65,11 @@ export const catalogMessages = {
 
     prompts: "提示词",
     datasets: "数据集",
+    createNewPrompt: "新建提示词",
+    newPromptHelp:
+      "在 Langfuse 中管理提示词及其版本，通过界面或 SDK 编辑更新，并通过 SDK 获取生产版本。请参阅文档了解更多。",
+    promptImmutable:
+      "提示词在 Langfuse 中是不可变的。如需更新提示词，请新建一个版本。",
     exportFailed: "导出提示词失败，请重试。",
     promptHelp:
       "在 Langfuse 中管理提示词及其版本，通过界面或 SDK 编辑更新，并通过 SDK 获取生产版本。请参阅文档了解更多。",

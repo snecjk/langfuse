@@ -3,10 +3,13 @@ import { NewPromptForm } from "@/src/features/prompts/components/NewPromptForm/N
 import useProjectIdFromURL from "@/src/hooks/useProjectIdFromURL";
 import { api } from "@/src/utils/api";
 import Page from "@/src/components/layouts/Page";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { catalogMessages } from "@/src/features/i18n/messages/catalog";
 
 export const NewPrompt = () => {
   const projectId = useProjectIdFromURL();
   const [initialPromptId] = useQueryParam("promptId", StringParam);
+  const t = useTranslation(catalogMessages);
 
   const { data: initialPrompt, isLoading } = api.prompts.byId.useQuery(
     {
@@ -51,21 +54,17 @@ export const NewPrompt = () => {
       scrollable
       headerProps={{
         title: initialPrompt
-          ? `${initialPrompt.name} \u2014 New version`
-          : "Create new prompt",
+          ? `${initialPrompt.name} \u2014 ${t("newPrompt")}`
+          : t("createNewPrompt"),
         help: {
-          description:
-            "Manage and version your prompts in Langfuse. Edit and update them via the UI and SDK. Retrieve the production version via the SDKs. Learn more in the docs.",
+          description: t("newPromptHelp"),
           href: "https://langfuse.com/docs/prompts",
         },
         breadcrumb: breadcrumb,
       }}
     >
       {initialPrompt ? (
-        <p className="text-muted-foreground text-sm">
-          Prompts are immutable in Langfuse. To update a prompt, create a new
-          version.
-        </p>
+        <p className="text-muted-foreground text-sm">{t("promptImmutable")}</p>
       ) : null}
       <div className="my-8">
         <NewPromptForm {...{ initialPrompt }} />
