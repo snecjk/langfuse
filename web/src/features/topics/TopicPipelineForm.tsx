@@ -4,6 +4,8 @@ import { type TopicFacet, type TopicFacetRef } from "@langfuse/shared/topics";
 import { type ConfigureTopicsSettingsInput } from "./TopicModelSettings";
 import { type RegenerateTopics } from "./useRegenerateTopics";
 import { type TimeRange } from "@/src/utils/date-range-utils";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 
 export function useTopicPipelineForm({
   projectId,
@@ -30,6 +32,7 @@ export function useTopicPipelineForm({
   running: boolean;
   onConfigure: () => void;
 }) {
+  const t = useTranslation(topicsMessages);
   const request = useRef<{ key: string; id: string } | null>(null);
   const trigger = api.topics.trigger.useMutation();
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +50,7 @@ export function useTopicPipelineForm({
       return result.id;
     } catch (cause) {
       setError(
-        cause instanceof Error ? cause.message : "Could not summarize traces.",
+        cause instanceof Error ? cause.message : t("couldNotSummarize"),
       );
       return null;
     }

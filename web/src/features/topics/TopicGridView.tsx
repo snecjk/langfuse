@@ -100,7 +100,7 @@ function TopicGridContent({
   return (
     <div className="flex h-full min-h-0 min-w-0 flex-col lg:flex-row">
       <section
-        aria-label="Topic grid"
+        aria-label={t("topicGrid")}
         className="flex min-h-48 min-w-0 shrink-0 basis-1/2 flex-col overflow-hidden lg:shrink lg:basis-3/5"
       >
         {message ? (

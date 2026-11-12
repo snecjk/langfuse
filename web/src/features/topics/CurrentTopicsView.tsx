@@ -388,6 +388,7 @@ function CurrentTraceTable({
   totalCount,
   topics,
 }: CurrentTraceTableProps) {
+  const t = useTranslation(topicsMessages);
   const tableRef = useRef<HTMLDivElement>(null);
   const { rows } = traces;
   const selectedRowLoaded = rows.some((row) => row.traceId === selectedTraceId);
@@ -415,7 +416,7 @@ function CurrentTraceTable({
   const columns: LangfuseColumnDef<FacetRow>[] = [
     {
       accessorKey: "traceId",
-      header: "Trace ID",
+      header: t("traceId"),
       size: 132,
       minSize: 100,
       cell: ({ row }) => {
@@ -433,7 +434,7 @@ function CurrentTraceTable({
     },
     {
       accessorKey: "topicName",
-      header: "Topic",
+      header: t("topic"),
       size: 148,
       minSize: 100,
       cell: ({ row }) => (
@@ -446,7 +447,7 @@ function CurrentTraceTable({
     },
     {
       accessorKey: "summary",
-      header: "Summary",
+      header: t("summary"),
       size: 300,
       minSize: 180,
       isFlexWidth: true,
@@ -467,13 +468,13 @@ function CurrentTraceTable({
                 </div>
                 <TextLink
                   path={`/project/${projectId}/traces/${encodeURIComponent(row.original.traceId)}`}
-                  value="Open trace"
+                  value={t("openTrace")}
                   onClick={openTrace}
                 />
               </div>
             )}
             <p className="break-words whitespace-pre-wrap">
-              {row.original.summary || "No applicable summary."}
+              {row.original.summary || t("noApplicableSummary")}
             </p>
           </div>
         );
@@ -487,7 +488,9 @@ function CurrentTraceTable({
       className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
     >
       <p className="text-muted-foreground shrink-0 px-3 py-1 text-xs tabular-nums">
-        {`${rows.length.toLocaleString()}${traces.hasMore ? "+" : ""}${totalCount === null ? "" : ` of ~${totalCount.toLocaleString()}`} traces loaded`}
+        {t("tracesLoaded", {
+          count: `${rows.length.toLocaleString()}${traces.hasMore ? "+" : ""}${totalCount === null ? "" : ` ${t("ofLabel")} ~${totalCount.toLocaleString()}`}`,
+        })}
       </p>
       <DataTable
         tableName="topics-current-traces"
@@ -502,7 +505,7 @@ function CurrentTraceTable({
         topAlignCells
         className="min-h-0 overscroll-contain"
         cellPadding="relaxed"
-        noResultsMessage="No matches. Adjust or clear your filters."
+        noResultsMessage={t("noTraceSummariesFilter")}
         rowSelection={selectedTraceId ? { [selectedTraceId]: true } : {}}
         onRowClick={selectRow}
         peekView={peekView}

@@ -5,6 +5,8 @@ import { TOPICS_MODEL_SLOTS, type TopicRule } from "@langfuse/shared/topics";
 import { api, type RouterOutputs } from "@/src/utils/api";
 import { AutomaticProcessingDialog } from "./AutomaticProcessingDialog";
 import { TOPIC_SETUP_BACKFILL_DAYS } from "./topic-setup-flow";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 
 type StoredSettings = RouterOutputs["topics"]["modelSettings"];
 
@@ -46,6 +48,7 @@ function AutomaticProcessingDialogContent({
   closeDialog: () => void;
   initialEnabled: boolean;
 }) {
+  const t = useTranslation(topicsMessages);
   const [error, setError] = useState<string | null>(null);
   const dailyTraces = useDailyTraceEstimate(projectId, rule?.filter ?? []);
   const submit = (input: { enabled: boolean; sampling: number }) => {
@@ -54,9 +57,7 @@ function AutomaticProcessingDialogContent({
       .then(closeDialog)
       .catch((cause: unknown) =>
         setError(
-          cause instanceof Error
-            ? cause.message
-            : "Could not save auto-analyze.",
+          cause instanceof Error ? cause.message : t("couldNotSaveAutoAnalyze"),
         ),
       );
   };

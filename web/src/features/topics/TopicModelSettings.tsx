@@ -1,6 +1,8 @@
 import { api, type RouterOutputs } from "@/src/utils/api";
 import { type TopicFacet, type TopicRule } from "@langfuse/shared/topics";
 import { useAutomaticProcessing } from "./useAutomaticProcessing";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 
 type StoredSettings = RouterOutputs["topics"]["modelSettings"];
 type Connection = RouterOutputs["llmApiKey"]["effective"]["data"][number];
@@ -39,6 +41,7 @@ export function useTopicModelSettings({
   facets: TopicFacet[];
   facetsReady: boolean;
 }) {
+  const t = useTranslation(topicsMessages);
   const settings = api.topics.modelSettings.useQuery({ projectId });
   const readinessSettings = api.topics.tracingReadinessSettings.useQuery({
     projectId,
@@ -88,7 +91,7 @@ export function useTopicModelSettings({
     configure: {
       settings: configureSettings,
       error: configurationError
-        ? `Could not load Topics configuration: ${configurationError.message} Reload the page to retry.`
+        ? t("couldNotLoadTopicsConfig", { message: configurationError.message })
         : null,
     },
     automaticProcessing: {

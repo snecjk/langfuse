@@ -1,5 +1,6 @@
 import { useRef, useState, type ReactNode } from "react";
 import { formatDistanceToNow } from "date-fns";
+import { zhCN as dateFnsZhCN } from "date-fns/locale";
 import { DialogController } from "@/src/components/design-system/DialogController/DialogController";
 import { env } from "@/src/env.mjs";
 import { type JudgeModel } from "@/src/features/evals/v2/judgeModel";
@@ -15,6 +16,11 @@ import {
   type TopicFacet,
   type TopicsModelSlotName,
 } from "@langfuse/shared/topics";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 import {
   ConfigureTopicsDialog,
   type ConfigureTopicsSaveDraft,
@@ -80,6 +86,8 @@ function ConfigureTopicsSettings({
   save: ReturnType<typeof useSaveTopicsSetup>;
   closeDialog: () => void;
 }) {
+  const t = useTranslation(topicsMessages);
+  const locale = useInterfaceLocale();
   const requests = useRef({ summary: 0, embedding: 0, clustering: 0 });
   const [checks, setChecks] = useState<
     Record<TopicsModelSlotName, TopicSlotCheck>
@@ -118,10 +126,13 @@ function ConfigureTopicsSettings({
     ? {
         shortLabel: stored.blockReason
           ? getEvaluatorBlockMetadata(stored.blockReason).shortLabel
-          : "Paused",
+          : t("pausedLabel"),
         pausedAgo: stored.blockedAt
-          ? formatDistanceToNow(new Date(stored.blockedAt), { addSuffix: true })
-          : "just now",
+          ? formatDistanceToNow(new Date(stored.blockedAt), {
+              addSuffix: true,
+              locale: locale === "zh-CN" ? dateFnsZhCN : undefined,
+            })
+          : t("justNow"),
         message: stored.blockMessage,
       }
     : null;
@@ -156,7 +167,7 @@ function ConfigureTopicsSettings({
         ...current,
         [slot]: {
           status: "error",
-          message: "Choose a model from a connection in this project.",
+          message: t("chooseModelFromConnection"),
         },
       }));
       return;
@@ -188,7 +199,7 @@ function ConfigureTopicsSettings({
           [slot]: {
             status: "error",
             message:
-              error instanceof Error ? error.message : "The test call failed.",
+              error instanceof Error ? error.message : t("modelTestFailed"),
           },
         }));
       });
@@ -203,7 +214,7 @@ function ConfigureTopicsSettings({
     if (!parsedDimensions.success)
       throw new Error(
         parsedDimensions.error.issues[0]?.message ??
-          "Check the embedding dimensions.",
+          t("checkEmbeddingDimensions"),
       );
     const summary = resolveTopicModelSlot(value.summary, connections, "chat");
     const embedding = resolveTopicModelSlot(
@@ -218,7 +229,7 @@ function ConfigureTopicsSettings({
       "chat",
     );
     if (stored.enabled && (!summary || !embedding || !clustering))
-      throw new Error("Choose a model from a connection in this project.");
+      throw new Error(t("chooseModelFromConnection"));
     try {
       await save.mutateAsync({
         projectId,
@@ -232,7 +243,7 @@ function ConfigureTopicsSettings({
       });
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Could not save Topics.";
+        error instanceof Error ? error.message : t("couldNotSaveTopics");
       setSaveError(message);
       throw error;
     }

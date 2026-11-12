@@ -191,6 +191,8 @@ it("follows a setup run from summaries through its topic update", () => {
 });
 
 it("names the connection when the project has one provider", () => {
-  expect(topicConnectionCaption(connections)).toBe("Amazon Bedrock");
-  expect(topicConnectionCaption([])).toBe("No AI connection");
+  const t = (key: "noAiConnection" | "projectConnections") =>
+    key === "noAiConnection" ? "No AI connection" : "Project connections";
+  expect(topicConnectionCaption(connections, t)).toBe("Amazon Bedrock");
+  expect(topicConnectionCaption([], t)).toBe("No AI connection");
 });

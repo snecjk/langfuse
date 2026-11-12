@@ -9,6 +9,8 @@ import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePos
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
 import { api } from "@/src/utils/api";
 import { type ConfigureTopicsSettingsInput } from "./TopicModelSettings";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 import {
   TopicSetupFlowDialog,
   type TopicSetupPastCount,
@@ -92,6 +94,7 @@ function TopicSetupSession({
   }) => Promise<unknown>;
   closeDialog: () => void;
 }) {
+  const t = useTranslation(topicsMessages);
   const capture = usePostHogClientCapture();
   const utils = api.useUtils();
   const canAddConnection = useHasProjectAccess({
@@ -188,7 +191,7 @@ function TopicSetupSession({
       "chat",
     );
     if (!summary || !embedding || !clustering)
-      throw new Error("Choose a model from a connection in this project.");
+      throw new Error(t("chooseModelFromConnection"));
     return {
       summary,
       embedding,
@@ -256,7 +259,7 @@ function TopicSetupSession({
       return [{ facetId: facet.id, version }];
     });
     if (refs.length === 0)
-      throw new Error("Save at least one question before starting.");
+      throw new Error(t("saveAtLeastOneQuestion"));
     const { traceCount: backfillCount } = await startSetup.mutateAsync({
       projectId,
       requestId,
@@ -294,7 +297,7 @@ function TopicSetupSession({
       await startAnalyzing();
     } catch (cause) {
       setError(
-        cause instanceof Error ? cause.message : "Could not save Topics.",
+        cause instanceof Error ? cause.message : t("couldNotSaveTopics"),
       );
     } finally {
       setPending(false);
@@ -321,7 +324,7 @@ function TopicSetupSession({
         "embedding",
         settings.stored.embedding?.model,
       )}
-      connectionCaption={topicConnectionCaption(connections)}
+      connectionCaption={topicConnectionCaption(connections, t)}
       hasConnection={connections.length > 0}
       canAddConnection={canAddConnection}
       advancedOpen={draft.advancedOpen}

@@ -12,6 +12,7 @@ export const topicsMessages = {
     pageUnavailableTitle: "Not found",
     pageUnavailableMessage: "This page is not available.",
     visualizeAs: "Visualize as",
+    visualize: "Visualize",
     runHistory: "Run history",
 
     // Facets
@@ -339,6 +340,7 @@ export const topicsMessages = {
     addMyOwn: "Add my own",
     enableFacet: "Enable {name}",
     builtIn: "Built-in",
+    custom: "Custom",
     fiveFacetsOn: "Five facets can be on. Turn one off to enable another.",
     facetsOn: "{count} of {max} on",
     customFacetsComingSoon:
@@ -432,6 +434,8 @@ export const topicsMessages = {
     whatToLookFor: "What to look for",
     selectModelsForAnalysis: "Select models for analysis",
     noConnectionYet: "No AI connection in this project yet",
+    noAiConnection: "No AI connection",
+    projectConnections: "Project connections",
     addConnection: "Add connection",
     noModelsYet: "No models yet",
     advanced: "Advanced",
@@ -475,7 +479,10 @@ export const topicsMessages = {
     couldNotSaveAutoAnalyze: "Could not save auto-analyze.",
     configureModelsFirst: "Configure models first.",
     noActiveQuestions: "Add at least one question before starting.",
+    saveAtLeastOneQuestion: "Save at least one question before starting.",
     loadingTopicsConfig: "Loading Topics configuration…",
+    couldNotLoadTopicsConfig:
+      "Could not load Topics configuration: {message} Reload the page to retry.",
     configureTopicsFirstLower: "configure Topics first",
     runInProgressWait: "A run is already in progress.",
     chooseValidTimeRange: "Choose a valid time range.",
@@ -565,6 +572,7 @@ export const topicsMessages = {
     pageUnavailableTitle: "页面不可用",
     pageUnavailableMessage: "此页面不可用。",
     visualizeAs: "可视化方式",
+    visualize: "可视化",
     runHistory: "运行历史",
 
     // Facets
@@ -880,6 +888,7 @@ export const topicsMessages = {
     addMyOwn: "添加自定义",
     enableFacet: "启用 {name}",
     builtIn: "内置",
+    custom: "自定义",
     fiveFacetsOn: "最多可开启五个分面。请关闭一个以启用另一个。",
     facetsOn: "已开启 {count} / {max}",
     customFacetsComingSoon: "自定义分面功能即将推出。此设置目前使用内置分面。",
@@ -965,6 +974,8 @@ export const topicsMessages = {
     whatToLookFor: "关注内容",
     selectModelsForAnalysis: "选择用于分析的模型",
     noConnectionYet: "此项目尚无 AI 连接",
+    noAiConnection: "无 AI 连接",
+    projectConnections: "项目连接",
     addConnection: "添加连接",
     noModelsYet: "暂无模型",
     advanced: "高级",
@@ -1003,7 +1014,10 @@ export const topicsMessages = {
     couldNotSaveAutoAnalyze: "无法保存自动分析设置。",
     configureModelsFirst: "请先配置模型。",
     noActiveQuestions: "开始前请至少添加一个问题。",
+    saveAtLeastOneQuestion: "开始前请至少保存一个问题。",
     loadingTopicsConfig: "正在加载主题配置…",
+    couldNotLoadTopicsConfig:
+      "无法加载主题配置：{message} 请重新加载页面重试。",
     configureTopicsFirstLower: "请先配置主题",
     runInProgressWait: "已有运行正在进行。",
     chooseValidTimeRange: "请选择有效的时间范围。",

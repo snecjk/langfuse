@@ -6,6 +6,8 @@ import {
 } from "@/src/features/i18n/components/PaginationBar/PaginationBar";
 import { formatCompactRelativeTime } from "@/src/utils/dates";
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 import { type TopicTracesResult } from "./facet-topics";
 import { TopicTraceLoadMore } from "./TopicTraceLoadMore";
 import { TopicsErrorMessage } from "./TopicsErrorMessage";
@@ -27,6 +29,7 @@ export function TopicMobileTraceList({
   selectedTraceId,
   onOpenTrace,
 }: TopicMobileTraceListProps) {
+  const t = useTranslation(topicsMessages);
   const { rows } = traces;
   const scrollRef = useRef<HTMLDivElement>(null);
   const selectedRef = useRef<HTMLButtonElement>(null);
@@ -90,7 +93,7 @@ export function TopicMobileTraceList({
                   </time>
                 </span>
                 <span className="[overflow-wrap:anywhere] whitespace-pre-wrap">
-                  {row.summary || "No applicable summary."}
+                  {row.summary || t("noApplicableSummary")}
                 </span>
                 <span className="text-muted-foreground flex w-full min-w-0 items-center justify-between gap-2 text-xs">
                   <span className="truncate font-mono" title={row.traceId}>

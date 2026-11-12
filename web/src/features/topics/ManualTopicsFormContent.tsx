@@ -10,6 +10,8 @@ import { type RegenerateTopics } from "./useRegenerateTopics";
 import { type ConfigureTopicsSettingsInput } from "./TopicModelSettings";
 import { ManualTopicsDialog } from "./ManualTopicsDialog";
 import { manualTopicsSelection } from "./manual-topics-selection";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 
 export function ManualTopicsFormContent({
   initialOperation = "process",
@@ -28,6 +30,7 @@ export function ManualTopicsFormContent({
   onTriggered,
   onConfigure,
 }: ManualTopicsFormContentProps) {
+  const t = useTranslation(topicsMessages);
   const form = useForm<ManualTopicsDraft>({
     defaultValues: {
       operation: initialOperation,
@@ -73,7 +76,7 @@ export function ManualTopicsFormContent({
     return {
       id: facet.id,
       name: facet.name,
-      kind: facet.isBuiltIn ? "Built-in" : "Custom",
+      kind: facet.isBuiltIn ? t("builtIn") : t("custom"),
       version: version.version,
       description: facet.description || version.prompt,
       summaries,
@@ -106,24 +109,24 @@ export function ManualTopicsFormContent({
     (summaryCounts.isPending || summaryCounts.isFetching);
   const disabledReason = (() => {
     if (isSubmitting) return null;
-    if (!canWrite)
-      return "You need permission to manage Topics in this project.";
+    if (!canWrite) return t("noPermissionManageTopics");
     if (configurationError) return configurationError;
     if (regenerate.prerequisiteReason) return regenerate.prerequisiteReason;
-    if (!settings) return "Loading Topics configuration…";
-    if (!configured)
-      return "Choose the Topics models in Configure Topics first.";
+    if (!settings) return t("loadingTopicsConfig");
+    if (!configured) return t("chooseModelsFirst");
     if (settings.stored.blockedAt)
-      return `Topics is paused. ${settings.stored.blockMessage ?? "Fix the model connection in Configure Topics."}`;
-    if (running) return "A Topics run is in progress. Wait for it to finish.";
+      return `${t("topicsPausedPrefix")} ${settings.stored.blockMessage ?? t("topicsPausedFix")}`;
+    if (running) return t("runInProgress");
     if (operation === "update" && regenerate.disabledReason)
       return regenerate.disabledReason;
     if (operation === "update") {
       if (isCountingSummaries) return null;
       if (summaryCounts.error)
-        return `Could not count stored summaries: ${summaryCounts.error.message}`;
+        return t("couldNotCountSummaries", {
+          message: summaryCounts.error.message,
+        });
       if (!facets.some((facet) => (facet.summaries ?? 0) > 0))
-        return "No trace summaries in the selected time range yet. Summarize traces first, then regenerate.";
+        return t("noSummariesInRange");
     }
     return selectionStatus.disabledReason;
   })();
@@ -135,8 +138,8 @@ export function ManualTopicsFormContent({
   const model = (slot: "summary" | "embedding" | "clustering") => {
     const value = settings?.stored[slot];
     return {
-      model: value?.model ?? "Not configured",
-      connection: value?.provider ?? "Project connection",
+      model: value?.model ?? t("notConfiguredModel"),
+      connection: value?.provider ?? t("projectConnection"),
     };
   };
   async function submit() {

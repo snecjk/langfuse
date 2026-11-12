@@ -8,6 +8,10 @@ import {
   type TopicRule,
   type TopicTimeRange,
 } from "@langfuse/shared/topics";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
+
+type T = ReturnType<typeof useTranslation<typeof topicsMessages>>;
 
 /**
  * Data and the `topics.trigger` (`operation: "update"`) write behind the
@@ -30,6 +34,7 @@ export function useRegenerateTopics({
   executions: TopicExecutionList | undefined;
   executionsError: string | null;
 }) {
+  const t = useTranslation(topicsMessages);
   const settings = api.topics.modelSettings.useQuery({ projectId });
   const rules = api.topics.rules.useQuery({ projectId });
   const configured = Boolean(
@@ -40,12 +45,12 @@ export function useRegenerateTopics({
   const rule = rules.data?.length === 1 ? rules.data[0] : null;
   const prerequisiteReason = (() => {
     if (rules.error)
-      return `Could not load active Topics facets: ${rules.error.message}`;
-    if (!rules.isSuccess) return "Checking the active Topics facets…";
+      return t("couldNotLoadActiveFacets", { message: rules.error.message });
+    if (!rules.isSuccess) return t("checkingActiveFacets");
     if (executionsError)
-      return `Could not check Topics runs: ${executionsError}`;
+      return t("couldNotCheckRuns", { message: executionsError });
     if (executions === undefined)
-      return "Checking for Topics runs in progress…";
+      return t("checkingRuns");
     return null;
   })();
   const candidates = rules.isSuccess ? ruleFacets(facets, rule) : [];
@@ -68,6 +73,7 @@ export function useRegenerateTopics({
       runInProgress,
       hasTimeRange: timeRange !== null,
       facetCount: candidates.length,
+      t,
     });
   // Survives reopening the dialog so a retried identical request reuses its
   // requestId and cannot start a second run.
@@ -96,7 +102,7 @@ export function useRegenerateTopics({
       return result.id;
     } catch (cause) {
       setError(
-        cause instanceof Error ? cause.message : "Could not regenerate topics.",
+        cause instanceof Error ? cause.message : t("couldNotRegenerate"),
       );
       return null;
     }
@@ -130,27 +136,25 @@ function regenerateDisabledReason({
   runInProgress,
   hasTimeRange,
   facetCount,
+  t,
 }: {
   canWrite: boolean;
   settings: "loading" | { configured: boolean; pausedMessage: string | null };
   runInProgress: boolean;
   hasTimeRange: boolean;
   facetCount: number;
+  t: T;
 }): string | null {
-  if (!canWrite)
-    return "You need permission to manage Topics in this project to regenerate topics.";
-  if (settings === "loading") return "Checking the Topics setup…";
+  if (!canWrite) return t("regenerateNeedsPermission");
+  if (settings === "loading") return t("checkingSetup");
   if (settings.pausedMessage !== null)
-    return ["Topics is paused.", settings.pausedMessage]
+    return [t("topicsPausedPrefix"), settings.pausedMessage]
       .filter(Boolean)
       .join(" ");
-  if (!settings.configured)
-    return "Choose the Topics models in Configure Topics first.";
-  if (runInProgress)
-    return "A Topics run is in progress. Regenerate when it finishes.";
-  if (!hasTimeRange) return "Choose a valid summary time range.";
-  if (facetCount === 0)
-    return "Turn on at least one facet in Configure Topics.";
+  if (!settings.configured) return t("chooseModelsToRegenerate");
+  if (runInProgress) return t("runInProgressRegenerate");
+  if (!hasTimeRange) return t("chooseValidTimeRange");
+  if (facetCount === 0) return t("turnOnFacetToRegenerate");
   return null;
 }
 

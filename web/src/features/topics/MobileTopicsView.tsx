@@ -19,6 +19,8 @@ import { MobileTopicVisualization } from "./MobileTopicVisualization";
 import { TopicsTraceToolbar } from "./TopicsTraceToolbar";
 import { prepareMobileTopics } from "./prepare-mobile-topics";
 import { UNASSIGNED_TOPIC_ID } from "./prepare-topic-display";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 
 type MobileTopicsViewProps = {
   projectId: string;
@@ -58,6 +60,7 @@ export function MobileTopicsView({
   useTraces,
   showUnassigned,
 }: MobileTopicsViewProps) {
+  const t = useTranslation(topicsMessages);
   const [navigation, setNavigation] = useState({
     view,
     panel: filters.length > 0 || searchQuery ? "traces" : "topics",
@@ -148,10 +151,10 @@ export function MobileTopicsView({
   return (
     <div className="ph-no-capture flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
       <Tabs value={navigation.panel} onValueChange={showPanel} layout="fill">
-        <Tabs.List variant="underline" layout="full" aria-label="Topics panels">
-          <Tabs.Trigger value="topics" label="Topics" />
-          <Tabs.Trigger value="traces" label="Traces" />
-          <Tabs.Trigger value="visualization" label="Visualize" />
+        <Tabs.List variant="underline" layout="full" aria-label={t("topicsPanels")}>
+          <Tabs.Trigger value="topics" label={t("topics")} />
+          <Tabs.Trigger value="traces" label={t("traces")} />
+          <Tabs.Trigger value="visualization" label={t("visualize")} />
         </Tabs.List>
         <Tabs.Content value="topics" layout="fill">
           <TopicMobileList
@@ -163,13 +166,13 @@ export function MobileTopicsView({
           />
           {facet.topics.length === 0 && canGenerateTopics && (
             <div className="shrink-0 border-t p-3">
-              <Button text="Generate topics" onClick={onGenerateTopics} />
+              <Button text={t("generateTopics")} onClick={onGenerateTopics} />
             </div>
           )}
         </Tabs.Content>
         <Tabs.Content value="traces" layout="fill">
           <section
-            aria-label="Topic traces"
+            aria-label={t("topicTracesAria")}
             className="flex min-h-0 flex-1 flex-col overflow-hidden"
           >
             <TopicMobileTraceList
@@ -182,14 +185,14 @@ export function MobileTopicsView({
               <div className="shrink-0 border-b px-4 py-3">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <h3 className="min-w-0 flex-1 text-sm font-bold [overflow-wrap:anywhere]">
-                    {selectedTopic?.name ?? "Trace summaries"}
+                    {selectedTopic?.name ?? t("traceSummaries")}
                   </h3>
                   <span className="text-muted-foreground text-xs tabular-nums">
                     ~
                     {(
                       selectedTopic?.count ?? facet.counts.total
                     ).toLocaleString()}{" "}
-                    traces
+                    {t("traces")}
                   </span>
                 </div>
                 {selectedTopic?.description && (
@@ -200,7 +203,7 @@ export function MobileTopicsView({
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {(filters.length > 0 || searchQuery) && (
                     <Button
-                      text="Show all traces"
+                      text={t("showAllTraces")}
                       variant="ghost"
                       size="sm"
                       onClick={showAllTraces}
@@ -208,7 +211,7 @@ export function MobileTopicsView({
                   )}
                   {tracingHref && (
                     <Button
-                      text="Open in Tracing"
+                      text={t("openInTracing")}
                       href={tracingHref}
                       variant="secondary"
                       size="sm"

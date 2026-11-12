@@ -78,13 +78,14 @@ export function isRecommendedTopicModel(
 
 export function topicConnectionCaption(
   connections: Array<{ provider: string }>,
+  t: (key: "noAiConnection" | "projectConnections") => string,
 ) {
   const providers = [
     ...new Set(connections.map((connection) => connection.provider)),
   ];
-  if (providers.length === 0) return "No AI connection";
+  if (providers.length === 0) return t("noAiConnection");
   if (providers.length === 1) return providers[0]!;
-  return "Project connections";
+  return t("projectConnections");
 }
 
 export function setupWaitMinutes(

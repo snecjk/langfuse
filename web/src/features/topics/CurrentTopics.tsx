@@ -20,6 +20,8 @@ import {
   mapWithoutUnassigned,
 } from "./prepare-topic-display";
 import { FacetTraceSource, useFacetTopicTraces } from "./useFacetTopicTraces";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 
 export function CurrentTopics({
   projectId,
@@ -32,6 +34,7 @@ export function CurrentTopics({
   canGenerateTopics,
   showUnassigned,
 }: CurrentTopicsProps) {
+  const t = useTranslation(topicsMessages);
   const selectedFacet = result.data?.facets.find(
     (facet) => facet.facetId === selectedFacetId,
   );
@@ -51,7 +54,7 @@ export function CurrentTopics({
           </Alert.Description>
         </Alert>
       )}
-      {result.isLoading && <Spinner message="Loading topics" />}
+      {result.isLoading && <Spinner message={t("loadingTopics")} />}
       {selectedFacet && (
         <CurrentFacet
           key={projectId}
