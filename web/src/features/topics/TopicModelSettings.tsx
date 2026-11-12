@@ -58,6 +58,7 @@ export function useTopicModelSettings({
     projectId,
     rule,
     stored: settings.data,
+    t,
   });
 
   let status: TopicSetupNoticeState["status"] = null;

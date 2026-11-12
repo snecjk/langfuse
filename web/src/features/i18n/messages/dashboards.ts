@@ -365,6 +365,8 @@ export const dashboardMessages = {
     tokensUnit: "Token 数",
     // Home
     env: "环境",
+    observationName: "观察名称",
+    scoreName: "评分名称",
     setDefault: "设为默认",
     setDefaultTitle: "将此仪表盘显示给项目中的所有人作为首页",
     editDashboardInDashboards: "在仪表盘中编辑此仪表盘",

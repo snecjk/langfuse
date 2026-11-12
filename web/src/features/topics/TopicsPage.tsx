@@ -57,12 +57,6 @@ import { TopicRunHistoryList } from "./TopicRunHistoryList";
 import { TopicsErrorMessage } from "./TopicsErrorMessage";
 import { busy, operationLabel } from "./topic-run-labels";
 
-const loadingPage = (
-  <Page headerProps={{ title: "Topics" }}>
-    <Spinner message="Loading topics" />
-  </Page>
-);
-
 export default function TopicsPage() {
   const router = useRouter();
   const t = useTranslation(topicsMessages);
@@ -80,7 +74,9 @@ export default function TopicsPage() {
   return projectId ? (
     <TopicsWorkspace key={projectId} projectId={projectId} />
   ) : (
-    loadingPage
+    <Page headerProps={{ title: t("topics") }}>
+      <Spinner message={t("loadingTopics")} />
+    </Page>
   );
 }
 
@@ -617,7 +613,14 @@ function TopicsWorkspaceContent({
     </DialogController>
   );
   return (
-    <TopicsWorkspaceGate isLoading={facets.isLoading} fallback={loadingPage}>
+    <TopicsWorkspaceGate
+      isLoading={facets.isLoading}
+      fallback={
+        <Page headerProps={{ title: t("topics") }}>
+          <Spinner message={t("loadingTopics")} />
+        </Page>
+      }
+    >
       {workspace}
     </TopicsWorkspaceGate>
   );

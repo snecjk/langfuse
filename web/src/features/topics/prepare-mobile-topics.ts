@@ -6,6 +6,10 @@ import {
   UNASSIGNED_TOPIC_ID,
 } from "./prepare-topic-display";
 import { type TopicsResultsView } from "./TopicsResultsViewSelect";
+import { type useTranslation } from "@/src/features/i18n/I18nProvider";
+import { type topicsMessages } from "@/src/features/i18n/messages/topics";
+
+type T = ReturnType<typeof useTranslation<typeof topicsMessages>>;
 
 function selectedTopicId(filters: FilterState) {
   const filter = filters.length === 1 ? filters[0] : undefined;
@@ -29,8 +33,9 @@ export function prepareMobileTopics(
   filters: FilterState,
   searchQuery: string | null,
   showUnassigned: boolean,
+  t: T,
 ) {
-  const { topics } = prepareTopicDisplay(facet, view);
+  const { topics } = prepareTopicDisplay(facet, view, t);
   const selection = selectedTopicId(filters);
   return {
     topics,

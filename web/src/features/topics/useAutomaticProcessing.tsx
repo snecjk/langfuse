@@ -2,6 +2,10 @@ import { getEvaluatorBlockMetadata } from "@langfuse/shared";
 import { type TopicRule } from "@langfuse/shared/topics";
 import { api, type RouterOutputs } from "@/src/utils/api";
 import { type AutomaticProcessingState } from "./prepare-topics-actions";
+import { type useTranslation } from "@/src/features/i18n/I18nProvider";
+import { type topicsMessages } from "@/src/features/i18n/messages/topics";
+
+type T = ReturnType<typeof useTranslation<typeof topicsMessages>>;
 
 type StoredSettings = RouterOutputs["topics"]["modelSettings"];
 
@@ -13,14 +17,16 @@ export function useAutomaticProcessing({
   projectId,
   rule,
   stored,
+  t,
 }: {
   projectId: string;
   rule: TopicRule | null;
   stored: StoredSettings | undefined;
+  t: T;
 }) {
   const mutation = useSetAutomaticProcessing(projectId);
   return {
-    state: automaticProcessingState(stored, rule),
+    state: automaticProcessingState(stored, rule, t),
     clearPause: () => mutation.mutate({ projectId, enabled: false }),
     save: (input: { enabled: boolean; sampling: number }) =>
       mutation.mutateAsync({ projectId, ...input }),
@@ -42,6 +48,7 @@ function useSetAutomaticProcessing(projectId: string) {
 function automaticProcessingState(
   stored: StoredSettings | undefined,
   rule: TopicRule | null,
+  t: T,
 ): AutomaticProcessingState {
   if (!stored || stored.enabled === null || !rule)
     return { status: "unconfigured" };
@@ -50,7 +57,7 @@ function automaticProcessingState(
       status: "paused",
       shortLabel: stored.blockReason
         ? getEvaluatorBlockMetadata(stored.blockReason).shortLabel
-        : "Paused",
+        : t("paused"),
     };
   if (stored.enabled) return { status: "on" };
   return { status: "off" };

@@ -11,6 +11,10 @@ import {
   unassignedTileClasses,
 } from "./topic-map-colors";
 import { type TopicsResultsView } from "./TopicsResultsViewSelect";
+import { type useTranslation } from "@/src/features/i18n/I18nProvider";
+import { type topicsMessages } from "@/src/features/i18n/messages/topics";
+
+type T = ReturnType<typeof useTranslation<typeof topicsMessages>>;
 
 export const UNASSIGNED_TOPIC_ID = "__unassigned";
 
@@ -28,7 +32,11 @@ export type TopicDisplay = Pick<
 };
 
 /** Topic identity, counts, and colors shared by the list and treemap renderers. */
-export function prepareTopicDisplay(facet: Facet, view: TopicsResultsView) {
+export function prepareTopicDisplay(
+  facet: Facet,
+  view: TopicsResultsView,
+  t: T,
+) {
   const mapIndices = new Map(
     orderedFacetTopics(facet).map((topic, index) => [topic.id, index]),
   );
@@ -55,9 +63,8 @@ export function prepareTopicDisplay(facet: Facet, view: TopicsResultsView) {
   if (unassignedCount > 0) {
     topics.push({
       id: UNASSIGNED_TOPIC_ID,
-      name: "Unassigned",
-      description:
-        "Traces without a topic, including outliers and summaries awaiting classification.",
+      name: t("unassigned"),
+      description: t("unassignedDescription"),
       count: unassignedCount,
       color: UNASSIGNED_SWATCH_COLOR,
       tiles: { small: unassignedTileClasses, big: unassignedTileClasses },

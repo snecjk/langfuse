@@ -13,6 +13,8 @@ import {
 } from "./prepare-topic-display";
 import { TopicTreemap } from "./TopicTreemap";
 import { TopicTraceList } from "./TopicTraceList";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { topicsMessages } from "@/src/features/i18n/messages/topics";
 
 type TopicTreemapViewProps = {
   projectId: string;
@@ -37,8 +39,9 @@ export function TopicTreemapView({
   tracePanelRef,
   useTraces,
 }: TopicTreemapViewProps) {
+  const t = useTranslation(topicsMessages);
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
-  const { topics, total } = prepareTopicDisplay(facet, "treemap");
+  const { topics, total } = prepareTopicDisplay(facet, "treemap", t);
   const selected =
     topics.find((topic) => topic.id === selectedTopicId) ?? topics[0];
   const traces = useTraces(selected ? topicQuery(selected.id) : null);

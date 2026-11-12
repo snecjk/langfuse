@@ -72,7 +72,7 @@ export function MobileTopicsView({
     setNavigation({ view, panel });
   }
   const { topics, selectedTopicId, selectedTopic, traceQuery } =
-    prepareMobileTopics(facet, view, filters, searchQuery, showUnassigned);
+    prepareMobileTopics(facet, view, filters, searchQuery, showUnassigned, t);
   const traces = useTracesWithSelection(useTraces, traceQuery, selectedTraceId);
   const visible = traces.rows;
   const mapPoints =
