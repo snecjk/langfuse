@@ -1,6 +1,8 @@
 import type { ComponentProps } from "react";
 import { DropdownIndicator } from "@/src/components/design-system/DropdownIndicator/DropdownIndicator";
 import { Button } from "@/src/components/ui/button";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tableMessages } from "@/src/features/i18n/messages/table";
 
 type TableViewPresetsButtonProps = Pick<
   ComponentProps<typeof Button>,
@@ -20,14 +22,24 @@ type TableViewPresetsButtonProps = Pick<
   count: number;
 };
 
+function translateDefaultLabel(
+  defaultLabel: "Your default" | "Project default",
+  t: (key: keyof (typeof tableMessages)["en"]) => string,
+): string {
+  return defaultLabel === "Your default"
+    ? t("viewPresetsYourDefault")
+    : t("viewPresetsProjectDefault");
+}
+
 export function TableViewPresetsButton({
   selectedView,
   count,
   ...props
 }: TableViewPresetsButtonProps) {
-  const label = selectedView?.name ?? "My Views";
+  const t = useTranslation(tableMessages);
+  const label = selectedView?.name ?? t("viewPresetsLabel");
   const title = selectedView?.defaultLabel
-    ? `${label} (${selectedView.defaultLabel})`
+    ? `${label} (${translateDefaultLabel(selectedView.defaultLabel, t)})`
     : label;
 
   return (

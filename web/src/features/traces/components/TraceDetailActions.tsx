@@ -8,6 +8,8 @@ import { DeleteTraceDialogController } from "@/src/features/traces/components/De
 import { TraceTranscriptDialogController } from "@/src/features/traces/components/TraceTranscriptDialogController";
 import { useDownloadTraceAsJson } from "@/src/features/traces/hooks/useDownloadTraceAsJson";
 import { type useTraceDetailData } from "@/src/features/traces/hooks/useTraceDetailData";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tracingMessages } from "@/src/features/i18n/messages/tracing";
 
 type TraceDetailData = NonNullable<
   ReturnType<typeof useTraceDetailData>["data"]
@@ -30,12 +32,13 @@ export function TraceDetailActions({
   children,
   ...props
 }: TraceDetailActionsProps) {
+  const t = useTranslation(tracingMessages);
   if (!trace)
     return children([
       {
         id: "download-json",
         type: "button",
-        label: "Download JSON",
+        label: t("downloadJson"),
         icon: Download,
         iconOnly: true,
         disabled: true,
@@ -44,7 +47,7 @@ export function TraceDetailActions({
       {
         id: "trace-options",
         type: "dropdown",
-        label: "More actions",
+        label: t("moreActions"),
         icon: MoreVertical,
         iconOnly: true,
         placement: "trailing",
@@ -85,6 +88,7 @@ function LoadedTraceDetailActions({
   trace: TraceDetailData;
   onShowTranscript?: () => void;
 }) {
+  const t = useTranslation(tracingMessages);
   const shareItems = useShareMenuItems({
     kind: "trace",
     projectId: trace.projectId,
@@ -109,8 +113,8 @@ function LoadedTraceDetailActions({
       {({ disabled: deleteDisabled, openDialog: openDeleteDialog }) => (
         <ConnectedDetailHeaderActionsMenuController
           idItems={[
-            { id: trace.id, name: "trace ID" },
-            ...(trace.name ? [{ id: trace.name, name: "trace name" }] : []),
+            { id: trace.id, name: t("traceId") },
+            ...(trace.name ? [{ id: trace.name, name: t("traceName") }] : []),
           ]}
           projectId={trace.projectId}
           renderMenu={(copyItems) => {
@@ -122,7 +126,7 @@ function LoadedTraceDetailActions({
                     {
                       type: "item" as const,
                       id: "show-trace-transcript",
-                      title: "Show trace transcript",
+                      title: t("showTraceTranscript"),
                       icon: FileText,
                       badge: <FeatureReleaseStatus status="internal" />,
                       onClick: onShowTranscript,
@@ -133,7 +137,7 @@ function LoadedTraceDetailActions({
               {
                 type: "item",
                 id: "delete",
-                title: "Delete",
+                title: t("deleteTrace"),
                 icon: TrashIcon,
                 variant: "destructive",
                 disabled: deleteDisabled,
@@ -144,7 +148,7 @@ function LoadedTraceDetailActions({
               {
                 id: "download-json",
                 type: "button",
-                label: "Download JSON",
+                label: t("downloadJson"),
                 icon: Download,
                 isLoading: isDownloading,
                 iconOnly: true,
@@ -160,7 +164,7 @@ function LoadedTraceDetailActions({
                   isPlaceholderData,
                 ]),
                 type: "dropdown",
-                label: "More actions",
+                label: t("moreActions"),
                 icon: MoreVertical,
                 iconOnly: true,
                 placement: "trailing",

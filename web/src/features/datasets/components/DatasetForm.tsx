@@ -27,6 +27,8 @@ import { useUniqueNameValidation } from "@/src/hooks/useUniqueNameValidation";
 import { DialogBody, DialogFooter } from "@/src/components/ui/dialog";
 import { DatasetSchemaInput } from "./DatasetSchemaInput";
 import { DatasetSchemaValidationError } from "./DatasetSchemaValidationError";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { catalogMessages } from "@/src/features/i18n/messages/catalog";
 
 type ServerSideSchemaValidationErrors = {
   datasetItemId: string;
@@ -114,6 +116,7 @@ const formSchema = z.object({
 });
 
 export const DatasetForm = (props: DatasetFormProps) => {
+  const t = useTranslation(catalogMessages);
   const [pending, setPending] = useState(false);
   const submissionPending = useRef(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -278,11 +281,8 @@ export const DatasetForm = (props: DatasetFormProps) => {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormDescription>
-                    Use slashes &apos;/&apos; in dataset names to organize them
-                    into <em>folders</em>.
-                  </FormDescription>
+                  <FormLabel>{t("name")}</FormLabel>
+                  <FormDescription>{t("datasetNameHelp")}</FormDescription>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -295,7 +295,7 @@ export const DatasetForm = (props: DatasetFormProps) => {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description (optional)</FormLabel>
+                  <FormLabel>{t("descriptionOptional")}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -308,7 +308,7 @@ export const DatasetForm = (props: DatasetFormProps) => {
               name="metadata"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Metadata (optional)</FormLabel>
+                  <FormLabel>{t("metadataOptional")}</FormLabel>
                   <FormControl>
                     <CodeMirrorEditor
                       mode="json"
@@ -329,8 +329,8 @@ export const DatasetForm = (props: DatasetFormProps) => {
               render={({ field }) => (
                 <DatasetSchemaInput
                   disabled={pending}
-                  label="Input schema"
-                  description="Validate dataset item inputs against a JSON Schema. All new and existing items must conform to this schema."
+                  label={t("inputSchema")}
+                  description={t("inputSchemaHelp")}
                   value={field.value}
                   onChange={field.onChange}
                   initialValue={inputSchemaString}
@@ -343,8 +343,8 @@ export const DatasetForm = (props: DatasetFormProps) => {
               render={({ field }) => (
                 <DatasetSchemaInput
                   disabled={pending}
-                  label="Expected output schema"
-                  description="Validate dataset item expected outputs against a JSON Schema. All new and existing items must conform to this schema."
+                  label={t("expectedOutputSchema")}
+                  description={t("expectedOutputSchemaHelp")}
                   value={field.value}
                   onChange={field.onChange}
                   initialValue={expectedOutputSchemaString}
@@ -377,7 +377,7 @@ export const DatasetForm = (props: DatasetFormProps) => {
                 onClick={props.onCancel}
                 disabled={pending}
               >
-                Back
+                {t("back")}
               </Button>
             )}
             <Button
@@ -385,7 +385,9 @@ export const DatasetForm = (props: DatasetFormProps) => {
               disabled={!!form.formState.errors.name}
               loading={pending}
             >
-              {props.mode === "create" ? "Create dataset" : "Update dataset"}
+              {props.mode === "create"
+                ? t("createDatasetAction")
+                : t("updateDatasetAction")}
             </Button>
           </DialogFooter>
         )}

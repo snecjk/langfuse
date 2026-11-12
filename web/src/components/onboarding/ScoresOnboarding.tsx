@@ -3,42 +3,41 @@ import {
   type ValueProposition,
 } from "@/src/components/ui/SplashScreen";
 import { ThumbsUp, Star, LineChart, Code } from "@langfuse/icons";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 
 export function ScoresOnboarding() {
+  const t = useTranslation(evaluationsMessages);
   const valuePropositions: ValueProposition[] = [
     {
-      title: "Collect user feedback",
-      description:
-        "Gather thumbs up/down feedback from users to identify high and low quality outputs",
+      title: t("scoreOnboardingFeedback"),
+      description: t("scoreOnboardingFeedbackDesc"),
       icon: ThumbsUp,
     },
     {
-      title: "Run model-based evaluations",
-      description:
-        "Use LLMs to automatically evaluate your application's outputs",
+      title: t("scoreOnboardingModelEval"),
+      description: t("scoreOnboardingModelEvalDesc"),
       icon: Star,
     },
     {
-      title: "Track quality metrics",
-      description:
-        "Monitor quality metrics over time to identify trends and issues",
+      title: t("scoreOnboardingQuality"),
+      description: t("scoreOnboardingQualityDesc"),
       icon: LineChart,
     },
     {
-      title: "Use custom metrics",
-      description:
-        "Langfuse's scores are flexible and can be used to track any metric that's associated with an LLM application",
+      title: t("scoreOnboardingCustom"),
+      description: t("scoreOnboardingCustomDesc"),
       icon: Code,
     },
   ];
 
   return (
     <SplashScreen
-      title="Get Started with Scores"
-      description="Scores allow you to evaluate the quality/safety of your LLM application through user feedback, model-based evaluations, or manual review. Scores can be used programmatically via the API and SDKs to track custom metrics."
+      title={t("scoresOnboardingTitle")}
+      description={t("scoresOnboardingDescription")}
       valuePropositions={valuePropositions}
       secondaryAction={{
-        label: "Learn More",
+        label: t("learnMore"),
         href: "https://langfuse.com/docs/evaluation/evaluation-methods/custom-scores",
       }}
       videoSrc="https://static.langfuse.com/prod-assets/onboarding/scores-overview-v1.mp4"

@@ -5,6 +5,8 @@ import { useDataTableControls } from "@/src/components/table/data-table-controls
 import { Badge } from "@/src/components/design-system/Badge/Badge";
 import { Button } from "@/src/components/ui/button";
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tableMessages } from "@/src/features/i18n/messages/table";
 import { type FilterState } from "@langfuse/shared";
 
 /** FilterToggleButton shows / hides the table's sidebar filter panel and exposes the active filter count.
@@ -25,6 +27,7 @@ export function FilterToggleButton({
   const activeFacetCount = filterState
     ? new Set(filterState.map((filter) => filter.column)).size
     : 0;
+  const t = useTranslation(tableMessages);
   return (
     <Button
       variant="outline"
@@ -33,7 +36,7 @@ export function FilterToggleButton({
       className={cn("flex h-8 items-center gap-2 text-sm", className)}
     >
       <Filter size="base" color="default" />
-      <span>Filters</span>
+      <span>{t("filters")}</span>
       {activeFacetCount > 0 && (
         <span className="ml-1">
           <Badge color="filled" size="md" text={String(activeFacetCount)} />

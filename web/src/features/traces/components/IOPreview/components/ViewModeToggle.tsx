@@ -2,6 +2,8 @@ import { Tabs } from "@/src/components/design-system/Tabs/Tabs";
 import { Switch } from "@/src/components/design-system/Switch/Switch";
 import { useJsonBetaToggle } from "@/src/features/traces/hooks/useJsonBetaToggle";
 import { type JsonViewPreference } from "@/src/components/ui/jsonViewPreference";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tracingMessages } from "@/src/features/i18n/messages/tracing";
 
 export type ViewMode = JsonViewPreference;
 
@@ -16,6 +18,7 @@ export function ViewModeToggle({
   onViewChange,
   compensateScrollRef,
 }: ViewModeToggleProps) {
+  const t = useTranslation(tracingMessages);
   const {
     jsonBetaEnabled,
     selectedViewTab,
@@ -32,8 +35,8 @@ export function ViewModeToggle({
           onValueChange={handleViewTabChange}
         >
           <Tabs.List variant="inset" size="sm">
-            <Tabs.Trigger value="pretty" label="Formatted" />
-            <Tabs.Trigger value="json" label="Raw" />
+            <Tabs.Trigger value="pretty" label={t("viewModeFormatted")} />
+            <Tabs.Trigger value="json" label={t("viewModeRaw")} />
           </Tabs.List>
         </Tabs>
       </div>
@@ -44,7 +47,9 @@ export function ViewModeToggle({
             checked={jsonBetaEnabled}
             onCheckedChange={handleBetaToggle}
           />
-          <span className="text-muted-foreground text-xs">Optimized</span>
+          <span className="text-muted-foreground text-xs">
+            {t("viewModeOptimized")}
+          </span>
         </div>
       )}
     </div>

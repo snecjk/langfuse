@@ -12,6 +12,8 @@ import {
 import { rankFacetOptions } from "@/src/features/filters/lib/facet-display";
 import { isStringPresenceOperator } from "@/src/features/filters/lib/sidebar-filter-actions";
 import { Plus, X } from "@langfuse/icons";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tableMessages } from "@/src/features/i18n/messages/table";
 import { cn } from "@/src/utils/tailwind";
 import type {
   KeyScoreLevels,
@@ -90,20 +92,6 @@ const BOOLEAN_OPERATOR_LABELS = {
   "<>": "does not equal",
 } as const;
 
-const CATEGORICAL_OPERATOR_OPTIONS = [
-  { value: "any of", label: "any of" },
-  { value: "none of", label: "none of" },
-];
-
-const NUMERIC_OPERATOR_OPTIONS = Object.entries(NUMERIC_OPERATOR_LABELS).map(
-  ([value, label]) => ({ value, label }),
-);
-const BOOLEAN_OPERATOR_OPTIONS = Object.entries(BOOLEAN_OPERATOR_LABELS).map(
-  ([value, label]) => ({ value, label }),
-);
-const STRING_OPERATOR_OPTIONS = Object.entries(STRING_OPERATOR_LABELS).map(
-  ([value, label]) => ({ value, label }),
-);
 const BOOLEAN_VALUE_OPTIONS = [
   { value: "true", label: "true" },
   { value: "false", label: "false" },
@@ -266,13 +254,43 @@ function SuggestingInput({
 }
 
 export function KeyValueFilterBuilder(props: KeyValueFilterBuilderProps) {
-  const {
-    mode,
-    keyOptions,
-    keyLevels,
-    activeFilters,
-    keyPlaceholder = "Key",
-  } = props;
+  const t = useTranslation(tableMessages);
+  type TableKey = keyof (typeof tableMessages)["en"];
+  const { mode, keyOptions, keyLevels, activeFilters, keyPlaceholder } = props;
+
+  const operatorLabel = (operator: string): string => {
+    const keyByOperator: Record<string, TableKey> = {
+      "=": "operatorEquals",
+      ">": "operatorGreaterThan",
+      "<": "operatorLessThan",
+      ">=": "operatorGreaterThanOrEquals",
+      "<=": "operatorLessThanOrEquals",
+      contains: "operatorStringContains",
+      "does not contain": "operatorStringDoesNotContain",
+      "is set": "operatorStringIsSet",
+      "is not set": "operatorStringIsNotSet",
+      "<>": "operatorBooleanDoesNotEqual",
+      "any of": "operatorCategoricalAnyOf",
+      "none of": "operatorCategoricalNoneOf",
+    };
+    return t(keyByOperator[operator] ?? "operatorEquals");
+  };
+
+  const numericOperatorOptions = Object.entries(NUMERIC_OPERATOR_LABELS).map(
+    ([value, _label]) => ({ value, label: operatorLabel(value) }),
+  );
+  const booleanOperatorOptions = Object.entries(BOOLEAN_OPERATOR_LABELS).map(
+    ([value, _label]) => ({ value, label: operatorLabel(value) }),
+  );
+  const stringOperatorOptions = Object.entries(STRING_OPERATOR_LABELS).map(
+    ([value, _label]) => ({ value, label: operatorLabel(value) }),
+  );
+  const categoricalOperatorOptions = ["any of", "none of"].map((value) => ({
+    value,
+    label: operatorLabel(value),
+  }));
+
+  const keyPlaceholderText = keyPlaceholder ?? t("keyPlaceholderKey");
   const availableValues = mode === "categorical" ? props.availableValues : {};
   const keyDetails = mode === "string" ? props.keyDetails : undefined;
   const valueOptions = mode === "string" ? props.valueOptions : undefined;
@@ -382,14 +400,17 @@ export function KeyValueFilterBuilder(props: KeyValueFilterBuilderProps) {
                 <div className="min-w-0 flex-1">
                   <SelectInput
                     value={filter.key}
-                    placeholder={keyPlaceholder}
-                    search={{ placeholder: "Search keys..." }}
-                    emptyMessage="No keys found."
+                    placeholder={keyPlaceholderText}
+                    search={{ placeholder: t("keyPlaceholderSearchKeys") }}
+                    emptyMessage={t("keyNoKeysFound")}
                     options={mergedKeyOptions.map((option) => ({
                       value: option,
                       label: option,
                       badges: keyLevels?.[option]?.map((level) => ({
-                        text: level === "trace" ? "Trace" : "Observation",
+                        text:
+                          level === "trace"
+                            ? t("keyLevelTrace")
+                            : t("keyLevelObservation"),
                         title: `${level === "trace" ? "Trace" : "Observation"}-level score`,
                         color:
                           level === "trace"
@@ -409,7 +430,7 @@ export function KeyValueFilterBuilder(props: KeyValueFilterBuilderProps) {
                     onChange={(key) => handleFilterChange(index, { key })}
                     suggestions={suggestKeys ? (keyOptions ?? []) : []}
                     details={keyDetails}
-                    placeholder={keyPlaceholder}
+                    placeholder={keyPlaceholderText}
                   />
                 </div>
               )}
@@ -430,8 +451,8 @@ export function KeyValueFilterBuilder(props: KeyValueFilterBuilderProps) {
                 {/* Operator select */}
                 <SelectInput
                   value={filter.operator}
-                  options={CATEGORICAL_OPERATOR_OPTIONS}
-                  placeholder="Operator"
+                  options={categoricalOperatorOptions}
+                  placeholder={t("keyPlaceholderOperator")}
                   onValueChange={(value) =>
                     handleFilterChange(index, {
                       operator: value as "any of" | "none of",
@@ -441,11 +462,13 @@ export function KeyValueFilterBuilder(props: KeyValueFilterBuilderProps) {
 
                 {/* Values multi-select */}
                 <MultiSelectInput
-                  placeholder="Select"
-                  selectedLabel={`${(filter.value as string[]).length} selected`}
-                  searchPlaceholder="Values"
-                  emptyMessage="No results found."
-                  selectAllLabel="Select All"
+                  placeholder={t("keyPlaceholderSelect")}
+                  selectedLabel={t("keyValueSelected", {
+                    count: (filter.value as string[]).length,
+                  })}
+                  searchPlaceholder={t("keyPlaceholderValues")}
+                  emptyMessage={t("keyNoResultsFound")}
+                  selectAllLabel={t("keySelectAll")}
                   options={Array.from(
                     new Set([
                       ...availableValuesForKey,
@@ -466,8 +489,8 @@ export function KeyValueFilterBuilder(props: KeyValueFilterBuilderProps) {
                 {/* Numeric operator select */}
                 <SelectInput
                   value={filter.operator}
-                  options={NUMERIC_OPERATOR_OPTIONS}
-                  placeholder="Operator"
+                  options={numericOperatorOptions}
+                  placeholder={t("keyPlaceholderOperator")}
                   onValueChange={(value) =>
                     handleFilterChange(index, {
                       operator: value as "=" | ">" | "<" | ">=" | "<=",
@@ -478,7 +501,7 @@ export function KeyValueFilterBuilder(props: KeyValueFilterBuilderProps) {
                 {/* Numeric value input */}
                 <Input
                   type="number"
-                  placeholder="Value"
+                  placeholder={t("keyPlaceholderValue")}
                   value={(filter as NumericKeyValueFilterEntry).value}
                   onChange={(e) =>
                     handleFilterChange(index, {
@@ -493,8 +516,8 @@ export function KeyValueFilterBuilder(props: KeyValueFilterBuilderProps) {
               <>
                 <SelectInput
                   value={filter.operator}
-                  options={BOOLEAN_OPERATOR_OPTIONS}
-                  placeholder="Operator"
+                  options={booleanOperatorOptions}
+                  placeholder={t("keyPlaceholderOperator")}
                   onValueChange={(value) =>
                     handleFilterChange(index, {
                       operator: value as "=" | "<>",
@@ -509,7 +532,7 @@ export function KeyValueFilterBuilder(props: KeyValueFilterBuilderProps) {
                       : ""
                   }
                   options={BOOLEAN_VALUE_OPTIONS}
-                  placeholder="Value"
+                  placeholder={t("keyPlaceholderValue")}
                   onValueChange={(value) =>
                     handleFilterChange(index, {
                       value: value === "true",
@@ -523,8 +546,8 @@ export function KeyValueFilterBuilder(props: KeyValueFilterBuilderProps) {
                 {/* String operator select */}
                 <SelectInput
                   value={filter.operator}
-                  options={STRING_OPERATOR_OPTIONS}
-                  placeholder="Operator"
+                  options={stringOperatorOptions}
+                  placeholder={t("keyPlaceholderOperator")}
                   onValueChange={(value) => {
                     const operator = value as StringOperator;
                     handleFilterChange(index, {
@@ -546,7 +569,7 @@ export function KeyValueFilterBuilder(props: KeyValueFilterBuilderProps) {
                     suggestions={
                       filter.key ? (valueOptions?.[filter.key] ?? []) : []
                     }
-                    placeholder="Value"
+                    placeholder={t("keyPlaceholderValue")}
                     disabled={!filter.key}
                   />
                 )}

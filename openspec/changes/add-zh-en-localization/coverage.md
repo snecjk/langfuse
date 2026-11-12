@@ -41,6 +41,24 @@ claim. The matrix supersedes it for current status.
 
 ---
 
+
+> ### 本次会话进度记录（apply-change add-zh-en-localization，任务 3.1 / 3.8 / 3.11 / 3.13 / 3.14）
+>
+> 该会话完成了以下本地化工作，已通过翻译资源检查（1522 条双语条目）、Web 类型检查和 `oxlint --max-warnings 0`：
+>
+> - **消息命名空间补齐**：
+>   - `table.ts`：补全 `noFiltersMatch` 的 `zh-CN` 译文；新增 `columnHeader`、`restoreDefaults`、`viewPresetsLabel`、`viewPresetsYourDefault`、`viewPresetsProjectDefault`、`facetClearAction`、`overviewSelectionCount`、`keyPlaceholderValues`、`keyLevelTrace`、`keyLevelObservation`。
+>   - `evaluations.ts`：补全 `deletedCount.one`；新增评分引导相关 `scoresOnboarding*`、`learnMore` 等键。
+>   - `catalog.ts`：新增数据集表单/对话相关键（`descriptionOptional`、`metadataOptional`、`datasetNameHelp`、`inputSchemaHelp`、`expectedOutputSchemaHelp`、`back`、`createDatasetAction`、`updateDatasetAction`、`validJsonSchema`、`invalidJsonInput`、`selectAtLeastOneDataset`、`selectDatasetFirst`、`chooseDatasetBeforeMedia`、`targetDatasets`、`currentLabel`、`selectDatasets`、`searchDatasets`、`noDatasetsFound`、`editDatasetItem`、`cancel`、`saveChanges`）。
+> - **组件迁移（引入 `useTranslation` 并将硬编码英文替换为 `t()`）**：
+>   - 3.1 公共表格/筛选：`OverviewSelectionBar`、`ColumnVisibilityHeader`、`FacetHeader`、`FilterToggleButton`、`FilteredRunPills`、`TableViewPresetsButton`、`KeyValueFilterBuilder`。
+>   - 3.8 追踪与观察：`ViewModeToggle`（Formatted/Raw/Optimized）、`TraceDetailActions`（Download JSON / More actions / 追踪 ID / 追踪名称 / 显示追踪转录 / 删除）。
+>   - 3.11 数据集与条目：`DatasetForm`、`EditDatasetItemDialog`、`NewDatasetItemForm`。
+>   - 3.13 评分与分析：`ScoresOnboarding`。
+>   - 3.14 评估器：共用 `evaluations.ts` 命名空间（`deletedCount.one` 已补齐）。
+>
+> 尚未完成的部分：各模块其余未迁移子组件、页面级客户端测试、覆盖矩阵逐页验证、生产构建与客户端包扫描（对应原任务 5.x / 6.x 验收门禁）。
+>
 ## A. Public / authentication / workspace
 
 | # | Route / entry | Actual owner | Role / toggle gate | Sub-flows & states | Namespace | Source migration | Verification | Exception |

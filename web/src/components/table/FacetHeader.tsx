@@ -12,6 +12,8 @@ import {
   TooltipTrigger,
 } from "@/src/components/ui/tooltip";
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tableMessages } from "@/src/features/i18n/messages/table";
 
 type FacetHeaderProps = Pick<
   ComponentPropsWithoutRef<"button">,
@@ -48,6 +50,7 @@ export const FacetHeader = forwardRef<HTMLButtonElement, FacetHeaderProps>(
     },
     ref,
   ) {
+    const t = useTranslation(tableMessages);
     return (
       <button
         {...buttonProps}
@@ -100,14 +103,14 @@ export const FacetHeader = forwardRef<HTMLButtonElement, FacetHeaderProps>(
                   }
                 }}
                 className="text-muted-foreground hover:text-foreground flex shrink-0 cursor-pointer items-center gap-0.5 rounded-sm px-1 py-0.5 text-[11px] leading-4 font-normal transition-colors hover:underline focus-visible:underline focus-visible:outline-none"
-                aria-label={`Clear ${label} filter`}
+                aria-label={t("facetClearFilter", { label })}
               >
                 <X size="sm" />
-                Clear
+                {t("facetClearAction")}
               </div>
             </TooltipTrigger>
             <TooltipContent side="right" className="text-xs">
-              Clear {label.toLowerCase()} filter
+              {t("facetClearFilter", { label: label.toLowerCase() })}
             </TooltipContent>
           </Tooltip>
         )}

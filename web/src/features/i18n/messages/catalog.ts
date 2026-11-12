@@ -53,6 +53,31 @@ export const catalogMessages = {
       "Selected datasets will be deleted. Associated run items and media links are cleaned up asynchronously.",
     deleteWarning:
       "This action cannot be undone. Selected folders delete all datasets contained in them.",
+    descriptionOptional: "Description (optional)",
+    metadataOptional: "Metadata (optional)",
+    datasetNameHelp:
+      "Use slashes '/' in dataset names to organize them into folders.",
+    inputSchemaHelp:
+      "Validate dataset item inputs against a JSON Schema. All new and existing items must conform to this schema.",
+    expectedOutputSchemaHelp:
+      "Validate dataset item expected outputs against a JSON Schema. All new and existing items must conform to this schema.",
+    back: "Back",
+    createDatasetAction: "Create dataset",
+    updateDatasetAction: "Update dataset",
+    validJsonSchema: "Must be a valid JSON Schema",
+    invalidJsonInput:
+      "Invalid input. Please provide a JSON object or double-quoted string.",
+    editDatasetItem: "Edit Dataset Item",
+    cancel: "Cancel",
+    saveChanges: "Save changes",
+    selectAtLeastOneDataset: "Select at least one dataset",
+    selectDatasetFirst: "Select a dataset first",
+    chooseDatasetBeforeMedia: "Choose a dataset before attaching media.",
+    targetDatasets: "Target datasets",
+    currentLabel: "(current)",
+    selectDatasets: "Select datasets",
+    searchDatasets: "Search datasets...",
+    noDatasetsFound: "No datasets found.",
   },
   "zh-CN": {
     confirm: "请确认",
@@ -103,5 +128,28 @@ export const catalogMessages = {
     deleteDescription:
       "所选数据集将被删除，关联的运行条目和媒体链接将异步清理。",
     deleteWarning: "此操作无法撤销，删除所选文件夹将同时删除其中的所有数据集。",
+    descriptionOptional: "描述（可选）",
+    metadataOptional: "元数据（可选）",
+    datasetNameHelp: "在数据集名称中使用斜杠“/”可将其组织为文件夹。",
+    inputSchemaHelp:
+      "使用 JSON Schema 验证数据集条目的输入。所有新增和现有条目都必须符合此架构。",
+    expectedOutputSchemaHelp:
+      "使用 JSON Schema 验证数据集条目的预期输出。所有新增和现有条目都必须符合此架构。",
+    back: "返回",
+    createDatasetAction: "创建数据集",
+    updateDatasetAction: "更新数据集",
+    validJsonSchema: "必须是有效的 JSON Schema",
+    invalidJsonInput: "输入无效。请提供 JSON 对象或带双引号的字符串。",
+    editDatasetItem: "编辑数据集条目",
+    cancel: "取消",
+    saveChanges: "保存更改",
+    selectAtLeastOneDataset: "请至少选择一个数据集",
+    selectDatasetFirst: "请先选择一个数据集",
+    chooseDatasetBeforeMedia: "在附加媒体前请先选择数据集。",
+    targetDatasets: "目标数据集",
+    currentLabel: "（当前）",
+    selectDatasets: "选择数据集",
+    searchDatasets: "搜索数据集...",
+    noDatasetsFound: "未找到数据集。",
   },
 } satisfies Messages;

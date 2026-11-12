@@ -15,6 +15,8 @@ import {
 } from "@/src/components/ui/form";
 import { api } from "@/src/utils/api";
 import { Plus } from "@langfuse/icons";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { catalogMessages } from "@/src/features/i18n/messages/catalog";
 import {
   useState,
   useMemo,
@@ -225,6 +227,7 @@ function InitializedNewDatasetItemForm({
   initialValues: NewDatasetItemFormValues;
   datasets: DatasetWithSchema[];
 }) {
+  const tr = useTranslation(catalogMessages);
   const [formError, setFormError] = useState<string | null>(null);
   const [screen, setScreen] = useState<"item" | "create">("item");
   const [createdDatasets, setCreatedDatasets] = useState<DatasetWithSchema[]>(
@@ -446,10 +449,10 @@ function InitializedNewDatasetItemForm({
                   name="datasetIds"
                   render={({ field }) => (
                     <FormItem className="flex min-w-0 flex-1 flex-col">
-                      <FormLabel>Target datasets</FormLabel>
+                      <FormLabel>{tr("targetDatasets")}</FormLabel>
                       <FormControl>
                         <MultiSelectTagInput
-                          aria-label="Target datasets"
+                          aria-label={tr("targetDatasets")}
                           disabled={isPending}
                           value={field.value}
                           options={datasets.map((dataset) => ({
@@ -464,9 +467,9 @@ function InitializedNewDatasetItemForm({
                             field.onChange(datasetIds);
                             selectDatasets(datasetIds);
                           }}
-                          placeholder="Select datasets"
-                          searchPlaceholder="Search datasets..."
-                          emptyMessage="No datasets found."
+                          placeholder={tr("selectDatasets")}
+                          searchPlaceholder={tr("searchDatasets")}
+                          emptyMessage={tr("noDatasetsFound")}
                         />
                       </FormControl>
                       <FormMessage />
@@ -474,7 +477,7 @@ function InitializedNewDatasetItemForm({
                   )}
                 />
                 <DesignSystemButton
-                  text="Create dataset"
+                  text={tr("createDatasetAction")}
                   icon={Plus}
                   variant="secondary"
                   disabled={isPending || pendingUploads.length > 0}

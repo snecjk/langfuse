@@ -4,6 +4,8 @@ import { HoverCard } from "@/src/components/design-system/HoverCard/HoverCard";
 import { api } from "@/src/utils/api";
 import { ListFilter } from "@langfuse/icons";
 import React, { useMemo } from "react";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tableMessages } from "@/src/features/i18n/messages/table";
 import { type FilterCondition, type FilterState } from "@langfuse/shared";
 
 interface FilteredRunPillsProps {
@@ -16,40 +18,47 @@ interface FilteredRunPillsProps {
   className?: string;
 }
 
-function operatorToText(operator: FilterCondition["operator"]): string {
+function operatorToText(
+  operator: FilterCondition["operator"],
+  t: (key: keyof (typeof tableMessages)["en"]) => string,
+): string {
   switch (operator) {
     case "=":
-      return "equals";
+      return t("operatorEquals");
     case ">=":
-      return "greater than or equal to";
+      return t("operatorGreaterThanOrEquals");
     case "<=":
-      return "less than or equal to";
+      return t("operatorLessThanOrEquals");
     case ">":
-      return "greater than";
+      return t("operatorGreaterThan");
     case "<":
-      return "less than";
+      return t("operatorLessThan");
   }
   return operator;
 }
 
 // Helper function to format filter information for display
-function formatFilterForPill(filter: FilterCondition) {
+function formatFilterForPill(
+  filter: FilterCondition,
+  t: (key: keyof (typeof tableMessages)["en"]) => string,
+) {
   const { operator, value } = filter;
+  const operatorText = operatorToText(operator, t);
 
   // Handle score filters with key
   if (filter.type === "numberObject" || filter.type === "booleanObject") {
     const valueStr = Array.isArray(value) ? value.join(", ") : String(value);
-    return `${filter.key} ${operatorToText(operator)} ${valueStr}`;
+    return `${filter.key} ${operatorText} ${valueStr}`;
   }
 
   if (filter.type === "categoryOptions") {
     const valueStr = Array.isArray(value) ? value.join(", ") : String(value);
-    return `${filter.key} ${operatorToText(operator)} ${valueStr}`;
+    return `${filter.key} ${operatorText} ${valueStr}`;
   }
 
   // Fallback for other filter types
   const valueStr = Array.isArray(value) ? value.join(", ") : String(value);
-  return `${filter.column} ${operatorToText(operator)} ${valueStr}`;
+  return `${filter.column} ${operatorText} ${valueStr}`;
 }
 
 export function FilteredRunPills({
@@ -58,6 +67,7 @@ export function FilteredRunPills({
   filteredRuns,
   className,
 }: FilteredRunPillsProps) {
+  const t = useTranslation(tableMessages);
   // Get run names from the API
   const { data: runs } = api.datasets.baseRunDataByDatasetId.useQuery({
     projectId,
@@ -94,7 +104,7 @@ export function FilteredRunPills({
                   </div>
                   <div className="space-y-1">
                     <div className="bg-muted rounded-md px-2 py-1 text-sm">
-                      {formatFilterForPill(item.filter)}
+                      {formatFilterForPill(item.filter, t)}
                     </div>
                   </div>
                 </div>
@@ -104,7 +114,7 @@ export function FilteredRunPills({
             {({ getTriggerProps }) => (
               <Badge
                 color="filled"
-                text={formatFilterForPill(item.filter)}
+                text={formatFilterForPill(item.filter, t)}
                 leadingIcon={ListFilter}
                 tabIndex={0}
                 {...getTriggerProps()}

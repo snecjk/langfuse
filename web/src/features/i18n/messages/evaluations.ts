@@ -127,6 +127,22 @@ export const evaluationsMessages = {
     noScores: "No Scores Available",
     selectScore: "Select a Score",
     trends: "View distribution and trends over time",
+    scoresOnboardingTitle: "Get Started with Scores",
+    scoresOnboardingDescription:
+      "Scores allow you to evaluate the quality/safety of your LLM application through user feedback, model-based evaluations, or manual review. Scores can be used programmatically via the API and SDKs to track custom metrics.",
+    scoreOnboardingFeedback: "Collect user feedback",
+    scoreOnboardingFeedbackDesc:
+      "Gather thumbs up/down feedback from users to identify high and low quality outputs",
+    scoreOnboardingModelEval: "Run model-based evaluations",
+    scoreOnboardingModelEvalDesc:
+      "Use LLMs to automatically evaluate your application's outputs",
+    scoreOnboardingQuality: "Track quality metrics",
+    scoreOnboardingQualityDesc:
+      "Monitor quality metrics over time to identify trends and issues",
+    scoreOnboardingCustom: "Use custom metrics",
+    scoreOnboardingCustomDesc:
+      "Langfuse's scores are flexible and can be used to track any metric that's associated with an LLM application",
+    learnMore: "Learn More",
   },
   "zh-CN": {
     noAssignedEvaluators: "无评估器",
@@ -232,8 +248,25 @@ export const evaluationsMessages = {
     created: "创建时间",
     processQueue: "处理队列",
     deleted: "评估器已删除",
+    scoresOnboardingTitle: "评分入门",
+    scoresOnboardingDescription:
+      "评分可让您通过用户反馈、基于模型的评估或人工审核来评估 LLM 应用的质量/安全性。评分可通过 API 和 SDK 以编程方式用于跟踪自定义指标。",
+    scoreOnboardingFeedback: "收集用户反馈",
+    scoreOnboardingFeedbackDesc:
+      "收集用户的点赞/点踩反馈，以识别高质量和低质量的输出",
+    scoreOnboardingModelEval: "运行基于模型的评估",
+    scoreOnboardingModelEvalDesc: "使用 LLM 自动评估您的应用输出",
+    scoreOnboardingQuality: "跟踪质量指标",
+    scoreOnboardingQualityDesc: "随时间监控质量指标，以识别趋势和问题",
+    scoreOnboardingCustom: "使用自定义指标",
+    scoreOnboardingCustomDesc:
+      "Langfuse 的评分灵活，可用于跟踪与 LLM 应用关联的任何指标。",
+    learnMore: "了解更多",
     delete: "删除",
-    deletedCount: { other: "已删除 {count} 个评估器。" },
+    deletedCount: {
+      one: "已删除 {count} 个评估器。",
+      other: "已删除 {count} 个评估器。",
+    },
     loadErrorHelp: "加载评分数据失败，请尝试刷新页面。",
     createScoresHelp: "为追踪和观察添加评估以创建评分。",
     selectScoresHelp: "从上方下拉菜单中选择一项或两项评分以查看分析",
