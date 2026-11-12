@@ -7,6 +7,8 @@ import { useDashboardFilterOptions } from "@/src/hooks/useDashboardFilterOptions
 import { PopoverFilterBuilder } from "@/src/features/filters/components/filter-builder";
 import { useQueryFilterState } from "@/src/features/filters/hooks/useFilterState";
 import { MultiSelect } from "@/src/features/filters/components/MultiSelect";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { dashboardMessages } from "@/src/features/i18n/messages/dashboard";
 
 import {
   LANGFUSE_HOME_DASHBOARD_DEFINITION,
@@ -61,9 +63,10 @@ import { setupTracingRoute } from "@/src/features/setup/setupRoutes";
 // session landed (via the scheduler reset key below).
 export default function ProjectHomePage() {
   const { readPath } = useReadPath();
+  const t = useTranslation(dashboardMessages);
   if (readPath === "unknown") {
     return (
-      <Page withPadding scrollable headerProps={{ title: "Home" }}>
+      <Page withPadding scrollable headerProps={{ title: t("home") }}>
         <NoDataOrLoading isLoading />
       </Page>
     );
