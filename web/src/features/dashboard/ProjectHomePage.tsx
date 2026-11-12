@@ -8,7 +8,9 @@ import { PopoverFilterBuilder } from "@/src/features/filters/components/filter-b
 import { useQueryFilterState } from "@/src/features/filters/hooks/useFilterState";
 import { MultiSelect } from "@/src/features/filters/components/MultiSelect";
 import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { dashboardMessages as dashboardListMessages } from "@/src/features/i18n/messages/dashboards";
 import { dashboardMessages } from "@/src/features/i18n/messages/dashboard";
+import { tracingMessages } from "@/src/features/i18n/messages/tracing";
 
 import {
   LANGFUSE_HOME_DASHBOARD_DEFINITION,
@@ -78,6 +80,9 @@ function HomeDashboard({ readPath }: { readPath: ResolvedReadPath }) {
   const router = useRouter();
   const utils = api.useUtils();
   const capture = usePostHogClientCapture();
+  const t = useTranslation(dashboardListMessages);
+  const tb = useTranslation(dashboardMessages);
+  const tf = useTranslation(tracingMessages);
   const projectId = router.query.projectId as string;
   const { project } = useQueryProjectOrOrganization();
   const { data: hasTracingConfigured, isLoading: isTracingCheckLoading } =
@@ -138,33 +143,33 @@ function HomeDashboard({ readPath }: { readPath: ResolvedReadPath }) {
 
   const filterColumns: ColumnDefinition[] = [
     {
-      name: "Trace Name",
+      name: tf("traceName"),
       id: "traceName",
       type: "stringOptions",
       options: nameOptions,
       internal: "internalValue",
     },
     {
-      name: "Tags",
+      name: tf("tags"),
       id: "tags",
       type: "arrayOptions",
       options: tagsOptions,
       internal: "internalValue",
     },
     {
-      name: "User",
+      name: tf("user"),
       id: "user",
       type: "string",
       internal: "internalValue",
     },
     {
-      name: "Release",
+      name: tf("release"),
       id: "release",
       type: "string",
       internal: "internalValue",
     },
     {
-      name: "Version",
+      name: tf("version"),
       id: "version",
       type: "string",
       internal: "internalValue",
@@ -245,7 +250,7 @@ function HomeDashboard({ readPath }: { readPath: ResolvedReadPath }) {
     },
     onError: (e) => {
       showErrorToast(
-        "Failed to set the default Home dashboard",
+        t("failedSetHomeDashboard"),
         e.message,
         classifyTrpcToastError(e, "dashboard_home.update"),
       );
@@ -354,12 +359,12 @@ function HomeDashboard({ readPath }: { readPath: ResolvedReadPath }) {
         withPadding
         scrollable
         headerProps={{
-          title: "Home",
+          title: tb("home"),
           actionButtonsLeft: (
             <>
               <MultiSelect
-                title="Environment"
-                label="Env"
+                title={tf("environment")}
+                label={t("env")}
                 values={selectedEnvironments}
                 onValueChange={setSelectedEnvironmentsDebounced}
                 options={environmentOptions.map((env) => ({
@@ -391,16 +396,16 @@ function HomeDashboard({ readPath }: { readPath: ResolvedReadPath }) {
                 <Button
                   variant="outline"
                   loading={setHomeDashboard.isPending}
-                  title="Show this dashboard on Home for everyone in this project"
+                  title={t("setDefaultTitle")}
                   onClick={handleSetDefaultDashboard}
                 >
-                  Set default
+                  {t("setDefault")}
                 </Button>
               )}
               <Button
                 variant="outline"
                 size="icon"
-                title="Edit this dashboard in Dashboards"
+                title={t("editDashboardInDashboards")}
                 asChild
               >
                 <Link
@@ -409,7 +414,7 @@ function HomeDashboard({ readPath }: { readPath: ResolvedReadPath }) {
                 >
                   <PencilIcon size="base" color="default" />
                   <span className="sr-only">
-                    Edit this dashboard in Dashboards
+                    {t("editDashboardInDashboards")}
                   </span>
                 </Link>
               </Button>
@@ -418,7 +423,7 @@ function HomeDashboard({ readPath }: { readPath: ResolvedReadPath }) {
                 project &&
                 (hasSetupTracingAccess ? (
                   <Link href={setupTracingRoute(project.id)}>
-                    <Button>Configure Tracing</Button>
+                    <Button>{t("configureTracing")}</Button>
                   </Link>
                 ) : (
                   <Button disabled>
@@ -428,7 +433,7 @@ function HomeDashboard({ readPath }: { readPath: ResolvedReadPath }) {
                       __rawClassName="mr-2 -ml-0.5"
                       aria-hidden="true"
                     />
-                    Configure Tracing
+                    {t("configureTracing")}
                   </Button>
                 ))}
             </>
@@ -437,7 +442,7 @@ function HomeDashboard({ readPath }: { readPath: ResolvedReadPath }) {
             <>
               <div className="flex flex-col gap-1">
                 <span className="text-muted-foreground px-2 text-xs">
-                  Dashboard
+                  {t("dashboard")}
                 </span>
                 <div className="[&_[role=combobox]]:w-full [&_[role=combobox]]:max-w-none">
                   <HomeDashboardSelect
@@ -456,7 +461,7 @@ function HomeDashboard({ readPath }: { readPath: ResolvedReadPath }) {
                     onClick={handleSetDefaultDashboard}
                     className="w-full justify-start font-normal"
                   >
-                    Set as project default
+                    {t("setAsProjectDefault")}
                   </Button>
                 )}
                 <Button
@@ -473,7 +478,7 @@ function HomeDashboard({ readPath }: { readPath: ResolvedReadPath }) {
                     }}
                   >
                     <PencilIcon size="base" color="default" />
-                    Edit dashboard
+                    {t("editDashboardMenu")}
                   </Link>
                 </Button>
                 {!isTracingCheckLoading &&
@@ -489,7 +494,7 @@ function HomeDashboard({ readPath }: { readPath: ResolvedReadPath }) {
                         href={setupTracingRoute(project.id)}
                         onClick={() => closeMenu()}
                       >
-                        Configure tracing
+                        {t("configureTracingMenu")}
                       </Link>
                     </Button>
                   ) : (
@@ -499,17 +504,17 @@ function HomeDashboard({ readPath }: { readPath: ResolvedReadPath }) {
                       className="w-full justify-start gap-2 font-normal"
                     >
                       <LockIcon size="base" aria-hidden="true" />
-                      Configure tracing
+                      {t("configureTracingMenu")}
                     </Button>
                   ))}
               </div>
               <div className="grid grid-cols-2 gap-2 border-t pt-2">
                 <span className="text-muted-foreground col-span-2 px-2 text-xs">
-                  Data
+                  {t("dataGroupLabel")}
                 </span>
                 <MultiSelect
-                  title="Environment"
-                  label="Environment"
+                  title={tf("environment")}
+                  label={tf("environment")}
                   values={selectedEnvironments}
                   onValueChange={setSelectedEnvironmentsDebounced}
                   options={environmentOptions.map((env) => ({ value: env }))}

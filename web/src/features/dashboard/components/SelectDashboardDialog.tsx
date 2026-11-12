@@ -13,33 +13,11 @@ import { Button } from "@/src/components/ui/button";
 import { Table } from "@/src/components/design-system/table/Table";
 import { createTextTableColumn } from "@/src/components/design-system/table/columns/createTextTableColumn";
 import { type LangfuseColumnDef } from "@/src/components/table/types";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { dashboardMessages } from "@/src/features/i18n/messages/dashboards";
 
 type Dashboard =
   RouterOutputs["dashboard"]["allDashboards"]["dashboards"][number];
-
-const columns: LangfuseColumnDef<Dashboard>[] = [
-  createTextTableColumn<Dashboard>({
-    accessorKey: "name",
-    header: "Name",
-  }),
-  {
-    accessorKey: "description",
-    header: "Description",
-    cell: ({ getValue }) => {
-      const description = getValue<string>();
-      return (
-        <span className="block truncate" title={description}>
-          {description}
-        </span>
-      );
-    },
-  },
-  {
-    accessorKey: "updatedAt",
-    header: "Updated",
-    cell: ({ getValue }) => getValue<Date>().toLocaleString(),
-  },
-];
 
 export interface SelectDashboardDialogProps {
   open: boolean;
@@ -56,9 +34,27 @@ export function SelectDashboardDialog({
   onSelectDashboard,
   onSkip,
 }: SelectDashboardDialogProps) {
+  const t = useTranslation(dashboardMessages);
   const [selectedDashboardId, setSelectedDashboardId] = useState<string | null>(
     null,
   );
+
+  const columns: LangfuseColumnDef<Dashboard>[] = [
+    createTextTableColumn<Dashboard>({
+      accessorKey: "name",
+      header: t("name"),
+    }),
+    {
+      accessorKey: "description",
+      header: t("description"),
+      cell: ({ getValue }) => getValue<string>(),
+    },
+    {
+      accessorKey: "updatedAt",
+      header: t("updatedLabel"),
+      cell: ({ getValue }) => getValue<Date>().toLocaleString(),
+    },
+  ];
 
   const dashboards = api.dashboard.allDashboards.useQuery(
     {
@@ -91,19 +87,19 @@ export function SelectDashboardDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
-          <DialogTitle>Select dashboard to add widget to</DialogTitle>
+          <DialogTitle>{t("selectDashboardToAdd")}</DialogTitle>
         </DialogHeader>
         <DialogBody>
           <div className="mt-4 max-h-[400px] overflow-y-auto">
             {dashboards.isLoading ? (
-              <div className="py-8 text-center">Loading dashboards...</div>
+              <div className="py-8 text-center">{t("loadingDashboards")}</div>
             ) : dashboards.isError ? (
               <div className="text-destructive py-8 text-center">
-                Error: {dashboards.error.message}
+                {t("errorPrefix", { message: dashboards.error.message })}
               </div>
             ) : dashboards.data?.dashboards.length === 0 ? (
               <div className="text-muted-foreground py-8 text-center">
-                No dashboards found.
+                {t("noDashboardsFound")}
               </div>
             ) : (
               <Table
@@ -120,7 +116,7 @@ export function SelectDashboardDialog({
                 selectedRowId={selectedDashboardId}
                 onRowClick={(dashboard) => setSelectedDashboardId(dashboard.id)}
                 getRowLabel={(dashboard) =>
-                  `Select dashboard ${dashboard.name}`
+                  t("selectDashboardRow", { name: dashboard.name })
                 }
               />
             )}
@@ -128,10 +124,10 @@ export function SelectDashboardDialog({
         </DialogBody>
         <DialogFooter className="mt-4 flex justify-between">
           <Button variant="outline" onClick={handleSkip}>
-            Skip
+            {t("skip")}
           </Button>
           <Button onClick={handleAdd} disabled={!selectedDashboardId}>
-            Add to Dashboard
+            {t("addToDashboard")}
           </Button>
         </DialogFooter>
       </DialogContent>

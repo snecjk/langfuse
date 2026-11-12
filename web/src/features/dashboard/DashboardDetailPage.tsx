@@ -95,6 +95,9 @@ import { useDashboardDefinitionDraft } from "@/src/features/dashboard/hooks/useD
 import { RouteParamsPendingFallback } from "@/src/components/RouteParamsPendingFallback/RouteParamsPendingFallback";
 import { useReadyRouteParams } from "@/src/hooks/useReadyRouteParams";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { dashboardMessages } from "@/src/features/i18n/messages/dashboards";
+import { tracingMessages } from "@/src/features/i18n/messages/tracing";
 
 // Position for a tile inserted "next to" an anchor tile: same size,
 // immediately to the right when that fits the 12-column grid, otherwise
@@ -115,6 +118,7 @@ function placementNextTo(anchor: DashboardPlacement) {
 export default function DashboardDetailPage() {
   const route = useReadyRouteParams(["projectId", "dashboardId"]);
   const { readPath } = useReadPath();
+  const t = useTranslation(dashboardMessages);
   if (!route.ready) {
     return <RouteParamsPendingFallback />;
   }
@@ -125,9 +129,9 @@ export default function DashboardDetailPage() {
         withPadding
         scrollable
         headerProps={{
-          title: "Dashboard",
+          title: t("dashboard"),
           breadcrumb: [
-            { name: "Dashboards", href: `/project/${projectId}/dashboards` },
+            { name: t("dashboards"), href: `/project/${projectId}/dashboards` },
           ],
         }}
       >
@@ -142,6 +146,8 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
   const router = useRouter();
   const utils = api.useUtils();
   const capture = usePostHogClientCapture();
+  const t = useTranslation(dashboardMessages);
+  const tf = useTranslation(tracingMessages);
 
   const { projectId, dashboardId, addWidgetId } = router.query as {
     projectId: string;
@@ -237,7 +243,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
       },
       onError: (error) => {
         showErrorToast(
-          "Error updating dashboard",
+          t("errorUpdatingDashboard"),
           error.message,
           classifyTrpcToastError(error, "dashboard.update"),
         );
@@ -259,7 +265,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
     },
     onError: (error) => {
       showErrorToast(
-        "Failed to update home dashboard",
+        t("failedUpdateHomeDashboard"),
         error.message,
         classifyTrpcToastError(error, "dashboard_home.update"),
       );
@@ -274,7 +280,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
       },
       onError: (error) => {
         showErrorToast(
-          "Error renaming dashboard",
+          t("errorRenamingDashboard"),
           error.message,
           classifyTrpcToastError(error, "dashboard.update"),
         );
@@ -290,7 +296,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
       },
       onError: (error) => {
         showErrorToast(
-          "Error saving filters",
+          t("errorSavingFilters"),
           error.message,
           classifyTrpcToastError(error, "dashboard_filters.update"),
         );
@@ -490,7 +496,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
         const result = await createWidgetAsync({
           projectId,
           ...toWidgetCreateFields(widget),
-          name: `${widget.name} (Copy)`,
+          name: t("widgetCopySuffix", { name: widget.name }),
         });
         capture("dashboard:widget_duplicated", {
           surface: "grid_menu",
@@ -502,13 +508,20 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
         insertWidgetPlacement(result.widget.id, placementNextTo(anchor));
       } catch (e) {
         showErrorToast(
-          "Failed to duplicate widget",
-          e instanceof Error ? e.message : "Unknown error",
+          t("failedDuplicateWidget"),
+          e instanceof Error ? e.message : t("unknown"),
           classifyTrpcToastError(e, "widget.clone"),
         );
       }
     },
-    [createWidgetAsync, projectId, dashboardId, capture, insertWidgetPlacement],
+    [
+      createWidgetAsync,
+      projectId,
+      dashboardId,
+      capture,
+      insertWidgetPlacement,
+      t,
+    ],
   );
 
   // Recreate a parsed clipboard widget as a project widget and place it on
@@ -526,7 +539,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
           dashboard_id: dashboardId,
         });
         showErrorToast(
-          "Cannot paste widget",
+          t("cannotPasteWidget"),
           parsed.reason,
           {
             operation: "widget.paste",
@@ -559,8 +572,8 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
         );
         if (parsed.removedFilters) {
           showErrorToast(
-            "Widget filters were adjusted",
-            "Some pasted filters were removed because they are not available in this view.",
+            t("widgetFiltersAdjusted"),
+            t("widgetFiltersAdjustedHelp"),
             {
               operation: "widget.paste",
               errorOrigin: "frontend",
@@ -571,8 +584,8 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
         }
       } catch (e) {
         showErrorToast(
-          "Failed to paste widget",
-          e instanceof Error ? e.message : "Unknown error",
+          t("failedPasteWidget"),
+          e instanceof Error ? e.message : t("unknown"),
           classifyTrpcToastError(e, "widget.paste"),
         );
       }
@@ -584,6 +597,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
       dashboardId,
       insertWidgetPlacement,
       projectId,
+      t,
     ],
   );
 
@@ -594,8 +608,8 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
       const text = await readTextFromClipboard();
       if (text === null) {
         showErrorToast(
-          "Clipboard unavailable",
-          "Your browser did not allow reading the clipboard. Paste with Cmd/Ctrl+V on the dashboard instead.",
+          t("clipboardUnavailable"),
+          t("clipboardUnavailableHelp"),
           {
             operation: "widget.paste",
             errorOrigin: "frontend",
@@ -619,7 +633,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
             dashboard_id: dashboardId,
           });
           showErrorToast(
-            "Cannot paste card",
+            t("cannotPasteCard"),
             preset.reason,
             {
               operation: "dashboard_card.paste",
@@ -636,8 +650,8 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
           dashboard_id: dashboardId,
         });
         showErrorToast(
-          "No widget in clipboard",
-          "The clipboard does not contain a Langfuse widget JSON. Copy one via a widget's ⋯ menu first.",
+          t("noWidgetInClipboard"),
+          t("noWidgetInClipboardHelp"),
           {
             operation: "widget.paste",
             errorOrigin: "frontend",
@@ -649,7 +663,14 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
       }
       await handleParsedWidgetPaste(parsed, source, anchor);
     },
-    [capture, dashboardId, handleParsedWidgetPaste, handlePastedPreset, isV4],
+    [
+      capture,
+      dashboardId,
+      handleParsedWidgetPaste,
+      handlePastedPreset,
+      isV4,
+      t,
+    ],
   );
 
   // Cmd/Ctrl+V on the dashboard pastes a copied widget. Only intercepts when
@@ -683,7 +704,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
             dashboard_id: dashboardId,
           });
           showErrorToast(
-            "Cannot paste card",
+            t("cannotPasteCard"),
             preset.reason,
             {
               operation: "dashboard_card.paste",
@@ -710,6 +731,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
     handlePastedPreset,
     capture,
     dashboardId,
+    t,
   ]);
 
   // Gate the dashboard-menu "Paste widget" item on the clipboard actually
@@ -757,10 +779,10 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
             (s): s is PromiseRejectedResult => s.status === "rejected",
           )?.reason;
           showErrorToast(
-            "Failed to import dashboard",
+            t("failedImportDashboard"),
             firstError instanceof Error
               ? firstError.message
-              : "Could not create the dashboard's widgets.",
+              : t("importWidgetsHelp"),
             classifyTrpcToastError(firstError, "dashboard.import"),
           );
           return;
@@ -816,15 +838,22 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
 
         showSuccessToast({
           operation: "dashboard.import",
-          title: "Dashboard imported",
-          description: `Added ${newPlacements.length} widget${
-            newPlacements.length === 1 ? "" : "s"
-          } from "${imported.name}".`,
+          title: t("dashboardImportedTitle"),
+          description:
+            newPlacements.length === 1
+              ? t("dashboardImportedHelp", {
+                  count: newPlacements.length,
+                  name: imported.name,
+                })
+              : t("dashboardImportedHelpPlural", {
+                  count: newPlacements.length,
+                  name: imported.name,
+                }),
         });
         if (imported.removedFilters) {
           showErrorToast(
-            "Widget filters were adjusted",
-            "Some imported filters were removed because they are not available in this view.",
+            t("widgetFiltersAdjusted"),
+            t("importedFiltersAdjustedHelp"),
             {
               operation: "dashboard.import",
               errorOrigin: "frontend",
@@ -835,8 +864,10 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
         }
         if (imported.skippedPresetCount > 0) {
           showErrorToast(
-            "Some cards were skipped",
-            `${imported.skippedPresetCount} preset card(s) in the file are not available in this Langfuse version.`,
+            t("someCardsSkipped"),
+            t("someCardsSkippedHelp", {
+              count: imported.skippedPresetCount,
+            }),
             {
               operation: "dashboard.import",
               errorOrigin: "frontend",
@@ -847,8 +878,8 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
         }
       } catch (e) {
         showErrorToast(
-          "Failed to import dashboard",
-          e instanceof Error ? e.message : "Unknown error",
+          t("failedImportDashboard"),
+          e instanceof Error ? e.message : t("unknown"),
           classifyTrpcToastError(e, "dashboard.import"),
         );
       }
@@ -861,6 +892,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
       applyDashboardDefinition,
       capture,
       dashboardId,
+      t,
     ],
   );
 
@@ -881,7 +913,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
           dashboard_id: dashboardId,
         });
         showErrorToast(
-          "Cannot import dashboard",
+          t("cannotImportDashboard"),
           dashboardResult.reason,
           {
             operation: "dashboard.import",
@@ -907,7 +939,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
             dashboard_id: dashboardId,
           });
           showErrorToast(
-            "Cannot import card",
+            t("cannotImportCard"),
             preset.reason,
             {
               operation: "dashboard_card.import",
@@ -924,8 +956,8 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
           dashboard_id: dashboardId,
         });
         showErrorToast(
-          "Unsupported file",
-          "Only Langfuse dashboard or widget JSON files can be dropped here.",
+          t("unsupportedFile"),
+          t("unsupportedFileHelp"),
           {
             operation: "dashboard.import",
             errorOrigin: "frontend",
@@ -944,6 +976,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
       handlePastedPreset,
       capture,
       dashboardId,
+      t,
     ],
   );
 
@@ -1031,64 +1064,64 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
   // Filter columns for PopoverFilterBuilder
   const filterColumns: ColumnDefinition[] = [
     {
-      name: "Environment",
+      name: tf("environment"),
       id: "environment",
       type: "stringOptions",
       options: environmentOptions,
       internal: "internalValue",
     },
     {
-      name: "Trace Name",
+      name: tf("traceName"),
       id: "traceName",
       type: "stringOptions",
       options: nameOptions,
       internal: "internalValue",
     },
     {
-      name: "Observation Name",
+      name: t("observationName"),
       id: "observationName",
       type: "string",
       internal: "internalValue",
     },
     {
-      name: "Score Name",
+      name: t("scoreName"),
       id: "scoreName",
       type: "string",
       internal: "internalValue",
     },
     {
-      name: "Tags",
+      name: tf("tags"),
       id: "tags",
       type: "arrayOptions",
       options: tagsOptions,
       internal: "internalValue",
     },
     {
-      name: "User",
+      name: tf("user"),
       id: "user",
       type: "string",
       internal: "internalValue",
     },
     {
-      name: "Session",
+      name: tf("session"),
       id: "session",
       type: "string",
       internal: "internalValue",
     },
     {
-      name: "Metadata",
+      name: tf("metadata"),
       id: "metadata",
       type: "stringObject",
       internal: "internalValue",
     },
     {
-      name: "Release",
+      name: tf("release"),
       id: "release",
       type: "string",
       internal: "internalValue",
     },
     {
-      name: "Version",
+      name: tf("version"),
       id: "version",
       type: "string",
       internal: "internalValue",
@@ -1154,7 +1187,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
     },
     onError: (e) => {
       showErrorToast(
-        "Failed to clone dashboard",
+        t("failedCloneDashboard"),
         e.message,
         classifyTrpcToastError(e, "dashboard.clone"),
       );
@@ -1224,7 +1257,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
           openCloneFirstDialog({
             projectId,
             dashboardId,
-            dashboardName: dashboard.data?.name ?? "Dashboard",
+            dashboardName: dashboard.data?.name ?? t("dashboard"),
             pendingDefinition,
             onCancel: () => {
               setGridResetKey((key) => key + 1);
@@ -1284,26 +1317,25 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
                   scrollable
                   headerProps={{
                     title:
-                      (dashboard.data?.name || "Dashboard") +
+                      (dashboard.data?.name || t("dashboard")) +
                       (dashboard.data?.owner === "LANGFUSE"
-                        ? " (Langfuse Maintained)"
+                        ? ` (${t("langfuseMaintained")})`
                         : ""),
                     breadcrumb: [
                       {
-                        name: "Dashboards",
+                        name: t("dashboards"),
                         href: `/project/${projectId}/dashboards`,
                       },
                     ],
                     help: {
                       description:
-                        dashboard.data?.description ||
-                        "No description available",
+                        dashboard.data?.description || t("noDescription"),
                     },
                     actionButtonsLeft: (
                       <>
                         <MultiSelect
-                          title="Environment"
-                          label="Env"
+                          title={tf("environment")}
+                          label={t("env")}
                           values={selectedEnvironments}
                           onValueChange={setSelectedEnvironmentsDebounced}
                           options={environmentOptions}
@@ -1328,9 +1360,9 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
                           setHomeDashboard.isPending) && (
                           <span
                             className="flex items-center"
-                            title="Saving..."
+                            title={t("saving")}
                             role="status"
-                            aria-label="Saving"
+                            aria-label={t("savingAria")}
                           >
                             <Loader2
                               size="base"
@@ -1346,8 +1378,8 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
                             variant="outline"
                           >
                             {updateDashboardFilters.isPending
-                              ? "Saving..."
-                              : "Save Filters"}
+                              ? t("saving")
+                              : t("saveFilters")}
                           </Button>
                         )}
                         {hasRbacCUDAccess && (
@@ -1357,7 +1389,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
                               color="default"
                               __rawClassName="mr-1"
                             />
-                            Add Widget
+                            {t("addWidget")}
                           </Button>
                         )}
                         {hasCloneAccess && (
@@ -1371,7 +1403,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
                               color="default"
                               __rawClassName="mr-1"
                             />
-                            Clone
+                            {t("clone")}
                           </Button>
                         )}
                         {hasRbacCUDAccess && (
@@ -1380,7 +1412,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                aria-label="More actions"
+                                aria-label={t("moreActions")}
                               >
                                 <MoreVertical size="base" color="default" />
                               </Button>
@@ -1398,7 +1430,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
                                     color="default"
                                     __rawClassName="mr-2"
                                   />
-                                  Paste widget
+                                  {t("pasteWidget")}
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuItem
@@ -1428,8 +1460,8 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
                                   __rawClassName="mr-2"
                                 />
                                 {isCurrentHome
-                                  ? "Shown on Home"
-                                  : "Use as Home"}
+                                  ? t("shownOnHome")
+                                  : t("useAsHome")}
                               </DropdownMenuItem>
                               {hasCUDAccess && (
                                 <DropdownMenuItem onSelect={openEditDialog}>
@@ -1438,7 +1470,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
                                     color="default"
                                     __rawClassName="mr-2"
                                   />
-                                  Edit name & description
+                                  {t("editNameDescription")}
                                 </DropdownMenuItem>
                               )}
                             </DropdownMenuContent>
@@ -1471,9 +1503,9 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
                     <Layer name="modal">
                       <div className="bg-background/80 pointer-events-none fixed inset-0 flex items-center justify-center backdrop-blur-xs">
                         <div className="border-primary bg-background rounded-lg border-2 border-dashed px-8 py-6 text-center shadow-lg">
-                          <p className="font-bold">Drop to import</p>
+                          <p className="font-bold">{t("dropToImport")}</p>
                           <p className="text-muted-foreground text-sm">
-                            Langfuse dashboard or widget JSON
+                            {t("dropImportHint")}
                           </p>
                         </div>
                       </div>
@@ -1492,7 +1524,7 @@ function DashboardDetailView({ readPath }: { readPath: ResolvedReadPath }) {
                   ) : dashboard.isError ? (
                     <div className="flex h-64 items-center justify-center">
                       <div className="text-destructive">
-                        Error: {dashboard.error.message}
+                        {t("errorPrefix", { message: dashboard.error.message })}
                       </div>
                     </div>
                   ) : (

@@ -5,6 +5,8 @@ import { Combobox } from "@/src/components/ui/Combobox";
 import { LangfuseIcon } from "@/src/components/design-system/LangfuseIcon/LangfuseIcon";
 import { Button } from "@/src/components/ui/button";
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { dashboardMessages } from "@/src/features/i18n/messages/dashboards";
 
 /**
  * Home's dashboard picker: selecting immediately shows ("peeks") the chosen
@@ -27,6 +29,7 @@ export function HomeDashboardSelect({
   onValueChange: (dashboardId: string) => void;
   currentDashboardName: string;
 }) {
+  const t = useTranslation(dashboardMessages);
   const hasCUDAccess = useHasProjectAccess({
     projectId,
     scope: "dashboards:CUD",
@@ -48,7 +51,7 @@ export function HomeDashboardSelect({
       value: d.id,
       label: d.name,
       ...(d.owner === "LANGFUSE" ? { icon: <LangfuseIcon size={14} /> } : {}),
-      ...(d.id === defaultDashboardId ? { badge: "default" } : {}),
+      ...(d.id === defaultDashboardId ? { badge: t("defaultBadge") } : {}),
     });
     const curated = items.filter((d) => d.owner === "LANGFUSE");
     const project = items.filter((d) => d.owner === "PROJECT");
@@ -56,24 +59,24 @@ export function HomeDashboardSelect({
       ...(project.length > 0
         ? [
             {
-              heading: "This project",
+              heading: t("thisProject"),
               options: project.map(toOption),
             },
           ]
         : []),
       {
-        heading: "Langfuse-maintained",
+        heading: t("langfuseMaintainedGroup"),
         options: curated.map(toOption),
       },
     ];
-  }, [dashboards.data?.dashboards, defaultDashboardId]);
+  }, [dashboards.data?.dashboards, defaultDashboardId, t]);
 
   if (!hasCUDAccess) {
     return (
       <Button
         variant="ghost"
         disabled
-        title="The dashboard shown on this project's home page"
+        title={t("dashboardShownOnHome")}
         className="text-muted-foreground my-0"
       >
         <LayoutDashboard size="base" color="default" __rawClassName="mr-1" />
@@ -91,8 +94,8 @@ export function HomeDashboardSelect({
         onValueChange(id);
       }}
       placeholder={currentDashboardName}
-      searchPlaceholder="Search dashboards..."
-      emptyText="No dashboards found"
+      searchPlaceholder={t("searchDashboards")}
+      emptyText={t("noDashboardsFound")}
       className="my-0 w-auto max-w-60"
       name="home-dashboard"
     />

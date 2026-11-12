@@ -15,6 +15,8 @@ import { TotalMetric } from "./TotalMetric";
 import { type QueryType, type ViewVersion } from "@langfuse/shared/query";
 import { mapLegacyUiTableFilterToView } from "@/src/features/dashboard/lib/dashboardUiTableToViewMapping";
 import { useScheduledDashboardExecuteQuery } from "@/src/features/dashboard/hooks/DashboardQuerySchedulerProvider";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { dashboardMessages } from "@/src/features/i18n/messages/dashboards";
 import { cn } from "@/src/utils/tailwind";
 
 export const ModelCostTable = ({
@@ -36,6 +38,7 @@ export const ModelCostTable = ({
   metricsVersion: ViewVersion;
   schedulerId?: string;
 }) => {
+  const t = useTranslation(dashboardMessages);
   const modelCostQuery: QueryType = {
     view: "observations",
     dimensions: [{ field: "providedModelName" }],
@@ -112,14 +115,14 @@ export const ModelCostTable = ({
       // shrink so the row area scrolls internally. (LFE-11035)
       className={cn(className, "h-full")}
       cardContentClassName="min-h-0"
-      title="Model costs"
+      title={t("modelCosts")}
       isLoading={isLoading || metrics.isLoading}
     >
       <DashboardTable
         headers={[
-          "Model",
-          <RightAlignedCell key="tokens">Tokens</RightAlignedCell>,
-          <RightAlignedCell key="cost">USD</RightAlignedCell>,
+          t("model"),
+          <RightAlignedCell key="tokens">{t("tokens")}</RightAlignedCell>,
+          <RightAlignedCell key="cost">{t("usd")}</RightAlignedCell>,
         ]}
         rows={metricsData}
         isLoading={isLoading || metrics.isLoading}
@@ -127,10 +130,10 @@ export const ModelCostTable = ({
       >
         <TotalMetric
           metric={costFormatter(totalTokenCost)}
-          description="Total cost"
+          description={t("totalCost")}
         >
           <DocPopup
-            description="Calculated multiplying the number of tokens with cost per token for each model."
+            description={t("costCalculationHelp")}
             href="https://langfuse.com/docs/model-usage-and-cost"
           />
         </TotalMetric>

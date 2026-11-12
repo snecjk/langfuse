@@ -44,7 +44,7 @@ export function ConnectedDashboardTable() {
     },
     onError: (error) => {
       showErrorToast(
-        "Failed to clone dashboard",
+        t("failedCloneDashboard"),
         error.message,
         classifyTrpcToastError(error, "dashboard.clone"),
       );
@@ -62,7 +62,7 @@ export function ConnectedDashboardTable() {
     },
     onError: (error) => {
       showErrorToast(
-        "Failed to delete dashboard",
+        t("failedDeleteDashboard"),
         error.message,
         classifyTrpcToastError(error, "dashboard.delete"),
       );
@@ -157,9 +157,9 @@ export function ConnectedDashboardTable() {
         >
           {({ openDialog: openEditDialog }) => (
             <ConfirmationDialogController
-              title="Delete dashboard"
-              text="This action cannot be undone. It permanently deletes this dashboard."
-              confirmLabel="Delete dashboard"
+              title={t("deleteDashboard")}
+              text={t("deleteDashboardWarning")}
+              confirmLabel={t("deleteDashboardConfirm")}
               variant="destructive"
               loading={deleteDashboard.isPending}
               onConfirm={async () => {

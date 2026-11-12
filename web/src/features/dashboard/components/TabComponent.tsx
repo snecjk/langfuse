@@ -1,5 +1,7 @@
 import { Tabs } from "@/src/components/design-system/Tabs/Tabs";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { dashboardMessages } from "@/src/features/i18n/messages/dashboards";
 import { type ChangeEvent, type ReactNode, useState } from "react";
 
 export type TabComponentProps = {
@@ -12,6 +14,7 @@ export type TabComponentProps = {
 export const TabComponent = ({ tabs }: TabComponentProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const capture = usePostHogClientCapture();
+  const t = useTranslation(dashboardMessages);
 
   const handleTabChange = (value: string) => {
     const index = Number(value);
@@ -37,7 +40,7 @@ export const TabComponent = ({ tabs }: TabComponentProps) => {
       >
         <div className="px-4 sm:hidden">
           <label htmlFor="tabs" className="sr-only">
-            Select a tab
+            {t("selectTab")}
           </label>
           <select
             id="tabs"
@@ -54,7 +57,7 @@ export const TabComponent = ({ tabs }: TabComponentProps) => {
           </select>
         </div>
         <div className="hidden h-9 shrink-0 items-center border-b sm:flex">
-          <Tabs.List variant="underline" overflow="menu" aria-label="Tabs">
+          <Tabs.List variant="underline" overflow="menu" aria-label={t("tabs")}>
             {tabs.map((tab, index) => (
               <Tabs.Trigger
                 key={tab.tabTitle}

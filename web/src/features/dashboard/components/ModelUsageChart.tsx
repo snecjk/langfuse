@@ -24,6 +24,8 @@ import { mapLegacyUiTableFilterToView } from "@/src/features/dashboard/lib/dashb
 import { type DatabaseRow } from "@/src/server/api/services/sqlInterface";
 import { DashboardLineTimeSeriesChart } from "@/src/features/dashboard/components/DashboardLineTimeSeriesChart";
 import { useScheduledDashboardExecuteQuery } from "@/src/features/dashboard/hooks/DashboardQuerySchedulerProvider";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { dashboardMessages } from "@/src/features/i18n/messages/dashboards";
 import { useMemo } from "react";
 
 export const ModelUsageChart = ({
@@ -56,6 +58,7 @@ export const ModelUsageChart = ({
     onActiveKeyChange: (key: string | undefined) => void;
   };
 }) => {
+  const t = useTranslation(dashboardMessages);
   const { allModels, selectedModels, setSelectedModels } = useModelSelection(
     projectId,
     userAndEnvFilterState,
@@ -312,47 +315,47 @@ export const ModelUsageChart = ({
 
   const data = [
     {
-      tabTitle: "Cost by model",
+      tabTitle: t("costByModel"),
       data: costByModel,
       totalMetric: costFormatter(totalCost),
-      metricDescription: `Cost`,
-      chartMetricLabel: "USD",
-      chartUnit: "USD",
+      metricDescription: t("costLabel"),
+      chartMetricLabel: t("usd"),
+      chartUnit: t("usd"),
     },
     {
-      tabTitle: "Cost by type",
+      tabTitle: t("costByType"),
       data: costByType,
       totalMetric: costFormatter(totalCost),
-      metricDescription: `Cost`,
-      chartMetricLabel: "USD",
-      chartUnit: "USD",
+      metricDescription: t("costLabel"),
+      chartMetricLabel: t("usd"),
+      chartUnit: t("usd"),
     },
     {
-      tabTitle: "Usage by model",
+      tabTitle: t("usageByModel"),
       data: unitsByModel,
       totalMetric: totalTokens
         ? compactNumberFormatter(totalTokens)
         : compactNumberFormatter(0),
-      metricDescription: `Units`,
-      chartMetricLabel: "Tokens",
-      chartUnit: "tokens",
+      metricDescription: t("unitsLabel"),
+      chartMetricLabel: t("tokens"),
+      chartUnit: t("tokensUnit"),
     },
     {
-      tabTitle: "Usage by type",
+      tabTitle: t("usageByType"),
       data: unitsByType,
       totalMetric: totalTokens
         ? compactNumberFormatter(totalTokens)
         : compactNumberFormatter(0),
-      metricDescription: `Units`,
-      chartMetricLabel: "Tokens",
-      chartUnit: "tokens",
+      metricDescription: t("unitsLabel"),
+      chartMetricLabel: t("tokens"),
+      chartUnit: t("tokensUnit"),
     },
   ];
 
   return (
     <DashboardCard
       className={className}
-      title="Model Usage"
+      title={t("modelUsage")}
       isLoading={
         isLoading || (queryResult.isPending && selectedModels.length > 0)
       }

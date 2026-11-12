@@ -13,6 +13,9 @@ import { Label } from "@/src/components/ui/label";
 import { Textarea } from "@/src/components/ui/textarea";
 import { showErrorToast } from "@/src/features/notifications/showErrorToast";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { dashboardMessages } from "@/src/features/i18n/messages/dashboards";
+import { dashboardMessages as baseDashboardMessages } from "@/src/features/i18n/messages/dashboard";
 
 interface EditDialogDashboardContentProps {
   closeDialog: () => void;
@@ -29,6 +32,8 @@ export function EditDialogDashboardContent({
   initialName,
   initialDescription,
 }: EditDialogDashboardContentProps) {
+  const t = useTranslation(dashboardMessages);
+  const tb = useTranslation(baseDashboardMessages);
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState(initialDescription);
   const utils = api.useUtils();
@@ -40,7 +45,7 @@ export function EditDialogDashboardContent({
     },
     onError: (e) => {
       showErrorToast(
-        "Failed to update dashboard",
+        t("failedUpdateDashboard"),
         e.message,
         classifyTrpcToastError(e, "dashboard.update"),
       );
@@ -49,7 +54,7 @@ export function EditDialogDashboardContent({
 
   const handleSave = () => {
     if (!name.trim()) {
-      showErrorToast("Validation error", "Dashboard name is required", {
+      showErrorToast(t("validationError"), t("dashboardNameRequired"), {
         operation: "dashboard.update",
         errorOrigin: "frontend",
         errorCategory: "user_input",
@@ -68,26 +73,26 @@ export function EditDialogDashboardContent({
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Edit Dashboard</DialogTitle>
+        <DialogTitle>{t("editDashboard")}</DialogTitle>
       </DialogHeader>
       <DialogBody>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{t("name")}</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Dashboard name"
+              placeholder={t("dashboardNamePlaceholder")}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t("description")}</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Dashboard description"
+              placeholder={t("dashboardDescriptionPlaceholder")}
               rows={3}
             />
           </div>
@@ -96,14 +101,14 @@ export function EditDialogDashboardContent({
       <DialogFooter>
         <div className="flex gap-2">
           <Button onClick={closeDialog} variant="outline" type="button">
-            Cancel
+            {tb("cancel")}
           </Button>
           <Button
             onClick={handleSave}
             type="button"
             loading={updateDashboard.isPending}
           >
-            Save Changes
+            {t("saveChanges")}
           </Button>
         </div>
       </DialogFooter>
