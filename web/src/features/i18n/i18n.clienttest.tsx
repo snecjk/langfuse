@@ -97,4 +97,67 @@ describe("interface localization", () => {
     remounted.unmount();
     document.cookie = "langfuse-ui-locale=; Max-Age=0; Path=/";
   });
+
+  it("composes full messages with different word order, safe parameters and counts", () => {
+    // One complete semantic message per language — not translated fragments
+    // concatenated at the callsite. The two languages order the link, the
+    // user-provided name and the count differently on purpose.
+    const messages = {
+      en: {
+        inviteSummary: {
+          one: "{count} teammate — {name} can join {link}",
+          other: "{count} teammates — {name} can join {link}",
+        },
+      },
+      "zh-CN": {
+        inviteSummary: "{name} 可以加入{link}（{count}位成员）",
+      },
+    } satisfies Messages;
+    // `count` participates in both plural selection and text interpolation.
+    const enOne = translate("en", messages, "inviteSummary", {
+      count: 1,
+      name: "小明",
+      link: "this workspace",
+    });
+    const enMany = translate("en", messages, "inviteSummary", {
+      count: 3,
+      name: "小明",
+      link: "this workspace",
+    });
+    const zh = translate("zh-CN", messages, "inviteSummary", {
+      count: 3,
+      name: "小明",
+      link: "this workspace",
+    });
+    expect(enOne).toBe("1 teammate — 小明 can join this workspace");
+    expect(enMany).toBe("3 teammates — 小明 can join this workspace");
+    expect(zh).toBe("小明 可以加入this workspace（3位成员）");
+    // Word order differs across languages but every value is present verbatim.
+    expect(zh.indexOf("小明")).toBeLessThan(zh.indexOf("this workspace"));
+
+    // Interpolated values are text, never HTML.
+    const unsafe = '<img src=x onerror="alert(1)">';
+    const markup = renderToStaticMarkup(
+      <p>
+        {translate("zh-CN", messages, "inviteSummary", {
+          count: 1,
+          name: unsafe,
+          link: "this workspace",
+        })}
+      </p>,
+    );
+    expect(markup).toContain("&lt;img");
+    expect(markup).not.toContain("<img");
+  });
+
+  it("diagnoses a message parameter the caller forgot to supply", () => {
+    const messages = {
+      en: { greet: "Hello, {name}" },
+      "zh-CN": { greet: "你好，{name}" },
+    } satisfies Messages;
+    // Development fails loudly and names the key and parameter.
+    expect(() => translate("zh-CN", messages, "greet", {})).toThrow(
+      /Missing interface translation parameter "name" for key "greet"/,
+    );
+  });
 });

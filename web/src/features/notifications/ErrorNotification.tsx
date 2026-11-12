@@ -8,6 +8,8 @@ import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePos
 import { useSupportDrawer } from "@/src/features/support-chat/SupportDrawerProvider";
 import { useV4MigrationPanel } from "@/src/features/v4-migration/V4MigrationPanelProvider";
 import { useCopyToClipboard } from "@/src/hooks/useCopyToClipboard";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { notificationMessages } from "@/src/features/i18n/messages/notifications";
 import { AlertTriangle, Check, Copy, X } from "@langfuse/icons";
 import { useRef } from "react";
 
@@ -37,6 +39,7 @@ export const ErrorNotification: React.FC<ErrorNotificationProps> = ({
   const { setOpen } = useSupportDrawer();
   const { setOpen: setMigrationPanelOpen } = useV4MigrationPanel();
   const capture = usePostHogClientCapture();
+  const t = useTranslation(notificationMessages);
   const { copy, isCopied } = useCopyToClipboard();
   const didCaptureShown = useRef(false);
   const isError = type === "ERROR";
@@ -81,22 +84,24 @@ export const ErrorNotification: React.FC<ErrorNotificationProps> = ({
         )}
         {path && (
           <div className={`text-sm leading-tight ${textColor}`}>
-            Path: {path}
+            {t("pathLabel", { path })}
           </div>
         )}
         {traceId && (
           <div
             className={`flex items-start gap-1 text-sm leading-tight ${textColor}`}
           >
-            <span className="min-w-0 break-all">Error ID: {traceId}</span>
+            <span className="min-w-0 break-all">
+              {t("errorIdLabel", { errorId: traceId })}
+            </span>
             <button
               className={`flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center border-none bg-transparent p-0 ${textColor}`}
               onClick={() => copy(traceId).catch(() => undefined)}
               onPointerDown={(e) => {
                 e.stopPropagation();
               }}
-              aria-label="Copy error ID"
-              title="Copy error ID"
+              aria-label={t("copyErrorId")}
+              title={t("copyErrorId")}
             >
               {isCopied ? <Check size="base" /> : <Copy size="base" />}
             </button>
@@ -122,7 +127,7 @@ export const ErrorNotification: React.FC<ErrorNotificationProps> = ({
               });
             }}
           >
-            Report issue to Langfuse team
+            {t("reportIssue")}
           </Button>
         )}
       </div>
@@ -142,7 +147,7 @@ export const ErrorNotification: React.FC<ErrorNotificationProps> = ({
           e.stopPropagation();
           e.preventDefault();
         }}
-        aria-label="Close"
+        aria-label={t("close")}
       >
         <X size="base" />
       </button>

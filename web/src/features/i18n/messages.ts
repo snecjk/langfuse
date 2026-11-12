@@ -38,7 +38,16 @@ export function translate<T extends Messages>(
       : (message[
           new Intl.PluralRules(messageLocale).select(Number(parameters.count))
         ] ?? message.other);
-  return template.replace(/\{(\w+)\}/g, (placeholder, name: string) =>
-    Object.hasOwn(parameters, name) ? String(parameters[name]) : placeholder,
-  );
+  return template.replace(/\{(\w+)\}/g, (placeholder, name: string) => {
+    if (Object.hasOwn(parameters, name)) return String(parameters[name]);
+    // A placeholder the caller forgot to supply is a bug, not user content.
+    // Development throws so the omission surfaces at the callsite; production
+    // degrades to a readable marker rather than leaking a raw `{placeholder}`.
+    const diagnostic = `Missing interface translation parameter "${name}" for key "${key}"`;
+    if (process.env.NODE_ENV !== "production") {
+      throw new Error(diagnostic);
+    }
+    console.warn(diagnostic);
+    return `[${name}]`;
+  });
 }

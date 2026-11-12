@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { vi } from "vitest";
 import { ErrorNotification } from "@/src/features/notifications/ErrorNotification";
+import { I18nProvider, useLocale } from "@/src/features/i18n/I18nProvider";
 
 const mocks = vi.hoisted(() => ({
   capture: vi.fn(),
@@ -185,5 +186,72 @@ describe("ErrorNotification", () => {
     });
     expect(dismissToast).toHaveBeenCalledWith("toast-4");
     expect(JSON.stringify(mocks.capture.mock.calls)).not.toContain("Sensitive");
+  });
+
+  it("updates already-shown notification chrome on language switch while preserving diagnostics and reporting content", async () => {
+    const props = {
+      // Raw server diagnostic: must stay verbatim across languages (it is what
+      // the report-issue message ships), while the surrounding chrome updates.
+      error: "Unknown provider error",
+      description: "upstream said: upstream_error_code=PROVIDER_TIMEOUT",
+      type: "ERROR" as const,
+      dismissToast: vi.fn(),
+      toast: "toast-switch",
+      source: "trpc" as const,
+      path: "auth.callback",
+      traceId: "0123456789abcdef",
+      analytics: {
+        operation: "auth.callback" as const,
+        trpcPath: "auth.callback" as const,
+        errorOrigin: "backend" as const,
+        errorCategory: "internal" as const,
+        trpcCode: "INTERNAL_SERVER_ERROR" as const,
+        httpStatus: 500,
+      },
+    };
+
+    function SwitchButton() {
+      const { locale, setLocale } = useLocale();
+      return (
+        <button
+          onClick={() => setLocale(locale === "en" ? "zh-CN" : "en")}
+        >{`switch`}</button>
+      );
+    }
+
+    const view = render(
+      <I18nProvider initialLocale="en">
+        <SwitchButton />
+        <ErrorNotification {...props} />
+      </I18nProvider>,
+    );
+
+    // English chrome is visible first.
+    expect(
+      screen.getByRole("button", { name: "Report issue to Langfuse team" }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Close")).toBeInTheDocument();
+    expect(screen.getByText("Unknown provider error")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "switch" }));
+
+    // Chrome re-renders in Chinese; the raw diagnostic and path/ID values are
+    // preserved verbatim, and analytics/reporting content is unchanged.
+    expect(
+      screen.getByRole("button", { name: "向 Langfuse 团队报告问题" }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("关闭")).toBeInTheDocument();
+    expect(screen.getByLabelText("复制错误 ID")).toBeInTheDocument();
+    expect(screen.getByText("Unknown provider error")).toBeInTheDocument();
+    expect(
+      screen.getByText(/upstream_error_code=PROVIDER_TIMEOUT/),
+    ).toBeInTheDocument();
+
+    await waitFor(() => expect(mocks.capture).toHaveBeenCalledTimes(1));
+    expect(JSON.stringify(mocks.capture.mock.calls)).not.toContain(
+      "PROVIDER_TIMEOUT",
+    );
+
+    view.unmount();
   });
 });
