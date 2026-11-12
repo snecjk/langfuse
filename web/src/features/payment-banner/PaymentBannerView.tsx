@@ -3,6 +3,8 @@ import { AlertCircle, CreditCard } from "@langfuse/icons";
 import Link from "next/link";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Button } from "@/src/components/ui/button";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { notificationMessages } from "@/src/features/i18n/messages/notifications";
 import { cn } from "@/src/utils/tailwind";
 
 const paymentBannerVariants = cva(
@@ -45,6 +47,7 @@ export function PaymentBannerView({
   severity,
   ref,
 }: PaymentBannerViewProps) {
+  const t = useTranslation(notificationMessages);
   return (
     <div
       ref={ref}
@@ -56,8 +59,8 @@ export function PaymentBannerView({
         {/* mt-0.5 optically centers the 16px icon on the first 20px text line */}
         <AlertCircle size="base" __rawClassName="mt-0.5 sm:mt-0" />
         <p className="min-w-0 text-sm wrap-break-word">
-          <span className="font-bold">Billing Issue:</span>{" "}
-          {`We have problems collecting subscription payment for your organization '${organizationName}'. Please update your payment information to continue using Langfuse.`}
+          <span className="font-bold">{t("paymentBillingIssueTitle")}</span>{" "}
+          {t("paymentBillingIssueMessage", { organization: organizationName })}
         </p>
       </div>
       <Button
@@ -68,7 +71,7 @@ export function PaymentBannerView({
       >
         <Link href={billingSettingsHref}>
           <CreditCard size="base" color="default" __rawClassName="mr-2" />
-          Update Payment
+          {t("paymentUpdatePayment")}
         </Link>
       </Button>
     </div>

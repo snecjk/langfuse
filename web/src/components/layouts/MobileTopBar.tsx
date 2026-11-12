@@ -10,6 +10,8 @@ import { InAppAiAgentButton } from "@/src/components/nav/InAppAiAgentButton";
 import { EnvLabelBadge } from "@/src/components/EnvLabelBadge";
 import { useEnvLabel } from "@/src/hooks/useEnvLabel";
 import { useIsInAppAgentLauncherVisible } from "@/src/features/in-app-agent/components/InAppAiAgentProvider";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { navigationMessages } from "@/src/features/i18n/messages/navigation";
 
 /**
  * Slim mobile top chrome for the minimal-chrome shell: hamburger · centered
@@ -33,6 +35,7 @@ export const MobileTopBar = ({
   const hasAppSidebar = useHasAppSidebar();
   const envLabel = useEnvLabel();
   const isInAppAgentLauncherVisible = useIsInAppAgentLauncherVisible();
+  const t = useTranslation(navigationMessages);
   const showHamburger = showSidebarTrigger && hasAppSidebar;
 
   return (
@@ -44,7 +47,7 @@ export const MobileTopBar = ({
             variant="ghost"
             size="icon"
             className="h-9 w-9"
-            aria-label="Open menu"
+            aria-label={t("openMenu")}
             onClick={() => toggleSidebar()}
           >
             <Menu size="lg" color="default" />

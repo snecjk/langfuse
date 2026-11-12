@@ -23,6 +23,22 @@ import {
   type ProjectNotificationEventType,
 } from "@langfuse/shared";
 
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { notificationMessages } from "@/src/features/i18n/messages/notifications";
+
+/** Maps each notification event type to its translated title and description keys. */
+const NOTIFICATION_EVENT_TITLE_KEYS = {
+  "blob-export-failed": "notificationChannelsBlobExportFailedTitle",
+  "posthog-export-failed": "notificationChannelsPosthogExportFailedTitle",
+  "evaluator-blocked": "notificationChannelsEvaluatorBlockedTitle",
+} as const;
+
+const NOTIFICATION_EVENT_DESCRIPTION_KEYS = {
+  "blob-export-failed": "notificationChannelsBlobExportFailedDescription",
+  "posthog-export-failed": "notificationChannelsPosthogExportFailedDescription",
+  "evaluator-blocked": "notificationChannelsEvaluatorBlockedDescription",
+} as const;
+
 /** Project notifications route to webhooks, Slack or PagerDuty; GitHub dispatch is not wired for this event source. */
 const PROJECT_NOTIFICATION_ACTION_TYPES: ActionTypes[] = [
   "WEBHOOK",
@@ -65,6 +81,7 @@ export function ProjectNotificationChannels({
 }: {
   projectId: string;
 }) {
+  const t = useTranslation(notificationMessages);
   const {
     channels,
     isLoading,
@@ -81,10 +98,9 @@ export function ProjectNotificationChannels({
 
   return (
     <div>
-      <Header title="Project Notifications" />
+      <Header title={t("notificationChannelsTitle")} />
       <p className="text-muted-foreground mb-4 text-sm">
-        Manage project notifications. Channel notifications are sent in addition
-        to the admin emails.
+        {t("notificationChannelsDescription")}
       </p>
 
       {mode === "list" ? (
@@ -102,11 +118,13 @@ export function ProjectNotificationChannels({
 
           <div className="flex flex-col gap-4">
             <div>
-              <h3 className="text-lg font-bold">Events</h3>
+              <h3 className="text-lg font-bold">
+                {t("notificationChannelsEvents")}
+              </h3>
               <p className="text-muted-foreground text-sm">
                 {hasChannels
-                  ? "Choose which events are delivered to your channels."
-                  : "Configure a channel above to enable project notifications."}
+                  ? t("notificationChannelsEventsDescription")
+                  : t("notificationChannelsEventsDescriptionEmpty")}
               </p>
             </div>
             {NOTIFIED_EVENTS.map((event) => (
@@ -120,9 +138,11 @@ export function ProjectNotificationChannels({
                     !hasChannels && "opacity-50",
                   )}
                 >
-                  <p className="text-base font-bold">{event.title}</p>
+                  <p className="text-base font-bold">
+                    {t(NOTIFICATION_EVENT_TITLE_KEYS[event.value])}
+                  </p>
                   <p className="text-muted-foreground text-sm">
-                    {event.description}
+                    {t(NOTIFICATION_EVENT_DESCRIPTION_KEYS[event.value])}
                   </p>
                 </div>
                 <Switch
@@ -158,9 +178,11 @@ export function ProjectNotificationChannels({
       >
         <DialogContent className="max-w-4xl">
           <DialogHeader>
-            <DialogTitle>Webhook Secret Created</DialogTitle>
+            <DialogTitle>
+              {t("notificationChannelsWebhookSecretTitle")}
+            </DialogTitle>
             <DialogDescription>
-              Copy the webhook secret below — it will only be shown once.
+              {t("notificationChannelsWebhookSecretDescription")}
             </DialogDescription>
           </DialogHeader>
           <DialogBody>
@@ -170,7 +192,7 @@ export function ProjectNotificationChannels({
           </DialogBody>
           <DialogFooter>
             <Button onClick={actions.dismissWebhookSecret}>
-              {"I've saved the secret"}
+              {t("notificationChannelsWebhookSecretConfirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

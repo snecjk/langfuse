@@ -36,6 +36,8 @@ import {
 import { type ChartProps } from "@/src/features/widgets/chart-library/chart-props";
 import { valueFormatter } from "@/src/features/widgets/chart-library/utils";
 import { formatMetricName } from "@/src/features/widgets/utils";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 
 import { type OrderByState } from "@langfuse/shared";
 
@@ -96,6 +98,7 @@ const SortableHeader: React.FC<{
   className?: string;
   rightAlign?: boolean;
 }> = ({ column, label, sortState, onSort, className, rightAlign = false }) => {
+  const t = useTranslation(widgetMessages);
   const isSorted = sortState?.column === column;
   const sortDirection = isSorted ? sortState.order : null;
 
@@ -130,8 +133,8 @@ const SortableHeader: React.FC<{
             className="ml-1"
             title={
               sortDirection === "ASC"
-                ? "Sorted ascending"
-                : "Sort by this column"
+                ? t("sortedAscending")
+                : t("sortByThisColumn")
             }
           >
             {sortDirection === "ASC" ? "▲" : "▼"}
@@ -225,6 +228,7 @@ export const PivotTable: React.FC<PivotTableProps> = ({
   onSortChange,
   isLoading = false,
 }) => {
+  const t = useTranslation(widgetMessages);
   const units = config?.units;
   // Transform chart data into pivot table structure
   const pivotTableRows = useMemo(() => {
@@ -350,7 +354,9 @@ export const PivotTable: React.FC<PivotTableProps> = ({
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
-          <p className="text-muted-foreground text-sm">No data available</p>
+          <p className="text-muted-foreground text-sm">
+            {t("noDataAvailable")}
+          </p>
         </div>
       </div>
     );
@@ -366,7 +372,7 @@ export const PivotTable: React.FC<PivotTableProps> = ({
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
           <p className="text-muted-foreground text-sm">
-            Unable to process data for pivot table
+            {t("unableToProcessPivot")}
           </p>
         </div>
       </div>
@@ -383,7 +389,7 @@ export const PivotTable: React.FC<PivotTableProps> = ({
               label={
                 config?.dimensions && config.dimensions.length > 0
                   ? config.dimensions.map(formatColumnHeader).join(" / ") // Show all dimensions
-                  : "Dimension"
+                  : t("breakdownDimension")
               }
               className="p-2 text-left font-bold first:pl-2"
             />

@@ -9,6 +9,7 @@ export function describeRunComparison({
   baselineText,
   currentText,
   verb = "scored",
+  labels,
 }: {
   /** The baseline run's name; omitted while the names are still loading. */
   baselineName?: string;
@@ -17,10 +18,13 @@ export function describeRunComparison({
   currentText: string;
   /** "scored" for a score, "cost" for cost, "took" for latency. */
   verb?: "scored" | "cost" | "took";
+  /** Localized connective words; English defaults keep unlocalized callers readable. */
+  labels?: { baseline: string; thisRun: string; cost: string; took: string };
 }): string {
-  const baseline = baselineName ?? "The baseline";
+  const baseline = baselineName ?? labels?.baseline ?? "The baseline";
   if (verb === "scored") {
-    return `${baseline} ${baselineText} · this run ${currentText}`;
+    return `${baseline} ${baselineText} · ${labels?.thisRun ?? "this run"} ${currentText}`;
   }
-  return `${baseline} ${verb} ${baselineText} · this run ${verb} ${currentText}`;
+  const verbWord = labels?.[verb] ?? verb;
+  return `${baseline} ${verbWord} ${baselineText} · ${labels?.thisRun ?? "this run"} ${verbWord} ${currentText}`;
 }

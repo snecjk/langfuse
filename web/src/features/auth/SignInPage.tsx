@@ -67,7 +67,7 @@ const PREVIEW_DEMO_USER_PASSWORD = "password";
 const credentialAuthForm = z.object({
   email: z.email(),
   password: z.string().min(8, {
-    message: "Password must be at least 8 characters long",
+    message: authMessages.en.passwordMinimum,
   }),
 });
 
@@ -497,8 +497,7 @@ export function useHuggingFaceRedirect(runningOnHuggingFaceSpaces: boolean) {
 const signInErrors = [
   {
     code: "OAuthAccountNotLinked",
-    description:
-      "Please sign in with the same provider (e.g. Google, GitHub, Azure AD, etc.) that you used to create this account.",
+    description: authMessages.en.accountNotLinked,
   },
 ];
 
@@ -664,7 +663,7 @@ export default function SignInPage({
         // or server state the server owns, not an app failure here). It then
         // navigates to the error page itself; when the server is up, that
         // lands on /auth/error?error=undefined, which still captures.
-        setCredentialsFormError("An unexpected error occurred.");
+        setCredentialsFormError(t("unexpectedErrorOccurred"));
         reportError(new Error("Sign in result is undefined"), {
           area: "auth.signIn.credentials",
           expected: true,
@@ -678,9 +677,7 @@ export default function SignInPage({
             { area: "auth.signIn.credentials" },
           );
         }
-        setCredentialsFormError(
-          result?.error ?? "An unexpected error occurred.",
-        );
+        setCredentialsFormError(result?.error ?? t("unexpectedErrorOccurred"));
       }
     } catch (error) {
       if (isNextAuthMissingSignInUrlError(error)) {
@@ -694,7 +691,7 @@ export default function SignInPage({
       } else {
         captureUnknownError("auth.signIn.credentials", error);
       }
-      setCredentialsFormError("An unexpected error occurred.");
+      setCredentialsFormError(t("unexpectedErrorOccurred"));
     } finally {
       // The token was redeemed (or rejected) by this attempt either way.
       turnstileRef.current?.reset();
@@ -748,7 +745,7 @@ export default function SignInPage({
         if (result?.ok) return; // session updates and useAuthGuard navigates
         setPreviewAutoSignInPending(false);
         setCredentialsFormError(
-          result?.error ?? "Automatic preview sign-in failed.",
+          result?.error ?? authMessages.en.automaticSignInFailedForm,
         );
       })
       .catch((error) => {
@@ -761,7 +758,7 @@ export default function SignInPage({
           captureUnknownError("auth.signIn.previewAutoSignIn", error);
         }
         setPreviewAutoSignInPending(false);
-        setCredentialsFormError("Automatic preview sign-in failed.");
+        setCredentialsFormError(authMessages.en.automaticSignInFailedForm);
       });
   }, [previewAutoSignInEnabled, sessionStatus, targetPath]);
 
@@ -783,7 +780,7 @@ export default function SignInPage({
     const email = emailSchema.safeParse(credentialsForm.getValues("email"));
     if (!email.success) {
       credentialsForm.setError("email", {
-        message: "Invalid email address",
+        message: t("invalidEmail"),
       });
       setContinueLoading(false);
       return;
@@ -833,9 +830,7 @@ export default function SignInPage({
         expected: isJsonParseSyntaxError(error),
         extra: { context: "auth.signIn.checkSso" },
       });
-      setCredentialsFormError(
-        "Unable to check SSO configuration. Please try again.",
-      );
+      setCredentialsFormError(t("ssoCheckFailedForm"));
     } finally {
       setContinueLoading(false);
     }

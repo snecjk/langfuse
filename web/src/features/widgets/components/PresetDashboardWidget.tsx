@@ -21,6 +21,8 @@ import { buildPresetExport } from "@/src/features/dashboard/utils/dashboard-impo
 import { copyTextToClipboard } from "@/src/utils/clipboard";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
 import { DropdownMenu } from "@/src/components/design-system/DropdownMenu/DropdownMenu";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 
 /**
  * A "preset" dashboard placement: renders a registered curated component by
@@ -87,6 +89,7 @@ export function PresetDashboardWidget({
         onHeightChange: (placementId: string, height: number) => void;
       };
 }) {
+  const t = useTranslation(widgetMessages);
   const metricsVersion: ViewVersion = readPath === "v4" ? "v2" : "v1";
 
   // Presets on project-owned dashboards (e.g. a clone of the curated Home)
@@ -191,7 +194,7 @@ export function PresetDashboardWidget({
       onDeleteWidget(placement.id);
       return;
     }
-    if (confirm("Please confirm deletion")) {
+    if (confirm(t("confirmDeletion"))) {
       onDeleteWidget(placement.id);
     }
   };
@@ -210,11 +213,11 @@ export function PresetDashboardWidget({
       });
       showSuccessToast({
         operation: "dashboard_card.copy",
-        title: "Card copied",
-        description: "Paste it on any dashboard with Cmd/Ctrl+V.",
+        title: t("cardCopied"),
+        description: t("cardCopiedHelp"),
       });
     } catch {
-      showErrorToast("Copy failed", "Could not write to the clipboard.", {
+      showErrorToast(t("copyFailed"), t("copyFailedHelp"), {
         operation: "dashboard_card.copy",
         errorOrigin: "frontend",
         errorCategory: "permission",
@@ -226,7 +229,7 @@ export function PresetDashboardWidget({
     return (
       <div className="bg-background flex h-full items-center justify-center rounded-lg border p-4">
         <div className="text-muted-foreground">
-          Unknown preset: {placement.presetId}
+          {t("unknownPreset", { id: placement.presetId })}
         </div>
       </div>
     );
@@ -261,7 +264,7 @@ export function PresetDashboardWidget({
             {
               type: "item",
               id: "copy",
-              title: "Copy card",
+              title: t("copyCard"),
               icon: CopyIcon,
               onClick: handleCopyToClipboard,
             },
@@ -270,7 +273,7 @@ export function PresetDashboardWidget({
                   {
                     type: "item" as const,
                     id: "clone",
-                    title: "Clone",
+                    title: t("clone"),
                     icon: CopyPlusIcon,
                     onClick: () => onDuplicatePreset(placement),
                   },
@@ -282,7 +285,7 @@ export function PresetDashboardWidget({
                   {
                     type: "item" as const,
                     id: "delete",
-                    title: "Delete",
+                    title: t("delete"),
                     icon: TrashIcon,
                     variant: "destructive" as const,
                     onClick: handleDelete,
@@ -294,7 +297,7 @@ export function PresetDashboardWidget({
           {({ getTriggerProps }) => (
             <button
               className="text-muted-foreground hover:text-foreground"
-              aria-label="Widget actions"
+              aria-label={t("widgetActions")}
               {...getTriggerProps()}
             >
               <MoreVerticalIcon size="base" />

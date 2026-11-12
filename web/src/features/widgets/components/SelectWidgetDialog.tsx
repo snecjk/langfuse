@@ -14,7 +14,6 @@ import {
 import { Button } from "@/src/components/ui/button";
 import { Tabs } from "@/src/components/design-system/Tabs/Tabs";
 import startCase from "lodash/startCase";
-import { getChartTypeDisplayName } from "@/src/features/widgets/chart-library/utils";
 import { ChartTypeIllustration } from "@/src/features/widgets/components/ChartTypeIllustration";
 import {
   HOME_DASHBOARD_PRESET_IDS,
@@ -29,6 +28,8 @@ import { useReadPath } from "@/src/features/events/hooks/useReadPath";
 import { type DashboardWidgetChartType } from "@langfuse/shared/src/db";
 import { InAppAgentWidgetComposer } from "@/src/features/in-app-agent/components/InAppAgentWidgetComposer";
 import { useInAppAiAgent } from "@/src/features/in-app-agent/components/InAppAiAgentProvider";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 
 export type WidgetItem = {
   id: string;
@@ -39,6 +40,23 @@ export type WidgetItem = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+/** Maps a chart type to the widget message key that names it. */
+const CHART_TYPE_LABEL_KEYS: Record<string, string> = {
+  LINE_TIME_SERIES: "chartTypeLine",
+  AREA_TIME_SERIES: "chartTypeArea",
+  BAR_TIME_SERIES: "chartTypeBarTimeSeries",
+  HORIZONTAL_BAR: "chartTypeHorizontalBar",
+  VERTICAL_BAR: "chartTypeVerticalBar",
+  PIE: "chartTypePie",
+  NUMBER: "chartTypeBigNumber",
+  HISTOGRAM: "chartTypeHistogram",
+  PIVOT_TABLE: "chartTypePivotTable",
+};
+
+const getChartTypeDisplayNameKey = (
+  chartType: DashboardWidgetChartType,
+): string => CHART_TYPE_LABEL_KEYS[chartType] ?? "chartTypeBigNumber";
 
 const rowClassName =
   "flex w-full items-center gap-4 rounded-lg border p-3 text-left hover:bg-accent/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring";
@@ -57,9 +75,11 @@ function RowIllustration({ type }: { type: string }) {
 function WidgetRow({
   widget,
   onClick,
+  chartTypeLabel,
 }: {
   widget: WidgetItem;
   onClick: () => void;
+  chartTypeLabel: (chartType: string) => string;
 }) {
   return (
     <button type="button" onClick={onClick} className={rowClassName}>
@@ -77,10 +97,8 @@ function WidgetRow({
           </div>
         ) : null}
         <div className="text-muted-foreground/80 mt-0.5 text-xs">
-          {getChartTypeDisplayName(
-            widget.chartType as DashboardWidgetChartType,
-          )}{" "}
-          · {startCase(widget.view.toLowerCase())}
+          {chartTypeLabel(widget.chartType)} ·{" "}
+          {startCase(widget.view.toLowerCase())}
         </div>
       </div>
     </button>
@@ -107,6 +125,7 @@ export function SelectWidgetDialog({
 }: SelectWidgetDialogProps) {
   const router = useRouter();
   const capture = usePostHogClientCapture();
+  const t = useTranslation(widgetMessages);
   const { isAvailable, openAssistant, submit } = useInAppAiAgent();
 
   const openCapturedRef = useRef(false);
@@ -147,7 +166,12 @@ export function SelectWidgetDialog({
   // never contradict each other.
   const hiddenWidgetsNote =
     hiddenWidgetCount > 0
-      ? `${hiddenWidgetCount} trace-based widget${hiddenWidgetCount === 1 ? "" : "s"} hidden — the Traces view is not available for new charts. Manage them under Widgets.`
+      ? t(
+          hiddenWidgetCount === 1
+            ? "hiddenTraceWidgetsPlural"
+            : "hiddenTraceWidgets",
+          { count: hiddenWidgetCount },
+        )
       : null;
 
   const selectWidget = (widget: WidgetItem) => {
@@ -162,21 +186,28 @@ export function SelectWidgetDialog({
     onOpenChange(false);
   };
 
+  const chartTypeLabel = (chartType: string): string =>
+    t(
+      getChartTypeDisplayNameKey(
+        chartType as DashboardWidgetChartType,
+      ) as Parameters<typeof t>[0],
+    );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[640px]">
         <DialogHeader>
-          <DialogTitle>Add widget</DialogTitle>
+          <DialogTitle>{t("addWidget")}</DialogTitle>
         </DialogHeader>
 
         <DialogBody>
           {/* !isResolved: an unresolved session reads as v3, which would
               briefly offer the unfiltered list to a v4 user. */}
           {widgets.isPending || !isResolved ? (
-            <div className="py-8 text-center">Loading widgets...</div>
+            <div className="py-8 text-center">{t("loadingWidgets")}</div>
           ) : widgets.isError ? (
             <div className="text-destructive py-8 text-center">
-              Error: {widgets.error.message}
+              {widgets.error.message}
             </div>
           ) : (
             <div className="flex flex-col gap-3 p-1">
@@ -202,9 +233,9 @@ export function SelectWidgetDialog({
               >
                 <RowIllustration type="CUSTOM" />
                 <div className="min-w-0 flex-1">
-                  <div className="font-bold">Custom Chart</div>
+                  <div className="font-bold">{t("customChart")}</div>
                   <div className="text-muted-foreground text-xs">
-                    Pick a data view, metrics, and chart type from scratch
+                    {t("customChartHelp")}
                   </div>
                 </div>
               </button>
@@ -224,12 +255,14 @@ export function SelectWidgetDialog({
                 <Tabs.List variant="inset" size="md">
                   <Tabs.Trigger
                     value="project"
-                    label={`Your widgets (${projectWidgets.length})`}
+                    label={t("yourWidgets", { count: projectWidgets.length })}
                   />
                   {onSelectPreset && (
                     <Tabs.Trigger
                       value="home-cards"
-                      label={`Home cards (${HOME_DASHBOARD_PRESET_IDS.length})`}
+                      label={t("homeCards", {
+                        count: HOME_DASHBOARD_PRESET_IDS.length,
+                      })}
                     />
                   )}
                 </Tabs.List>
@@ -240,13 +273,13 @@ export function SelectWidgetDialog({
                         <WidgetRow
                           key={widget.id}
                           widget={widget as WidgetItem}
+                          chartTypeLabel={chartTypeLabel}
                           onClick={() => selectWidget(widget as WidgetItem)}
                         />
                       ))}
                       {projectWidgets.length === 0 ? (
                         <div className="text-muted-foreground py-8 text-center text-sm">
-                          {hiddenWidgetsNote ??
-                            "No saved widgets in this project yet — build one with Custom Chart."}
+                          {hiddenWidgetsNote ?? t("noSavedWidgets")}
                         </div>
                       ) : hiddenWidgetsNote ? (
                         <div className="text-muted-foreground px-1 py-2 text-xs">
@@ -295,7 +328,7 @@ export function SelectWidgetDialog({
                                   {meta.description}
                                 </div>
                                 <div className="text-muted-foreground/80 mt-0.5 text-xs">
-                                  Home card · fixed configuration
+                                  {t("homeCardFixed")}
                                 </div>
                               </div>
                             </button>
@@ -312,7 +345,7 @@ export function SelectWidgetDialog({
 
         <DialogFooter className="mt-4">
           <Button onClick={() => onOpenChange(false)} variant="outline">
-            Cancel
+            {t("cancel")}
           </Button>
         </DialogFooter>
       </DialogContent>

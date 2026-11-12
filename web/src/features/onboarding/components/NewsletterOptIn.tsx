@@ -17,6 +17,8 @@ import {
   NEWSLETTER_SIGNUP_URL,
   type NewsletterList,
 } from "../lib/newsletterSignup";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { onboardingMessages } from "@/src/features/i18n/messages/onboarding";
 
 const newsletterOptInSchema = z.object({
   email: z
@@ -26,33 +28,6 @@ const newsletterOptInSchema = z.object({
 });
 
 const NewsletterOptInForm = createForm<NewsletterOptInValues>();
-
-const EXPLAINER_LABEL = "How your address is used";
-
-const DESCRIPTIONS = {
-  installer:
-    "Monthly product updates, plus a heads-up when a new major version or a required upgrade affects your instance.",
-  invited:
-    "One email a month with the newest Langfuse features and improvements.",
-} as const;
-
-const EXPLAINER_INTROS = {
-  installer:
-    "By subscribing, you'll be added to the Langfuse mailing lists for product updates and self-hosting notices. Expect a monthly email about new features, plus a heads-up when a new major version or a required upgrade affects your instance.",
-  invited:
-    "By subscribing, you'll be added to the Langfuse product updates list. Expect one email a month about new features.",
-} as const;
-
-const FALLBACK_REASONS = {
-  unreachable:
-    "This browser can't reach langfuse.com. To subscribe, open a link below on a device with internet access:",
-  failed: "We couldn't subscribe you. You can sign up here instead:",
-} as const;
-
-const FALLBACK_LINK_LABELS: Record<NewsletterList, string> = {
-  oss: "Self-hosting notices:",
-  product: "Product updates:",
-};
 
 type NewsletterOptInProps =
   | { state: "loading" }
@@ -72,19 +47,20 @@ type NewsletterOptInProps =
     };
 
 export function NewsletterOptIn(props: NewsletterOptInProps) {
+  const t = useTranslation(onboardingMessages);
   switch (props.state) {
     case "loading":
       return (
         <StatusCard
-          title="Getting your workspace ready"
-          description="One moment..."
+          title={t("newsletterGettingReady")}
+          description={t("newsletterOneMoment")}
         />
       );
     case "completing":
       return (
         <StatusCard
-          title="Finishing setup"
-          description="Taking you to your workspace..."
+          title={t("newsletterFinishingSetup")}
+          description={t("newsletterTakingYouToWorkspace")}
         />
       );
     case "form":
@@ -104,7 +80,11 @@ export function NewsletterOptIn(props: NewsletterOptInProps) {
         <OnboardingCard>
           <NewsletterHeader audience={getAudience(props.lists)} />
           <NewsletterFallback
-            reason={FALLBACK_REASONS[props.state]}
+            reason={t(
+              props.state === "unreachable"
+                ? "newsletterFallbackUnreachable"
+                : "newsletterFallbackFailed",
+            )}
             lists={props.lists}
             isContinuing={props.isContinuing}
             onContinue={props.onContinue}
@@ -148,53 +128,63 @@ function StatusCard({
 
 /** The ⓘ opens on hover and keyboard focus, and on click or tap for touch screens. */
 function NewsletterHeader({ audience }: { audience: Audience }) {
+  const t = useTranslation(onboardingMessages);
   const [isExplainerOpen, setIsExplainerOpen] = useState(false);
   const openExplainer = () => setIsExplainerOpen(true);
+  const explainerLabel = t("newsletterExplainerLabel");
+  const description =
+    audience === "installer"
+      ? t("newsletterInstallerDescription")
+      : t("newsletterInvitedDescription");
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-1">
-        <h1 className="text-xl font-bold">Stay up to date</h1>
+        <h1 className="text-xl font-bold">{t("newsletterStayUpToDate")}</h1>
         <ControlledHoverCard
           open={isExplainerOpen}
           onOpenChange={setIsExplainerOpen}
           content={<NewsletterExplainer audience={audience} />}
-          aria-label={EXPLAINER_LABEL}
+          aria-label={explainerLabel}
         >
           {({ getTriggerProps }) => (
             <IconButton
               {...getTriggerProps({ onClick: openExplainer })}
               icon={Info}
-              label={EXPLAINER_LABEL}
+              label={explainerLabel}
               size="sm"
               variant="ghost"
             />
           )}
         </ControlledHoverCard>
       </div>
-      <p className="text-muted-foreground text-sm">{DESCRIPTIONS[audience]}</p>
+      <p className="text-muted-foreground text-sm">{description}</p>
     </div>
   );
 }
 
 function NewsletterExplainer({ audience }: { audience: Audience }) {
+  const t = useTranslation(onboardingMessages);
+  const intro =
+    audience === "installer"
+      ? t("newsletterInstallerExplainer")
+      : t("newsletterInvitedExplainer");
+
   return (
     <div className="text-muted-foreground flex w-96 max-w-[calc(100vw-1rem)] flex-col gap-2 p-3 text-sm">
-      <p>{EXPLAINER_INTROS[audience]}</p>
-      <p>You can unsubscribe at any time with the link in every email.</p>
+      <p>{intro}</p>
+      <p>{t("newsletterUnsubscribe")}</p>
       <p>
-        Shown once to new users. Your browser, not this instance, checks it can
-        reach langfuse.com and sends your address to{" "}
+        {t("newsletterBrowserCheckPrefix")}{" "}
         <span className="font-mono break-words">{NEWSLETTER_SIGNUP_URL}</span>{" "}
-        when you subscribe. If it can&apos;t reach it, you&apos;ll see sign-up
-        links instead.
+        {t("newsletterBrowserCheckSuffix")}
       </p>
       <p>
-        Langfuse admins can disable this question entirely by setting{" "}
+        {t("newsletterAdminsDisablePrefix")}{" "}
         <span className="font-mono break-words">
           LANGFUSE_DISABLE_SIGNUP_ONBOARDING=true
         </span>
-        .
+        {t("newsletterAdminsDisableSuffix")}
       </p>
     </div>
   );
@@ -210,6 +200,7 @@ function NewsletterForm({
   onSubscribe: (values: NewsletterOptInValues) => Promise<void>;
   onSkip: () => Promise<void>;
 }) {
+  const t = useTranslation(onboardingMessages);
   const form = NewsletterOptInForm.useForm({
     resolver: zodResolver(newsletterOptInSchema),
     defaultValues: { email: defaultEmail },
@@ -225,14 +216,14 @@ function NewsletterForm({
         {
           id: "subscribe",
           type: "submit",
-          text: "Subscribe",
+          text: t("newsletterSubscribe"),
           loading: isSubscribing,
           disabled: isSkipping,
         },
         {
           id: "skip",
           type: "button",
-          text: "Skip",
+          text: t("newsletterSkip"),
           variant: "ghost",
           loading: isSkipping,
           disabled: isSubscribing,
@@ -240,7 +231,7 @@ function NewsletterForm({
         },
       ]}
     >
-      <NewsletterOptInForm.Field name="email" label="Email">
+      <NewsletterOptInForm.Field name="email" label={t("newsletterEmail")}>
         {(field) => (
           <Input
             id={field.id}
@@ -273,6 +264,7 @@ function NewsletterFallback({
   isContinuing: boolean;
   onContinue: () => void;
 }) {
+  const t = useTranslation(onboardingMessages);
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-3">
@@ -287,7 +279,11 @@ function NewsletterFallback({
           {getNewsletterFallbackLinks(lists).map(({ list, url }) => (
             <li key={list} className="flex flex-col gap-0.5">
               <span className="text-muted-foreground text-xs">
-                {FALLBACK_LINK_LABELS[list]}
+                {t(
+                  list === "oss"
+                    ? "newsletterFallbackOss"
+                    : "newsletterFallbackProduct",
+                )}
               </span>
               <Metric href={url} value={url} newTab shouldWrap />
             </li>
@@ -297,7 +293,7 @@ function NewsletterFallback({
       <div>
         <Button
           type="button"
-          text="Continue"
+          text={t("newsletterContinue")}
           loading={isContinuing}
           onClick={onContinue}
         />

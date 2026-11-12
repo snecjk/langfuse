@@ -10,9 +10,12 @@ import { type z } from "zod";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
 import { useReadPath } from "@/src/features/events/hooks/useReadPath";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 
 export default function EditWidgetPage() {
   const router = useRouter();
+  const t = useTranslation(widgetMessages);
   const { projectId, widgetId, dashboardId } = router.query as {
     projectId: string;
     widgetId: string;
@@ -53,8 +56,8 @@ export default function EditWidgetPage() {
       });
       showSuccessToast({
         operation: "widget.update",
-        title: "Widget updated successfully",
-        description: "Your widget has been updated.",
+        title: t("widgetUpdated"),
+        description: t("widgetUpdatedHelp"),
       });
       // Navigate back to dashboard if provided else widgets list
       if (dashboardId) {
@@ -67,7 +70,7 @@ export default function EditWidgetPage() {
     },
     onError: (error) => {
       showErrorToast(
-        "Failed to update widget",
+        t("widgetUpdateFailed"),
         error.message,
         classifyTrpcToastError(error, "widget.update"),
       );
@@ -99,9 +102,9 @@ export default function EditWidgetPage() {
     <Page
       withPadding
       headerProps={{
-        title: "Edit Widget",
+        title: t("editWidgetTitle"),
         help: {
-          description: "Edit an existing widget",
+          description: t("editWidgetHelp"),
         },
       }}
     >
@@ -135,7 +138,7 @@ export default function EditWidgetPage() {
         />
       ) : (
         <div className="flex h-[300px] items-center justify-center">
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">{t("loading")}</p>
         </div>
       )}
     </Page>

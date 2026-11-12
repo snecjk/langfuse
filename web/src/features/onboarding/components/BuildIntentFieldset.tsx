@@ -8,6 +8,8 @@ import {
   type BuildIntentId,
   type BuildIntentOption,
 } from "../lib/buildIntent";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { onboardingMessages } from "@/src/features/i18n/messages/onboarding";
 
 type BuildIntentFieldsetProps = {
   options: BuildIntentOption[];
@@ -22,6 +24,7 @@ export function BuildIntentFieldset({
   onChange,
   otherInput,
 }: BuildIntentFieldsetProps) {
+  const t = useTranslation(onboardingMessages);
   const isAtLimit = value.length >= BUILD_INTENT_MAX_SELECTIONS;
 
   const handleOptionToggle = (id: BuildIntentId, isChecked: boolean) =>
@@ -29,12 +32,10 @@ export function BuildIntentFieldset({
 
   return (
     <fieldset>
-      <legend className="text-xl font-bold">
-        What will you use Langfuse for?
-      </legend>
+      <legend className="text-xl font-bold">{t("question")}</legend>
       <div className="mt-1 flex flex-col gap-3">
         <p className="text-muted-foreground text-sm">
-          Pick up to {BUILD_INTENT_MAX_SELECTIONS}
+          {t("pickUpTo", { count: BUILD_INTENT_MAX_SELECTIONS })}
         </p>
         {options.map((option) => (
           <BuildIntentOptionRow

@@ -51,6 +51,8 @@ import {
   useInAppAiAgent,
   useIsInAppAgentLauncherVisible,
 } from "@/src/features/in-app-agent/components/InAppAiAgentProvider";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { navigationMessages } from "@/src/features/i18n/messages/navigation";
 
 type IdNavigationItem = {
   type: "trace_id" | "observation_id";
@@ -69,6 +71,7 @@ export const getIdNavigationItem = (
   search: string,
   projectId?: string,
   isV4 = false,
+  t?: (key: "cmdKIdTrace" | "cmdKIdObservation") => string,
 ): IdNavigationItem | null => {
   if (!projectId) return null;
 
@@ -80,7 +83,7 @@ export const getIdNavigationItem = (
     const filter = `${isV4 ? "traceId;string;;contains" : "id;string;;="};${encodeURIComponent(id)}`;
     return {
       type: "trace_id",
-      title: "Find trace by ID",
+      title: t?.("cmdKIdTrace") ?? "Find trace by ID",
       url: `/project/${encodedProjectId}/traces?filter=${encodeURIComponent(filter)}`,
     };
   }
@@ -91,7 +94,7 @@ export const getIdNavigationItem = (
       : `id;stringOptions;;any of;${encodeURIComponent(id)}`;
     return {
       type: "observation_id",
-      title: "Find observation by ID",
+      title: t?.("cmdKIdObservation") ?? "Find observation by ID",
       url: `/project/${encodedProjectId}/${isV4 ? "traces" : "observations"}?filter=${encodeURIComponent(filter)}`,
     };
   }
@@ -108,10 +111,26 @@ const RECENTS_LIMIT = 4;
 
 const ENTITY_LIMIT = 100;
 
+/** English fallbacks for pure callers (unit tests) of the command-menu builders. */
+const DEFAULT_CREATE_ACTION_TITLES = {
+  cmdKCreateDashboard: "New dashboard",
+  cmdKCreatePrompt: "New prompt",
+  cmdKCreateEvaluator: "New evaluator",
+  cmdKCreateAlert: "New alert",
+  cmdKCreateAutomation: "New automation",
+} as const;
+
+const DEFAULT_SHORTCUT_TITLES = {
+  cmdKWidgets: "Widgets",
+  cmdKEvaluatorRules: "Evaluator rules",
+  cmdKDefaultEvaluationModel: "Default evaluation model",
+  cmdKAutomations: "Automations",
+} as const;
+
 const ENTITY_GROUPS: Record<
   EntityType,
   {
-    heading: string;
+    headingKey: "prompts" | "datasets" | "annotationQueues" | "evaluators";
     navHref: string;
     scope: ProjectScope;
     icon: IconComponent;
@@ -122,7 +141,7 @@ const ENTITY_GROUPS: Record<
   }
 > = {
   prompt: {
-    heading: "Prompts",
+    headingKey: "prompts",
     navHref: "/project/[projectId]/prompts",
     scope: "prompts:read",
     icon: FileJson,
@@ -130,7 +149,7 @@ const ENTITY_GROUPS: Record<
     pathKey: "name",
   },
   dataset: {
-    heading: "Datasets",
+    headingKey: "datasets",
     navHref: "/project/[projectId]/datasets",
     scope: "datasets:read",
     icon: Database,
@@ -138,7 +157,7 @@ const ENTITY_GROUPS: Record<
     pathKey: "id",
   },
   annotation_queue: {
-    heading: "Annotation queues",
+    headingKey: "annotationQueues",
     navHref: "/project/[projectId]/annotation-queues",
     scope: "annotationQueues:read",
     icon: ClipboardPen,
@@ -146,7 +165,7 @@ const ENTITY_GROUPS: Record<
     pathKey: "id",
   },
   evaluator: {
-    heading: "Evaluators",
+    headingKey: "evaluators",
     navHref: "/project/[projectId]/evals",
     scope: "evaluator:read",
     icon: Lightbulb,
@@ -175,31 +194,35 @@ const RECENT_ICON_BY_TYPE: Record<string, IconComponent> = {
 // inherits the sidebar's feature, plan and v4 gating.
 const NAV_CREATE_ACTIONS: Array<{
   navHref: string;
-  title: string;
+  titleKey:
+    | "cmdKCreateDashboard"
+    | "cmdKCreatePrompt"
+    | "cmdKCreateEvaluator"
+    | "cmdKCreateAlert";
   scope: ProjectScope;
   keywords: string[];
 }> = [
   {
     navHref: "/project/[projectId]/dashboards",
-    title: "New dashboard",
+    titleKey: "cmdKCreateDashboard",
     scope: "dashboards:CUD",
     keywords: ["create", "add", "dashboard"],
   },
   {
     navHref: "/project/[projectId]/prompts",
-    title: "New prompt",
+    titleKey: "cmdKCreatePrompt",
     scope: "prompts:CUD",
     keywords: ["create", "add", "prompt"],
   },
   {
     navHref: "/project/[projectId]/evals",
-    title: "New evaluator",
+    titleKey: "cmdKCreateEvaluator",
     scope: "evaluator:CUD",
     keywords: ["create", "add", "evaluator", "eval", "llm as a judge"],
   },
   {
     navHref: "/project/[projectId]/alerts",
-    title: "New alert",
+    titleKey: "cmdKCreateAlert",
     scope: "alerts:CUD",
     keywords: ["create", "add", "alert", "monitor"],
   },
@@ -209,7 +232,7 @@ const NAV_CREATE_ACTIONS: Array<{
 const NAV_PAGE_SHORTCUTS: Array<{
   navHref: string;
   path: string;
-  title: string;
+  titleKey: "cmdKWidgets" | "cmdKEvaluatorRules" | "cmdKDefaultEvaluationModel";
   scope: ProjectScope;
   keywords: string[];
   v4Only?: boolean;
@@ -217,14 +240,14 @@ const NAV_PAGE_SHORTCUTS: Array<{
   {
     navHref: "/project/[projectId]/dashboards",
     path: "widgets",
-    title: "Widgets",
+    titleKey: "cmdKWidgets",
     scope: "dashboards:read",
     keywords: ["widget", "chart", "dashboard"],
   },
   {
     navHref: "/project/[projectId]/evals",
     path: "evals/rules",
-    title: "Evaluator rules",
+    titleKey: "cmdKEvaluatorRules",
     scope: "evaluationRule:read",
     keywords: ["evaluator", "eval", "rule", "filter", "sampling"],
     v4Only: true,
@@ -232,7 +255,7 @@ const NAV_PAGE_SHORTCUTS: Array<{
   {
     navHref: "/project/[projectId]/evals",
     path: "evals/default-model",
-    title: "Default evaluation model",
+    titleKey: "cmdKDefaultEvaluationModel",
     scope: "evalDefaultModel:read",
     keywords: ["evaluator", "eval", "default", "model", "llm"],
   },
@@ -242,15 +265,17 @@ function RecentGroup({
   recents,
   iconByUrl,
   onNavigate,
+  t,
 }: {
   recents: RecentEntry[];
   iconByUrl: Map<string, IconComponent | undefined>;
   onNavigate: (entry: RecentEntry) => void;
+  t: (key: "cmdKGroupRecent") => string;
 }) {
   if (recents.length === 0) return null;
 
   return (
-    <CommandGroup heading="Recent">
+    <CommandGroup heading={t("cmdKGroupRecent")}>
       {recents.map((entry) => (
         <RecentItem
           key={entry.url}
@@ -332,6 +357,7 @@ function CreateActionItem({
 function AssistantItem({ onDone }: { onDone: () => void }) {
   const { openAssistant, selectConversation } = useInAppAiAgent();
   const isLauncherVisible = useIsInAppAgentLauncherVisible();
+  const t = useTranslation(navigationMessages);
 
   if (!isLauncherVisible) return null;
 
@@ -348,7 +374,7 @@ function AssistantItem({ onDone }: { onDone: () => void }) {
       onSelect={handleSelect}
     >
       <BotMessageSquare size="base" />
-      Ask Assistant
+      {t("cmdKAssistant")}
       <CommandShortcut keys={["Mod", "I"]} variant="subtle" />
     </CommandItem>
   );
@@ -357,6 +383,7 @@ function AssistantItem({ onDone }: { onDone: () => void }) {
 function ThemeItem({ onDone }: { onDone: () => void }) {
   const { resolvedTheme, setTheme } = useTheme();
   const capture = usePostHogClientCapture();
+  const t = useTranslation(navigationMessages);
   const nextTheme = resolvedTheme === "dark" ? "light" : "dark";
   const Icon = nextTheme === "dark" ? Moon : Sun;
 
@@ -376,7 +403,7 @@ function ThemeItem({ onDone }: { onDone: () => void }) {
       onSelect={handleSelect}
     >
       <Icon size="base" />
-      Switch to {nextTheme} theme
+      {t("cmdKSwitchTheme", { theme: nextTheme })}
     </CommandItem>
   );
 }
@@ -388,6 +415,7 @@ function MainNavigationGroup({
   isSearching,
   onNavigate,
   onDone,
+  t,
 }: {
   navItems: NavMenuItem[];
   pageShortcuts: PageShortcuts;
@@ -395,9 +423,10 @@ function MainNavigationGroup({
   isSearching: boolean;
   onNavigate: (entry: RecentEntry) => void;
   onDone: () => void;
+  t: (key: "cmdKGroupGoTo") => string;
 }) {
   return (
-    <CommandGroup heading="Go to">
+    <CommandGroup heading={t("cmdKGroupGoTo")}>
       <AssistantItem onDone={onDone} />
       {navItems.map((item) => (
         <Fragment key={item.url}>
@@ -486,8 +515,10 @@ function MainNavigationItem({
 
 function ProjectsGroup({
   onNavigate,
+  t,
 }: {
   onNavigate: (entry: RecentEntry) => void;
+  t: (key: "cmdKGroupProjects") => string;
 }) {
   const router = useRouter();
   const capture = usePostHogClientCapture();
@@ -498,7 +529,7 @@ function ProjectsGroup({
   return (
     <>
       <CommandSeparator />
-      <CommandGroup heading="Projects">
+      <CommandGroup heading={t("cmdKGroupProjects")}>
         {allProjectItems.map((item) => (
           <CommandItem
             key={item.url}
@@ -530,8 +561,10 @@ function ProjectsGroup({
 
 function DashboardsGroup({
   onNavigate,
+  t,
 }: {
   onNavigate: (entry: RecentEntry) => void;
+  t: (key: "cmdKGroupDashboards") => string;
 }) {
   const router = useRouter();
   const capture = usePostHogClientCapture();
@@ -560,7 +593,7 @@ function DashboardsGroup({
   return (
     <>
       <CommandSeparator />
-      <CommandGroup heading="Dashboards">
+      <CommandGroup heading={t("cmdKGroupDashboards")}>
         {dashboards.map((dashboard) => (
           <CommandItem
             key={dashboard.id}
@@ -594,14 +627,18 @@ function DashboardsGroup({
 function EntityGroup({
   group,
   onNavigate,
+  t,
 }: {
   group: EntityGroupData;
   onNavigate: (entry: RecentEntry) => void;
+  t: (
+    key: "prompts" | "datasets" | "annotationQueues" | "evaluators",
+  ) => string;
 }) {
   return (
     <>
       <CommandSeparator />
-      <CommandGroup heading={ENTITY_GROUPS[group.type].heading}>
+      <CommandGroup heading={t(ENTITY_GROUPS[group.type].headingKey)}>
         {group.items.map((item) => (
           <EntityItem
             key={item.url}
@@ -680,8 +717,10 @@ function IdNavigationGroup({
 
 function ProjectSettingsGroup({
   onNavigate,
+  t,
 }: {
   onNavigate: (entry: RecentEntry) => void;
+  t: (key: "cmdKGroupProjectSettings") => string;
 }) {
   const router = useRouter();
   const capture = usePostHogClientCapture();
@@ -691,7 +730,7 @@ function ProjectSettingsGroup({
   const projectSettingsItems = settingsPages
     .filter((page) => page.show !== false && !("href" in page))
     .map((page) => ({
-      title: `Project Settings > ${page.title}`,
+      title: `${t("cmdKGroupProjectSettings")} > ${page.title}`,
       url: `/project/${project?.id}/settings${page.slug === "index" ? "" : `/${page.slug}`}`,
       keywords: page.cmdKKeywords || [],
     }));
@@ -701,7 +740,7 @@ function ProjectSettingsGroup({
   return (
     <>
       <CommandSeparator />
-      <CommandGroup heading="Project settings">
+      <CommandGroup heading={t("cmdKGroupProjectSettings")}>
         {projectSettingsItems.map((item) => (
           <CommandItem
             key={item.url}
@@ -732,8 +771,10 @@ function ProjectSettingsGroup({
 
 function OrganizationSettingsGroup({
   onNavigate,
+  t,
 }: {
   onNavigate: (entry: RecentEntry) => void;
+  t: (key: "cmdKGroupOrganizationSettings") => string;
 }) {
   const router = useRouter();
   const capture = usePostHogClientCapture();
@@ -743,7 +784,7 @@ function OrganizationSettingsGroup({
   const orgSettingsItems = orgSettingsPages
     .filter((page) => page.show !== false && !("href" in page))
     .map((page) => ({
-      title: `Organization Settings > ${page.title}`,
+      title: `${t("cmdKGroupOrganizationSettings")} > ${page.title}`,
       url: `/organization/${organization?.id}/settings${page.slug === "index" ? "" : `/${page.slug}`}`,
       keywords: page.cmdKKeywords || [],
     }));
@@ -753,7 +794,7 @@ function OrganizationSettingsGroup({
   return (
     <>
       <CommandSeparator />
-      <CommandGroup heading="Organization settings">
+      <CommandGroup heading={t("cmdKGroupOrganizationSettings")}>
         {orgSettingsItems.map((item) => (
           <CommandItem
             key={item.url}
@@ -784,8 +825,10 @@ function OrganizationSettingsGroup({
 
 function AiGatewayGroup({
   onNavigate,
+  t,
 }: {
   onNavigate: (entry: RecentEntry) => void;
+  t: (key: "cmdKGroupAiGateway") => string;
 }) {
   const router = useRouter();
   const capture = usePostHogClientCapture();
@@ -797,7 +840,7 @@ function AiGatewayGroup({
   const gatewayItems = gatewayPages
     .filter((page) => page.show && !page.disabledReason)
     .map((page) => ({
-      title: `AI Gateway > ${page.title}`,
+      title: `${t("cmdKGroupAiGateway")} > ${page.title}`,
       url: buildGatewayPagePath(organization.id, page.slug),
       keywords: page.cmdKKeywords,
     }));
@@ -807,7 +850,7 @@ function AiGatewayGroup({
   return (
     <>
       <CommandSeparator />
-      <CommandGroup heading="AI Gateway">
+      <CommandGroup heading={t("cmdKGroupAiGateway")}>
         {gatewayItems.map((item) => (
           <CommandItem
             key={item.url}
@@ -838,8 +881,10 @@ function AiGatewayGroup({
 
 function AccountSettingsGroup({
   onNavigate,
+  t,
 }: {
   onNavigate: (entry: RecentEntry) => void;
+  t: (key: "cmdKGroupAccountSettings") => string;
 }) {
   const router = useRouter();
   const capture = usePostHogClientCapture();
@@ -848,7 +893,7 @@ function AccountSettingsGroup({
   const accountSettingsItems = accountSettingsPages
     .filter((page) => !("href" in page))
     .map((page) => ({
-      title: `Account Settings > ${page.title}`,
+      title: `${t("cmdKGroupAccountSettings")} > ${page.title}`,
       url: `/account/settings${page.slug === "index" ? "" : `/${page.slug}`}`,
       keywords: page.cmdKKeywords || [],
     }));
@@ -858,7 +903,7 @@ function AccountSettingsGroup({
   return (
     <>
       <CommandSeparator />
-      <CommandGroup heading="Account settings">
+      <CommandGroup heading={t("cmdKGroupAccountSettings")}>
         {accountSettingsItems.map((item) => (
           <CommandItem
             key={item.url}
@@ -894,6 +939,7 @@ function CommandMenuComponent({
 }) {
   const { open, setOpen } = useCommandMenu();
   const capture = usePostHogClientCapture();
+  const t = useTranslation(navigationMessages);
   const { project } = useQueryProjectOrOrganization();
   const { isV4 } = useReadPath();
   const [search, setSearch] = useState("");
@@ -908,7 +954,7 @@ function CommandMenuComponent({
     debouncedSearch,
   );
   const isSearching = search !== "";
-  const idNavigationItem = getIdNavigationItem(search, project?.id, isV4);
+  const idNavigationItem = getIdNavigationItem(search, project?.id, isV4, t);
 
   const debouncedSearchChange = useDebounce(
     (value: string) => {
@@ -1004,7 +1050,7 @@ function CommandMenuComponent({
       }
     >
       <CommandInput
-        placeholder="Search pages, projects, dashboards…"
+        placeholder={t("cmdKPlaceholder")}
         className="border-none text-lg focus:border-none focus:ring-0 focus:ring-transparent focus:outline-hidden"
         value={search}
         onValueChange={(value) => {
@@ -1013,10 +1059,10 @@ function CommandMenuComponent({
         }}
       />
       <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
+        <CommandEmpty>{t("cmdKEmpty")}</CommandEmpty>
         {idNavigationItem && (
           <IdNavigationGroup
-            heading="Tracing"
+            heading={t("cmdKGroupTracing")}
             item={idNavigationItem}
             icon={ListTree}
             search={search}
@@ -1028,6 +1074,7 @@ function CommandMenuComponent({
             recents={visibleRecents}
             iconByUrl={iconByUrl}
             onNavigate={handleNavigate}
+            t={t}
           />
         )}
         <MainNavigationGroup
@@ -1037,21 +1084,23 @@ function CommandMenuComponent({
           isSearching={isSearching}
           onNavigate={handleNavigate}
           onDone={() => handleNavigate()}
+          t={t}
         />
-        <ProjectsGroup onNavigate={handleNavigate} />
-        <DashboardsGroup onNavigate={handleNavigate} />
+        <ProjectsGroup onNavigate={handleNavigate} t={t} />
+        <DashboardsGroup onNavigate={handleNavigate} t={t} />
         {isSearching &&
           entityGroups.map((group) => (
             <EntityGroup
               key={group.type}
               group={group}
               onNavigate={handleNavigate}
+              t={t}
             />
           ))}
-        <ProjectSettingsGroup onNavigate={handleNavigate} />
-        <OrganizationSettingsGroup onNavigate={handleNavigate} />
-        <AiGatewayGroup onNavigate={handleNavigate} />
-        <AccountSettingsGroup onNavigate={handleNavigate} />
+        <ProjectSettingsGroup onNavigate={handleNavigate} t={t} />
+        <OrganizationSettingsGroup onNavigate={handleNavigate} t={t} />
+        <AiGatewayGroup onNavigate={handleNavigate} t={t} />
+        <AccountSettingsGroup onNavigate={handleNavigate} t={t} />
       </CommandList>
     </CommandDialog>
   );
@@ -1180,6 +1229,7 @@ function useCommandMenuRecents(projectId: string | undefined) {
 function useCreateActions(mainNavigation: NavigationItem[]): CreateActions {
   const session = useSession();
   const { project } = useQueryProjectOrOrganization();
+  const t = useTranslation(navigationMessages);
 
   if (!project) return { byNavUrl: new Map(), standalone: [] };
 
@@ -1188,12 +1238,14 @@ function useCreateActions(mainNavigation: NavigationItem[]): CreateActions {
     projectId: project.id,
     canCreate: (scope) =>
       hasProjectAccess({ session: session.data, scope, projectId: project.id }),
+    t,
   });
 }
 
 function usePageShortcuts(mainNavigation: NavigationItem[]): PageShortcuts {
   const session = useSession();
   const { project } = useQueryProjectOrOrganization();
+  const t = useTranslation(navigationMessages);
 
   if (!project) return { byNavUrl: new Map(), standalone: [] };
 
@@ -1202,6 +1254,7 @@ function usePageShortcuts(mainNavigation: NavigationItem[]): PageShortcuts {
     projectId: project.id,
     canRead: (scope) =>
       hasProjectAccess({ session: session.data, scope, projectId: project.id }),
+    t,
   });
 }
 
@@ -1316,10 +1369,19 @@ export function buildCreateActions({
   navItems,
   projectId,
   canCreate,
+  t = (key) => DEFAULT_CREATE_ACTION_TITLES[key],
 }: {
   navItems: Pick<NavigationItem, "href" | "url">[];
   projectId: string;
   canCreate: (scope: ProjectScope) => boolean;
+  t?: (
+    key:
+      | "cmdKCreateDashboard"
+      | "cmdKCreatePrompt"
+      | "cmdKCreateEvaluator"
+      | "cmdKCreateAlert"
+      | "cmdKCreateAutomation",
+  ) => string;
 }): CreateActions {
   const byNavUrl = new Map<string, CreateAction[]>();
   for (const navItem of navItems) {
@@ -1327,7 +1389,7 @@ export function buildCreateActions({
     if (!action || !navItem.url || !canCreate(action.scope)) continue;
     byNavUrl.set(navItem.url, [
       {
-        title: action.title,
+        title: t(action.titleKey),
         url: `${navItem.url}/new`,
         keywords: action.keywords,
       },
@@ -1337,7 +1399,7 @@ export function buildCreateActions({
   const standalone: CreateAction[] = canCreate("automations:CUD")
     ? [
         {
-          title: "New automation",
+          title: t("cmdKCreateAutomation"),
           url: `/project/${projectId}/automations?view=create`,
           keywords: ["create", "add", "automation", "webhook", "slack"],
         },
@@ -1351,10 +1413,18 @@ export function buildPageShortcuts({
   navItems,
   projectId,
   canRead,
+  t = (key) => DEFAULT_SHORTCUT_TITLES[key],
 }: {
   navItems: Pick<NavigationItem, "href" | "url" | "icon">[];
   projectId: string;
   canRead: (scope: ProjectScope) => boolean;
+  t?: (
+    key:
+      | "cmdKWidgets"
+      | "cmdKEvaluatorRules"
+      | "cmdKDefaultEvaluationModel"
+      | "cmdKAutomations",
+  ) => string;
 }): PageShortcuts {
   const byNavUrl = new Map<string, NavMenuItem[]>();
   for (const navItem of navItems) {
@@ -1365,7 +1435,7 @@ export function buildPageShortcuts({
         canRead(shortcut.scope) &&
         !(shortcut.v4Only && isLegacyNavItem(navItem, projectId)),
     ).map((shortcut) => ({
-      title: shortcut.title,
+      title: t(shortcut.titleKey),
       url: `/project/${projectId}/${shortcut.path}`,
       icon: navItem.icon,
       keywords: shortcut.keywords,
@@ -1376,7 +1446,7 @@ export function buildPageShortcuts({
   const standalone: NavMenuItem[] = canRead("automations:read")
     ? [
         {
-          title: "Automations",
+          title: t("cmdKAutomations"),
           url: `/project/${projectId}/automations`,
           icon: Zap,
           keywords: ["automation", "webhook", "slack", "trigger"],

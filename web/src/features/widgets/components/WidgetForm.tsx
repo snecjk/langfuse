@@ -84,6 +84,8 @@ import {
 } from "@/src/features/widgets/utils/pivot-table-utils";
 import { WIDGET_FILTER_PRESETS } from "@/src/features/widgets/constants/widgetFilterPresets";
 import { useCaptureWidgetHighCardinalityError } from "@/src/features/widgets/hooks/useWidgetQueryErrorCapture";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 import {
   applyChartTypeChange,
   deriveEffectiveSort,
@@ -108,6 +110,10 @@ import {
 // this file; it now backs the shared normalizeWidgetFormValues healing.
 export { resolveAggregationAndChartType } from "./widgetFormSchema";
 
+// chartTypes drives the chart-type SelectGroup rendering (group/name/value/
+// icon). Whether a type supports a breakdown dimension is derived on demand via
+// widgetChartTypeSupportsBreakdown(chartType) at each gate, not stored here.
+// The `name` is a stable i18n key; the label is resolved at render time.
 type ChartType = {
   group: "time-series" | "total-value";
   name: string;
@@ -115,55 +121,52 @@ type ChartType = {
   icon: IconComponent;
 };
 
-// chartTypes drives the chart-type SelectGroup rendering (group/name/value/
-// icon). Whether a type supports a breakdown dimension is derived on demand via
-// widgetChartTypeSupportsBreakdown(chartType) at each gate, not stored here.
 const chartTypes: ChartType[] = [
   {
     group: "total-value",
-    name: "Big Number",
+    name: "chartTypeBigNumber",
     value: "NUMBER",
     icon: dashboardWidgetChartTypeIcons.NUMBER,
   },
   {
     group: "time-series",
-    name: "Line Chart",
+    name: "chartTypeLine",
     value: "LINE_TIME_SERIES",
     icon: dashboardWidgetChartTypeIcons.LINE_TIME_SERIES,
   },
   {
     group: "time-series",
-    name: "Vertical Bar Chart",
+    name: "chartTypeBarTimeSeries",
     value: "BAR_TIME_SERIES",
     icon: dashboardWidgetChartTypeIcons.BAR_TIME_SERIES,
   },
   {
     group: "total-value",
-    name: "Horizontal Bar Chart",
+    name: "chartTypeHorizontalBar",
     value: "HORIZONTAL_BAR",
     icon: dashboardWidgetChartTypeIcons.HORIZONTAL_BAR,
   },
   {
     group: "total-value",
-    name: "Vertical Bar Chart",
+    name: "chartTypeVerticalBar",
     value: "VERTICAL_BAR",
     icon: dashboardWidgetChartTypeIcons.VERTICAL_BAR,
   },
   {
     group: "total-value",
-    name: "Histogram",
+    name: "chartTypeHistogram",
     value: "HISTOGRAM",
     icon: dashboardWidgetChartTypeIcons.HISTOGRAM,
   },
   {
     group: "total-value",
-    name: "Pie Chart",
+    name: "chartTypePie",
     value: "PIE",
     icon: dashboardWidgetChartTypeIcons.PIE,
   },
   {
     group: "total-value",
-    name: "Pivot Table",
+    name: "chartTypePivotTable",
     value: "PIVOT_TABLE",
     icon: dashboardWidgetChartTypeIcons.PIVOT_TABLE,
   },
@@ -219,6 +222,7 @@ export function WidgetForm({
   setDateRangeAndOption,
   selectedOption,
 }: WidgetFormProps) {
+  const t = useTranslation(widgetMessages);
   const selectedView = values.view;
   const chartType = values.chart.type;
   const selectedMeasure = values.metrics[0]?.measure ?? "count";
@@ -502,7 +506,7 @@ export function WidgetForm({
 
   const onSubmit = form.handleSubmit((submitted) => {
     if (!queryValidation.valid) {
-      showErrorToast("Invalid query", queryValidation.reason, {
+      showErrorToast(t("invalidQuery"), queryValidation.reason, {
         operation: "widget.validate",
         errorOrigin: "frontend",
         errorCategory: "user_input",
@@ -537,7 +541,7 @@ export function WidgetForm({
       <Card className="flex h-full flex-col">
         <CardHeader>
           <div className="flex items-start justify-between gap-3">
-            <CardTitle>Widget Configuration</CardTitle>
+            <CardTitle>{t("widgetConfiguration")}</CardTitle>
             {!widgetId && isV4 && (
               <WidgetImporter
                 projectId={projectId}
@@ -548,25 +552,21 @@ export function WidgetForm({
               />
             )}
           </div>
-          <CardDescription>
-            Configure your widget by selecting data and visualization options
-          </CardDescription>
+          <CardDescription>{t("widgetConfigurationHelp")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 overflow-y-auto">
           {isV4 && selectedView === "traces" && (
             <Alert variant="warning" icon={AlertCircle}>
-              <Alert.Title>Traces view is not available in v4</Alert.Title>
+              <Alert.Title>{t("tracesViewNotAvailable")}</Alert.Title>
               <Alert.Description>
-                This widget uses the traces view which is not supported in v4.
-                It will continue to use v3 definitions. To use v4, change the
-                view to observations or scores.
+                {t("tracesViewNotAvailableHelp")}
               </Alert.Description>
             </Alert>
           )}
           {/* Data Selection Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold">Data Selection</h3>
+              <h3 className="text-lg font-bold">{t("dataSelection")}</h3>
               {viewVersion === "v2" && (
                 <Popover>
                   <PopoverTrigger asChild>
@@ -576,7 +576,7 @@ export function WidgetForm({
                         color="default"
                         __rawClassName="mr-2"
                       />
-                      Presets
+                      {t("presets")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-64 p-1" align="end">
@@ -609,7 +609,7 @@ export function WidgetForm({
             {/* Metrics Selection */}
             <div className="space-y-2">
               <Label htmlFor="metrics-select">
-                {chartType === "PIVOT_TABLE" ? "Metrics" : "Metric"}
+                {chartType === "PIVOT_TABLE" ? t("metrics") : t("metric")}
               </Label>
               {chartType === "PIVOT_TABLE" ? (
                 <PivotMetricsField
@@ -671,7 +671,7 @@ export function WidgetForm({
 
           {/* Visualization Section */}
           <div className="mt-6 space-y-4">
-            <h3 className="text-lg font-bold">Visualization</h3>
+            <h3 className="text-lg font-bold">{t("visualization")}</h3>
 
             <NameField control={form.control} suggestion={suggestions.name} />
             <DescriptionField
@@ -687,7 +687,7 @@ export function WidgetForm({
               error={chartTypeError}
             />
 
-            <FormField label="Date Range">
+            <FormField label={t("dateRange")}>
               {(field) => (
                 <WidgetDateRangeInput
                   id={field.id}
@@ -723,7 +723,7 @@ export function WidgetForm({
             onClick={onSubmit}
             disabled={saveDisabled}
           >
-            Save Widget
+            {t("saveWidget")}
           </Button>
         </CardFooter>
       </Card>
@@ -807,8 +807,9 @@ function ViewSelect({
   availableViewOptions: typeof views | typeof viewsV2;
   onViewChange: (view: z.infer<typeof views>) => void;
 }) {
+  const t = useTranslation(widgetMessages);
   return (
-    <FormField control={control} name="view" label="View">
+    <FormField control={control} name="view" label={t("view")}>
       {(field) => (
         <SelectInput
           value={field.value}
@@ -816,7 +817,7 @@ function ViewSelect({
             onViewChange(value as z.infer<typeof views>)
           }
           id={field.id}
-          placeholder="Select a view"
+          placeholder={t("selectView")}
           error={Boolean(field.error)}
           aria-invalid={Boolean(field.error)}
           aria-describedby={field.inputDescribedById}
@@ -851,6 +852,7 @@ function SingleMetricField({
   availableMetrics: { value: string; label: string }[];
   validAggregationsForMeasure: z.infer<typeof metricAggregations>[];
 }) {
+  const t = useTranslation(widgetMessages);
   // Owns metrics.0.aggregation; the measure is a cross-slice trigger handled by
   // the parent (onMeasureChange also resolves the chart type).
   const { field: aggField } = useController({
@@ -873,7 +875,7 @@ function SingleMetricField({
             value={measure}
             onValueChange={(value) => onMeasureChange(value)}
             id="metrics-select"
-            placeholder="Select metrics"
+            placeholder={t("selectMetrics")}
             error={Boolean(error)}
             aria-invalid={error ? true : undefined}
             aria-describedby={error ? "single-metric-error" : undefined}
@@ -909,7 +911,7 @@ function SingleMetricField({
                 aggField.onChange(value as z.infer<typeof metricAggregations>)
               }
               id="aggregation-select"
-              placeholder="Select Aggregation"
+              placeholder={t("selectAggregation")}
               options={aggregationOptions.map((aggregation) => ({
                 value: aggregation,
                 label: startCase(aggregation),
@@ -920,8 +922,7 @@ function SingleMetricField({
       </div>
       {measure !== "count" && ctx.chartType === "HISTOGRAM" && (
         <p className="text-muted-foreground text-xs">
-          Aggregation is automatically set to &quot;histogram&quot; for
-          histogram charts
+          {t("aggregationAutoHistogram")}
         </p>
       )}
       {error && (
@@ -951,6 +952,7 @@ function PivotMetricsField({
     measure: string,
   ) => z.infer<typeof metricAggregations>[];
 }) {
+  const t = useTranslation(widgetMessages);
   // Owns the entire `metrics` slice — one value in (field.value), one onChange
   // out (field.onChange with a fresh array).
   const { field } = useController({ control, name: "metrics" });
@@ -1019,7 +1021,8 @@ function PivotMetricsField({
           <div key={index} className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor={`pivot-metric-${index}`}>
-                Metric {index + 1} {index === 0 ? "(Required)" : "(Optional)"}
+                {t("metric")} {index + 1}{" "}
+                {index === 0 ? t("metricRequired") : t("metricOptional")}
               </Label>
               {index > 0 && (
                 <Button
@@ -1049,10 +1052,10 @@ function PivotMetricsField({
                   }
                   placeholder={
                     !isEnabled
-                      ? "Select previous metric first"
+                      ? t("selectPreviousMetricFirst")
                       : !canEdit
-                        ? "No more measures available"
-                        : "Select measure"
+                        ? t("noMoreMeasures")
+                        : t("selectMeasure")
                   }
                   options={metricsForIndex.map((metric) => {
                     const meta =
@@ -1089,7 +1092,7 @@ function PivotMetricsField({
                         value as z.infer<typeof metricAggregations>,
                       )
                     }
-                    placeholder="Select aggregation"
+                    placeholder={t("selectAggregation")}
                     options={aggregationsForIndex.map((aggregation) => ({
                       value: aggregation,
                       label: startCase(aggregation),
@@ -1112,7 +1115,7 @@ function PivotMetricsField({
             className="w-full"
           >
             <Plus size="base" color="default" __rawClassName="mr-1" />
-            Add Metric {metrics.length + 1}
+            {t("addMetric", { index: metrics.length + 1 })}
           </Button>
         )}
       {error && (
@@ -1133,10 +1136,11 @@ function FiltersField({
   control: Control<WidgetFormValues>;
   selectedView: z.infer<typeof views>;
 }) {
+  const t = useTranslation(widgetMessages);
   const { field } = useController({ control, name: "filters" });
   return (
     <div className="space-y-2">
-      <Label>Filters</Label>
+      <Label>{t("filters")}</Label>
       <MetricsFilterBuilder
         {...filterData}
         view={selectedView}
@@ -1158,12 +1162,13 @@ function BreakdownSelect({
   error?: string;
   availableDimensions: { value: string; label: string }[];
 }) {
+  const t = useTranslation(widgetMessages);
   // Owns the entire `dimensions` slice; a non-pivot chart carries at most one.
   return (
     <FormField
       control={control}
       name="dimensions"
-      label="Breakdown Dimension (Optional)"
+      label={t("breakdownDimension")}
     >
       {(field) => (
         <SelectInput
@@ -1172,12 +1177,12 @@ function BreakdownSelect({
             field.onChange(next === "none" ? [] : [{ field: next }])
           }
           id={field.id}
-          placeholder="Select a dimension"
+          placeholder={t("selectDimension")}
           error={Boolean(error || field.error)}
           aria-invalid={Boolean(error || field.error)}
           aria-describedby={field.inputDescribedById}
           options={[
-            { value: "none", label: "None" },
+            { value: "none", label: t("none") },
             ...availableDimensions.map((dimension) => {
               const meta =
                 viewDeclarations[ctx.viewVersion][ctx.view]?.dimensions?.[
@@ -1217,6 +1222,7 @@ function PivotDimensionsField({
   error?: string;
   availableDimensions: { value: string; label: string }[];
 }) {
+  const t = useTranslation(widgetMessages);
   const { field } = useController({ control, name: "dimensions" });
   const pivotDimensions = field.value.map((d) => d.field);
 
@@ -1233,10 +1239,9 @@ function PivotDimensionsField({
   return (
     <div className="space-y-4">
       <div>
-        <h4 className="mb-2 text-sm font-bold">Row Dimensions</h4>
+        <h4 className="mb-2 text-sm font-bold">{t("rowDimensions")}</h4>
         <p className="text-muted-foreground mb-3 text-xs">
-          Configure up to {MAX_PIVOT_TABLE_DIMENSIONS} dimensions for pivot
-          table rows. Each dimension creates groupings with subtotals.
+          {t("rowDimensionsHelp", { count: MAX_PIVOT_TABLE_DIMENSIONS })}
         </p>
       </div>
 
@@ -1248,7 +1253,7 @@ function PivotDimensionsField({
         return (
           <div key={index} className="space-y-2">
             <Label htmlFor={`pivot-dimension-${index}`}>
-              Dimension {index + 1} (Optional)
+              {t("dimension", { index: index + 1 })}
             </Label>
             <SelectInput
               value={currentValue}
@@ -1262,11 +1267,11 @@ function PivotDimensionsField({
               }
               placeholder={
                 isEnabled
-                  ? "Select a dimension"
-                  : "Select previous dimension first"
+                  ? t("selectDimension")
+                  : t("selectPreviousDimensionFirst")
               }
               options={[
-                { value: "none", label: "None" },
+                { value: "none", label: t("none") },
                 ...availableDimensions
                   .filter((d) => !selectedDimensions.includes(d.value))
                   .map((dimension) => {
@@ -1313,6 +1318,7 @@ function PivotSortField({
   effectiveSort: SortField | undefined;
   metricsForSort: { id: string }[];
 }) {
+  const t = useTranslation(widgetMessages);
   // Owns chart.sort; the DISPLAY value is always the sanitized effectiveSort so
   // a stale sort column shows as "no default sort" without any write-back.
   const column = effectiveSort?.column ?? "none";
@@ -1321,15 +1327,16 @@ function PivotSortField({
   return (
     <div className="space-y-4">
       <div>
-        <h4 className="mb-2 text-sm font-bold">Default Sort Configuration</h4>
+        <h4 className="mb-2 text-sm font-bold">
+          {t("defaultSortConfiguration")}
+        </h4>
         <p className="text-muted-foreground mb-3 text-xs">
-          Configure the default sort order for the pivot table. This will be
-          applied when the widget is first loaded.
+          {t("defaultSortHelp")}
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <FormField control={control} name="chart.sort" label="Sort Column">
+        <FormField control={control} name="chart.sort" label={t("sortColumn")}>
           {(field) => (
             <SelectInput
               value={column}
@@ -1337,12 +1344,12 @@ function PivotSortField({
                 field.onChange(next === "none" ? null : { column: next, order })
               }
               id={field.id}
-              placeholder="Select a column to sort by"
+              placeholder={t("selectSortColumn")}
               error={Boolean(field.error)}
               aria-invalid={Boolean(field.error)}
               aria-describedby={field.inputDescribedById}
               options={[
-                { value: "none", label: "No default sort" },
+                { value: "none", label: t("noDefaultSort") },
                 ...metricsForSort.map((metric) => ({
                   value: metric.id,
                   label: formatMetricName(metric.id),
@@ -1352,7 +1359,7 @@ function PivotSortField({
           )}
         </FormField>
 
-        <FormField control={control} name="chart.sort" label="Sort Order">
+        <FormField control={control} name="chart.sort" label={t("sortOrder")}>
           {(field) => (
             <SelectInput
               value={order}
@@ -1361,10 +1368,10 @@ function PivotSortField({
               }
               disabled={column === "none"}
               id={field.id}
-              placeholder="Select sort order"
+              placeholder={t("selectSortOrder")}
               options={[
-                { value: "ASC", label: "Ascending (A-Z)" },
-                { value: "DESC", label: "Descending (Z-A)" },
+                { value: "ASC", label: t("ascending") },
+                { value: "DESC", label: t("descending") },
               ]}
             />
           )}
@@ -1389,8 +1396,9 @@ function NameField({
   control: Control<WidgetFormValues>;
   suggestion: string;
 }) {
+  const t = useTranslation(widgetMessages);
   return (
-    <FormField control={control} name="name" label="Name">
+    <FormField control={control} name="name" label={t("name")}>
       {(field) => (
         <Input
           id={field.id}
@@ -1403,7 +1411,7 @@ function NameField({
           // title and toSavePayload, so input, preview, and saved value agree.
           value={effectiveWidgetName(field.value, suggestion)}
           onChange={(e) => field.onChange(e.target.value)}
-          placeholder="Enter widget name"
+          placeholder={t("enterWidgetName")}
         />
       )}
     </FormField>
@@ -1417,8 +1425,9 @@ function DescriptionField({
   control: Control<WidgetFormValues>;
   suggestion: string;
 }) {
+  const t = useTranslation(widgetMessages);
   return (
-    <FormField control={control} name="description" label="Description">
+    <FormField control={control} name="description" label={t("description")}>
       {(field) => (
         <Input
           id={field.id}
@@ -1427,7 +1436,7 @@ function DescriptionField({
           error={Boolean(field.error)}
           value={effectiveWidgetName(field.value, suggestion)}
           onChange={(e) => field.onChange(e.target.value)}
-          placeholder="Enter widget description"
+          placeholder={t("enterWidgetDescription")}
         />
       )}
     </FormField>
@@ -1447,8 +1456,9 @@ function ChartTypeSelect({
   measureSupportsHistogram: boolean;
   error?: string;
 }) {
+  const t = useTranslation(widgetMessages);
   return (
-    <FormField control={control} name="chart.type" label="Chart Type">
+    <FormField control={control} name="chart.type" label={t("chartType")}>
       {(field) => (
         <SelectInput
           value={value}
@@ -1456,7 +1466,7 @@ function ChartTypeSelect({
             onChartTypeChange(next as DashboardWidgetChartType)
           }
           id={field.id}
-          placeholder="Select a chart type"
+          placeholder={t("selectChartType")}
           error={Boolean(error || field.error)}
           aria-invalid={Boolean(error || field.error)}
           aria-describedby={field.inputDescribedById}
@@ -1464,34 +1474,33 @@ function ChartTypeSelect({
             {
               type: "group",
               id: "time-series",
-              label: "Time Series",
+              label: t("chartTypeTimeSeriesGroup"),
               options: chartTypes
                 .filter((chart) => chart.group === "time-series")
                 .map((chart) => ({
                   value: chart.value,
-                  label: chart.name,
+                  label: t(chart.name as Parameters<typeof t>[0]),
                   icon: chart.icon,
                 })),
             },
             {
               type: "group",
               id: "total-value",
-              label: "Total Value",
+              label: t("chartTypeTotalValueGroup"),
               options: chartTypes
                 .filter((chart) => chart.group === "total-value")
                 .map((chart) =>
                   chart.value === "HISTOGRAM" && !measureSupportsHistogram
                     ? {
                         value: chart.value,
-                        label: chart.name,
+                        label: t(chart.name as Parameters<typeof t>[0]),
                         icon: chart.icon,
                         disabled: true as const,
-                        disabledReason:
-                          "Histogram is not supported for this metric",
+                        disabledReason: t("histogramUnsupported"),
                       }
                     : {
                         value: chart.value,
-                        label: chart.name,
+                        label: t(chart.name as Parameters<typeof t>[0]),
                         icon: chart.icon,
                       },
                 ),
@@ -1508,12 +1517,9 @@ function HistogramBinsField({
 }: {
   control: Control<WidgetFormValues>;
 }) {
+  const t = useTranslation(widgetMessages);
   return (
-    <FormField
-      control={control}
-      name="chart.bins"
-      label="Number of Bins (1-100)"
-    >
+    <FormField control={control} name="chart.bins" label={t("numberOfBins")}>
       {(field) => (
         <Input
           id={field.id}
@@ -1530,7 +1536,7 @@ function HistogramBinsField({
               field.onChange(value);
             }
           }}
-          placeholder="Enter number of bins (1-100)"
+          placeholder={t("enterNumberOfBins")}
         />
       )}
     </FormField>
@@ -1538,11 +1544,12 @@ function HistogramBinsField({
 }
 
 function RowLimitField({ control }: { control: Control<WidgetFormValues> }) {
+  const t = useTranslation(widgetMessages);
   return (
     <FormField
       control={control}
       name="chart.rowLimit"
-      label="Breakdown Row Limit (0-1000)"
+      label={t("breakdownRowLimit")}
     >
       {(field) => (
         <Input
@@ -1560,7 +1567,7 @@ function RowLimitField({ control }: { control: Control<WidgetFormValues> }) {
               field.onChange(value);
             }
           }}
-          placeholder="Enter breakdown row limit (0-1000)"
+          placeholder={t("enterBreakdownRowLimit")}
         />
       )}
     </FormField>
@@ -1578,6 +1585,7 @@ export function useWidgetFormState({
   onSave: (widgetData: WidgetSavePayload) => void;
   widgetId?: string;
 }) {
+  const t = useTranslation(widgetMessages);
   const { isV4 } = useReadPath();
 
   // The initial widget's persisted version is a local hint frozen at mount.
@@ -1798,13 +1806,19 @@ export function useWidgetFormState({
     if (unsupportedFilters.length > 0) {
       return {
         valid: false as const,
-        reason:
-          `Unsupported legacy filter column(s): ${unsupportedFilterColumns}. ` +
-          "Remove them or switch to a compatible view before saving this widget.",
+        reason: t("unsupportedLegacyFilters", {
+          columns: unsupportedFilterColumns,
+        }),
       };
     }
     return validateQuery(query, viewVersion);
-  }, [query, unsupportedFilterColumns, unsupportedFilters.length, viewVersion]);
+  }, [
+    query,
+    unsupportedFilterColumns,
+    unsupportedFilters.length,
+    viewVersion,
+    t,
+  ]);
 
   useCaptureWidgetHighCardinalityError({
     validation: queryValidation,

@@ -8,6 +8,8 @@ import {
   formatMetric,
   toFullMetricString,
 } from "@/src/features/widgets/chart-library/utils";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 
 const HistogramChart = ({
   data,
@@ -23,6 +25,7 @@ const HistogramChart = ({
   config?: ChartProps["config"];
   metricFormatter?: MetricFormatterFunction;
 }) => {
+  const t = useTranslation(widgetMessages);
   const formatBinEdge = (value: number) =>
     toFullMetricString(metricFormatter(value, { style: "compact" }));
 
@@ -50,7 +53,7 @@ const HistogramChart = ({
   if (!histogramData.length) {
     return (
       <div className="text-muted-foreground flex h-full items-center justify-center">
-        No data available
+        {t("noDataAvailable")}
       </div>
     );
   }

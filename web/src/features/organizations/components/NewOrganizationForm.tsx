@@ -14,6 +14,8 @@ import { Input } from "@/src/components/ui/input";
 import { organizationFormSchema } from "@/src/features/organizations/utils/organizationNameSchema";
 import { Switch } from "@/src/components/design-system/Switch/Switch";
 import { ExternalLink } from "@langfuse/icons";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { workspaceMessages } from "@/src/features/i18n/messages/workspace";
 
 export const NewOrganizationForm = ({
   isLangfuseCloud,
@@ -22,6 +24,7 @@ export const NewOrganizationForm = ({
   isLangfuseCloud: boolean;
   onSubmit: (values: z.infer<typeof organizationFormSchema>) => Promise<void>;
 }) => {
+  const t = useTranslation(workspaceMessages);
   const form = useForm({
     resolver: zodResolver(organizationFormSchema),
     defaultValues: {
@@ -39,7 +42,7 @@ export const NewOrganizationForm = ({
         message:
           error instanceof Error
             ? error.message
-            : "Failed to create organization",
+            : t("failedToCreateOrganization"),
       });
     }
   }
@@ -62,7 +65,7 @@ export const NewOrganizationForm = ({
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Organization name</FormLabel>
+              <FormLabel>{t("organizationName")}</FormLabel>
               <FormControl>
                 <Input
                   placeholder="my-org"
@@ -80,11 +83,11 @@ export const NewOrganizationForm = ({
           render={({ field }) => (
             <FormItem className="flex flex-row items-start justify-between gap-4 rounded-md border p-3">
               <div className="flex flex-col gap-1">
-                <FormLabel>Enable AI powered features</FormLabel>
+                <FormLabel>{t("aiFeaturesEnabled")}</FormLabel>
                 <p className="text-muted-foreground text-sm">
                   {isLangfuseCloud
-                    ? "Relevant project data can be sent to AWS Bedrock within your Langfuse data region. Your data will not be used to train models."
-                    : "Relevant project data can be sent to the model provider configured by your instance administrator."}{" "}
+                    ? t("aiFeaturesCloudHelp")
+                    : t("aiFeaturesSelfHostedHelp")}{" "}
                   {isLangfuseCloud && (
                     <a
                       href="https://langfuse.com/security/ai-features"
@@ -92,7 +95,7 @@ export const NewOrganizationForm = ({
                       rel="noopener noreferrer"
                       className="text-primary inline-flex items-center gap-1 hover:underline"
                     >
-                      Learn more
+                      {t("learnMore")}
                       <ExternalLink size="sm" />
                     </a>
                   )}
@@ -102,14 +105,14 @@ export const NewOrganizationForm = ({
                 <Switch
                   checked={field.value}
                   onCheckedChange={field.onChange}
-                  aria-label="Enable AI powered features"
+                  aria-label={t("aiFeaturesEnabled")}
                 />
               </FormControl>
             </FormItem>
           )}
         />
         <Button type="submit" loading={form.formState.isSubmitting}>
-          Create
+          {t("create")}
         </Button>
       </form>
     </Form>

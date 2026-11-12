@@ -9,20 +9,20 @@ import {
 } from "@/src/components/ui/card";
 import { env } from "@/src/env.mjs";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { workspaceMessages } from "@/src/features/i18n/messages/workspace";
 
 /** DemoOrganizationTile links to the public demo project */
 export const DemoOrganizationTile = () => {
+  const t = useTranslation(workspaceMessages);
   const capture = usePostHogClientCapture();
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Try Langfuse Demo</CardTitle>
+        <CardTitle>{t("tryLangfuseDemo")}</CardTitle>
       </CardHeader>
-      <CardContent>
-        We have built a Q&A chatbot that answers questions based on the Langfuse
-        Docs. Interact with it to see traces in Langfuse.
-      </CardContent>
+      <CardContent>{t("demoDescription")}</CardContent>
       <CardFooter>
         <Button asChild variant="secondary">
           <Link
@@ -33,7 +33,7 @@ export const DemoOrganizationTile = () => {
               })
             }
           >
-            View Demo Project
+            {t("viewDemoProject")}
           </Link>
         </Button>
       </CardFooter>

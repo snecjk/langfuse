@@ -24,6 +24,8 @@ import {
   getWidgetMissingBucketValue,
 } from "@/src/features/widgets/utils";
 import { type WidgetFormState } from "./WidgetForm";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 
 type ConnectedWidgetPreviewProps = Pick<
   WidgetFormState,
@@ -66,6 +68,7 @@ export function ConnectedWidgetPreview(props: ConnectedWidgetPreviewProps) {
     transformedData,
     chartPresentation,
   } = useWidgetPreviewData(props);
+  const t = useTranslation(widgetMessages);
 
   const chartConfig: ComponentProps<typeof Chart>["chartConfig"] = (() => {
     if (chartType === "PIVOT_TABLE") {
@@ -127,7 +130,7 @@ export function ConnectedWidgetPreview(props: ConnectedWidgetPreviewProps) {
             <div className="flex h-[300px] items-center justify-center">
               <div className="w-full max-w-sm">
                 <Alert variant="destructive" icon={AlertCircle}>
-                  <Alert.Title>Invalid query</Alert.Title>
+                  <Alert.Title>{t("invalidQuery")}</Alert.Title>
                   <Alert.Description>
                     {queryValidation.reason}
                   </Alert.Description>
@@ -177,9 +180,7 @@ export function ConnectedWidgetPreview(props: ConnectedWidgetPreviewProps) {
           !chartLoadingState.isLoading && (
             <CardContent>
               <div className="flex h-[300px] items-center justify-center">
-                <p className="text-muted-foreground">
-                  Waiting for Input / Loading...
-                </p>
+                <p className="text-muted-foreground">{t("waitingForInput")}</p>
               </div>
             </CardContent>
           )}

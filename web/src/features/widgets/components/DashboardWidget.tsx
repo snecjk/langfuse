@@ -64,6 +64,8 @@ import { useScheduledDashboardExecuteQuery } from "@/src/features/dashboard/hook
 import { CopyWidgetDialog } from "@/src/features/widgets/components/CopyWidgetDialog";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
 import { Tooltip } from "@/src/components/design-system/Tooltip/Tooltip";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 
 export interface WidgetPlacement {
   id: string;
@@ -121,6 +123,7 @@ export function DashboardWidget({
   const router = useRouter();
   const utils = api.useUtils();
   const capture = usePostHogClientCapture();
+  const t = useTranslation(widgetMessages);
   const isV4 = readPath === "v4";
   const widget = api.dashboardWidgets.get.useQuery(
     {
@@ -526,7 +529,7 @@ export function DashboardWidget({
     },
     onError: (e) => {
       showErrorToast(
-        "Failed to clone widget",
+        t("cloneFailed"),
         e.message,
         classifyTrpcToastError(e, "widget.clone"),
       );
@@ -547,7 +550,7 @@ export function DashboardWidget({
       onDeleteWidget(placement.id);
       return;
     }
-    if (onDeleteWidget && confirm("Please confirm deletion")) {
+    if (onDeleteWidget && confirm(t("confirmDeletion"))) {
       onDeleteWidget(placement.id);
     }
   };
@@ -555,7 +558,7 @@ export function DashboardWidget({
   if (widget.isPending) {
     return (
       <div className="bg-background flex items-center justify-center rounded-lg border p-4">
-        <div className="text-muted-foreground">Loading...</div>
+        <div className="text-muted-foreground">{t("loading")}</div>
       </div>
     );
   }
@@ -563,7 +566,7 @@ export function DashboardWidget({
   if (!widget.data) {
     return (
       <div className="bg-background flex items-center justify-center rounded-lg border p-4">
-        <div className="text-muted-foreground">Widget not found</div>
+        <div className="text-muted-foreground">{t("widgetNotFound")}</div>
       </div>
     );
   }
@@ -598,11 +601,11 @@ export function DashboardWidget({
       });
       showSuccessToast({
         operation: "widget.copy",
-        title: "Widget copied",
-        description: "Paste it on any dashboard with Cmd/Ctrl+V.",
+        title: t("widgetCopied"),
+        description: t("widgetCopiedHelp"),
       });
     } catch {
-      showErrorToast("Copy failed", "Could not write to the clipboard.", {
+      showErrorToast(t("copyFailed"), t("copyFailedHelp"), {
         operation: "widget.copy",
         errorOrigin: "frontend",
         errorCategory: "permission",
@@ -650,7 +653,7 @@ export function DashboardWidget({
                 <button
                   onClick={onLockedEditAttempt}
                   className="text-muted-foreground hover:text-foreground hidden group-hover:block"
-                  aria-label="Edit widget"
+                  aria-label={t("editWidget")}
                 >
                   <PencilIcon size="base" />
                 </button>
@@ -658,15 +661,13 @@ export function DashboardWidget({
                 <button
                   onClick={handleEdit}
                   className="text-muted-foreground hover:text-foreground hidden group-hover:block"
-                  aria-label="Edit widget"
+                  aria-label={t("editWidget")}
                 >
                   <PencilIcon size="base" />
                 </button>
               ) : widget.data.owner === "LANGFUSE" ? (
                 <Tooltip
-                  label={
-                    "This widget is managed by Langfuse.\nCreate a copy to edit."
-                  }
+                  label={t("widgetManagedByLangfuse")}
                   placement="bottom-end"
                   hoverableContent={false}
                 >
@@ -682,7 +683,7 @@ export function DashboardWidget({
                         },
                       })}
                       className="text-muted-foreground hover:text-foreground hidden group-hover:block"
-                      aria-label="Edit widget"
+                      aria-label={t("editWidget")}
                     >
                       <PencilIcon size="base" />
                     </button>
@@ -700,8 +701,8 @@ export function DashboardWidget({
                       type: "item" as const,
                       id: "view-as-table",
                       title: viewAsTableHint
-                        ? `View as table (${viewAsTableHint.count} filter${viewAsTableHint.count === 1 ? "" : "s"} not shown in the table)`
-                        : "View as table",
+                        ? t("viewAsTableHint", { count: viewAsTableHint.count })
+                        : t("viewAsTable"),
                       tooltip: viewAsTableHint?.title,
                       icon: TableIcon,
                       onClick: handleViewAsTable,
@@ -715,7 +716,7 @@ export function DashboardWidget({
               {
                 type: "item",
                 id: "copy",
-                title: "Copy widget",
+                title: t("copyWidget"),
                 icon: CopyIcon,
                 onClick: handleCopyToClipboard,
               },
@@ -724,7 +725,7 @@ export function DashboardWidget({
                     {
                       type: "item" as const,
                       id: "clone",
-                      title: "Clone",
+                      title: t("clone"),
                       icon: CopyPlusIcon,
                       onClick: () =>
                         onDuplicateWidget(placement, widgetExportSource),
@@ -735,17 +736,17 @@ export function DashboardWidget({
               {
                 type: "item",
                 id: "download-json",
-                title: "Download as JSON",
+                title: t("downloadAsJson"),
                 icon: FileJsonIcon,
                 onClick: handleDownloadJson,
               },
               {
                 type: "item",
                 id: "download-csv",
-                title: "Download data as CSV",
+                title: t("downloadDataAsCsv"),
                 icon: DownloadIcon,
                 disabled: queryResult.isPending
-                  ? { reason: "Chart data is still loading" }
+                  ? { reason: t("chartDataLoading") }
                   : undefined,
                 onClick: () =>
                   downloadChartDataCsv(transformedData, widget.data.name),
@@ -759,7 +760,7 @@ export function DashboardWidget({
                     {
                       type: "item" as const,
                       id: "delete",
-                      title: "Delete",
+                      title: t("delete"),
                       icon: TrashIcon,
                       variant: "destructive" as const,
                       onClick: handleDelete,
@@ -771,7 +772,7 @@ export function DashboardWidget({
             {({ getTriggerProps }) => (
               <button
                 className="text-muted-foreground hover:text-foreground hidden group-hover:block aria-expanded:block"
-                aria-label="Widget actions"
+                aria-label={t("widgetActions")}
                 {...getTriggerProps()}
               >
                 <MoreVerticalIcon size="base" />

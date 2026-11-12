@@ -27,11 +27,14 @@ import {
   DashboardWidgetTable,
   type WidgetTableRow,
 } from "./DashboardWidgetTable";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 
 export function ConnectedDashboardWidgetTable() {
   const projectId = useProjectIdFromURL();
   const utils = api.useUtils();
   const capture = usePostHogClientCapture();
+  const t = useTranslation(widgetMessages);
   const [selectedWidget, setSelectedWidget] = useState<WidgetTableRow | null>(
     null,
   );
@@ -43,15 +46,15 @@ export function ConnectedDashboardWidgetTable() {
     onError: (error) => {
       if (error.data?.code === "CONFLICT") {
         showErrorToast(
-          "Widget in use",
-          "Widget is still in use. Please remove it from all dashboards before deleting it.",
+          t("widgetInUse"),
+          t("widgetInUseHelp"),
           classifyTrpcToastError(error, "widget.delete"),
         );
         return;
       }
 
       showErrorToast(
-        "Failed to delete widget",
+        t("widgetDeleteFailed"),
         error.message,
         classifyTrpcToastError(error, "widget.delete"),
       );
@@ -60,9 +63,9 @@ export function ConnectedDashboardWidgetTable() {
 
   return (
     <ConfirmationDialogController
-      title="Delete widget"
-      text="This action permanently deletes this widget. If the widget is currently used in any dashboard, you will need to remove it from those dashboards first."
-      confirmLabel="Delete Widget"
+      title={t("deleteWidget")}
+      text={t("deleteWidgetHelp")}
+      confirmLabel={t("deleteWidgetConfirm")}
       variant="destructive"
       loading={deleteWidget.isPending}
       onConfirm={async () => {
@@ -95,6 +98,7 @@ function ConnectedDashboardWidgetTableContent({
   const router = useRouter();
   const utils = api.useUtils();
   const capture = usePostHogClientCapture();
+  const t = useTranslation(widgetMessages);
   const hasCUDAccess = useHasProjectAccess({
     projectId,
     scope: "dashboards:CUD",
@@ -139,13 +143,13 @@ function ConnectedDashboardWidgetTableContent({
         });
       } catch (error) {
         showErrorToast(
-          "Failed to download widget",
-          error instanceof Error ? error.message : "Unknown error",
+          t("widgetDownloadFailed"),
+          error instanceof Error ? error.message : t("unknownError"),
           classifyTrpcToastError(error, "widget.download"),
         );
       }
     },
-    [capture, fetchExportSource],
+    [capture, fetchExportSource, t],
   );
 
   const handleCopyToClipboard = useCallback(
@@ -164,13 +168,13 @@ function ConnectedDashboardWidgetTableContent({
         });
         showSuccessToast({
           operation: "widget.copy",
-          title: "Widget copied",
-          description: "Paste it on any dashboard with Cmd/Ctrl+V.",
+          title: t("widgetCopied"),
+          description: t("widgetCopiedHelp"),
         });
       } catch (error) {
         showErrorToast(
-          "Failed to copy widget",
-          error instanceof Error ? error.message : "Unknown error",
+          t("widgetCopyFailed"),
+          error instanceof Error ? error.message : t("unknownError"),
           failurePhase === "trpc"
             ? classifyTrpcToastError(error, "widget.copy")
             : {
@@ -181,7 +185,7 @@ function ConnectedDashboardWidgetTableContent({
         );
       }
     },
-    [capture, fetchExportSource],
+    [capture, fetchExportSource, t],
   );
 
   const handleDuplicate = useCallback(
@@ -204,18 +208,18 @@ function ConnectedDashboardWidgetTableContent({
         utils.dashboardWidgets.invalidate();
         showSuccessToast({
           operation: "widget.clone",
-          title: "Widget cloned",
-          description: `Created "${exportSource.name} (Copy)".`,
+          title: t("widgetCloned"),
+          description: t("widgetClonedHelp", { name: exportSource.name }),
         });
       } catch (error) {
         showErrorToast(
-          "Failed to duplicate widget",
-          error instanceof Error ? error.message : "Unknown error",
+          t("widgetCloneFailed"),
+          error instanceof Error ? error.message : t("unknownError"),
           classifyTrpcToastError(error, "widget.clone"),
         );
       }
     },
-    [capture, createWidgetAsync, fetchExportSource, projectId, utils],
+    [capture, createWidgetAsync, fetchExportSource, projectId, utils, t],
   );
 
   const [orderByState, setOrderByState] = useOrderByState({

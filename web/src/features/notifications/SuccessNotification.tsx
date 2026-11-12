@@ -1,5 +1,7 @@
 import { ActionButton } from "@/src/components/ActionButton";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { notificationMessages } from "@/src/features/i18n/messages/notifications";
 import { BadgeCheck, X } from "@langfuse/icons";
 import { useRef } from "react";
 import type { ToastOperation } from "./toastAnalytics";
@@ -23,6 +25,7 @@ export const SuccessNotification: React.FC<SuccessNotificationProps> = ({
   link,
 }) => {
   const capture = usePostHogClientCapture();
+  const t = useTranslation(notificationMessages);
   const didCaptureShown = useRef(false);
 
   const captureShown = (element: HTMLDivElement | null) => {
@@ -71,7 +74,7 @@ export const SuccessNotification: React.FC<SuccessNotificationProps> = ({
       <button
         className="text-primary-foreground flex h-6 w-6 cursor-pointer items-start justify-end border-none bg-transparent p-0 transition-colors duration-200"
         onClick={handleDismiss}
-        aria-label="Close"
+        aria-label={t("close")}
       >
         <X size="base" />
       </button>

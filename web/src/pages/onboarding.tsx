@@ -2,12 +2,15 @@
 
 import Head from "next/head";
 import { ConnectedOnboardingSurvey } from "@/src/features/onboarding/components/ConnectedOnboardingSurvey";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { onboardingMessages } from "@/src/features/i18n/messages/onboarding";
 
 export default function OnboardingPage() {
+  const t = useTranslation(onboardingMessages);
   return (
     <>
       <Head>
-        <title>Onboarding | Langfuse</title>
+        <title>{t("onboardingTitle")}</title>
       </Head>
       <ConnectedOnboardingSurvey />
     </>

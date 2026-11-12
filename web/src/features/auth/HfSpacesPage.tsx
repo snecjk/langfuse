@@ -9,12 +9,16 @@ import Head from "next/head";
 import Link from "next/link";
 import { PlusIcon } from "@langfuse/icons";
 import { CodeSection } from "@/src/components/design-system/CodeSection/CodeSection";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { authFormsMessages } from "@/src/features/i18n/messages/auth-forms";
 
 export type PageProps = {
   deploymentDomain: string;
 };
 
 export default function HfSpacesPage({ deploymentDomain }: PageProps) {
+  const t = useTranslation(authFormsMessages);
+
   return (
     <>
       <Head>
@@ -40,7 +44,7 @@ export default function HfSpacesPage({ deploymentDomain }: PageProps) {
         <div className="bg-card mt-14 rounded-lg px-6 py-10 shadow-sm sm:mx-auto sm:w-full sm:max-w-[480px] sm:px-10">
           <div className="space-y-8">
             <CodeSection
-              title="HF Space Host"
+              title={t("hfSpaceHost")}
               variant="outline"
               content={deploymentDomain}
             />
@@ -51,7 +55,7 @@ export default function HfSpacesPage({ deploymentDomain }: PageProps) {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Open in new tab
+                {t("openInNewTab")}
               </Link>
             </Button>
           </div>

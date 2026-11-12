@@ -22,7 +22,6 @@ import { TableSearchBar } from "@/src/features/search-bar/components/TableSearch
 import { toObservedOptions } from "@/src/features/search-bar/lib/observed-options";
 import {
   getExperimentsFilterConfig,
-  getExperimentsColumnName,
   isExperimentsOmittableFilterColumn,
 } from "./filter-config";
 import { type LangfuseColumnDef } from "@/src/components/table/types";
@@ -91,6 +90,8 @@ import {
   scoreColumnScopeToggledProps,
 } from "@/src/features/experiments/lib/analytics";
 import { type ColumnGroupTogglePayload } from "@/src/components/table/DataTableColumnVisibilityFilter";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 /**
  * LFE-10460: the metadata column's default position moved from last to right
@@ -133,6 +134,7 @@ function ExperimentsMultiSelectActionMenu({
   datasetIdByExperimentId: Record<string, string>;
 }) {
   const router = useRouter();
+  const t = useTranslation(experimentMessages);
   const capture = usePostHogClientCapture();
   const [showRunEvaluationDialog, setShowRunEvaluationDialog] = useState(false);
   // Page-scoped and in table order, so the first id is the topmost selected
@@ -222,13 +224,13 @@ function ExperimentsMultiSelectActionMenu({
     {
       id: ActionId.ExperimentCompare,
       type: BatchActionType.Create,
-      label: "Compare",
-      description: "Compare selected experiments",
+      label: t("compare"),
+      description: t("compareHelp"),
       icon: <GitCompareArrows size="base" __rawClassName="sm:mr-2" />,
       customDialog: true,
       disabled: tooManySelected,
       disabledReason: tooManySelected
-        ? `Select only up to ${MAX_SELECTED_EXPERIMENTS} experiments to compare`
+        ? t("compareDisabledReason", { count: MAX_SELECTED_EXPERIMENTS })
         : undefined,
       accessCheck: {
         scope: "project:read",
@@ -239,8 +241,8 @@ function ExperimentsMultiSelectActionMenu({
           {
             id: ActionId.ObservationBatchEvaluation,
             type: BatchActionType.Create,
-            label: "Run Evaluator",
-            description: "Run evaluators on selected experiments",
+            label: t("runEvaluator"),
+            description: t("runEvaluatorHelp"),
             icon: <LightbulbIcon size="base" __rawClassName="sm:mr-2" />,
             customDialog: true,
             accessCheck: {
@@ -326,6 +328,7 @@ export default function ExperimentsTable({
   showControlsInPageHeader = false,
 }: ExperimentsTableProps) {
   const router = useRouter();
+  const t = useTranslation(experimentMessages);
 
   const { setDetailPageList } = useDetailPageLists();
   // Selection lives in a per-mount vanilla zustand store (not useState) so a
@@ -620,13 +623,13 @@ export default function ExperimentsTable({
     selectActionColumn,
     createIdTableColumn<ExperimentsTableRow>({
       accessorKey: "name",
-      header: getExperimentsColumnName("name"),
+      header: t("name"),
       size: 200,
       isPinnedLeft: true,
     }),
     createIOTableColumn<ExperimentsTableRow>({
       accessorKey: "description",
-      header: getExperimentsColumnName("description"),
+      header: t("description"),
       size: 300,
       enableHiding: true,
       // Off by default: 300px of mostly boilerplate ahead of the score columns.
@@ -640,7 +643,7 @@ export default function ExperimentsTable({
       // resize handle sat flush against the table edge and could not be dragged
       // wider in a maximized browser (LFE-10460).
       accessorKey: "metadata",
-      header: getExperimentsColumnName("metadata"),
+      header: t("metadata"),
       size: 100,
       enableHiding: true,
       defaultHidden: true,
@@ -648,14 +651,14 @@ export default function ExperimentsTable({
     }),
     createNumberTableColumn<ExperimentsTableRow>({
       accessorKey: "itemCount",
-      header: getExperimentsColumnName("itemCount"),
+      header: t("itemCount"),
       size: 100,
       formatter: (value) => numberFormatter(value, 0, 0),
     }),
     {
       accessorKey: "errorCount",
       id: "errorCount",
-      header: getExperimentsColumnName("errorCount"),
+      header: t("errorCount"),
       size: 100,
       cell: ({ row }) => {
         const value: number = row.getValue("errorCount");
@@ -679,7 +682,7 @@ export default function ExperimentsTable({
                 },
               ],
             })}
-            aria-label={`View ${formatted} failing items`}
+            aria-label={t("failingItems", { count: formatted })}
           >
             <Badge color="error" text={formatted} />
           </Link>
@@ -689,7 +692,7 @@ export default function ExperimentsTable({
     },
     createDateTableColumn<ExperimentsTableRow>({
       accessorKey: "startTime",
-      header: getExperimentsColumnName("startTime"),
+      header: t("startTime"),
       size: 150,
       enableHiding: true,
       enableSorting: true,
@@ -697,7 +700,7 @@ export default function ExperimentsTable({
     {
       accessorKey: "datasetId",
       id: "datasetId",
-      header: getExperimentsColumnName("experimentDatasetName"),
+      header: t("dataset"),
       size: 150,
       cell: ({ row }) => {
         const datasetId: string | undefined = row.getValue("datasetId");
@@ -723,7 +726,7 @@ export default function ExperimentsTable({
     {
       accessorKey: "prompts",
       id: "prompts",
-      header: getExperimentsColumnName("prompts"),
+      header: t("prompts"),
       size: 100,
       enableHiding: true,
       cell: ({ row }) => {
@@ -740,11 +743,11 @@ export default function ExperimentsTable({
     createExperimentMetricColumn<ExperimentsTableRow>({
       metric: "latency",
       accessorKey: "latencyAvg",
-      header: getExperimentsColumnName("latencyAvg"),
+      header: t("latencyAvg"),
       size: 100,
       enableHiding: true,
       headerTooltip: {
-        description: "Average duration of the root span per experiment item.",
+        description: t("latencyAvgHelp"),
       },
       formatter: (value) => `Ø ${numberFormatter(value / 1000, 4)}s`,
       metricsLoading,
@@ -752,7 +755,7 @@ export default function ExperimentsTable({
     createExperimentMetricColumn<ExperimentsTableRow>({
       metric: "cost",
       accessorKey: "totalCost",
-      header: getExperimentsColumnName("totalCost"),
+      header: t("totalCost"),
       size: 100,
       enableHiding: true,
       formatter: (value) => `$${numberFormatter(value, 6)}`,
@@ -760,7 +763,7 @@ export default function ExperimentsTable({
     }),
     {
       accessorKey: "traceItemScores",
-      header: "Trace Scores",
+      header: t("traceScores"),
       id: "traceItemScores",
       enableHiding: true,
       cell: () => {
@@ -772,7 +775,7 @@ export default function ExperimentsTable({
     },
     {
       accessorKey: "observationItemScores",
-      header: "Observation Scores",
+      header: t("observationScores"),
       id: "observationItemScores",
       enableHiding: true,
       cell: () => {
@@ -784,7 +787,7 @@ export default function ExperimentsTable({
     },
     {
       accessorKey: "experimentScores",
-      header: "Experiment Scores",
+      header: t("experimentScores"),
       id: "experimentScores",
       enableHiding: true,
       cell: () => {
@@ -1045,11 +1048,7 @@ export default function ExperimentsTable({
           nonStickyContent={
             isShowingMostRecent ? (
               <div className="text-muted-foreground border-t px-3 py-1.5 text-xs">
-                No experiments started in the selected time range. Showing the{" "}
-                {mostRecentCount === 1
-                  ? "most recent run"
-                  : `${mostRecentCount} most recent runs`}{" "}
-                instead.
+                {t("mostRecentFallback", { count: mostRecentCount })}
               </div>
             ) : null
           }

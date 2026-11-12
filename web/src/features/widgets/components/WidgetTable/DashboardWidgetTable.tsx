@@ -13,31 +13,33 @@ import { createLinkTableColumn } from "@/src/components/design-system/table/colu
 import { createTextTableColumn } from "@/src/components/design-system/table/columns/createTextTableColumn";
 import { type LangfuseColumnDef } from "@/src/components/table/types";
 import { dashboardWidgetChartTypeIcons } from "@/src/features/widgets/chart-library/chartTypeIcons";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 
 const TYPE_COLUMN_SIZE = 140;
 
-const chartTypeLabels: Record<DashboardWidgetChartType, string> = {
-  LINE_TIME_SERIES: "Line Chart",
-  AREA_TIME_SERIES: "Area Chart",
-  BAR_TIME_SERIES: "Bar Chart",
-  HORIZONTAL_BAR: "Horizontal Bar Chart",
-  VERTICAL_BAR: "Vertical Bar Chart",
-  PIE: "Pie Chart",
-  NUMBER: "Big Number",
-  HISTOGRAM: "Histogram",
-  PIVOT_TABLE: "Pivot Table",
+const chartTypeLabelKeys: Record<DashboardWidgetChartType, string> = {
+  LINE_TIME_SERIES: "chartTypeLine",
+  AREA_TIME_SERIES: "chartTypeArea",
+  BAR_TIME_SERIES: "chartTypeBarTimeSeries",
+  HORIZONTAL_BAR: "chartTypeHorizontalBar",
+  VERTICAL_BAR: "chartTypeVerticalBar",
+  PIE: "chartTypePie",
+  NUMBER: "chartTypeBigNumber",
+  HISTOGRAM: "chartTypeHistogram",
+  PIVOT_TABLE: "chartTypePivotTable",
 };
 
-const chartDisplayModes: Record<DashboardWidgetChartType, string> = {
-  LINE_TIME_SERIES: "Time Series",
-  AREA_TIME_SERIES: "Time Series",
-  BAR_TIME_SERIES: "Time Series",
-  HORIZONTAL_BAR: "Total Value",
-  VERTICAL_BAR: "Total Value",
-  PIE: "Total Value",
-  NUMBER: "Total Value",
-  HISTOGRAM: "Total Value",
-  PIVOT_TABLE: "Total Value",
+const chartDisplayModeKeys: Record<DashboardWidgetChartType, string> = {
+  LINE_TIME_SERIES: "timeSeriesMode",
+  AREA_TIME_SERIES: "timeSeriesMode",
+  BAR_TIME_SERIES: "timeSeriesMode",
+  HORIZONTAL_BAR: "totalValueMode",
+  VERTICAL_BAR: "totalValueMode",
+  PIE: "totalValueMode",
+  NUMBER: "totalValueMode",
+  HISTOGRAM: "totalValueMode",
+  PIVOT_TABLE: "totalValueMode",
 };
 
 const viewBadgeVariants = {
@@ -96,11 +98,12 @@ export function DashboardWidgetTable({
   onDownload: (widget: WidgetTableRow) => void;
   onDuplicate: (widget: WidgetTableRow) => void;
 }) {
+  const t = useTranslation(widgetMessages);
   const columns = useMemo<LangfuseColumnDef<WidgetTableRow>[]>(
     () => [
       createLinkTableColumn<WidgetTableRow>({
         accessorKey: "name",
-        header: "Name",
+        header: t("name"),
         enableSorting: true,
         size: 200,
         getCell: (name, { row }) =>
@@ -116,13 +119,13 @@ export function DashboardWidgetTable({
       }),
       createTextTableColumn<WidgetTableRow>({
         accessorKey: "description",
-        header: "Description",
+        header: t("description"),
         size: 300,
       }),
       createBadgeTableColumn<WidgetTableRow>({
         range: "decorative",
         accessorKey: "view",
-        header: "View Type",
+        header: t("viewType"),
         enableSorting: true,
         size: TYPE_COLUMN_SIZE,
         getBadge: (view) => ({
@@ -134,11 +137,15 @@ export function DashboardWidgetTable({
       createBadgeTableColumn<WidgetTableRow>({
         range: "decorative",
         accessorKey: "chartType",
-        header: "Chart Type",
+        header: t("chartType"),
         enableSorting: true,
         size: TYPE_COLUMN_SIZE,
         getBadge: (chartType) => ({
-          value: chartTypeLabels[chartType as DashboardWidgetChartType],
+          value: t(
+            chartTypeLabelKeys[
+              chartType as DashboardWidgetChartType
+            ] as Parameters<typeof t>[0],
+          ),
           variant:
             chartTypeBadgeVariants[chartType as DashboardWidgetChartType],
           icon: dashboardWidgetChartTypeIcons[
@@ -149,36 +156,40 @@ export function DashboardWidgetTable({
       createBadgeTableColumn<WidgetTableRow>({
         range: "decorative",
         accessorFn: (row) =>
-          chartDisplayModes[row.chartType as DashboardWidgetChartType],
+          t(
+            chartDisplayModeKeys[
+              row.chartType as DashboardWidgetChartType
+            ] as Parameters<typeof t>[0],
+          ),
         id: "displayMode",
-        header: "Display Mode",
+        header: t("displayMode"),
         enableSorting: true,
         size: TYPE_COLUMN_SIZE,
         getBadge: (displayMode) => ({
           value: displayMode,
-          variant: displayMode === "Time Series" ? "blue" : "teal",
+          variant: displayMode === t("timeSeriesMode") ? "blue" : "teal",
           icon:
-            displayMode === "Time Series"
+            displayMode === t("timeSeriesMode")
               ? dashboardWidgetChartTypeIcons.LINE_TIME_SERIES
               : dashboardWidgetChartTypeIcons.NUMBER,
         }),
       }),
       createDateTableColumn<WidgetTableRow>({
         accessorKey: "createdAt",
-        header: "Created At",
+        header: t("createdAt"),
         enableSorting: true,
         mode: "relative",
         size: 100,
       }),
       createDateTableColumn<WidgetTableRow>({
         accessorKey: "updatedAt",
-        header: "Updated At",
+        header: t("updatedAt"),
         enableSorting: true,
         mode: "relative",
         size: 100,
       }),
     ],
-    [projectId],
+    [projectId, t],
   );
   const actions = useCallback<
     NonNullable<TableProps<WidgetTableRow>["actions"]>
@@ -187,24 +198,22 @@ export function DashboardWidgetTable({
       {
         id: "copy",
         type: "item",
-        title: "Copy widget",
+        title: t("copyWidget"),
         icon: Copy,
         onClick: () => onCopy(row),
       },
       {
         id: "clone",
         type: "item",
-        title: "Clone",
+        title: t("clone"),
         icon: CopyPlus,
-        disabled: hasCUDAccess
-          ? undefined
-          : { reason: "You do not have permission to clone widgets" },
+        disabled: hasCUDAccess ? undefined : { reason: t("noClonePermission") },
         onClick: () => onDuplicate(row),
       },
       {
         id: "download",
         type: "item",
-        title: "Download as JSON",
+        title: t("downloadAsJson"),
         icon: FileJson,
         onClick: () => onDownload(row),
       },
@@ -212,19 +221,19 @@ export function DashboardWidgetTable({
       {
         id: "delete",
         type: "item",
-        title: "Delete",
+        title: t("delete"),
         icon: Trash,
         variant: "destructive",
         disabled:
           hasCUDAccess && row.owner !== "LANGFUSE"
             ? undefined
             : {
-                reason: "You do not have permission to delete this widget",
+                reason: t("noDeletePermission"),
               },
         onClick: () => onDelete(row),
       },
     ],
-    [hasCUDAccess, onCopy, onDelete, onDownload, onDuplicate],
+    [hasCUDAccess, onCopy, onDelete, onDownload, onDuplicate, t],
   );
 
   return (

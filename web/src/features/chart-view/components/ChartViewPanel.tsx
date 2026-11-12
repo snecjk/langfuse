@@ -25,6 +25,8 @@ import {
   ChartTypePicker,
   MetricSelect,
 } from "./ConfigControls";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 
 /**
  * The "Take B" chart-view layout (the direction Nikita picked): a maximized
@@ -59,6 +61,7 @@ export const ChartViewPanel = React.memo(function ChartViewPanel({
    *  here instead of relying on a host. */
   className?: string;
 }) {
+  const t = useTranslation(widgetMessages);
   const [open, setOpen] = useState(true);
   const metric = getMetric(config.metric);
 
@@ -112,9 +115,7 @@ export const ChartViewPanel = React.memo(function ChartViewPanel({
               aggregation={config.aggregation}
               metricLabel={metric.label}
               metricUnit={metric.unit}
-              emptyMessage={
-                emptyMessage ?? "No events match the current filters."
-              }
+              emptyMessage={emptyMessage ?? t("noValuesForExperiments")}
             />
           )}
         </div>
@@ -124,38 +125,38 @@ export const ChartViewPanel = React.memo(function ChartViewPanel({
       {open ? (
         <div className="flex w-full flex-col gap-3 overflow-y-auto border-t p-3 md:w-72 md:shrink-0 md:border-t-0 md:border-l">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-bold">Visualize</span>
+            <span className="text-sm font-bold">{t("visualization")}</span>
             <Button
               variant="ghost"
               size="icon-xs"
-              aria-label="Collapse panel"
+              aria-label={t("collapsePanel")}
               onClick={() => setOpen(false)}
             >
               <ChevronRight size="sm" color="default" />
             </Button>
           </div>
-          <PanelField label="Chart type">
+          <PanelField label={t("chartType")}>
             <ChartTypePicker
               value={config.chartType}
               onChange={onChartType}
               layout="full"
             />
           </PanelField>
-          <PanelField label="Metric">
+          <PanelField label={t("metric")}>
             <MetricSelect value={config.metric} onChange={onMetric} />
           </PanelField>
-          <PanelField label="Aggregation">
+          <PanelField label={t("selectAggregation")}>
             <AggregationSelect
               metric={config.metric}
               value={config.aggregation}
               onChange={onAggregation}
             />
           </PanelField>
-          <PanelField label="Breakdown">
+          <PanelField label={t("breakdownDimension")}>
             <BreakdownSelect value={config.breakdown} onChange={onBreakdown} />
           </PanelField>
           {granularitySlot ? (
-            <PanelField label="Granularity">{granularitySlot}</PanelField>
+            <PanelField label={t("granularity")}>{granularitySlot}</PanelField>
           ) : null}
         </div>
       ) : (
@@ -163,7 +164,7 @@ export const ChartViewPanel = React.memo(function ChartViewPanel({
           <Button
             variant="ghost"
             size="icon-xs"
-            aria-label="Expand panel"
+            aria-label={t("expandPanel")}
             onClick={() => setOpen(true)}
           >
             <ChevronLeft size="sm" color="default" />

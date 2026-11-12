@@ -14,6 +14,8 @@ import {
   type ImportedWidgetFormSnapshot,
   type WidgetImportOptionSets,
 } from "@/src/features/widgets/utils/import-export-utils";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 
 /** observationLevelOptions is the static set of observation levels always offered on import. */
 const observationLevelOptions = ObservationLevelDomain.options.map((value) => ({
@@ -34,6 +36,7 @@ export const WidgetImporter = ({
   isV4: boolean;
   onImport: (snapshot: ImportedWidgetFormSnapshot) => void;
 }) => {
+  const t = useTranslation(widgetMessages);
   const importInputRef = useRef<HTMLInputElement>(null);
   const utils = api.useUtils();
 
@@ -54,7 +57,20 @@ export const WidgetImporter = ({
       dateRange,
     });
 
-    await runImport({ file, optionSets, isV4, onImport });
+    await runImport({
+      file,
+      optionSets,
+      isV4,
+      onImport,
+      messages: {
+        uploadedTitle: t("widgetUploaded"),
+        uploadedHelp: t("widgetUploadedHelp"),
+        adjustedTitle: t("widgetFiltersAdjusted"),
+        adjustedHelp: t("widgetFiltersAdjustedHelp"),
+        malformedTitle: t("malformedInput"),
+        malformedHelp: t("malformedInputHelp"),
+      },
+    });
   };
 
   return (
@@ -72,7 +88,7 @@ export const WidgetImporter = ({
         onClick={() => importInputRef.current?.click()}
       >
         <Upload size="base" color="default" __rawClassName="mr-2" />
-        Import
+        {t("import")}
       </Button>
     </>
   );
@@ -179,7 +195,24 @@ async function runImport(params: {
   optionSets: WidgetImportOptionSets;
   isV4: boolean;
   onImport: (snapshot: ImportedWidgetFormSnapshot) => void;
+  messages?: {
+    uploadedTitle: string;
+    uploadedHelp: string;
+    adjustedTitle: string;
+    adjustedHelp: string;
+    malformedTitle: string;
+    malformedHelp: string;
+  };
 }): Promise<void> {
+  const messages = params.messages ?? {
+    uploadedTitle: "Widget uploaded successfully",
+    uploadedHelp: "Widget configuration has been loaded.",
+    adjustedTitle: "Widget filters were adjusted",
+    adjustedHelp:
+      "Some imported filters or filter values were removed because they are not available in this project.",
+    malformedTitle: "Malformed input",
+    malformedHelp: "This operation can't be done due to the malformed input",
+  };
   try {
     const result = await importWidgetFile({
       file: params.file,
@@ -191,14 +224,14 @@ async function runImport(params: {
 
     showSuccessToast({
       operation: "widget.import",
-      title: "Widget uploaded successfully",
-      description: "Widget configuration has been loaded.",
+      title: messages.uploadedTitle,
+      description: messages.uploadedHelp,
     });
 
     if (result.removedValues || result.removedFilters) {
       showErrorToast(
-        "Widget filters were adjusted",
-        "Some imported filters or filter values were removed because they are not available in this project.",
+        messages.adjustedTitle,
+        messages.adjustedHelp,
         {
           operation: "widget.import",
           errorOrigin: "frontend",
@@ -209,8 +242,8 @@ async function runImport(params: {
     }
   } catch {
     showErrorToast(
-      "Malformed input",
-      "This operation can't be done due to the malformed input",
+      messages.malformedTitle,
+      messages.malformedHelp,
       {
         operation: "widget.import",
         errorOrigin: "frontend",

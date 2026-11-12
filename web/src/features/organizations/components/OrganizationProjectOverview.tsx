@@ -33,6 +33,8 @@ import { V4MigrationProjectChip } from "@/src/features/v4-migration/V4MigrationP
 import { api } from "@/src/utils/api";
 import { formatCompactRelativeTime } from "@/src/utils/dates";
 import { useV4UpgradeUiEnabled } from "@/src/features/v4-migration/useV4UpgradeUiEnabled";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { workspaceMessages } from "@/src/features/i18n/messages/workspace";
 import { useAccountV4MigrationData } from "@/src/features/v4-migration/hooks/useV4MigrationData";
 import { getProjectMigrationReadiness } from "@/src/features/v4-migration/migrationData";
 import { ErrorPage } from "@/src/components/error-page";
@@ -45,17 +47,31 @@ import { OrganizationSettingsTile } from "@/src/features/organizations/component
 import { useGatewayMemberStatus } from "@/src/features/organizations/hooks/useGatewayMemberStatus";
 import { DemoOrganizationTile } from "@/src/features/organizations/components/DemoOrganizationTile";
 
-const lastTraceLabel = (lastTraceAt: Date | string | null | undefined) =>
-  lastTraceAt
-    ? `Last trace ${formatCompactRelativeTime(new Date(lastTraceAt))}`
-    : "No traces in the last 30d";
-
 /** Marks the project that receives the org's AI Gateway traces. */
-const GatewayProjectMark = () => (
-  <span className="flex shrink-0" title="Receives AI Gateway traces">
-    <Waypoints size="base" color="default" aria-label="AI Gateway project" />
-  </span>
-);
+const GatewayProjectMark = () => {
+  const t = useTranslation(workspaceMessages);
+  return (
+    <span className="flex shrink-0" title={t("gatewayProjectHint")}>
+      <Waypoints
+        size="base"
+        color="default"
+        aria-label={t("gatewayProjectAria")}
+      />
+    </span>
+  );
+};
+
+type Translate = ReturnType<typeof useTranslation<typeof workspaceMessages>>;
+
+const lastTraceLabel = (
+  t: Translate,
+  lastTraceAt: Date | string | null | undefined,
+) =>
+  lastTraceAt
+    ? t("lastTrace", {
+        time: formatCompactRelativeTime(new Date(lastTraceAt)),
+      })
+    : t("noTraces30d");
 
 const OrganizationProjectTiles = ({
   org,
@@ -64,6 +80,7 @@ const OrganizationProjectTiles = ({
   org: NonNullable<Session["user"]>["organizations"][number];
   search?: string;
 }) => {
+  const t = useTranslation(workspaceMessages);
   const v4UpgradeUiEnabled = useV4UpgradeUiEnabled();
   const gatewayAccess = useGatewaySettingsAccess(org.id);
   // Gateway managers see which project receives the gateway's traces.
@@ -113,7 +130,7 @@ const OrganizationProjectTiles = ({
                 <Link
                   href={`/project/${project.id}`}
                   className="absolute inset-0"
-                  aria-label={`Go to project ${project.name}`}
+                  aria-label={t("goToProjectAria", { name: project.name })}
                 />
               )}
               <CardHeader>
@@ -144,8 +161,9 @@ const OrganizationProjectTiles = ({
                   <p className="text-muted-foreground text-xs">
                     {lastTraceQuery.isSuccess
                       ? lastTraceLabel(
+                          t,
                           lastTraceQuery.data?.find(
-                            (t) => t.projectId === project.id,
+                            (tr) => tr.projectId === project.id,
                           )?.lastTraceAt,
                         )
                       : null}
@@ -154,7 +172,9 @@ const OrganizationProjectTiles = ({
               )}
               {project.deletedAt && (
                 <CardContent>
-                  <CardDescription>Project is being deleted</CardDescription>
+                  <CardDescription>
+                    {t("projectDeletionPending")}
+                  </CardDescription>
                 </CardContent>
               )}
             </Card>
@@ -176,7 +196,9 @@ const OrganizationProjectTiles = ({
               {!project.deletedAt ? (
                 <CardFooter className="gap-2">
                   <Button asChild variant="secondary">
-                    <Link href={`/project/${project.id}`}>Go to project</Link>
+                    <Link href={`/project/${project.id}`}>
+                      {t("goToProject")}
+                    </Link>
                   </Button>
                   <Button asChild variant="ghost">
                     <Link href={`/project/${project.id}/settings`}>
@@ -186,7 +208,9 @@ const OrganizationProjectTiles = ({
                 </CardFooter>
               ) : (
                 <CardContent>
-                  <CardDescription>Project is being deleted</CardDescription>
+                  <CardDescription>
+                    {t("projectDeletionPending")}
+                  </CardDescription>
                 </CardContent>
               )}
             </Card>
@@ -197,6 +221,7 @@ const OrganizationProjectTiles = ({
 };
 
 const OrganizationActionButtons = ({ orgId }: { orgId: string }) => {
+  const t = useTranslation(workspaceMessages);
   const session = useSession();
   const gatewayOnly = gatewayOnlyLanding(session.data, orgId) !== undefined;
   const membersViewAccess = useHasOrganizationAccess({
@@ -214,7 +239,7 @@ const OrganizationActionButtons = ({ orgId }: { orgId: string }) => {
         <Button asChild variant="ghost">
           <Link
             href={`/organization/${orgId}/settings`}
-            aria-label="Organization settings"
+            aria-label={t("organizationSettingsTile")}
           >
             <Settings size="base" color="default" />
           </Link>
@@ -231,14 +256,14 @@ const OrganizationActionButtons = ({ orgId }: { orgId: string }) => {
         <Button asChild>
           <Link href={createProjectRoute(orgId)}>
             <PlusIcon size="base" __rawClassName="mr-2" aria-hidden="true" />
-            New project
+            {t("newProject")}
           </Link>
         </Button>
       )}
       {!createProjectAccess && !gatewayOnly && (
         <Button disabled>
           <LockIcon size="base" __rawClassName="mr-2" aria-hidden="true" />
-          New project
+          {t("newProject")}
         </Button>
       )}
     </>
@@ -254,6 +279,7 @@ const SingleOrganizationPage = ({
   search?: string;
   banner: ReactNode;
 }) => {
+  const t = useTranslation(workspaceMessages);
   const isDemoOrg =
     env.NEXT_PUBLIC_DEMO_ORG_ID === org.id &&
     org.projects.some((p) => p.id === env.NEXT_PUBLIC_DEMO_PROJECT_ID);
@@ -262,7 +288,7 @@ const SingleOrganizationPage = ({
     return (
       <ContainerPage
         headerProps={{
-          title: "Demo Organization",
+          title: t("demoOrganization"),
         }}
       >
         <DemoOrganizationTile />
@@ -273,7 +299,7 @@ const SingleOrganizationPage = ({
   return (
     <ContainerPage
       headerProps={{
-        title: "Projects",
+        title: t("projects"),
         actionButtonsRight: <OrganizationActionButtons orgId={org.id} />,
       }}
     >
@@ -321,6 +347,7 @@ const ConnectedGatewayMemberTile = ({ org }: { org: Organization }) => {
 };
 
 export const OrganizationProjectOverview = () => {
+  const t = useTranslation(workspaceMessages);
   const router = useRouter();
   const queryOrgId = router.query.organizationId;
   const session = useSession();
@@ -358,21 +385,21 @@ export const OrganizationProjectOverview = () => {
   if (landing && !landing.canUseGateway) {
     return (
       <ErrorPage
-        title="No access to this organization"
-        message="AI Gateway is not enabled for this organization. Ask an organization admin to change your role."
+        title={t("noAccessToOrganization")}
+        message={t("aiGatewayNotEnabled")}
       />
     );
   }
 
   if (organizations === undefined) {
-    return "loading...";
+    return t("loading");
   }
 
   if (!org) {
     return (
       <ErrorPage
-        title="Organization not found"
-        message="This organization does not exist or you do not have access to it."
+        title={t("organizationNotFound")}
+        message={t("organizationNotFoundHelp")}
       />
     );
   }

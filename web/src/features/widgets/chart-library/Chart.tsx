@@ -27,6 +27,8 @@ import { AlertCircle } from "@langfuse/icons";
 import { BigNumber } from "@/src/features/widgets/chart-library/BigNumber";
 import { PivotTable } from "@/src/features/widgets/chart-library/PivotTable";
 import { type OrderByState } from "@langfuse/shared";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 
 const DEFAULT_METRIC_THEME = {
   light: "hsl(var(--chart-1))",
@@ -123,6 +125,7 @@ const ChartComponent = ({
    */
   emptyState?: ReactNode;
 }) => {
+  const t = useTranslation(widgetMessages);
   const [forceRender, setForceRender] = useState(overrideWarning);
   const shouldWarn = data.length > 2000 && !forceRender;
 
@@ -306,19 +309,16 @@ const ChartComponent = ({
   const renderWarning = () => (
     <div className="flex flex-col items-center justify-center p-6 text-center">
       <AlertCircle __rawClassName="mb-4 h-12 w-12" />
-      <h3 className="mb-2 text-lg font-bold">Large Dataset Warning</h3>
+      <h3 className="mb-2 text-lg font-bold">{t("largeDatasetWarning")}</h3>
       <p className="text-muted-foreground mb-6 text-sm">
-        This chart has more than 2,000 unique data points. Rendering it may be
-        slow or may crash your browser. Try to reduce the number of dimensions
-        by adding more selective filters or choosing a coarser breakdown
-        dimension.
+        {t("largeDatasetWarningHelp")}
       </p>
       <Button
         variant="outline"
         onClick={() => setForceRender(true)}
         className="font-bold"
       >
-        I understand, proceed to render the chart
+        {t("proceedToRender")}
       </Button>
     </div>
   );

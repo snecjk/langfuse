@@ -10,6 +10,9 @@ export const authFormsMessages = {
       "Name must start with a letter and can only contain letters, numbers, spaces, hyphens, apostrophes, and periods",
     captchaFailed:
       "Captcha verification failed. Please complete the captcha and try again.",
+    captchaLoadFailed: "Captcha failed to load. Try again",
+    hfSpaceHost: "HF Space Host",
+    openInNewTab: "Open in new tab",
 
     createAccount: "Create new account",
     noCard: "No credit card required.",
@@ -160,5 +163,8 @@ export const authFormsMessages = {
     dataRegionsLower: "数据区域",
     and: "与",
     securityPrivacy: "数据安全与隐私",
+    captchaLoadFailed: "人机验证加载失败，请重试",
+    hfSpaceHost: "HF Space 主机",
+    openInNewTab: "在新标签页打开",
   },
 } satisfies Messages;

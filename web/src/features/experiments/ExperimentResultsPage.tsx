@@ -24,9 +24,12 @@ import {
   type ExperimentDiffMode,
   type ExperimentResultsLayout,
 } from "@/src/features/experiments/hooks/useExperimentResultsState";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 export default function ExperimentResultsPage() {
   const router = useRouter();
+  const t = useTranslation(experimentMessages);
   const projectId = router.query.projectId as string;
 
   const {
@@ -117,7 +120,7 @@ export default function ExperimentResultsPage() {
   // Show spinner while session loads or while redirecting when beta is off
   if (!isExperimentsBetaActive) {
     return (
-      <Page headerProps={{ title: "Experiments" }}>
+      <Page headerProps={{ title: t("experiments") }}>
         <div className="flex h-full items-center justify-center">
           <Spinner size="xl" variant="muted" />
         </div>
@@ -131,7 +134,10 @@ export default function ExperimentResultsPage() {
         title: "",
         itemType: "EXPERIMENT",
         breadcrumb: [
-          { name: "Experiments", href: `/project/${projectId}/experiments` },
+          {
+            name: t("experiments"),
+            href: `/project/${projectId}/experiments`,
+          },
         ],
         actionButtonsLeft: (
           <ExperimentSelectionControls

@@ -20,6 +20,8 @@ import {
   useReadyRouteParams,
 } from "@/src/hooks/useReadyRouteParams";
 import { RouteParamsPendingFallback } from "@/src/components/RouteParamsPendingFallback/RouteParamsPendingFallback";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 
 export default function NewWidgetPage() {
   const route = useReadyRouteParams(["projectId"]);
@@ -29,6 +31,7 @@ export default function NewWidgetPage() {
 
 function NewWidgetView({ projectId }: { projectId: string }) {
   const router = useRouter();
+  const t = useTranslation(widgetMessages);
   const dashboardId = asSingleQueryParam(router.query.dashboardId);
   const { isV4, isResolved } = useReadPath();
   const capture = usePostHogClientCapture();
@@ -56,8 +59,8 @@ function NewWidgetView({ projectId }: { projectId: string }) {
       });
       showSuccessToast({
         operation: "widget.create",
-        title: "Widget created successfully",
-        description: "Your widget has been created.",
+        title: t("widgetCreated"),
+        description: t("widgetCreatedHelp"),
       });
 
       if (dashboardId) {
@@ -84,7 +87,7 @@ function NewWidgetView({ projectId }: { projectId: string }) {
     },
     onError: (error) => {
       showErrorToast(
-        "Failed to save widget",
+        t("widgetSaveFailed"),
         error.message,
         classifyTrpcToastError(error, "widget.create"),
       );
@@ -93,7 +96,7 @@ function NewWidgetView({ projectId }: { projectId: string }) {
 
   const handleSaveWidget = (widgetData: WidgetSavePayload) => {
     if (!widgetData.name.trim()) {
-      showErrorToast("Error", "Widget name is required", {
+      showErrorToast(t("invalidQuery"), t("widgetNameRequired"), {
         operation: "widget.create",
         errorOrigin: "frontend",
         errorCategory: "user_input",
@@ -128,9 +131,9 @@ function NewWidgetView({ projectId }: { projectId: string }) {
       <Page
         withPadding
         headerProps={{
-          title: "New Widget",
+          title: t("newWidgetTitle"),
           help: {
-            description: "Create a new widget",
+            description: t("newWidgetHelp"),
           },
         }}
       >
@@ -143,9 +146,9 @@ function NewWidgetView({ projectId }: { projectId: string }) {
     <Page
       withPadding
       headerProps={{
-        title: "New Widget",
+        title: t("newWidgetTitle"),
         help: {
-          description: "Create a new widget",
+          description: t("newWidgetHelp"),
         },
       }}
     >

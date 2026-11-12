@@ -3,6 +3,8 @@ import React from "react";
 import { cn } from "@/src/utils/tailwind";
 import DocPopup from "@/src/components/layouts/doc-popup";
 import { Skeleton } from "@/src/components/ui/skeleton";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { workspaceMessages } from "@/src/features/i18n/messages/workspace";
 
 interface NoDataOrLoadingProps {
   isLoading: boolean;
@@ -16,11 +18,7 @@ interface NoDataProps {
   className?: string;
 }
 
-const NoData = ({
-  noDataText = "No data",
-  children,
-  className,
-}: NoDataProps) => {
+const NoData = ({ noDataText, children, className }: NoDataProps) => {
   return (
     <div
       className={cn(
@@ -40,6 +38,7 @@ export function NoDataOrLoading({
   href,
   className,
 }: NoDataOrLoadingProps) {
+  const t = useTranslation(workspaceMessages);
   if (isLoading) {
     return (
       <div
@@ -54,7 +53,7 @@ export function NoDataOrLoading({
   }
 
   return (
-    <NoData noDataText="No data" className={className}>
+    <NoData noDataText={t("noData")} className={className}>
       {description && <DocPopup description={description} href={href} />}
     </NoData>
   );

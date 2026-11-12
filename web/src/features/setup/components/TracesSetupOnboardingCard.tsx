@@ -14,6 +14,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { showToast } from "@/src/features/notifications/showToast";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { onboardingMessages } from "@/src/features/i18n/messages/onboarding";
 
 const SKILLS_INSTALL_COMMAND =
   "Install the Langfuse AI skill from github.com/langfuse/skills and use it to add tracing to this application with Langfuse following best practices.";
@@ -27,6 +29,9 @@ function CopyableSnippet({
   value: string;
   onCopy?: () => void;
 }) {
+  const t = useTranslation(onboardingMessages);
+  const copyLabel = t("copyPrompt");
+  const copiedLabel = t("copied");
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -38,7 +43,7 @@ function CopyableSnippet({
     } catch {
       showToast({
         type: "ERROR",
-        title: "Failed to copy to clipboard",
+        title: t("failedToCopy"),
         analytics: {
           operation: "onboarding_prompt.copy",
           errorOrigin: "frontend",
@@ -64,7 +69,7 @@ function CopyableSnippet({
         ) : (
           <Copy size="base" color="default" />
         )}
-        {copied ? "Copied" : "Copy prompt"}
+        {copied ? copiedLabel : copyLabel}
       </Button>
     </div>
   );
@@ -75,6 +80,7 @@ export function TracesSetupOnboardingCard({
 }: {
   projectId: string;
 }) {
+  const t = useTranslation(onboardingMessages);
   const capture = usePostHogClientCapture();
   const baseUrl = useLangfuseBaseUrl();
   const hasApiKeyCreateAccess = useHasProjectAccess({
@@ -101,7 +107,7 @@ export function TracesSetupOnboardingCard({
       reportNonTrpcError(error, "setup");
       showToast({
         type: "ERROR",
-        title: "Failed to create API key",
+        title: t("failedToCreateApiKey"),
         analytics: classifyTrpcToastError(error, "project_api_key.create"),
       });
     }
@@ -109,16 +115,15 @@ export function TracesSetupOnboardingCard({
 
   return (
     <SplashScreen
-      waitingFor="Waiting for first trace"
-      title="Time to log your first trace, it only takes a minute"
-      description="Get your API keys first, then ask your coding agent to add observability with Langfuse to your application."
+      waitingFor={t("waitingForFirstTrace")}
+      title={t("timeToLogFirstTrace")}
+      description={t("tracesSetupDescription")}
       videoSrc="https://static.langfuse.com/prod-assets/onboarding/traces-overview-v1.mp4"
       videoPosition="bottom"
       steps={[
         {
-          title: "Create API keys",
-          description:
-            "Your application needs API keys to send traces to Langfuse.",
+          title: t("createApiKeys"),
+          description: t("createApiKeysDescription"),
           content: apiKeys ? (
             <ApiKeyDetailContent
               scope="project"
@@ -136,7 +141,7 @@ export function TracesSetupOnboardingCard({
                   loading={mutCreateApiKey.isPending}
                   className="self-start"
                 >
-                  Create new API key
+                  {t("createNewApiKey")}
                 </Button>
               ) : (
                 <Button disabled className="self-start">
@@ -145,25 +150,28 @@ export function TracesSetupOnboardingCard({
                     __rawClassName="mr-2 -ml-0.5"
                     aria-hidden="true"
                   />
-                  Create new API key
+                  {t("createNewApiKey")}
                 </Button>
               )}
               <ActionButton
                 href={`/project/${projectId}/settings/api-keys`}
                 variant="secondary"
               >
-                Manage API keys
+                {t("manageApiKeys")}
               </ActionButton>
             </div>
           ),
         },
         {
-          title: "Add tracing with your coding agent",
+          title: t("addTracingWithCodingAgent"),
           badge: (
-            <Badge color="filled" leadingIcon={Sparkles} text="Recommended" />
+            <Badge
+              color="filled"
+              leadingIcon={Sparkles}
+              text={t("recommended")}
+            />
           ),
-          description:
-            "Paste this prompt into Claude, Cursor, Copilot, or another coding agent.",
+          description: t("pastePromptIntoAgent"),
           content: (
             <>
               <CopyableSnippet
@@ -187,16 +195,15 @@ export function TracesSetupOnboardingCard({
                     })
                   }
                 >
-                  or follow our docs to set up tracing manually
+                  {t("followDocsManually")}
                 </Link>
               </div>
             </>
           ),
         },
         {
-          title: "Run your app — traces will appear here",
-          description:
-            "Once your app makes an LLM call, traces show up within seconds.",
+          title: t("runAppTracesAppear"),
+          description: t("tracesAppearDescription"),
         },
       ]}
     />

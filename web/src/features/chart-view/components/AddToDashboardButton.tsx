@@ -7,6 +7,8 @@ import { showErrorToast } from "@/src/features/notifications/showErrorToast";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
 import { SelectDashboardDialog } from "@/src/features/dashboard/components/SelectDashboardDialog";
 import { type ChartWidgetInput } from "../lib/chartConfigToWidget";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 
 /**
  * "Add to dashboard" — turns an in-view chart into a real dashboard widget by
@@ -30,6 +32,7 @@ export const AddToDashboardButton = React.memo(function AddToDashboardButton({
   widgetInput: ChartWidgetInput;
 }) {
   const router = useRouter();
+  const t = useTranslation(widgetMessages);
   const [open, setOpen] = useState(false);
   const createWidget = api.dashboardWidgets.create.useMutation();
 
@@ -50,14 +53,14 @@ export const AddToDashboardButton = React.memo(function AddToDashboardButton({
           // keep it open so the user can retry or pick another dashboard.
           onError: (error) =>
             showErrorToast(
-              "Failed to add chart to dashboard",
+              t("addToDashboardFailed"),
               error.message,
               classifyTrpcToastError(error, "dashboard_chart.add"),
             ),
         },
       );
     },
-    [createWidget, projectId, widgetInput, router],
+    [createWidget, projectId, widgetInput, router, t],
   );
 
   return (
@@ -70,7 +73,7 @@ export const AddToDashboardButton = React.memo(function AddToDashboardButton({
         disabled={createWidget.isPending}
       >
         <LayoutDashboard size="base" color="default" />
-        Add to dashboard
+        {t("addToDashboard")}
       </Button>
       <SelectDashboardDialog
         open={open}

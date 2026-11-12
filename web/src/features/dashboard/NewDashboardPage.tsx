@@ -34,7 +34,7 @@ export default function NewDashboardPage() {
       showSuccessToast({
         operation: "dashboard.create",
         title: t("dashboardCreated"),
-        description: t("dashboardCreatedDesc"),
+        description: t("dashboardCreatedDescription"),
       });
       // Navigate to the newly created dashboard
       router.push(`/project/${projectId}/dashboards/${data.id}`);
@@ -57,7 +57,7 @@ export default function NewDashboardPage() {
         description: dashboardDescription,
       });
     } else {
-      showErrorToast(t("dashboardNameRequired"), {
+      showErrorToast(t("dashboardNameRequired"), "", {
         operation: "dashboard.create",
         errorOrigin: "frontend",
         errorCategory: "user_input",

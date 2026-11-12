@@ -9,6 +9,8 @@ import {
   DialogBody,
 } from "@/src/components/ui/dialog";
 import { Button } from "@/src/components/ui/button";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 
 /**
  * Copy-first flow for Langfuse-managed widgets on a project dashboard:
@@ -28,6 +30,7 @@ export function CopyWidgetDialog({
   onConfirm: () => void;
   isPending: boolean;
 }) {
+  const t = useTranslation(widgetMessages);
   return (
     <Dialog
       open={open}
@@ -40,15 +43,11 @@ export function CopyWidgetDialog({
     >
       <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
-          <DialogTitle>Edit your copy of this widget</DialogTitle>
+          <DialogTitle>{t("editWidgetCopyTitle")}</DialogTitle>
         </DialogHeader>
         <DialogBody>
           <p className="text-muted-foreground py-4 text-sm">
-            Editing creates your own copy of{" "}
-            <span className="text-foreground font-bold">
-              &ldquo;{widgetName}&rdquo;
-            </span>
-            . Your copy won&rsquo;t receive future updates from Langfuse.
+            {t("editWidgetCopyHelp", { name: widgetName })}
           </p>
         </DialogBody>
         <DialogFooter>
@@ -59,10 +58,10 @@ export function CopyWidgetDialog({
               type="button"
               disabled={isPending}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button onClick={onConfirm} type="button" loading={isPending}>
-              Create my copy
+              {t("createMyCopy")}
             </Button>
           </div>
         </DialogFooter>

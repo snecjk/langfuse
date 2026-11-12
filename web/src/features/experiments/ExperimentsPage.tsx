@@ -17,9 +17,12 @@ import { FlaskConical } from "@langfuse/icons";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Spinner } from "@/src/components/design-system/Spinner/Spinner";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 export default function ExperimentsPage() {
   const router = useRouter();
+  const t = useTranslation(experimentMessages);
   const projectId = router.query.projectId as string;
   const [isCreateExperimentDialogOpen, setIsCreateExperimentDialogOpen] =
     useState(false);
@@ -52,7 +55,7 @@ export default function ExperimentsPage() {
 
   if (!canAccessExperiments) {
     return (
-      <Page headerProps={{ title: "Experiments" }}>
+      <Page headerProps={{ title: t("experiments") }}>
         <div className="flex h-full items-center justify-center">
           <Spinner size="xl" variant="muted" />
         </div>
@@ -63,7 +66,7 @@ export default function ExperimentsPage() {
   return (
     <Page
       headerProps={{
-        title: "Experiments",
+        title: t("experiments"),
         titleBadges: <V4MigrationDelayBadge page="experiments" />,
         actionButtonsRight: (
           <div className="flex items-center gap-2">
@@ -77,7 +80,9 @@ export default function ExperimentsPage() {
                   onClick={() => capture("dataset_run:new_form_open")}
                 >
                   <FlaskConical size="base" color="default" />
-                  <span className="ml-2 hidden md:block">Run experiment</span>
+                  <span className="ml-2 hidden md:block">
+                    {t("runExperiment")}
+                  </span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">

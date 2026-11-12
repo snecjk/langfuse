@@ -8,6 +8,8 @@ import {
 } from "react";
 import { Button } from "@/src/components/ui/button";
 import type { TurnstileAction } from "@/src/features/auth/constants";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { authFormsMessages } from "@/src/features/i18n/messages/auth-forms";
 import { useTheme } from "next-themes";
 
 const SCRIPT_SRC =
@@ -112,6 +114,7 @@ export function TurnstileWidget({
   onTokenChange,
   ref,
 }: TurnstileWidgetProps) {
+  const t = useTranslation(authFormsMessages);
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const pendingTokenRef = useRef<PendingToken>(null);
@@ -199,7 +202,7 @@ export function TurnstileWidget({
             setLoadAttempt((attempt) => attempt + 1);
           }}
         >
-          Captcha failed to load. Try again
+          {t("captchaLoadFailed")}
         </Button>
       ) : null}
     </div>

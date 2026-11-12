@@ -45,14 +45,14 @@ claim. The matrix supersedes it for current status.
 
 | # | Route / entry | Actual owner | Role / toggle gate | Sub-flows & states | Namespace | Source migration | Verification | Exception |
 |---|---------------|--------------|--------------------|--------------------|-----------|------------------|--------------|-----------|
-| A1 | `/auth/sign-in` | `features/auth/SignInPage` | 公开 | 表单、错误、captcha、provider 按钮、注册/重置链接、语言选择器 | `auth`, `auth-forms`, `metadata` | 部分迁移 | 未验证 | — |
-| A2 | `/auth/sign-up` | `features/auth/SignUpPage` | 公开 | 表单、验证、错误、条款、语言选择器 | `auth`, `auth-forms`, `metadata` | 部分迁移 | 部分验证（SignUpPage.clienttest 覆盖中/英切换） | — |
-| A3 | `/auth/reset-password` | `auth-credentials/ResetPasswordPage` | 公开 | 请求邮件、成功/失败、captcha | `auth-forms` | 部分迁移 | 部分验证（clienttest 存在） | — |
-| A4 | `/auth/setup-password` | `auth-credentials` setup 页 | 公开（邀请/重置 token） | 设置密码、校验、错误 | `auth-forms` | 部分迁移 | 未验证 | — |
-| A5 | `/auth/error` | AuthErrorPage | 公开 | 各身份错误状态、重试、联系支持 | — | 未迁移 | 未验证 | 服务端原文（原始诊断保留） |
-| A6 | `/auth/enterprise-sso-required` | enterprise SSO 页 | 公开 | 必需/启动说明、域名校验、跳转 | — | 未迁移 | 未验证 | — |
-| A7 | `/auth/sso-initiate` | SSO 启动流程 | 公开 | 跳转中/失败 | — | 未迁移 | 未验证 | 服务端原文 |
-| A8 | `/auth/hf-spaces` | Hugging Face 专用页 | 公开 | 空间校验、错误、跳转 | — | 未迁移 | 未验证 | — |
+| A1 | `/auth/sign-in` | `features/auth/SignInPage` | 公开 | 表单、错误、captcha、provider 按钮、注册/重置链接、语言选择器 | `auth`, `auth-forms`, `metadata` | 源码完成 | 部分验证（auth-sign-in-page.clienttest 覆盖中/英切换与错误分类） | — |
+| A2 | `/auth/sign-up` | `features/auth/SignUpPage` | 公开 | 表单、验证、错误、条款、语言选择器 | `auth`, `auth-forms`, `metadata` | 源码完成 | 部分验证（SignUpPage.clienttest 覆盖中/英切换） | — |
+| A3 | `/auth/reset-password` | `auth-credentials/ResetPasswordPage` | 公开 | 请求邮件、成功/失败、captcha | `auth-forms` | 源码完成 | 部分验证（clienttest 存在） | — |
+| A4 | `/auth/setup-password` | `auth-credentials` setup 页 | 公开（邀请/重置 token） | 设置密码、校验、错误 | `auth-forms` | 源码完成 | 未验证 | — |
+| A5 | `/auth/error` | AuthErrorPage | 公开 | 各身份错误状态、重试、联系支持 | `auth` | 源码完成 | 未验证 | 服务端原文（IdP/OAuth 原始 message 保留） |
+| A6 | `/auth/enterprise-sso-required` | enterprise SSO 页 | 公开 | 必需/启动说明、域名校验、跳转 | `auth` | 源码完成 | 未验证 | 服务端原文（check-sso 返回 message 保留）；提供商名不翻译 |
+| A7 | `/auth/sso-initiate` | SSO 启动流程 | 公开 | 跳转中/失败 | `auth` | 源码完成 | 未验证 | 服务端原文（原始错误 message 保留） |
+| A8 | `/auth/hf-spaces` | Hugging Face 专用页 | 公开 | 空间校验、错误、跳转 | `auth-forms` | 源码完成 | 未验证 | — |
 | A9 | `/` (index) | `pages/index` → 组织/项目选择 | 已登录 | 无组织/无项目空态、创建、跳转 | `workspace`, `navigation` | 部分迁移 | 未验证 | — |
 | A10 | `/organization/[organizationId]` | `OrganizationSettingsPage` / 组织首页 | 已登录（org 成员） | 项目列表、创建、设置入口 | `workspace`, `settings`, `navigation` | 部分迁移 | 未验证 | — |
 | A11 | `/organization/[organizationId]/setup` | org setup 向导 | 已登录（org admin） | 创建项目引导、跳过、完成 | — | 未迁移 | 未验证 | — |
@@ -164,7 +164,8 @@ are not satisfied. The current priority is visible translated content, followed
 by full runtime verification.
 
 - Authentication: sign-in, sign-up, password setup/reset, verification email
-  actions, provider badges, privacy notice and cloud-region picker.
+  actions, provider badges, privacy notice and cloud-region picker; error page,
+  enterprise SSO-required/initiation and Hugging Face-specific pages.
 - Navigation: primary routes, group labels, account menus, theme labels and
   explicitly keyed page tabs. Arbitrary project, organization and tab names are
   not translated.
@@ -186,7 +187,6 @@ by full runtime verification.
 
 ## Known remaining content (historical checkpoint)
 
-- Auth error, enterprise SSO-required/initiation and Hugging Face-specific pages.
 - Independent command menus, sidebar notifications and onboarding components.
 - Detail body controls, JSON-viewer toolbars and less common tracing actions.
 - Prompt/dataset creation/editing/import dialogs, folder operations and remaining

@@ -678,7 +678,7 @@ function SignupFooter() {
   const router = useRouter();
   return (
     <p className="text-muted-foreground mt-10 text-center text-sm">
-      Already have an account?{" "}
+      {t("alreadyAccount")}{" "}
       <Link
         href={`/auth/sign-in${router.asPath.includes("?") ? router.asPath.substring(router.asPath.indexOf("?")) : ""}`}
         className="text-link hover:text-link-hover font-bold"

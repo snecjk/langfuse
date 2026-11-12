@@ -1,3 +1,6 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { notificationMessages } from "@/src/features/i18n/messages/notifications";
+
 export type PreviewDeploymentBannerViewProps = {
   /** Link back to the pull request this preview deployment belongs to. */
   prUrl: string;
@@ -19,22 +22,25 @@ export function PreviewDeploymentBannerView({
   updatedText,
   updatedTitle,
 }: PreviewDeploymentBannerViewProps) {
+  const t = useTranslation(notificationMessages);
   return (
     <div className="border-preview-banner-border bg-preview-banner text-preview-banner-foreground flex w-full items-center justify-center border-b px-4 py-1">
       <span className="text-sm">
-        Preview deployment of{" "}
+        {t("previewDeploymentPrefix")}{" "}
         <a
           href={prUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="text-preview-banner-link hover:text-preview-banner-link-hover font-bold hover:underline"
         >
-          {prNumber ? `PR #${prNumber}` : "a pull request"}
+          {prNumber
+            ? t("previewDeploymentPr", { prNumber })
+            : t("previewDeploymentPrGeneric")}
         </a>
         {author ? (
           <>
             {" "}
-            by{" "}
+            {t("previewDeploymentBy")}{" "}
             <a
               href={`https://github.com/${encodeURIComponent(author)}`}
               target="_blank"
@@ -48,7 +54,10 @@ export function PreviewDeploymentBannerView({
         {updatedText ? (
           <>
             {" "}
-            · <span title={updatedTitle}>updated {updatedText}</span>
+            ·{" "}
+            <span title={updatedTitle}>
+              {t("previewDeploymentUpdated", { time: updatedText })}
+            </span>
           </>
         ) : null}
       </span>

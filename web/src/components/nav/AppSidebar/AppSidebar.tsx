@@ -654,7 +654,7 @@ const VersionLabel = ({
           <span className="whitespace-nowrap">{versionText}</span>
           {update && !backgroundMigrationStatus && (
             <AttentionDot
-              label={`New ${update.updateType} version available`}
+              label={t("updateAvailable")}
               tone={update.updateType}
             />
           )}

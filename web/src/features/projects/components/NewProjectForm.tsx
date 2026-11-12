@@ -15,6 +15,8 @@ import { api, reportTrpcErrorWithoutToast } from "@/src/utils/api";
 import { useSession } from "next-auth/react";
 import { projectNameSchema } from "@/src/features/auth/lib/projectNameSchema";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { workspaceMessages } from "@/src/features/i18n/messages/workspace";
 
 export const NewProjectForm = ({
   orgId,
@@ -23,6 +25,7 @@ export const NewProjectForm = ({
   orgId: string;
   onSuccess: (projectId: string) => void;
 }) => {
+  const t = useTranslation(workspaceMessages);
   const capture = usePostHogClientCapture();
   const { update: updateSession } = useSession();
 
@@ -70,7 +73,7 @@ export const NewProjectForm = ({
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Project name</FormLabel>
+              <FormLabel>{t("projectName")}</FormLabel>
               <FormControl>
                 <Input
                   placeholder="my-llm-project"
@@ -83,7 +86,7 @@ export const NewProjectForm = ({
           )}
         />
         <Button type="submit" loading={createProjectMutation.isPending}>
-          Create
+          {t("create")}
         </Button>
       </form>
     </Form>

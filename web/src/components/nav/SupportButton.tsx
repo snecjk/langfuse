@@ -3,12 +3,15 @@ import { SidebarMenuButton, useSidebar } from "@/src/components/ui/sidebar";
 import { useSupportDrawer } from "@/src/features/support-chat/SupportDrawerProvider";
 import { useV4MigrationPanel } from "@/src/features/v4-migration/V4MigrationPanelProvider";
 import { useInAppAiAgent } from "@/src/features/in-app-agent/components/InAppAiAgentProvider";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { navigationMessages } from "@/src/features/i18n/messages/navigation";
 
 export const SupportButton = () => {
   const { setOpen: setSupportDrawerOpen } = useSupportDrawer();
   const { setOpen: setMigrationPanelOpen } = useV4MigrationPanel();
   const { setOpen: setAiAgentOpen } = useInAppAiAgent();
   const { isMobile, setOpenMobile: setOpenMobileSidebar } = useSidebar();
+  const t = useTranslation(navigationMessages);
 
   return (
     <SidebarMenuButton
@@ -25,7 +28,7 @@ export const SupportButton = () => {
       }}
     >
       <LifeBuoy size="base" />
-      Support
+      {t("support")}
     </SidebarMenuButton>
   );
 };

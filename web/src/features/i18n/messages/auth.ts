@@ -40,6 +40,46 @@ export const authMessages = {
     privacy: "Langfuse Privacy Policy",
     and: ", and",
     accurateData: ". You also confirm that the entered data is accurate.",
+
+    // Sign-in fallbacks assigned as form errors before localization, so the
+    // mapping below needs an entry to resolve them against.
+    unexpectedErrorOccurred: "An unexpected error occurred.",
+    automaticSignInFailedForm: "Automatic preview sign-in failed.",
+    ssoCheckFailedForm: "Unable to check SSO configuration. Please try again.",
+
+    // Authentication error page.
+    authenticationError: "Authentication Error",
+    authenticationErrorFallback:
+      "An authentication error occurred. Please reach out to support.",
+
+    // Enterprise SSO required. Provider names are not translated.
+    enterpriseSsoRequiredTitle: "Use your Enterprise SSO",
+    enterpriseSsoRequiresProvider:
+      "This domain requires your company's custom Enterprise SSO.",
+    enterpriseSsoTriedProvider:
+      "You tried signing in with {provider}, but this domain requires your company's custom Enterprise SSO.",
+    enterpriseSsoEnterCompanyEmail:
+      "Enter your company email so we can send you to the correct identity provider.",
+    enterpriseSsoEmail: "Email",
+    enterpriseSsoSubmit: "Continue with Enterprise SSO",
+    enterpriseSsoNoConfiguration:
+      "We couldn't find a custom Enterprise SSO configuration for this domain. Double-check your company email or contact your administrator.",
+    enterpriseSsoStartFailed:
+      "Unable to start the Enterprise SSO sign-in flow. Please try again.",
+    enterpriseSsoCheckFailed:
+      "Something went wrong while checking your Enterprise SSO configuration. Please try again.",
+    enterpriseSsoBackToSignIn: "Back to other sign-in options",
+    enterpriseSsoNeedHelp: "Need help? Contact",
+    enterpriseSsoPageTitle: "Enterprise SSO Required | Langfuse",
+
+    // SSO initiation (redirect-in-progress and failure shell).
+    ssoInitiateNoProvider:
+      "No SSO provider specified. Please contact your administrator.",
+    ssoInitiateFailed:
+      "Failed to initiate SSO sign-in. Please try again or contact support.",
+    ssoInitiateFailedTitle: "SSO Sign-in Failed",
+    ssoInitiateRedirecting: "Redirecting to your identity provider...",
+    signingInPageTitle: "Signing in | Langfuse",
   },
   "zh-CN": {
     signInTitle: "登录你的账户",
@@ -80,5 +120,34 @@ export const authMessages = {
     privacy: "Langfuse 隐私政策",
     and: "，以及",
     accurateData: "。同时，你确认所填写的信息准确无误。",
+
+    unexpectedErrorOccurred: "发生了意外错误。",
+    automaticSignInFailedForm: "预览环境自动登录失败。",
+    ssoCheckFailedForm: "无法检查 SSO 配置，请重试。",
+
+    authenticationError: "身份验证错误",
+    authenticationErrorFallback: "发生身份验证错误，请联系支持团队。",
+
+    enterpriseSsoRequiredTitle: "使用你的企业 SSO",
+    enterpriseSsoRequiresProvider: "此域名需要使用你公司的自定义企业 SSO。",
+    enterpriseSsoTriedProvider:
+      "你尝试使用 {provider} 登录，但此域名需要使用你公司的自定义企业 SSO。",
+    enterpriseSsoEnterCompanyEmail:
+      "请输入你的公司邮箱，以便将你引导至正确的身份提供商。",
+    enterpriseSsoEmail: "邮箱",
+    enterpriseSsoSubmit: "继续使用企业 SSO",
+    enterpriseSsoNoConfiguration:
+      "未找到此域名的自定义企业 SSO 配置。请检查你的公司邮箱，或联系你的管理员。",
+    enterpriseSsoStartFailed: "无法启动企业 SSO 登录流程，请重试。",
+    enterpriseSsoCheckFailed: "检查企业 SSO 配置时出现问题，请重试。",
+    enterpriseSsoBackToSignIn: "返回其他登录方式",
+    enterpriseSsoNeedHelp: "需要帮助？请联系",
+    enterpriseSsoPageTitle: "企业 SSO 必需 | Langfuse",
+
+    ssoInitiateNoProvider: "未指定 SSO 提供商，请联系你的管理员。",
+    ssoInitiateFailed: "无法发起 SSO 登录，请重试或联系支持团队。",
+    ssoInitiateFailedTitle: "SSO 登录失败",
+    ssoInitiateRedirecting: "正在跳转到你的身份提供商…",
+    signingInPageTitle: "正在登录 | Langfuse",
   },
 } satisfies Messages;

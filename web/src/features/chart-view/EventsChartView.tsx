@@ -8,6 +8,8 @@ import { toChartFilters } from "./lib/chartFilterCompatibility";
 import { ChartViewPanel } from "./components/ChartViewPanel";
 import { AddToDashboardButton } from "./components/AddToDashboardButton";
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 /**
  * Production chart view for the v4 events table. Builds the observations
  * aggregate query from the same filters + time window the table is showing,
@@ -44,6 +46,7 @@ export function EventsChartView({
   // A degenerate window (from === to, or from > to from independent time picks)
   // can't be charted; the query is disabled, which react-query keeps at
   // isPending forever — so surface a hint instead of an endless spinner.
+  const t = useTranslation(widgetMessages);
   const validRange = fromTimestamp < toTimestamp;
 
   const queryResult = api.dashboard.executeQuery.useQuery(
@@ -62,13 +65,10 @@ export function EventsChartView({
 
   const error = (() => {
     if (!validRange) {
-      return "Pick a wider time range to chart.";
+      return t("widerTimeRange");
     }
     if (queryResult.isError) {
-      return (
-        queryResult.error?.message ??
-        "Couldn't build a chart for the current view."
-      );
+      return queryResult.error?.message ?? t("chartBuildFailed");
     }
     return null;
   })();

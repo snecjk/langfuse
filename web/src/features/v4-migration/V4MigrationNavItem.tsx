@@ -5,6 +5,8 @@ import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePos
 import { useQueryProject } from "@/src/features/projects/hooks";
 import { useProjectV4MigrationActions } from "@/src/features/v4-migration/hooks/useV4MigrationData";
 import { useOpenV4MigrationPanel } from "@/src/features/v4-migration/hooks/useOpenV4MigrationPanel";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { navigationMessages } from "@/src/features/i18n/messages/navigation";
 
 export function useV4MigrationNavItemProject() {
   const { project } = useQueryProject();
@@ -26,7 +28,8 @@ export function V4MigrationNavItem({
   const openMigrationPanel = useOpenV4MigrationPanel();
   const { isMobile, setOpenMobile: setOpenMobileSidebar } = useSidebar();
   const capture = usePostHogClientCapture();
-  const label = "Action required";
+  const t = useTranslation(navigationMessages);
+  const label = t("actionRequired");
 
   const handleClick = () => {
     capture("sidebar:v4_migration_card_clicked");

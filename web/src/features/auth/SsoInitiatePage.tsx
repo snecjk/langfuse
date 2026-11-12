@@ -4,8 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { ErrorPageWithSentry } from "@/src/components/error-page";
 import { Spinner } from "@/src/components/layouts/Spinner";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { authMessages } from "@/src/features/i18n/messages/auth";
 
 export default function SsoInitiatePage() {
+  const t = useTranslation(authMessages);
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
@@ -19,7 +22,7 @@ export default function SsoInitiatePage() {
 
     // If provider is missing or empty, show error
     if (!provider || provider === "") {
-      setError("No SSO provider specified. Please contact your administrator.");
+      setError(t("ssoInitiateNoProvider"));
       return;
     }
 
@@ -32,21 +35,22 @@ export default function SsoInitiatePage() {
       .catch((error) => {
         console.error("SSO initiation error:", error);
         setError(
-          error instanceof Error
-            ? error.message
-            : "Failed to initiate SSO sign-in. Please try again or contact support.",
+          error instanceof Error ? error.message : t("ssoInitiateFailed"),
         );
       });
-  }, [router.isReady, router.query.provider]);
+  }, [router.isReady, router.query.provider, t]);
 
   // Show error page if sign-in failed
   if (error) {
     return (
       <>
         <Head>
-          <title>Sign-in Error | Langfuse</title>
+          <title>{t("ssoInitiateFailedTitle")} | Langfuse</title>
         </Head>
-        <ErrorPageWithSentry title="SSO Sign-in Failed" message={error} />
+        <ErrorPageWithSentry
+          title={t("ssoInitiateFailedTitle")}
+          message={error}
+        />
       </>
     );
   }
@@ -55,9 +59,9 @@ export default function SsoInitiatePage() {
   return (
     <>
       <Head>
-        <title>Signing in | Langfuse</title>
+        <title>{t("signingInPageTitle")}</title>
       </Head>
-      <Spinner message="Redirecting to your identity provider..." />
+      <Spinner message={t("ssoInitiateRedirecting")} />
     </>
   );
 }

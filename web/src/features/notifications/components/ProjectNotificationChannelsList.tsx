@@ -3,6 +3,8 @@ import { Webhook, Plus, Pencil, Trash2 } from "@langfuse/icons";
 
 import { Button } from "@/src/components/ui/button";
 import { type AutomationDomain } from "@langfuse/shared";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { notificationMessages } from "@/src/features/i18n/messages/notifications";
 
 const destinationLabel = (automation: AutomationDomain): string => {
   if (automation.action.type === "SLACK") {
@@ -49,10 +51,13 @@ export function ProjectNotificationChannelsList({
   onEdit,
   onDelete,
 }: ProjectNotificationChannelsListProps) {
+  const t = useTranslation(notificationMessages);
   return (
     <div className="flex flex-col gap-4">
       {isLoading && (
-        <p className="text-muted-foreground text-sm">Loading channels...</p>
+        <p className="text-muted-foreground text-sm">
+          {t("notificationChannelsLoading")}
+        </p>
       )}
       {!isLoading && channels && channels.length > 0 && (
         <div className="flex flex-col gap-3">
@@ -75,7 +80,7 @@ export function ProjectNotificationChannelsList({
                   variant="ghost"
                   size="icon"
                   onClick={() => onEdit(channel)}
-                  title="Edit channel"
+                  title={t("notificationChannelsEditChannel")}
                 >
                   <Pencil size="base" color="default" />
                 </Button>
@@ -84,7 +89,7 @@ export function ProjectNotificationChannelsList({
                   size="icon"
                   disabled={isDeleting}
                   onClick={() => onDelete(channel.id)}
-                  title="Delete channel"
+                  title={t("notificationChannelsDeleteChannel")}
                 >
                   <Trash2 size="base" color="default" />
                 </Button>
@@ -99,7 +104,7 @@ export function ProjectNotificationChannelsList({
         <div>
           <Button variant="secondary" onClick={onAdd}>
             <Plus size="base" __rawClassName="mr-2" />
-            Add channel
+            {t("notificationChannelsAddChannel")}
           </Button>
         </div>
       )}

@@ -6,6 +6,8 @@ import { useUiCustomization } from "@/src/ee/features/ui-customization/useUiCust
 import { PlusIcon } from "@langfuse/icons";
 import { LangfuseIcon } from "@/src/components/design-system/LangfuseIcon/LangfuseIcon";
 import { LangfuseWordmark } from "@/src/components/design-system/LangfuseWordmark/LangfuseWordmark";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { navigationMessages } from "@/src/features/i18n/messages/navigation";
 
 /**
  * Compact Langfuse brand mark for the top bar.
@@ -29,13 +31,14 @@ export const TopbarBrand = ({
   variant?: "icon" | "wordmark";
 }) => {
   const uiCustomization = useUiCustomization();
+  const t = useTranslation(navigationMessages);
   const logoLight = uiCustomization?.logoLightModeHref;
   const logoDark = uiCustomization?.logoDarkModeHref;
 
   return (
     <Link
       href="/"
-      aria-label="Langfuse home"
+      aria-label={t("langfuseHome")}
       className={cn("flex shrink-0 items-center gap-1", className)}
     >
       {logoLight && logoDark ? (

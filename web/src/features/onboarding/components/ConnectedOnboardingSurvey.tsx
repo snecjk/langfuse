@@ -26,8 +26,11 @@ import type { SurveyFormData } from "../lib/surveyTypes";
 import { useNewsletterSignup } from "../hooks/useNewsletterSignup";
 import { NewsletterOptIn, type NewsletterOptInValues } from "./NewsletterOptIn";
 import { OnboardingSurvey } from "./OnboardingSurvey";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { onboardingMessages } from "@/src/features/i18n/messages/onboarding";
 
 export function ConnectedOnboardingSurvey() {
+  const t = useTranslation(onboardingMessages);
   const router = useRouter();
   const { data: session, update: updateSession } = useSession();
   const { isLangfuseCloud } = useLangfuseCloudRegion();
@@ -119,8 +122,8 @@ export function ConnectedOnboardingSurvey() {
         }
         setHasStartedOnboardingCompletion(false);
         showErrorToast(
-          "Failed to finish onboarding",
-          error instanceof Error ? error.message : "Please try again.",
+          t("failedToFinishOnboarding"),
+          error instanceof Error ? error.message : t("pleaseTryAgain"),
           classifyTrpcToastError(error, "onboarding.complete"),
         );
       }
@@ -147,8 +150,8 @@ export function ConnectedOnboardingSurvey() {
           // Only Cloud gets here; self-hosted falls back to loading the page.
           setHasStartedOnboardingCompletion(false);
           showErrorToast(
-            "Failed to continue onboarding",
-            error instanceof Error ? error.message : "Please try again.",
+            t("failedToContinueOnboarding"),
+            error instanceof Error ? error.message : t("pleaseTryAgain"),
             {
               operation: "onboarding.continue",
               errorOrigin: "frontend",

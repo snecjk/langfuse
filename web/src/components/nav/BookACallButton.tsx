@@ -2,9 +2,12 @@ import { CalendarDays } from "@langfuse/icons";
 import { SidebarMenuButton } from "@/src/components/ui/sidebar";
 import Link from "next/link";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { navigationMessages } from "@/src/features/i18n/messages/navigation";
 
 export const BookACallButton = () => {
   const capture = usePostHogClientCapture();
+  const t = useTranslation(navigationMessages);
 
   return (
     <SidebarMenuButton asChild>
@@ -17,7 +20,7 @@ export const BookACallButton = () => {
         }}
       >
         <CalendarDays size="base" />
-        Book a call
+        {t("bookCall")}
       </Link>
     </SidebarMenuButton>
   );

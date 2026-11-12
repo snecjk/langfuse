@@ -18,6 +18,8 @@ import { Skeleton } from "@/src/components/ui/skeleton";
 import { GATEWAY_OVERVIEW_DOCS_URL } from "@/src/features/ai-gateway/constants/gatewayDocsUrls";
 import { createProjectRoute } from "@/src/features/setup/setupRoutes";
 import { buildGatewayPagePath } from "@/src/features/ai-gateway/fns/gatewayUrls/buildGatewayPagePath";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { workspaceMessages } from "@/src/features/i18n/messages/workspace";
 
 export type OrganizationSettingsTileState =
   | "noProjects"
@@ -39,7 +41,8 @@ export function OrganizationSettingsTile({
   orgName,
   state,
 }: OrganizationSettingsTileProps) {
-  const actions = tileActions(state, orgId);
+  const t = useTranslation(workspaceMessages);
+  const actions = tileActions(t, state, orgId);
   return (
     <Card>
       <CardHeader>
@@ -47,13 +50,13 @@ export function OrganizationSettingsTile({
           {isGatewayState(state) && (
             <Waypoints size="base" color="default" aria-hidden="true" />
           )}
-          {isGatewayState(state) ? "AI Gateway" : "No projects"}
+          {isGatewayState(state) ? "AI Gateway" : t("noProjectsTitle")}
         </CardTitle>
         <CardDescription>
           {state === "gatewayLoading" ? (
             <Skeleton className="h-5 w-2/3" />
           ) : (
-            tileDescription(state, orgName)
+            tileDescription(t, state, orgName)
           )}
         </CardDescription>
       </CardHeader>
@@ -67,30 +70,35 @@ function isGatewayState(state: OrganizationSettingsTileState) {
 }
 
 function tileDescription(
+  t: ReturnType<typeof useTranslation<typeof workspaceMessages>>,
   state: Exclude<OrganizationSettingsTileState, "gatewayLoading">,
   orgName: string,
 ) {
   switch (state) {
     case "noProjects":
-      return "This organization has no projects yet.";
+      return t("noProjectsHelp");
     case "noProjectAccess":
-      return "You don't have access to any projects in this organization.";
+      return t("noProjectAccessHelp");
     case "gatewaySetupPending":
-      return `The AI Gateway of ${orgName} isn't ready yet. Your admin is still setting it up, so check back soon.`;
+      return t("gatewayPendingHelp", { name: orgName });
     case "gatewayNoKey":
-      return `You've been invited to use the AI Gateway of ${orgName}. Create your personal gateway key to start using your team's AI models.`;
+      return t("gatewayNoKeyHelp", { name: orgName });
     case "gatewayHasKey":
-      return `You're set up with the AI Gateway of ${orgName}. Manage your gateway keys or see which AI models you can use.`;
+      return t("gatewayHasKeyHelp", { name: orgName });
   }
 }
 
-function tileActions(state: OrganizationSettingsTileState, orgId: string) {
+function tileActions(
+  t: ReturnType<typeof useTranslation<typeof workspaceMessages>>,
+  state: OrganizationSettingsTileState,
+  orgId: string,
+) {
   const settingsButton = (
     <Button
       variant="secondary"
       href={`/organization/${orgId}/settings`}
       icon={Settings}
-      text="Organization settings"
+      text={t("organizationSettingsTile")}
     />
   );
   const keysHref = buildGatewayPagePath(orgId, "api-keys");
@@ -99,7 +107,7 @@ function tileActions(state: OrganizationSettingsTileState, orgId: string) {
       variant="secondary"
       href={GATEWAY_OVERVIEW_DOCS_URL}
       icon={BookOpen}
-      text="What's the AI Gateway?"
+      text={t("whatsTheAiGateway")}
     />
   );
 
@@ -110,7 +118,7 @@ function tileActions(state: OrganizationSettingsTileState, orgId: string) {
           <Button
             href={createProjectRoute(orgId)}
             icon={PlusIcon}
-            text="New project"
+            text={t("newProject")}
           />
           {settingsButton}
         </>
@@ -124,7 +132,11 @@ function tileActions(state: OrganizationSettingsTileState, orgId: string) {
     case "gatewayNoKey":
       return (
         <>
-          <Button href={keysHref} icon={KeyRound} text="Create gateway key" />
+          <Button
+            href={keysHref}
+            icon={KeyRound}
+            text={t("createGatewayKey")}
+          />
           {docsButton}
         </>
       );
@@ -135,12 +147,12 @@ function tileActions(state: OrganizationSettingsTileState, orgId: string) {
             variant="secondary"
             href={keysHref}
             icon={KeyRound}
-            text="Manage gateway keys"
+            text={t("manageGatewayKeys")}
           />
           <Button
             variant="secondary"
             href={buildGatewayPagePath(orgId, "models")}
-            text="View models"
+            text={t("viewModels")}
           />
         </>
       );

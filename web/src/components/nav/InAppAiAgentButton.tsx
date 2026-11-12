@@ -9,6 +9,8 @@ import {
 
 import { HaloIcon } from "@/src/features/in-app-agent/components/HaloIcon";
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { navigationMessages } from "@/src/features/i18n/messages/navigation";
 
 /** Launcher only — the assistant window itself is rendered by
  * InAppAgentWindowHost from the persistent authenticated layout, so it
@@ -24,6 +26,7 @@ export const InAppAiAgentButton = ({
   prominent?: boolean;
 } = {}) => {
   const { open, setOpen, openAssistant, attentionCount } = useInAppAiAgent();
+  const t = useTranslation(navigationMessages);
 
   const toggleAssistant = useCallback(
     (source: InAppAgentEntryPoint) => {
@@ -59,7 +62,7 @@ export const InAppAiAgentButton = ({
 
   const attentionSuffix =
     attentionCount > 0
-      ? ` (${attentionCount} ${attentionCount === 1 ? "needs" : "need"} attention)`
+      ? t("agentAttentionSuffix", { count: attentionCount })
       : "";
 
   return (
@@ -68,7 +71,7 @@ export const InAppAiAgentButton = ({
       variant="outline"
       // Count lives on the button name — a nested badge aria-label is ignored
       // once the parent already has aria-label.
-      aria-label={`${open ? "Close" : "Open"} Halo${attentionSuffix}`}
+      aria-label={`${open ? t("close") : t("open")} Halo${attentionSuffix}`}
       aria-pressed={open}
       data-ignore-outside-interaction
       onClick={() => toggleAssistant("top_nav")}
