@@ -25,6 +25,8 @@ import { toObservedOptions } from "@/src/features/search-bar/lib/observed-option
 
 import { EVAL_LOGS_FIELD_REGISTRY } from "@/src/features/evals/constants/tableSearchRegistry";
 import { evalLogFilterConfig } from "@/src/features/filters/config/eval-logs-config";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 import { useSidebarFilterState } from "@/src/features/filters/hooks/useSidebarFilterState";
 import { type RouterOutputs, api } from "@/src/utils/api";
 import { safeExtract } from "@/src/utils/map-utils";
@@ -69,6 +71,7 @@ export default function EvalLogTable({
   projectId: string;
   jobConfigurationId?: string;
 }) {
+  const t = useTranslation(evaluationsMessages);
   const [rowHeight, setRowHeight, rowHeights] = useRowHeightLocalStorage(
     "evalLogs",
     "s",
@@ -112,27 +115,27 @@ export default function EvalLogTable({
   const columns = [
     createStatusTableColumn<JobExecutionRow, JobExecutionStatus>({
       accessorKey: "status",
-      header: "Status",
+      header: t("status"),
       getStatus: (status) =>
         status ? jobExecutionStatusToStatus[status] : undefined,
     }),
     createDateTableColumn<JobExecutionRow>({
       accessorKey: "startTime",
-      header: "Start Time",
+      header: t("startTime"),
       enableHiding: true,
     }),
     createDateTableColumn<JobExecutionRow>({
       accessorKey: "endTime",
-      header: "End Time",
+      header: t("endTime"),
       enableHiding: true,
     }),
     createIdTableColumn<JobExecutionRow>({
       accessorKey: "scoreName",
-      header: "Score Name",
+      header: t("scoreName"),
       enableHiding: true,
     }),
     columnHelper.accessor("scoreValue", {
-      header: "Score Value",
+      header: t("scoreValue"),
       id: "scoreValue",
       enableHiding: true,
       cell: (row) => {
@@ -148,7 +151,7 @@ export default function EvalLogTable({
     }),
     createIOTableColumn<JobExecutionRow>({
       accessorKey: "scoreComment",
-      header: "Score Comment",
+      header: t("scoreComment"),
       enableHiding: true,
       cellPadding: "none",
       compact: true,
@@ -156,7 +159,7 @@ export default function EvalLogTable({
     }),
     createIOTableColumn<JobExecutionRow>({
       accessorKey: "error",
-      header: "Error",
+      header: t("error"),
       enableHiding: true,
       cellPadding: "none",
       compact: true,
@@ -164,7 +167,7 @@ export default function EvalLogTable({
     }),
     createLinkTableColumn<JobExecutionRow>({
       accessorKey: "traceId",
-      header: "Target Trace",
+      header: t("targetTrace"),
       getCell: (traceId) => {
         if (traceId) {
           return {
@@ -181,7 +184,7 @@ export default function EvalLogTable({
     }),
     createLinkTableColumn<JobExecutionRow>({
       accessorKey: "executionTraceId",
-      header: "Execution Trace",
+      header: t("executionTrace"),
       enableHiding: true,
       getCell: (traceId) => {
         if (traceId) {
@@ -199,7 +202,7 @@ export default function EvalLogTable({
     }),
     createLinkTableColumn<JobExecutionRow>({
       accessorKey: "templateId",
-      header: "Template",
+      header: t("template"),
       getCell: (templateId) => {
         if (templateId) {
           return {
@@ -220,7 +223,7 @@ export default function EvalLogTable({
     columns.push(
       createLinkTableColumn<JobExecutionRow>({
         accessorKey: "evaluatorId",
-        header: "Evaluator",
+        header: t("evaluator"),
         getCell: (evaluatorId) => {
           if (evaluatorId) {
             return {

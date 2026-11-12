@@ -53,6 +53,8 @@ import { useLogViewColumns } from "./useLogViewColumns";
 import { flattenChronological } from "@/src/features/traces/components/TraceLogView/fns/flattenChronological";
 import { filterBySearch } from "@/src/features/traces/components/TraceLogView/fns/filterBySearch";
 import { flattenTreeOrder } from "@/src/features/traces/components/TraceLogView/fns/flattenTreeOrder";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tracingMessages } from "@/src/features/i18n/messages/tracing";
 
 export interface TraceLogViewProps {
   traceId: string;
@@ -95,6 +97,7 @@ export const TraceLogView = ({
   currentView = "pretty",
   target = "trace",
 }: TraceLogViewProps) => {
+  const t = useTranslation(tracingMessages);
   const {
     roots: contextRoots,
     observations: contextObservations,
@@ -349,10 +352,9 @@ export const TraceLogView = ({
           role="status"
           className="text-muted-foreground bg-muted/40 shrink-0 border-b px-3 py-2 text-xs"
         >
-          Logs may be incomplete. Only the first{" "}
-          {truncatedAtObservations.toLocaleString()} observations in this
-          session are loaded, ordered by start time. Find later observations in
-          the observations table.
+          {t("logViewIncomplete", {
+            count: truncatedAtObservations.toLocaleString(),
+          })}
         </div>
       )}
       {/* Toolbar with search and actions */}
@@ -386,7 +388,7 @@ export const TraceLogView = ({
       {hasNoObservations && (
         <div className="flex flex-1 items-center justify-center">
           <div className="text-muted-foreground text-sm">
-            No observations in this trace
+            {t("logViewNoObservations")}
           </div>
         </div>
       )}
@@ -394,7 +396,7 @@ export const TraceLogView = ({
       {hasNoSearchResults && (
         <div className="flex flex-1 items-center justify-center">
           <div className="text-muted-foreground text-sm">
-            No observations match &quot;{searchQuery}&quot;
+            {t("logViewNoSearchResults", { query: searchQuery })}
           </div>
         </div>
       )}

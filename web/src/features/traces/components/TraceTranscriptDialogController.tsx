@@ -4,6 +4,8 @@ import { type ReactNode } from "react";
 import { Alert } from "@/src/components/design-system/Alert/Alert";
 import { Dialog } from "@/src/components/design-system/Dialog/Dialog";
 import { DialogController } from "@/src/components/design-system/DialogController/DialogController";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tracingMessages } from "@/src/features/i18n/messages/tracing";
 import { JSONView } from "@/src/components/ui/CodeJsonViewer";
 import { api } from "@/src/utils/api";
 
@@ -19,6 +21,7 @@ export function TraceTranscriptDialogController({
 }: TraceTranscriptSource & {
   children: (control: { openDialog: (() => void) | undefined }) => ReactNode;
 }) {
+  const t = useTranslation(tracingMessages);
   const { data: session } = useSession();
   if (session?.user?.admin !== true) {
     return children({ openDialog: undefined });
@@ -27,10 +30,14 @@ export function TraceTranscriptDialogController({
   return (
     <DialogController<TraceTranscriptSource>
       renderDialog={({ state }) => (
-        <Dialog title="Trace transcript" size="lg" closeOnInteractionOutside>
+        <Dialog
+          title={t("traceTranscriptDialogTitle")}
+          size="lg"
+          closeOnInteractionOutside
+        >
           <Dialog.Body>
             <div className="ph-no-capture flex flex-col gap-4">
-              <TraceTranscriptInspector {...state} />
+              <TraceTranscriptInspector source={state} />
             </div>
           </Dialog.Body>
         </Dialog>
@@ -41,7 +48,12 @@ export function TraceTranscriptDialogController({
   );
 }
 
-function TraceTranscriptInspector(source: TraceTranscriptSource) {
+function TraceTranscriptInspector({
+  source,
+}: {
+  source: TraceTranscriptSource;
+}) {
+  const t = useTranslation(tracingMessages);
   const query = api.events.transcriptByTraceId.useQuery({
     ...source,
     context: "other",
@@ -56,16 +68,13 @@ function TraceTranscriptInspector(source: TraceTranscriptSource) {
       </Alert>
     );
   }
-  if (!query.data) return <p className="text-xs">Loading transcript…</p>;
+  if (!query.data) return <p className="text-xs">{t("loadingTranscript")}</p>;
 
   return (
     <>
       {query.data.cutoff && (
         <Alert variant="warning" size="sm">
-          <Alert.Description>
-            This transcript is incomplete because the trace exceeds the
-            observation limit.
-          </Alert.Description>
+          <Alert.Description>{t("transcriptIncomplete")}</Alert.Description>
         </Alert>
       )}
       {query.data.transcript ? (
@@ -76,7 +85,7 @@ function TraceTranscriptInspector(source: TraceTranscriptSource) {
         />
       ) : (
         <p className="text-muted-foreground text-xs">
-          No transcript available for this trace.
+          {t("noTranscriptAvailable")}
         </p>
       )}
     </>

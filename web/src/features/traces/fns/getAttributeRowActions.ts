@@ -15,6 +15,7 @@ import { buildEventsTablePathForColumnFilter } from "@/src/features/events/lib/e
 import { attributeColumnFilter } from "@/src/features/traces/fns/attributeColumnFilter";
 import { attributeGrammar } from "@/src/features/traces/fns/attributeGrammar";
 import type { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
+import type { MessageParameters } from "@/src/features/i18n/messages";
 
 export function getAttributeRowActions({
   row,
@@ -24,6 +25,7 @@ export function getAttributeRowActions({
   analyticsTable,
   router,
   capture,
+  t,
 }: {
   row: Row<JsonTableRow>;
   projectId: string;
@@ -33,6 +35,7 @@ export function getAttributeRowActions({
   analyticsTable: "attributes" | "metadata";
   router: Pick<NextRouter, "asPath" | "push">;
   capture: ReturnType<typeof usePostHogClientCapture>;
+  t: (key: string, parameters?: MessageParameters) => string;
 }) {
   const { key, value, hasChildren } = row.original;
   const isScalar =
@@ -71,7 +74,7 @@ export function getAttributeRowActions({
     {
       type: "item",
       id: "copy-value",
-      title: hasChildren ? "Copy structure" : "Copy value",
+      title: hasChildren ? t("copyStructure") : t("copyValue"),
       icon: Copy,
       onClick: () => {
         track("copy");
@@ -86,7 +89,7 @@ export function getAttributeRowActions({
       {
         type: "item",
         id: "include-filter",
-        title: "Include in filter",
+        title: t("includeInFilter"),
         tooltip: includeText,
         icon: Filter,
         onClick: () => {
@@ -100,7 +103,7 @@ export function getAttributeRowActions({
       items.push({
         type: "item",
         id: "exclude-filter",
-        title: "Exclude from filter",
+        title: t("excludeFromFilter"),
         tooltip: `-${includeText}`,
         icon: FilterX,
         onClick: () => {

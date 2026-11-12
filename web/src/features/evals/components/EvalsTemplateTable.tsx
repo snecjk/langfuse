@@ -14,6 +14,8 @@ import { usePaginationState } from "@/src/hooks/usePaginationState";
 import { TablePeekViewEvaluatorTemplateDetail } from "@/src/components/table/peek/TablePeekViewEvaluatorTemplateDetail";
 import { usePeekNavigation } from "@/src/components/table/peek/hooks/usePeekNavigation";
 import { useDetailPageLists } from "@/src/features/navigate-detail-pages/DetailPageListsProvider";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 import { Button } from "@/src/components/ui/button";
 import { useRouter } from "next/router";
 import {
@@ -232,6 +234,7 @@ export default function EvalsTemplateTable({
 }: {
   projectId: string;
 }) {
+  const t = useTranslation(evaluationsMessages);
   const router = useRouter();
   const codeEvalCapabilities = useIsCodeEvalEnabled();
   const { enabled: isCodeEvalEnabled, supportedSourceCodeLanguages } =
@@ -334,11 +337,11 @@ export default function EvalsTemplateTable({
   const columns = [
     createIdTableColumn<EvalsTemplateRow>({
       accessorKey: "name",
-      header: "Name",
+      header: t("name"),
     }),
     columnHelper.accessor("type", {
       id: "type",
-      header: "Type",
+      header: t("type"),
       size: 120,
       cell: ({ row }) => (
         <TemplateTypeBadge
@@ -349,7 +352,7 @@ export default function EvalsTemplateTable({
     }),
     columnHelper.accessor("resultType", {
       id: "resultType",
-      header: "Score Result Type",
+      header: t("scoreResultType"),
       size: 120,
       cell: (row) => {
         const resultType = row.getValue();
@@ -359,7 +362,7 @@ export default function EvalsTemplateTable({
     }),
     columnHelper.accessor("maintainer", {
       id: "maintainer",
-      header: "Maintainer",
+      header: t("maintainer"),
       size: 150,
       cell: (row) => {
         return (
@@ -374,12 +377,12 @@ export default function EvalsTemplateTable({
     }),
     createDateTableColumn<EvalsTemplateRow>({
       accessorKey: "latestCreatedAt",
-      header: "Last Edited",
+      header: t("lastEdited"),
       size: 150,
     }),
     createNumberTableColumn<EvalsTemplateRow>({
       accessorKey: "usageCount",
-      header: "Usage Count",
+      header: t("usageCount"),
       enableHiding: true,
       size: 80,
       formatter: (value) => String(value),
@@ -389,19 +392,19 @@ export default function EvalsTemplateTable({
     }),
     createNumberTableColumn<EvalsTemplateRow>({
       accessorKey: "latestVersion",
-      header: "Latest Version",
+      header: t("latestVersion"),
       enableHiding: true,
       size: 80,
       formatter: (value) => String(value),
     }),
     createIdTableColumn<EvalsTemplateRow>({
       accessorKey: "id",
-      header: "Id",
+      header: t("id"),
       size: 100,
       enableHiding: true,
     }),
     columnHelper.accessor("actions", {
-      header: "Actions",
+      header: t("actions"),
       id: "actions",
       size: 100,
       cell: ({ row }) => {

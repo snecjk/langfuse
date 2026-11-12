@@ -5,7 +5,7 @@
  * Provides:
  * - Search input for filtering observations (hidden in JSON view)
  * - Action buttons: expand/collapse all, copy JSON
- * - Large Trace indicator for virtualized mode
+ * - t("logViewLargeTrace") indicator for virtualized mode
  */
 
 import { memo, useState } from "react";
@@ -26,6 +26,8 @@ import {
 } from "@/src/components/ui/tooltip";
 import { HoverCard } from "@/src/components/design-system/HoverCard/HoverCard";
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tracingMessages } from "@/src/features/i18n/messages/tracing";
 import { Spinner } from "@/src/components/design-system/Spinner/Spinner";
 import { type JsonViewPreference } from "@/src/components/ui/jsonViewPreference";
 
@@ -38,7 +40,7 @@ export interface LogViewToolbarProps {
   onSearchFocus?: () => void;
   /** Whether virtualization is active (for large traces) */
   isVirtualized?: boolean;
-  /** Total number of observations (shown in Large Trace indicator) */
+  /** Total number of observations (shown in t("logViewLargeTrace") indicator) */
   observationCount?: number;
   /** Number of observations with loaded I/O data (for cache-only mode) */
   loadedObservationCount?: number;
@@ -87,6 +89,7 @@ export const LogViewToolbar = memo(function LogViewToolbar({
   showMilliseconds = false,
   onToggleMilliseconds,
 }: LogViewToolbarProps) {
+  const t = useTranslation(tracingMessages);
   const [isCopied, setIsCopied] = useState(false);
 
   const handleCopyClick = () => {
@@ -99,7 +102,7 @@ export const LogViewToolbar = memo(function LogViewToolbar({
 
   return (
     <div className="bg-background flex h-9 shrink-0 items-center gap-1.5 border-b px-2">
-      {/* Large Trace indicator - only shown for virtualized mode */}
+      {/* t("logViewLargeTrace") indicator - only shown for virtualized mode */}
       {isVirtualized && (
         <HoverCard
           openDelay={200}
@@ -107,15 +110,16 @@ export const LogViewToolbar = memo(function LogViewToolbar({
           sideOffset={8}
           content={
             <div className="w-72 p-3 text-sm">
-              <p className="font-bold">Optimized for performance</p>
+              <p className="font-bold">{t("logViewOptimizedForPerf")}</p>
               <p className="text-muted-foreground mt-1.5">
-                This trace has {observationCount?.toLocaleString() ?? "many"}{" "}
-                observations. To keep things smooth:
+                {t("logViewManyObservations", {
+                  count: observationCount?.toLocaleString() ?? "many",
+                })}
               </p>
               <ul className="text-muted-foreground mt-1.5 list-inside list-disc space-y-0.5">
-                <li>Content loads as you scroll</li>
-                <li>JSON view is disabled</li>
-                <li>Download/copy includes I/O for cached observations only</li>
+                <li>{t("logViewLoadsAsScroll")}</li>
+                <li>{t("logViewJsonDisabled")}</li>
+                <li>{t("logViewDownloadCached")}</li>
               </ul>
             </div>
           }
@@ -126,7 +130,7 @@ export const LogViewToolbar = memo(function LogViewToolbar({
               tabIndex={0}
               {...getTriggerProps()}
             >
-              Large Trace
+              {t("logViewLargeTrace")}
             </span>
           )}
         </HoverCard>
@@ -140,7 +144,7 @@ export const LogViewToolbar = memo(function LogViewToolbar({
           <CommandInput
             showBorder={false}
             variant="toolbar"
-            placeholder="Search observations..."
+            placeholder={t("logViewSearchPlaceholder")}
             className="border-0 focus:ring-0"
             value={searchQuery}
             onValueChange={onSearchChange}
@@ -185,8 +189,8 @@ export const LogViewToolbar = memo(function LogViewToolbar({
                     indentDisabled
                       ? undefined
                       : indentEnabled
-                        ? "Hide indentation"
-                        : "Show indentation"
+                        ? t("logViewHideIndent")
+                        : t("logViewShowIndent")
                   }
                 >
                   <IndentIncrease size="base" />
@@ -206,7 +210,7 @@ export const LogViewToolbar = memo(function LogViewToolbar({
               showMilliseconds && "bg-primary text-primary-foreground",
             )}
             onClick={onToggleMilliseconds}
-            title={showMilliseconds ? "Hide milliseconds" : "Show milliseconds"}
+            title={showMilliseconds ? t("logViewHideMs") : t("logViewShowMs")}
           >
             <Timer size="base" />
           </Button>
@@ -237,10 +241,10 @@ export const LogViewToolbar = memo(function LogViewToolbar({
             </TooltipTrigger>
             <TooltipContent>
               {isVirtualized
-                ? "Disabled for large traces"
+                ? t("logViewDisabledLarge")
                 : allRowsExpanded
-                  ? "Collapse all"
-                  : "Expand all"}
+                  ? t("logViewCollapseAll")
+                  : t("logViewExpandAll")}
             </TooltipContent>
           </Tooltip>
         )}
@@ -253,10 +257,9 @@ export const LogViewToolbar = memo(function LogViewToolbar({
             sideOffset={8}
             content={
               <div className="w-64 p-3 text-sm">
-                <p className="font-bold">Cache-only mode</p>
+                <p className="font-bold">{t("logViewCacheOnlyMode")}</p>
                 <p className="text-muted-foreground mt-1">
-                  For large traces, only expanded observations include full I/O
-                  data.
+                  {t("logViewCacheOnlyDesc")}
                 </p>
                 {loadedObservationCount !== undefined &&
                   observationCount !== undefined && (
@@ -297,8 +300,8 @@ export const LogViewToolbar = memo(function LogViewToolbar({
                   {isCopyOrDownloadLoading
                     ? "Loading data..."
                     : isCopyOrDownloadCacheOnly
-                      ? "Copy as JSON (cache only)"
-                      : "Copy as JSON"}
+                      ? t("logViewCopyJsonCache")
+                      : t("logViewCopyJson")}
                 </TooltipContent>
               </Tooltip>
             )}

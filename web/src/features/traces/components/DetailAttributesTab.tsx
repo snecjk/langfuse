@@ -9,6 +9,9 @@ import type { MediaReturnType } from "@/src/features/media/validation";
 import { PrettyJsonViewContent } from "@/src/components/ui/PrettyJsonViewContent";
 import { IOSection } from "@/src/components/ui/IOSection";
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tracingMessages } from "@/src/features/i18n/messages/tracing";
+import type { MessageParameters } from "@/src/features/i18n/messages";
 import { IO_STICKY_HEADERS_CLASS } from "@/src/features/traces/constants/ioSectionClasses";
 import { getMetadataRowActions } from "@/src/features/traces/fns/getMetadataRowActions";
 import { getAttributeRowActions } from "@/src/features/traces/fns/getAttributeRowActions";
@@ -49,6 +52,7 @@ export function DetailAttributesTab({
   jsonMetadataExpanded?: boolean;
   onJsonMetadataExpandedChange?: (expanded: boolean) => void;
 }) {
+  const t = useTranslation(tracingMessages);
   const router = useRouter();
   const capture = usePostHogClientCapture();
   const hasAttributes =
@@ -76,7 +80,7 @@ export function DetailAttributesTab({
           >
             {(state) => (
               <IOSection
-                title="Metadata"
+                title={t("metadata")}
                 onCopy={state.copy}
                 actions={
                   state.contentKind === "table" && state.hasExpandableRows
@@ -86,8 +90,8 @@ export function DetailAttributesTab({
                             ? FoldVertical
                             : UnfoldVertical,
                           label: state.allRowsExpanded
-                            ? "Collapse all rows"
-                            : "Expand all rows",
+                            ? t("collapseAllRows")
+                            : t("expandAllRows"),
                           onClick: state.toggleAllRows,
                         },
                       ]
@@ -97,7 +101,7 @@ export function DetailAttributesTab({
               >
                 <PrettyJsonViewContent
                   state={state}
-                  title="Metadata"
+                  title={t("metadata")}
                   borderless
                   rowActions={(row) =>
                     getAttributeRowActions({
@@ -108,6 +112,10 @@ export function DetailAttributesTab({
                       analyticsTable: "attributes",
                       router,
                       capture,
+                      t: t as (
+                        key: string,
+                        parameters?: MessageParameters,
+                      ) => string,
                     })
                   }
                 />
@@ -122,7 +130,7 @@ export function DetailAttributesTab({
           >
             {(state) => (
               <IOSection
-                title="Model parameters"
+                title={t("modelParameters")}
                 onCopy={state.copy}
                 actions={
                   state.contentKind === "table" && state.hasExpandableRows
@@ -132,8 +140,8 @@ export function DetailAttributesTab({
                             ? FoldVertical
                             : UnfoldVertical,
                           label: state.allRowsExpanded
-                            ? "Collapse all rows"
-                            : "Expand all rows",
+                            ? t("collapseAllRows")
+                            : t("expandAllRows"),
                           onClick: state.toggleAllRows,
                         },
                       ]
@@ -143,7 +151,7 @@ export function DetailAttributesTab({
               >
                 <PrettyJsonViewContent
                   state={state}
-                  title="Model parameters"
+                  title={t("modelParameters")}
                   borderless
                 />
               </IOSection>
@@ -153,9 +161,9 @@ export function DetailAttributesTab({
         {hasMetadata ? (
           <div>
             {metadataTooLarge ? (
-              <IOSection title="Custom Metadata">
+              <IOSection title={t("customMetadata")}>
                 <LargeJsonFieldFallback
-                  title="Custom Metadata"
+                  title={t("customMetadata")}
                   hideTitle
                   serialized={metadataProbe.serialized}
                   isString={metadataProbe.isString}
@@ -186,7 +194,7 @@ export function DetailAttributesTab({
               >
                 {(state) => (
                   <IOSection
-                    title="Custom Metadata"
+                    title={t("customMetadata")}
                     onCopy={state.copy}
                     actions={
                       state.contentKind === "table" && state.hasExpandableRows
@@ -207,7 +215,7 @@ export function DetailAttributesTab({
                   >
                     <PrettyJsonViewContent
                       state={state}
-                      title="Custom Metadata"
+                      title={t("customMetadata")}
                       borderless
                       rowActions={(row) =>
                         getMetadataRowActions({
@@ -215,6 +223,10 @@ export function DetailAttributesTab({
                           projectId,
                           filterTarget: observation ? "observations" : "traces",
                           router,
+                          t: t as (
+                            key: string,
+                            parameters?: MessageParameters,
+                          ) => string,
                         })
                       }
                     />

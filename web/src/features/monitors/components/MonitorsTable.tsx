@@ -28,6 +28,8 @@ import { getMonitorFilterConfig } from "@/src/features/filters/config/monitors-c
 import { useSidebarFilterState } from "@/src/features/filters/hooks/useSidebarFilterState";
 import { showErrorToast } from "@/src/features/notifications/showErrorToast";
 import { showSuccessToast } from "@/src/features/notifications/showSuccessToast";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 import { useOrderByState } from "@/src/features/orderBy/hooks/useOrderByState";
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
 import { default as TagList } from "@/src/features/tag/components/TagList";
@@ -72,6 +74,7 @@ type MonitorsOrderBy = RouterInputs["monitors"]["all"]["orderBy"];
 
 /** MonitorsTable renders the project's monitors as a sortable, filterable, paginated table with row navigation to the edit page. */
 export function MonitorsTable() {
+  const t = useTranslation(evaluationsMessages);
   const router = useRouter();
   const projectId = useProjectIdFromURL() ?? "";
   const utils = api.useUtils();
@@ -193,7 +196,7 @@ export function MonitorsTable() {
   const columns: LangfuseColumnDef<MonitorRow>[] = [
     {
       accessorKey: "severity",
-      header: "Severity",
+      header: t("severity"),
       id: "severity",
       enableSorting: true,
       enableResizing: false,
@@ -207,7 +210,7 @@ export function MonitorsTable() {
     },
     {
       accessorKey: "name",
-      header: "Name",
+      header: t("name"),
       id: "name",
       enableSorting: true,
       enableResizing: false,
@@ -227,7 +230,7 @@ export function MonitorsTable() {
       ? [
           {
             accessorKey: "tags",
-            header: "Tags",
+            header: t("tags"),
             id: "tags",
             enableSorting: false,
             enableResizing: false,
@@ -253,7 +256,7 @@ export function MonitorsTable() {
       : []),
     {
       accessorKey: "actions",
-      header: "Actions",
+      header: t("actions"),
       id: "actions",
       enableSorting: false,
       enableResizing: false,

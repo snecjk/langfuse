@@ -6,6 +6,7 @@ import { type JsonTableRow } from "@/src/components/table/utils/jsonExpansionUti
 import { getCopyValue } from "@/src/components/table/ValueCell";
 import { type DropdownMenu } from "@/src/components/design-system/DropdownMenu/DropdownMenu";
 import { copyTextToClipboard } from "@/src/utils/clipboard";
+import type { MessageParameters } from "@/src/features/i18n/messages";
 import {
   buildEventsTablePathForMetadataFilter,
   type MetadataFilterOperator,
@@ -36,11 +37,13 @@ export function getMetadataRowActions({
   projectId,
   filterTarget,
   router,
+  t,
 }: {
   row: Row<JsonTableRow>;
   projectId: string;
   filterTarget: "observations" | "traces";
   router: Pick<NextRouter, "asPath" | "push">;
+  t: (key: string, parameters?: MessageParameters) => string;
 }) {
   const { value, type, hasChildren, level } = row.original;
 
@@ -95,14 +98,14 @@ export function getMetadataRowActions({
     {
       type: "item",
       id: "copy-value",
-      title: hasChildren ? "Copy structure" : "Copy value",
+      title: hasChildren ? t("copyStructure") : t("copyValue"),
       icon: Copy,
       onClick: handleCopyData,
     },
     {
       type: "item",
       id: "copy-path",
-      title: "Copy path",
+      title: t("copyPath"),
       icon: Copy,
       onClick: handleCopyPath,
     },
@@ -114,7 +117,7 @@ export function getMetadataRowActions({
       {
         type: "item",
         id: "include-filter",
-        title: "Include in filter",
+        title: t("includeInFilter"),
         tooltip: includeFilterText,
         icon: Filter,
         onClick: () => navigateWithFilter(includeOperator),
@@ -122,7 +125,7 @@ export function getMetadataRowActions({
       {
         type: "item",
         id: "exclude-filter",
-        title: "Exclude from filter",
+        title: t("excludeFromFilter"),
         tooltip: excludeFilterText,
         icon: FilterX,
         onClick: () => navigateWithFilter(excludeOperator),

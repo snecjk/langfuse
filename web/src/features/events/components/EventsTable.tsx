@@ -70,6 +70,8 @@ import { createTextTableColumn } from "@/src/components/design-system/table/colu
 import { type LangfuseColumnDef } from "@/src/components/table/types";
 
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tracingMessages } from "@/src/features/i18n/messages/tracing";
 import { ObservationLevelTag } from "@/src/components/ObservationLevelTag";
 import {
   compactNumberFormatter,
@@ -327,6 +329,7 @@ export default function ObservationsEventsTable({
   isolateTableState = false,
   showAllEnvironments = false,
 }: EventsTableProps) {
+  const t = useTranslation(tracingMessages);
   const peekContext = usePeekTableState();
   const hasBatchExportAccess = useHasProjectAccess({
     projectId,
@@ -1313,7 +1316,7 @@ export default function ObservationsEventsTable({
     }),
     createIOTableColumn<EventsTableRow>({
       accessorKey: "metadata",
-      header: "Metadata",
+      header: t("metadata"),
       size: 300,
       headerTooltip: {
         description: "Add metadata to traces to track additional information.",
@@ -1391,7 +1394,7 @@ export default function ObservationsEventsTable({
     },
     {
       accessorKey: "cost",
-      header: "Cost",
+      header: t("cost"),
       id: "cost",
       enableHiding: true,
       defaultHidden: true,
@@ -1475,7 +1478,7 @@ export default function ObservationsEventsTable({
     },
     {
       accessorKey: "usage",
-      header: "Usage",
+      header: t("usage"),
       id: "usage",
       enableHiding: true,
       defaultHidden: true,
@@ -1496,7 +1499,7 @@ export default function ObservationsEventsTable({
             return Number((usage.outputUsage / latency).toFixed(1));
           },
           id: "tokensPerSecond",
-          header: "Tokens per second",
+          header: t("tokensPerSecond"),
           size: 200,
           formatter: (value) => String(value),
           defaultHidden: true,
@@ -1602,7 +1605,7 @@ export default function ObservationsEventsTable({
     }),
     {
       accessorKey: "scores",
-      header: "Scores",
+      header: t("scores"),
       id: "scores",
       enableHiding: true,
       defaultHidden: true,

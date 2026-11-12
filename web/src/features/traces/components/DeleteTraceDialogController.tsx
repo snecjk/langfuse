@@ -7,6 +7,8 @@ import { showSuccessToast } from "@/src/features/notifications/showSuccessToast"
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
 import { api } from "@/src/utils/api";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tracingMessages } from "@/src/features/i18n/messages/tracing";
 
 export function DeleteTraceDialogController({
   projectId,
@@ -26,6 +28,7 @@ export function DeleteTraceDialogController({
     openDialog: () => void;
   }) => ReactNode;
 }) {
+  const t = useTranslation(tracingMessages);
   const router = useRouter();
   const capture = usePostHogClientCapture();
   const utils = api.useUtils();
@@ -36,13 +39,13 @@ export function DeleteTraceDialogController({
 
   const disabled = useMemo(() => {
     if (!hasAccess) {
-      return { reason: "You don't have permission to delete this trace." };
+      return { reason: t("noDeletePermission") };
     }
     if (!hasEntitlement) {
-      return { reason: "Trace deletion is not available on your plan." };
+      return { reason: t("noDeleteEntitlement") };
     }
     return undefined;
-  }, [hasAccess, hasEntitlement]);
+  }, [hasAccess, hasEntitlement, t]);
 
   return (
     <ConfirmationDialogController<{
@@ -52,10 +55,14 @@ export function DeleteTraceDialogController({
       redirectUrl?: string;
       onAfterDelete?: (deletedTraceId: string) => void;
     }>
-      title={(target) => `Delete trace ${target.traceName || target.traceId}?`}
-      text="This action cannot be undone. It removes all the data associated with this trace. If this is the project default, it will be deleted for all users."
+      title={(target) =>
+        t("traceDeleteConfirmTitle", {
+          traceName: target.traceName || target.traceId,
+        })
+      }
+      text={t("traceDeleteConfirmText")}
       confirmationText={(target) => target.traceName || ""}
-      confirmLabel="Delete trace"
+      confirmLabel={t("deleteTrace")}
       variant="destructive"
       loading={deleteMutation.isPending || isDeleted}
       error={deleteMutation.error?.message}
@@ -67,9 +74,8 @@ export function DeleteTraceDialogController({
         setIsDeleted(true);
         showSuccessToast({
           operation: "trace.delete",
-          title: "Trace deleted",
-          description:
-            "Selected trace will be deleted. Traces are removed asynchronously and may continue to be visible for up to 24 hours.",
+          title: t("traceDeletedTitle"),
+          description: t("traceDeletedDesc"),
         });
         capture("trace:delete", { source: "trace" });
         if (target.redirectUrl) {
