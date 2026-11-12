@@ -6,6 +6,10 @@ import {
   Settings,
   type IconComponent,
 } from "@langfuse/icons";
+import { type useTranslation } from "@/src/features/i18n/I18nProvider";
+import { type topicsMessages } from "@/src/features/i18n/messages/topics";
+
+type T = ReturnType<typeof useTranslation<typeof topicsMessages>>;
 
 export type AutomaticProcessingState =
   | { status: "unconfigured" }
@@ -22,21 +26,30 @@ type TopicAction = {
   badge?: string;
 };
 
-const automaticBadge: Record<AutomaticProcessingState["status"], string> = {
-  unconfigured: "Off",
-  off: "Off",
-  on: "On",
-  paused: "Paused",
-};
+function automaticBadge(
+  status: AutomaticProcessingState["status"],
+  t: T,
+): string {
+  switch (status) {
+    case "unconfigured":
+    case "off":
+      return t("off");
+    case "on":
+      return t("on");
+    case "paused":
+      return t("paused");
+  }
+}
 
 function processingDisabledReason(
   state: AutomaticProcessingState,
   canWrite: boolean,
   saving: boolean,
-) {
-  if (state.status === "unconfigured") return "Configure Topics first.";
-  if (!canWrite) return "You need permission to edit Topics.";
-  if (saving) return "Saving settings…";
+  t: T,
+): string | undefined {
+  if (state.status === "unconfigured") return t("configureTopicsFirst");
+  if (!canWrite) return t("noPermissionEditTopics");
+  if (saving) return t("savingSettings");
   return undefined;
 }
 
@@ -53,6 +66,7 @@ export function prepareTopicsActions({
   onHistory,
   showUnassigned,
   onShowUnassignedChange,
+  t,
 }: {
   automaticProcessing: { state: AutomaticProcessingState; saving: boolean };
   canWrite: boolean;
@@ -65,9 +79,10 @@ export function prepareTopicsActions({
   onHistory: () => void;
   showUnassigned: boolean;
   onShowUnassignedChange: (show: boolean) => void;
+  t: T;
 }) {
   const { state, saving } = automaticProcessing;
-  const reason = processingDisabledReason(state, canWrite, saving);
+  const reason = processingDisabledReason(state, canWrite, saving, t);
   const disabledReason =
     reason && state.status === "paused"
       ? `${state.shortLabel}. ${reason}`
@@ -82,10 +97,10 @@ export function prepareTopicsActions({
       id: "automatic",
       label:
         state.status === "off" || state.status === "unconfigured"
-          ? "Analyze"
-          : "Auto-analyze",
+          ? t("analyze")
+          : t("autoAnalyze"),
       icon: Play,
-      badge: automaticBadge[state.status],
+      badge: automaticBadge(state.status, t),
       disabledReason,
       onSelect: onAutomaticProcessing,
     });
@@ -93,32 +108,32 @@ export function prepareTopicsActions({
   menu.push(
     {
       id: "regenerate",
-      label: "Regenerate topics",
+      label: t("regenerateTopics"),
       icon: RefreshCw,
       disabledReason: regenerateAvailable
         ? undefined
-        : "Configure Topics first.",
+        : t("configureTopicsFirst"),
       onSelect: onRegenerate,
     },
     {
       id: "history",
-      label: "History",
+      label: t("history"),
       icon: History,
       onSelect: onHistory,
     },
     {
       id: "configure",
-      label: "Settings",
+      label: t("settings"),
       icon: Settings,
       disabledReason: configureAvailable
         ? undefined
-        : "Topics settings are still loading.",
+        : t("topicsSettingsLoading"),
       onSelect: onConfigure,
     },
   );
   const display = {
     id: "show-unassigned",
-    label: "Show unassigned",
+    label: t("showUnassigned"),
     icon: Eye,
     checked: showUnassigned,
     onCheckedChange: onShowUnassignedChange,
