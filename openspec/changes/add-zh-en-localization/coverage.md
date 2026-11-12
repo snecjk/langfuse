@@ -66,13 +66,13 @@ claim. The matrix supersedes it for current status.
 
 | # | Route / entry | Actual owner | Role / toggle gate | Sub-flows & states | Namespace | Source migration | Verification | Exception |
 |---|---------------|--------------|--------------------|--------------------|-----------|------------------|--------------|-----------|
-| B1 | 侧栏主导航（全路由） | `layouts/routes.tsx`, `AppSidebar`, `NavMain` | 已登录 | 路由/分组、折叠/展开、账户菜单、区域菜单、升级/支持 | `navigation` | 部分迁移 | 未验证 | — |
-| B2 | 命令菜单 (⌘K) | `command-k-menu` | 已登录 | 搜索、分组、跳转、最近 | — | 未迁移 | 未验证 | — |
-| B3 | 全局通知/toast | `features/notifications`, `ErrorNotification`, `SuccessNotification` | 已登录 | 成功/错误/警告、带操作、上报 | — | 未迁移 | 未验证 | 服务端原文（原始错误诊断保留） |
-| B4 | 顶部横幅/banner | `top-banner`, `payment-banner`, `preview-deployment-banner`, `cloud-status-notification` | 已登录 | 各横幅文案与操作 | — | 未迁移 | 未验证 | — |
-| B5 | 主题/外观切换 | `theming/ThemeToggle` | 已登录 | 明暗/系统 | — | 部分迁移 | 未验证 | — |
+| B1 | 侧栏主导航（全路由） | `layouts/routes.tsx`, `AppSidebar`, `NavMain` | 已登录 | 路由/分组、折叠/展开、账户菜单、区域菜单、升级/支持 | `navigation` | 源码完成 | 未验证 | — |
+| B2 | 命令菜单 (⌘K) | `command-k-menu` | 已登录 | 搜索、分组、跳转、最近 | `navigation` | 源码完成 | 未验证 | 用户项目/组织名与跳转 URL 不翻译 |
+| B3 | 全局通知/toast | `features/notifications`, `ErrorNotification`, `SuccessNotification` | 已登录 | 成功/错误/警告、带操作、上报 | `notifications` | 源码完成 | 部分验证（ErrorNotification.clienttest 覆盖切换更新） | 服务端原文（原始错误诊断保留） |
+| B4 | 顶部横幅/banner | `top-banner`, `payment-banner`, `preview-deployment-banner`, `cloud-status-notification` | 已登录 | 各横幅文案与操作 | `notifications` | 源码完成 | 未验证 | — |
+| B5 | 主题/外观切换 | `theming/ThemeToggle` | 已登录 | 明暗/系统 | `navigation` | 部分迁移 | 未验证 | — |
 | B6 | 通用数据表格 chrome | `components/table/*`, `DataTableToolbar`, `DataTablePagination`, `DataTableRefreshButton`, `DataTableSelectAllBanner`, `DataTableColumnVisibilityFilter`, `DataTableRowHeightSwitch` | 已登录 | 分页、全选、列显示、行高、搜索模式、筛选构建器、刷新、导出、空态 | `table` | 部分迁移 | 部分验证（DataTableToolbar.clienttest 覆盖切换保留草稿/选中） | — |
-| B7 | 通用筛选器 | `features/filters`, `search-bar`, `natural-language-filters` | 已登录 | 过滤构建器、搜索栏、AI 过滤、已应用/清除 | — | 未迁移 | 未验证 | — |
+| B7 | 通用筛选器 | `features/filters`, `search-bar`, `natural-language-filters` | 已登录 | 过滤构建器、搜索栏、AI 过滤、已应用/清除 | — | 部分迁移（筛选侧栏 chrome 已迁移；filter-builder/search-bar 残余） | 未验证 | — |
 | B8 | 通用日期/时间选择器 | `components/date-picker`, `global-time-range` | 已登录 | 预设、相对时间、自定义范围 | — | 未迁移 | 未验证 | — |
 | B9 | 通用对话框/表单原语 | `components/design-system/*` (Dialog, Form, PasswordInput, Confirm, Dropzone …) | 已登录 | 按钮、占位符、工具提示、密码显隐、确认/错误/加载、aria | — | 未迁移 | 未验证 | — |
 
@@ -82,7 +82,7 @@ claim. The matrix supersedes it for current status.
 |---|---------------|--------------|--------------------|--------------------|-----------|------------------|--------------|-----------|
 | C1 | `/project/[projectId]` (Home) | 项目首页卡片 | 已登录 | 概览卡片、空态、跳转 | — | 未迁移 | 未验证 | — |
 | C2 | `/project/[projectId]/dashboards` | `features/dashboard`, `dashboards/[dashboardId]`, `dashboards/new` | 已登录 | 列表、创建、编辑、详情、空态 | `dashboards` | 部分迁移（仪表盘列表页列头与 toast 已迁移；创建/编辑/详情页未迁移） | 未验证 | — |
-| C3 | `/project/[projectId]/widgets` `/widgets/new` `/widgets/[widgetId]` | `features/widgets` | 已登录 | 图表类型、查询/指标配置、预览、错误、删除 | — | 部分迁移（ConnectedDashboardWidgetTable 接入） | 未验证 | 机器标识（指标键） |
+| C3 | `/project/[projectId]/widgets` `/widgets/new` `/widgets/[widgetId]` | `features/widgets` | 已登录 | 图表类型、查询/指标配置、预览、错误、删除 | `widgets` | 部分迁移（widgets 页面/表单/图表 chrome 与 WidgetTable 已迁移；指标键与保存配置保持原样） | 未验证 | 机器标识（指标键） |
 | C4 | `/project/[projectId]/traces` | `features/traces/TracesPage`, `TracesTable` | 已登录 | 列表列、筛选、详情跳转 | `tracing`, `table` | 部分迁移 | 部分验证（合并回归） | 用户数据（追踪内容） |
 | C5 | `/project/[projectId]/traces/[traceId]` | `TraceDetailView`, `TraceDetailViewHeader`, `TraceDetailTabsBarList`, `ObservationDetailView*`, `TracePanelNavigationHeader` | 已登录 | 详情头、tab、观察面板、Formatted/Raw、JSON 工具栏、动作菜单 | `tracing` | 部分迁移 | 部分验证 | 用户数据（输入/输出/JSON 不翻译） |
 | C6 | `/project/[projectId]/observations` `/observations/new` | `tracing-tables/observations/*` | 已登录 | 列表、新建、详情 | `tracing`, `table` | 部分迁移 | 部分验证 | — |
