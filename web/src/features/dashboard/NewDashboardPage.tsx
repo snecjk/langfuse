@@ -10,13 +10,16 @@ import { showSuccessToast } from "@/src/features/notifications/showSuccessToast"
 import { showErrorToast } from "@/src/features/notifications/showErrorToast";
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { dashboardMessages } from "@/src/features/i18n/messages/dashboard";
 
 export default function NewDashboardPage() {
   const router = useRouter();
   const { projectId } = router.query as { projectId: string };
+  const t = useTranslation(dashboardMessages);
 
   // State for new dashboard
-  const [dashboardName, setDashboardName] = useState("New Dashboard");
+  const [dashboardName, setDashboardName] = useState("");
   const [dashboardDescription, setDashboardDescription] = useState("");
 
   // Check project access
@@ -30,15 +33,15 @@ export default function NewDashboardPage() {
     onSuccess: (data) => {
       showSuccessToast({
         operation: "dashboard.create",
-        title: "Dashboard created",
-        description: "Your new dashboard has been created successfully",
+        title: t("dashboardCreated"),
+        description: t("dashboardCreatedDesc"),
       });
       // Navigate to the newly created dashboard
       router.push(`/project/${projectId}/dashboards/${data.id}`);
     },
     onError: (error) => {
       showErrorToast(
-        "Error creating dashboard",
+        t("errorCreateDashboard"),
         error.message,
         classifyTrpcToastError(error, "dashboard.create"),
       );
@@ -54,7 +57,7 @@ export default function NewDashboardPage() {
         description: dashboardDescription,
       });
     } else {
-      showErrorToast("Validation error", "Dashboard name is required", {
+      showErrorToast(t("dashboardNameRequired"), {
         operation: "dashboard.create",
         errorOrigin: "frontend",
         errorCategory: "user_input",
@@ -66,7 +69,7 @@ export default function NewDashboardPage() {
     <Page
       withPadding
       headerProps={{
-        title: "Create Dashboard",
+        title: t("createDashboard"),
         help: {
           description: "Create a new dashboard for your project",
         },
@@ -76,7 +79,7 @@ export default function NewDashboardPage() {
               variant="outline"
               onClick={() => router.push(`/project/${projectId}/dashboards`)}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button
               onClick={handleCreateDashboard}
@@ -87,7 +90,7 @@ export default function NewDashboardPage() {
               }
               loading={createDashboard.isPending}
             >
-              Create
+              {t("createDashboard")}
             </Button>
           </>
         ),
@@ -95,27 +98,27 @@ export default function NewDashboardPage() {
     >
       <div className="mx-auto my-8 max-w-xl space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="dashboard-name">Dashboard Name</Label>
+          <Label htmlFor="dashboard-name">{t("dashboardName")}</Label>
           <Input
             id="dashboard-name"
             value={dashboardName}
             onChange={(e) => {
               setDashboardName(e.target.value);
             }}
-            placeholder="Enter dashboard name"
+            placeholder={t("dashboardNamePlaceholder")}
             required
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="dashboard-description">Description</Label>
+          <Label htmlFor="dashboard-description">{t("description")}</Label>
           <Textarea
             id="dashboard-description"
             value={dashboardDescription}
             onChange={(e) => {
               setDashboardDescription(e.target.value);
             }}
-            placeholder="Describe the purpose of this dashboard. Optional, but very helpful."
+            placeholder={t("dashboardDescriptionPlaceholder")}
             rows={4}
           />
         </div>

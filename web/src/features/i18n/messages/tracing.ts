@@ -89,6 +89,14 @@ export const tracingMessages = {
     traceView: "Trace view",
     collapseAllRows: "Collapse all rows",
     expandAllRows: "Expand all rows",
+    accessDenied: "You do not have access to this trace.",
+    traceNotFound: "Trace not found",
+    traceNotFoundDesc:
+      "The trace is either still being processed or has been deleted.",
+    retry: "Retry",
+    signInToLangfuse: "Sign in to Langfuse",
+    signIn: "Sign in",
+    breadcrumbsTraces: "Traces",
   },
   "zh-CN": {
     startTime: "开始时间",
@@ -173,5 +181,12 @@ export const tracingMessages = {
     traceView: "追踪视图",
     collapseAllRows: "折叠所有行",
     expandAllRows: "展开所有行",
+    accessDenied: "你没有权限访问此追踪。",
+    traceNotFound: "追踪未找到",
+    traceNotFoundDesc: "此追踪正在处理中或已被删除。",
+    retry: "重试",
+    signInToLangfuse: "登录 Langfuse",
+    signIn: "登录",
+    breadcrumbsTraces: "追踪",
   },
 } satisfies Messages;

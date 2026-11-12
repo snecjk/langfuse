@@ -11,6 +11,8 @@ import {
   useCallback,
 } from "react";
 import { ScrollArea } from "@/src/components/ui/scroll-area";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tableMessages } from "@/src/features/i18n/messages/table";
 import { Tabs } from "@/src/components/design-system/Tabs/Tabs";
 import {
   Select,
@@ -217,6 +219,7 @@ export function DataTableControls({
   const { setOpen, tableName, isMobile } = useDataTableControls();
   const { isLangfuseCloud } = useLangfuseCloudRegion();
   const capture = usePostHogClientCapture();
+  const t = useTranslation(tableMessages);
   const [aiPopoverOpen, setAiPopoverOpen] = useState(false);
   const activeFilterCount = queryFilter.filters.filter(
     (filter) => filter.isActive,
@@ -808,7 +811,7 @@ export function DataTableControls({
         >
           {visibleFilters.length === 0 && (
             <p className="text-muted-foreground pb-2 text-xs">
-              No active filters.
+              {t("noActiveFilters")}
             </p>
           )}
           {/* Popover + command list, not a DropdownMenu: the catalog runs to
@@ -828,13 +831,13 @@ export function DataTableControls({
                 disabled={addableFilters.length === 0}
               >
                 <Plus size="base" color="default" __rawClassName="mr-1.5" />
-                Add filter
+                {t("addFilter")}
               </Button>
             </PopoverTrigger>
             <PopoverContent align="start" className="w-56 p-0">
               <InputCommand shouldFilter={false}>
                 <InputCommandInput
-                  placeholder="Search filters"
+                  placeholder={t("searchFilters")}
                   variant="bottom"
                   value={addFilterSearch}
                   onValueChange={(query) => {
@@ -845,7 +848,7 @@ export function DataTableControls({
                 <InputCommandList className="max-h-72">
                   {rankedAddableFilters.length === 0 ? (
                     <p className="text-muted-foreground px-2 py-6 text-center text-xs">
-                      No filters match &quot;{addFilterSearch.trim()}&quot;
+                      {t("noFiltersMatch", { query: addFilterSearch.trim() })}
                     </p>
                   ) : (
                     <InputCommandGroup>
@@ -922,9 +925,7 @@ export function DataTableControls({
                   setOpen(true);
                   emitSidebarToggled(true, "rail_badge");
                 }}
-                aria-label={`Show ${activeFilterCount} active ${
-                  activeFilterCount === 1 ? "filter" : "filters"
-                }`}
+                aria-label={t("activeFilters", { count: activeFilterCount })}
                 className="mt-2 cursor-pointer"
               >
                 <Badge
@@ -936,8 +937,7 @@ export function DataTableControls({
             </TooltipTrigger>
             <TooltipContent side="right" className="max-w-64 text-xs">
               <p className="font-bold">
-                {activeFilterCount} active{" "}
-                {activeFilterCount === 1 ? "filter" : "filters"}
+                {t("activeFilters", { count: activeFilterCount })}
               </p>
               {queryFilter.filters
                 .filter((filter) => filter.isActive)
@@ -1010,7 +1010,7 @@ export function DataTableControls({
               </Tooltip>
             )}
             {layout !== "inline" && (
-              <span className="text-sm font-bold">Filters</span>
+              <span className="text-sm font-bold">{t("filterOptions")}</span>
             )}
             {/* Inline: the count already shows on the sheet's Filters trigger
                 and footer, so a bare number here (title hidden) is just noise. */}
@@ -1035,7 +1035,7 @@ export function DataTableControls({
                       </Button>
                     </PopoverTrigger>
                   </TooltipTrigger>
-                  <TooltipContent>Filter with AI</TooltipContent>
+                  <TooltipContent>{t("filterOptions")}</TooltipContent>
                 </Tooltip>
                 <PopoverContent align="center" className="w-[400px]">
                   <DataTableAIFilters
@@ -1079,8 +1079,8 @@ export function DataTableControls({
                   }}
                   aria-label={
                     expandedVisibleCount === 0
-                      ? "Expand all filters"
-                      : "Collapse all filters"
+                      ? t("expandAllFilters")
+                      : t("collapseAllFilters")
                   }
                 >
                   {expandedVisibleCount === 0 ? (
@@ -1092,8 +1092,8 @@ export function DataTableControls({
               </TooltipTrigger>
               <TooltipContent>
                 {expandedVisibleCount === 0
-                  ? "Expand all filters"
-                  : "Collapse all filters"}
+                  ? t("expandAllFilters")
+                  : t("collapseAllFilters")}
               </TooltipContent>
             </Tooltip>
             <DropdownMenu>
@@ -2460,6 +2460,7 @@ interface FilterModeTabsProps {
 }
 
 function FilterModeTabs({ mode, onModeChange }: FilterModeTabsProps) {
+  const t = useTranslation(tableMessages);
   return (
     // px-3 = the header box's inset, so the toggle lines up with the facet rows.
     <div className="mt-1 mb-2 px-3">
@@ -2468,8 +2469,8 @@ function FilterModeTabs({ mode, onModeChange }: FilterModeTabsProps) {
         onValueChange={(newMode) => onModeChange(newMode as "select" | "text")}
       >
         <Tabs.List variant="inset" layout="full" size="sm">
-          <Tabs.Trigger value="select" label="Select" />
-          <Tabs.Trigger value="text" label="Text" />
+          <Tabs.Trigger value="select" label={t("selectMode")} />
+          <Tabs.Trigger value="text" label={t("textMode")} />
         </Tabs.List>
       </Tabs>
     </div>

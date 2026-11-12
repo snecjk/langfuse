@@ -17,6 +17,8 @@ import { getTraceScopeTabs } from "./fns/getTraceScopeTabs";
 import { getTraceScopeQuery } from "./fns/getTraceScopeQuery";
 import { resolveTraceScope } from "./fns/resolveTraceScope";
 import { api } from "@/src/utils/api";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tracingMessages } from "@/src/features/i18n/messages/tracing";
 
 export function TracePage({
   traceId,
@@ -34,6 +36,7 @@ export function TracePage({
     "unifiedTraceSessionView",
     { projectId: routeProjectId },
   );
+  const t = useTranslation(tracingMessages);
 
   // Shared, beta-aware fetch (same hook the peek uses).
   const trace = useTraceDetailData({
@@ -47,16 +50,15 @@ export function TracePage({
     projectIdForAccessCheck,
   );
 
-  if (trace.isUnauthorized)
-    return <ErrorPage message="You do not have access to this trace." />;
+  if (trace.isUnauthorized) return <ErrorPage message={t("accessDenied")} />;
 
   if (trace.isNotFound)
     return (
       <ErrorPage
-        title="Trace not found"
-        message="The trace is either still being processed or has been deleted."
+        title={t("traceNotFound")}
+        message={t("traceNotFoundDesc")}
         additionalButton={{
-          label: "Retry",
+          label: t("retry"),
           onClick: () => window.location.reload(),
         }}
       />
