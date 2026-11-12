@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-deprecated -- Legacy UI usage retained during migration to design-system components. */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { dashboardMessages } from "@/src/features/i18n/messages/dashboards";
 import { showErrorToast } from "@/src/features/notifications/showErrorToast";
 import { showSuccessToast } from "@/src/features/notifications/showSuccessToast";
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
@@ -27,6 +29,7 @@ export function ConnectedDashboardTable() {
   const router = useRouter();
   const utils = api.useUtils();
   const capture = usePostHogClientCapture();
+  const t = useTranslation(dashboardMessages);
   const hasAccess = useHasProjectAccess({ projectId, scope: "dashboards:CUD" });
   const [selectedDashboard, setSelectedDashboard] =
     useState<DashboardTableRow | null>(null);
@@ -35,8 +38,8 @@ export function ConnectedDashboardTable() {
       utils.dashboard.invalidate();
       showSuccessToast({
         operation: "dashboard.clone",
-        title: "Dashboard cloned",
-        description: "The dashboard has been cloned successfully",
+        title: t("dashboardCloned"),
+        description: t("dashboardClonedHelp"),
       });
     },
     onError: (error) => {
@@ -52,8 +55,8 @@ export function ConnectedDashboardTable() {
       capture("dashboard:delete_dashboard_button_click");
       showSuccessToast({
         operation: "dashboard.delete",
-        title: "Dashboard deleted",
-        description: "The dashboard has been deleted successfully",
+        title: t("dashboardDeleted"),
+        description: t("dashboardDeletedHelp"),
       });
       utils.dashboard.invalidate();
     },

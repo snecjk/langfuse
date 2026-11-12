@@ -81,7 +81,7 @@ claim. The matrix supersedes it for current status.
 | # | Route / entry | Actual owner | Role / toggle gate | Sub-flows & states | Namespace | Source migration | Verification | Exception |
 |---|---------------|--------------|--------------------|--------------------|-----------|------------------|--------------|-----------|
 | C1 | `/project/[projectId]` (Home) | 项目首页卡片 | 已登录 | 概览卡片、空态、跳转 | — | 未迁移 | 未验证 | — |
-| C2 | `/project/[projectId]/dashboards` | `features/dashboard`, `dashboards/[dashboardId]`, `dashboards/new` | 已登录 | 列表、创建、编辑、详情、空态 | — | 部分迁移（ConnectedDashboardTable 接入） | 未验证 | — |
+| C2 | `/project/[projectId]/dashboards` | `features/dashboard`, `dashboards/[dashboardId]`, `dashboards/new` | 已登录 | 列表、创建、编辑、详情、空态 | `dashboards` | 部分迁移（仪表盘列表页列头与 toast 已迁移；创建/编辑/详情页未迁移） | 未验证 | — |
 | C3 | `/project/[projectId]/widgets` `/widgets/new` `/widgets/[widgetId]` | `features/widgets` | 已登录 | 图表类型、查询/指标配置、预览、错误、删除 | — | 部分迁移（ConnectedDashboardWidgetTable 接入） | 未验证 | 机器标识（指标键） |
 | C4 | `/project/[projectId]/traces` | `features/traces/TracesPage`, `TracesTable` | 已登录 | 列表列、筛选、详情跳转 | `tracing`, `table` | 部分迁移 | 部分验证（合并回归） | 用户数据（追踪内容） |
 | C5 | `/project/[projectId]/traces/[traceId]` | `TraceDetailView`, `TraceDetailViewHeader`, `TraceDetailTabsBarList`, `ObservationDetailView*`, `TracePanelNavigationHeader` | 已登录 | 详情头、tab、观察面板、Formatted/Raw、JSON 工具栏、动作菜单 | `tracing` | 部分迁移 | 部分验证 | 用户数据（输入/输出/JSON 不翻译） |

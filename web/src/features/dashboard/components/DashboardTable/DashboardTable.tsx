@@ -1,5 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { Copy, Edit, Trash2 } from "@langfuse/icons";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { dashboardMessages } from "@/src/features/i18n/messages/dashboards";
 
 import {
   Table,
@@ -43,11 +45,12 @@ export function DashboardTable({
   onEdit: (dashboard: DashboardTableRow) => void;
   projectId: string;
 }) {
+  const t = useTranslation(dashboardMessages);
   const columns = useMemo<LangfuseColumnDef<DashboardTableRow>[]>(
     () => [
       createLinkTableColumn<DashboardTableRow>({
         accessorKey: "name",
-        header: "Name",
+        header: t("name"),
         enableSorting: true,
         size: 200,
         getCell: (name, { row }) => {
@@ -64,7 +67,7 @@ export function DashboardTable({
       }),
       createTextTableColumn<DashboardTableRow>({
         accessorKey: "description",
-        header: "Description",
+        header: t("description"),
         size: 300,
       }),
       createBadgeTableColumn<DashboardTableRow>({
@@ -72,7 +75,7 @@ export function DashboardTable({
         id: "ownerTag",
         accessorFn: (row) =>
           row.owner === "LANGFUSE" ? "Langfuse" : "Project",
-        header: "Owner",
+        header: t("owner"),
         size: 80,
         getBadge: (owner) => ({
           value: owner,
@@ -81,20 +84,20 @@ export function DashboardTable({
       }),
       createDateTableColumn<DashboardTableRow>({
         accessorKey: "createdAt",
-        header: "Created At",
+        header: t("createdAt"),
         enableSorting: true,
         mode: "relative",
         size: 80,
       }),
       createDateTableColumn<DashboardTableRow>({
         accessorKey: "updatedAt",
-        header: "Updated At",
+        header: t("updatedAt"),
         enableSorting: true,
         mode: "relative",
         size: 80,
       }),
     ],
-    [projectId],
+    [projectId, t],
   );
   const actions = useCallback<
     NonNullable<TableProps<DashboardTableRow>["actions"]>
@@ -105,19 +108,15 @@ export function DashboardTable({
         type: "item",
         title: "Edit",
         icon: Edit,
-        disabled: hasAccess
-          ? undefined
-          : { reason: "You do not have permission to edit dashboards" },
+        disabled: hasAccess ? undefined : { reason: t("noPermissionEdit") },
         onClick: () => onEdit(dashboard),
       },
       {
         id: "clone",
         type: "item",
-        title: "Clone",
+        title: t("clone"),
         icon: Copy,
-        disabled: hasAccess
-          ? undefined
-          : { reason: "You do not have permission to clone dashboards" },
+        disabled: hasAccess ? undefined : { reason: t("noPermissionClone") },
         onClick: () => onClone(dashboard),
       },
       ...(dashboard.owner === "PROJECT"
@@ -126,20 +125,20 @@ export function DashboardTable({
             {
               id: "delete",
               type: "item" as const,
-              title: "Delete",
+              title: t("delete"),
               icon: Trash2,
               variant: "destructive" as const,
               disabled: hasAccess
                 ? undefined
                 : {
-                    reason: "You do not have permission to delete dashboards",
+                    reason: t("noPermissionDelete"),
                   },
               onClick: () => onDelete(dashboard),
             },
           ]
         : []),
     ],
-    [hasAccess, onClone, onDelete, onEdit],
+    [hasAccess, onClone, onDelete, onEdit, t],
   );
 
   return (
