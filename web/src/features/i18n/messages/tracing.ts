@@ -87,6 +87,8 @@ export const tracingMessages = {
     timeline: "Timeline",
     selectTraceView: "Select trace view",
     traceView: "Trace view",
+    collapseAllRows: "Collapse all rows",
+    expandAllRows: "Expand all rows",
   },
   "zh-CN": {
     startTime: "开始时间",
@@ -169,5 +171,7 @@ export const tracingMessages = {
     timeline: "时间线",
     selectTraceView: "选择追踪视图",
     traceView: "追踪视图",
+    collapseAllRows: "折叠所有行",
+    expandAllRows: "展开所有行",
   },
 } satisfies Messages;

@@ -332,10 +332,10 @@ function TracePanelNavigationHeaderExpanded({
                     }
                   >
                     <DropdownMenuRadioItem value="tree">
-                      Tree
+                      {t("tree")}
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="timeline">
-                      Timeline
+                      {t("timeline")}
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem
                       value="graph"
@@ -361,7 +361,9 @@ function TracePanelNavigationHeaderExpanded({
                       aria-label={t("selectTraceView")}
                       className="h-7 min-w-20 justify-between gap-1 px-2 text-xs font-bold"
                     >
-                      {TRACE_VIEW_LABELS[activeView]}
+                      {TRACE_VIEW_LABELS[activeView]
+                        ? t(TRACE_VIEW_LABELS[activeView])
+                        : activeView}
                       <ChevronDown
                         size="base"
                         color="tertiary"
@@ -395,10 +397,13 @@ const GRAPH_UNAVAILABLE_COPY: Record<GraphUnavailableReason, string> = {
 
 type TraceViewMode = "tree" | "timeline" | "graph";
 
-const TRACE_VIEW_LABELS: Record<TraceViewMode, string> = {
-  tree: "Tree",
-  timeline: "Timeline",
-  graph: "Graph",
+const TRACE_VIEW_LABELS: Record<
+  TraceViewMode,
+  keyof typeof tracingMessages.en
+> = {
+  tree: "tree",
+  timeline: "timeline",
+  graph: "graph",
 };
 
 function ViewModeSwitch({

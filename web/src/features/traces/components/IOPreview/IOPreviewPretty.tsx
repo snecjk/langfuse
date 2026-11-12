@@ -13,6 +13,8 @@ import {
   type SkillsResourceLoaded,
   deepParseJson,
 } from "@langfuse/shared";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { tracingMessages } from "@/src/features/i18n/messages/tracing";
 import { PrettyJsonViewContent } from "@/src/components/ui/PrettyJsonViewContent";
 import { IOSection, type IOSectionAction } from "@/src/components/ui/IOSection";
 import {
@@ -114,6 +116,7 @@ function JsonInputOutputView({
   onOutputExpansionChange,
   outputActions,
 }: JsonInputOutputViewProps) {
+  const t = useTranslation(tracingMessages);
   const showInput = !hideInput && !(hideIfNull && !parsedInput);
   const showOutput = !hideOutput && !(hideIfNull && !parsedOutput);
 
@@ -131,7 +134,7 @@ function JsonInputOutputView({
         >
           {(state) => (
             <IOSection
-              title="Input"
+              title={t("input")}
               onCopy={state.copy}
               actions={
                 state.contentKind === "table" && state.hasExpandableRows
@@ -141,8 +144,8 @@ function JsonInputOutputView({
                           ? FoldVertical
                           : UnfoldVertical,
                         label: state.allRowsExpanded
-                          ? "Collapse all rows"
-                          : "Expand all rows",
+                          ? t("collapseAllRows")
+                          : t("expandAllRows"),
                         onClick: state.toggleAllRows,
                       },
                     ]
@@ -150,7 +153,11 @@ function JsonInputOutputView({
               }
               variant={state.contentKind === "table" ? "table" : "text"}
             >
-              <PrettyJsonViewContent state={state} title="Input" borderless />
+              <PrettyJsonViewContent
+                state={state}
+                title={t("input")}
+                borderless
+              />
             </IOSection>
           )}
         </JsonViewController>
@@ -167,7 +174,7 @@ function JsonInputOutputView({
         >
           {(state) => (
             <IOSection
-              title="Output"
+              title={t("output")}
               onCopy={state.copy}
               actions={
                 state.contentKind === "table" && state.hasExpandableRows
@@ -177,8 +184,8 @@ function JsonInputOutputView({
                           ? FoldVertical
                           : UnfoldVertical,
                         label: state.allRowsExpanded
-                          ? "Collapse all rows"
-                          : "Expand all rows",
+                          ? t("collapseAllRows")
+                          : t("expandAllRows"),
                         onClick: state.toggleAllRows,
                       },
                       ...(outputActions ?? []),
@@ -187,7 +194,11 @@ function JsonInputOutputView({
               }
               variant={state.contentKind === "table" ? "table" : "text"}
             >
-              <PrettyJsonViewContent state={state} title="Output" borderless />
+              <PrettyJsonViewContent
+                state={state}
+                title={t("output")}
+                borderless
+              />
             </IOSection>
           )}
         </JsonViewController>
@@ -217,8 +228,6 @@ function isChatIO(value: unknown): boolean {
   if (Array.isArray(messages)) return messages.some(hasDeclaredRole);
   return hasDeclaredRole(value);
 }
-
-const SIDE_TITLES = { input: "Input", output: "Output" } as const;
 
 export interface IOPreviewPrettyProps extends ExpansionStateProps {
   skills?:
@@ -296,6 +305,7 @@ export function IOPreviewPretty({
 }: IOPreviewPrettyProps) {
   const { forcedTheme, resolvedTheme } = useTheme();
   const { statusPresentation, parsedStatusMessage } = useStatusMessage(status);
+  const t = useTranslation(tracingMessages);
   const [isSkillsExpanded, setSkillsExpanded] = useState(false);
   const [expandedSkillKey, setExpandedSkillKey] = useState("");
   const [activeSkillTab, setActiveSkillTab] = useState("requested");
@@ -639,8 +649,8 @@ export function IOPreviewPretty({
                           ? FoldVertical
                           : UnfoldVertical,
                         label: state.allRowsExpanded
-                          ? "Collapse all rows"
-                          : "Expand all rows",
+                          ? t("collapseAllRows")
+                          : t("expandAllRows"),
                         onClick: state.toggleAllRows,
                       },
                     ]
@@ -880,7 +890,7 @@ export function IOPreviewPretty({
                         message={message}
                         title={
                           titleBySide[side]
-                            ? SIDE_TITLES[side]
+                            ? t(side === "input" ? "input" : "output")
                             : getMessageTitle(message)
                         }
                         toolCallNumbers={messageToToolCallNumbers.get(

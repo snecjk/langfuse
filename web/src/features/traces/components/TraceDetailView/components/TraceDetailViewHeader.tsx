@@ -309,7 +309,7 @@ function LoadedTraceDetailViewHeader({
                           {...getTriggerProps()}
                         >
                           <PlusIcon size="base" color="default" />
-                          <span>Add to</span>
+                          <span>{t("addTo")}</span>
                           <DropdownIndicator size="sm" nudge />
                         </Button>
                       )}
@@ -338,7 +338,7 @@ function LoadedTraceDetailViewHeader({
                         ) : (
                           <SquarePen size="base" color="default" />
                         )}
-                        <span>Annotate</span>
+                        <span>{t("annotate")}</span>
                       </Button>
                     )}
                     <Button
