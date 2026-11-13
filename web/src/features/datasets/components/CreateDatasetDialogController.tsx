@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-deprecated -- Legacy UI usage retained during migration to design-system components. */
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
 import { Dialog } from "@/src/components/ui/dialog";
 import {
@@ -17,6 +19,7 @@ export function CreateDatasetDialogController({
     openDialog: () => void;
   }) => ReactNode;
 }) {
+  const t = useTranslation(datasetsMessages);
   const capture = usePostHogClientCapture();
   const [open, setOpen] = useState(false);
   const hasAccess = useHasProjectAccess({
@@ -26,7 +29,7 @@ export function CreateDatasetDialogController({
 
   const disabled = hasAccess
     ? undefined
-    : { reason: "You don't have permission to create a dataset." };
+    : { reason: t("permissionCreateDataset") };
 
   const openDialog = () => {
     if (!hasAccess) return;

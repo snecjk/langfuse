@@ -4,6 +4,8 @@ import { showErrorToast } from "@/src/features/notifications/showErrorToast";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
 import { MAX_FILE_SIZE_BYTES } from "@/src/features/datasets/components/UploadDatasetCsv";
 import { type BulkDatasetItemValidationError } from "@langfuse/shared";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 import chunk from "lodash/chunk";
 import {
   parseCsvClient,
@@ -67,6 +69,7 @@ type UseCsvImportOptions = {
 };
 
 export function useCsvImport(options: UseCsvImportOptions) {
+  const t = useTranslation(datasetsMessages);
   const [progress, setProgress] = useState<ImportProgress>({
     totalItems: 0,
     processedItems: 0,
@@ -86,7 +89,7 @@ export function useCsvImport(options: UseCsvImportOptions) {
 
     if (!csvFile) return false;
     if (csvFile.size > MAX_FILE_SIZE_BYTES) {
-      showErrorToast("File too large", "Maximum file size is 10MB", {
+      showErrorToast(t("fileTooLargeImport"), t("fileTooLargeImportHelp"), {
         operation: "dataset_items.import",
         errorOrigin: "frontend",
         errorCategory: "resource_limit",
@@ -249,7 +252,7 @@ export function useCsvImport(options: UseCsvImportOptions) {
       });
       if (error instanceof Error && processedCount === 0) {
         showErrorToast(
-          "Failed to import all dataset items",
+          t("importFailed"),
           error.message,
           hasStartedUpload
             ? classifyTrpcToastError(error, "dataset_items.import")
@@ -261,8 +264,8 @@ export function useCsvImport(options: UseCsvImportOptions) {
         );
       } else {
         showErrorToast(
-          "Failed to import all dataset items",
-          `Please try again starting from row ${processedCount + 1}.`,
+          t("importFailed"),
+          t("importFailedPartial", { row: processedCount + 1 }),
           classifyTrpcToastError(error, "dataset_items.import"),
         );
       }

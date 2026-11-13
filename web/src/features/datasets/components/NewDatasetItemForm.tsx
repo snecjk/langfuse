@@ -16,7 +16,7 @@ import {
 import { api } from "@/src/utils/api";
 import { Plus } from "@langfuse/icons";
 import { useTranslation } from "@/src/features/i18n/I18nProvider";
-import { catalogMessages } from "@/src/features/i18n/messages/catalog";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 import {
   useState,
   useMemo,
@@ -178,6 +178,7 @@ async function prepareInitialValues(
 }
 
 export function NewDatasetItemForm(props: NewDatasetItemFormProps) {
+  const t = useTranslation(datasetsMessages);
   const [source] = useState(props);
   const formId = useId();
   const datasets = api.datasets.allDatasetMeta.useQuery({
@@ -197,13 +198,13 @@ export function NewDatasetItemForm(props: NewDatasetItemFormProps) {
   if (datasets.isError && !datasets.data) {
     return (
       <div className="flex flex-col items-start gap-2">
-        <p>Datasets could not be loaded.</p>
+        <p>{t("datasetsCouldNotLoad")}</p>
         <Button
           type="button"
           variant="outline"
           onClick={() => datasets.refetch()}
         >
-          Try again
+          {t("tryAgain")}
         </Button>
       </div>
     );
@@ -227,7 +228,7 @@ function InitializedNewDatasetItemForm({
   initialValues: NewDatasetItemFormValues;
   datasets: DatasetWithSchema[];
 }) {
-  const tr = useTranslation(catalogMessages);
+  const t = useTranslation(datasetsMessages);
   const [formError, setFormError] = useState<string | null>(null);
   const [screen, setScreen] = useState<"item" | "create">("item");
   const [createdDatasets, setCreatedDatasets] = useState<DatasetWithSchema[]>(
@@ -284,20 +285,16 @@ function InitializedNewDatasetItemForm({
     async (file: File): Promise<string | null> => {
       if (submissionOwner.current.pending) return null;
       if (!uploadDatasetId) {
-        showErrorToast(
-          "Select a dataset first",
-          "Choose a dataset before attaching media.",
-          {
-            operation: "dataset_item_media.upload",
-            errorOrigin: "frontend",
-            errorCategory: "user_input",
-          },
-        );
+        showErrorToast(t("selectDatasetFirst"), t("chooseDatasetBeforeMedia"), {
+          operation: "dataset_item_media.upload",
+          errorOrigin: "frontend",
+          errorCategory: "user_input",
+        });
         return null;
       }
       return uploadFile(file, "input");
     },
-    [uploadDatasetId, uploadFile],
+    [uploadDatasetId, uploadFile, t],
   );
 
   const handleFileUpload =
@@ -449,10 +446,10 @@ function InitializedNewDatasetItemForm({
                   name="datasetIds"
                   render={({ field }) => (
                     <FormItem className="flex min-w-0 flex-1 flex-col">
-                      <FormLabel>{tr("targetDatasets")}</FormLabel>
+                      <FormLabel>{t("targetDatasets")}</FormLabel>
                       <FormControl>
                         <MultiSelectTagInput
-                          aria-label={tr("targetDatasets")}
+                          aria-label={t("targetDatasets")}
                           disabled={isPending}
                           value={field.value}
                           options={datasets.map((dataset) => ({
@@ -467,9 +464,9 @@ function InitializedNewDatasetItemForm({
                             field.onChange(datasetIds);
                             selectDatasets(datasetIds);
                           }}
-                          placeholder={tr("selectDatasets")}
-                          searchPlaceholder={tr("searchDatasets")}
-                          emptyMessage={tr("noDatasetsFound")}
+                          placeholder={t("selectDatasets")}
+                          searchPlaceholder={t("searchDatasets")}
+                          emptyMessage={t("noDatasetsFound")}
                         />
                       </FormControl>
                       <FormMessage />
@@ -477,7 +474,7 @@ function InitializedNewDatasetItemForm({
                   )}
                 />
                 <DesignSystemButton
-                  text={tr("createDatasetAction")}
+                  text={t("createDatasetAction")}
                   icon={Plus}
                   variant="secondary"
                   disabled={isPending || pendingUploads.length > 0}
@@ -492,7 +489,7 @@ function InitializedNewDatasetItemForm({
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
-                      <FormLabel>Input</FormLabel>
+                      <FormLabel>{t("input")}</FormLabel>
                       {hasInputSchema &&
                         selectedDatasets
                           .filter((d) => d.inputSchema)
@@ -543,7 +540,7 @@ function InitializedNewDatasetItemForm({
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
-                      <FormLabel>Expected output</FormLabel>
+                      <FormLabel>{t("expectedOutput")}</FormLabel>
                       {hasOutputSchema &&
                         selectedDatasets
                           .filter((d) => d.expectedOutputSchema)
@@ -596,7 +593,7 @@ function InitializedNewDatasetItemForm({
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
-                      <FormLabel>Metadata</FormLabel>
+                      <FormLabel>{t("metadata")}</FormLabel>
                       <DatasetItemFieldToolbar
                         copyValue={field.value}
                         disabled={isPending}
@@ -636,7 +633,7 @@ function InitializedNewDatasetItemForm({
             />
             {formError ? (
               <p className="mt-2 text-center">
-                <span className="font-bold">Error:</span> {formError}
+                <span className="font-bold">{t("formError")}</span> {formError}
               </p>
             ) : null}
           </div>
@@ -722,6 +719,7 @@ const AddItemsButton = ({
   isPending: boolean;
   pendingUploads: PendingMediaUpload[];
 }) => {
+  const t = useTranslation(datasetsMessages);
   const [input, expectedOutput] = useWatch({
     control,
     name: ["input", "expectedOutput"],
@@ -742,10 +740,10 @@ const AddItemsButton = ({
         pendingUploads.length > 0
       }
     >
-      Add
+      {t("add")}
       {selectedDatasetCount > 1
-        ? ` to ${selectedDatasetCount} datasets`
-        : " to dataset"}
+        ? ` ${t("addToDatasets", { count: selectedDatasetCount })}`
+        : ` ${t("addToDataset")}`}
     </Button>
   );
 };

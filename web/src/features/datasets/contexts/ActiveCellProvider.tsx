@@ -3,6 +3,8 @@ import { createContext, useContext, useState, type ReactNode } from "react";
 import { useStore } from "zustand";
 import { createStore } from "zustand/vanilla";
 import { showToast } from "@/src/features/notifications/showToast";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 
 type ActiveCell = {
   datasetRunId: string;
@@ -29,7 +31,7 @@ const isSameTarget = (left: CellTarget | null, right: CellTarget | null) =>
   left?.traceId === right?.traceId &&
   left?.observationId === right?.observationId;
 
-function createActiveCellStore() {
+function createActiveCellStore(saveCommentFirst: string) {
   return createStore<ActiveCellState>((set, get) => ({
     activeCell: null,
     hasCommentDraft: false,
@@ -40,7 +42,7 @@ function createActiveCellStore() {
         if (!sameTarget && hasCommentDraft) {
           showToast({
             type: "ERROR",
-            title: "Please save or discard your comment before proceeding",
+            title: saveCommentFirst,
             analytics: {
               operation: "dataset_annotation.navigate",
               errorOrigin: "frontend",
@@ -73,7 +75,8 @@ const ActiveCellContext = createContext<
 >(undefined);
 
 export function ActiveCellProvider({ children }: { children: ReactNode }) {
-  const [store] = useState(createActiveCellStore);
+  const t = useTranslation(datasetsMessages);
+  const [store] = useState(() => createActiveCellStore(t("saveCommentFirst")));
 
   return (
     <ActiveCellContext.Provider value={store}>

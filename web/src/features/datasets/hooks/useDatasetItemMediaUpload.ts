@@ -8,6 +8,8 @@ import { api } from "@/src/utils/api";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
 import { safeRandomUUID } from "@/src/utils/safe-random-uuid";
 import { type DatasetItemMediaField } from "@langfuse/shared";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 
 const SUPPORTED_CONTENT_TYPES = new Set<string>(
   Object.values(MediaContentType),
@@ -55,6 +57,7 @@ export function useDatasetItemMediaUpload({
   // generates the id up front); the association is claimed when it is written.
   datasetItemId: string;
 }) {
+  const t = useTranslation(datasetsMessages);
   const [pendingUploads, setPendingUploads] = useState<PendingMediaUpload[]>(
     [],
   );
@@ -74,8 +77,10 @@ export function useDatasetItemMediaUpload({
     ): Promise<string | null> => {
       if (!SUPPORTED_CONTENT_TYPES.has(file.type)) {
         showErrorToast(
-          "Unsupported file type",
-          `${file.type || "Unknown type"} is not supported for media uploads.`,
+          t("unsupportedMediaType"),
+          t("unsupportedMediaTypeHelp", {
+            type: file.type || t("unknownType"),
+          }),
           {
             operation: "dataset_item_media.upload",
             errorOrigin: "frontend",
@@ -87,8 +92,10 @@ export function useDatasetItemMediaUpload({
 
       if (file.size > MAX_BROWSER_MEDIA_UPLOAD_SIZE_BYTES) {
         showErrorToast(
-          "File too large",
-          `Maximum file size is ${MAX_BROWSER_MEDIA_UPLOAD_SIZE_MB}MB`,
+          t("mediaFileTooLarge"),
+          t("mediaFileTooLargeHelp", {
+            size: MAX_BROWSER_MEDIA_UPLOAD_SIZE_MB,
+          }),
           {
             operation: "dataset_item_media.upload",
             errorOrigin: "frontend",
@@ -155,8 +162,8 @@ export function useDatasetItemMediaUpload({
         return `@@@langfuseMedia:type=${file.type}|id=${mediaId}|source=bytes@@@`;
       } catch (error) {
         showErrorToast(
-          "Media upload failed",
-          error instanceof Error ? error.message : "Please try again.",
+          t("mediaUploadFailed"),
+          error instanceof Error ? error.message : t("tryAgain"),
           getMediaUploadFailureAnalytics(failurePhase, error),
         );
         return null;
@@ -164,7 +171,7 @@ export function useDatasetItemMediaUpload({
         setPendingUploads((prev) => prev.filter((u) => u.id !== pendingId));
       }
     },
-    [projectId, datasetId, datasetItemId, getUploadUrl, markUploadComplete],
+    [projectId, datasetId, datasetItemId, getUploadUrl, markUploadComplete, t],
   );
 
   return { uploadFile, pendingUploads, resetPendingUploads };

@@ -31,6 +31,8 @@ import { createDateTableColumn } from "@/src/components/design-system/table/colu
 import { createNumberTableColumn } from "@/src/components/design-system/table/columns/createNumberTableColumn";
 import { useQueryFilterState } from "@/src/features/filters/hooks/useFilterState";
 import { useDebounce } from "@/src/hooks/useDebounce";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 
 export function DatasetRunItemsByRunTable(props: {
   projectId: string;
@@ -38,6 +40,7 @@ export function DatasetRunItemsByRunTable(props: {
   datasetRunId: string;
   datasetVersion?: Date | null;
 }) {
+  const t = useTranslation(datasetsMessages);
   const { projectId, datasetId, datasetRunId, datasetVersion } = props;
   const { setDetailPageList } = useDetailPageLists();
   const [paginationState, setPaginationState] = useQueryParams({
@@ -115,7 +118,7 @@ export function DatasetRunItemsByRunTable(props: {
   const columns: LangfuseColumnDef<DatasetRunItemByRunRowData>[] = [
     createLinkTableColumn<DatasetRunItemByRunRowData>({
       accessorKey: "datasetItemId",
-      header: "Dataset Item",
+      header: t("datasetItemColumn"),
       size: 110,
       isPinnedLeft: true,
       getCell: (datasetItemId) => {
@@ -135,7 +138,7 @@ export function DatasetRunItemsByRunTable(props: {
     }),
     createDateTableColumn<DatasetRunItemByRunRowData>({
       accessorKey: "runAt",
-      header: "Run At",
+      header: t("runAt"),
       size: 150,
     }),
     createLinkTableColumn<
@@ -143,7 +146,7 @@ export function DatasetRunItemsByRunTable(props: {
       DatasetRunItemByRunRowData["trace"]
     >({
       accessorKey: "trace",
-      header: "Trace",
+      header: t("trace"),
       size: 60,
       getCell: (trace) => {
         if (!trace) return undefined;
@@ -169,7 +172,7 @@ export function DatasetRunItemsByRunTable(props: {
     }),
     {
       accessorKey: "latency",
-      header: "Latency",
+      header: t("latency"),
       id: "latency",
       size: 70,
       enableHiding: true,
@@ -181,14 +184,14 @@ export function DatasetRunItemsByRunTable(props: {
     },
     createNumberTableColumn<DatasetRunItemByRunRowData>({
       accessorKey: "totalCost",
-      header: "Cost",
+      header: t("cost"),
       size: 60,
       enableHiding: true,
       formatter: (value) => usdFormatter(value),
     }),
     {
       accessorKey: "scores",
-      header: "Scores",
+      header: t("scores"),
       id: "scores",
       enableHiding: true,
       defaultHidden: true,
@@ -199,7 +202,7 @@ export function DatasetRunItemsByRunTable(props: {
     },
     {
       accessorKey: "input",
-      header: "Trace Input",
+      header: t("traceInput"),
       id: "input",
       size: 200,
       enableHiding: true,
@@ -223,7 +226,7 @@ export function DatasetRunItemsByRunTable(props: {
     },
     {
       accessorKey: "output",
-      header: "Output",
+      header: t("output"),
       id: "output",
       size: 200,
       enableHiding: true,
@@ -247,7 +250,7 @@ export function DatasetRunItemsByRunTable(props: {
     },
     {
       accessorKey: "expectedOutput",
-      header: "Expected Output",
+      header: t("expectedOutput"),
       id: "expectedOutput",
       size: 200,
       enableHiding: true,

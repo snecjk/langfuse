@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-deprecated -- Legacy UI usage retained during migration to design-system components. */
 import { useTranslation } from "@/src/features/i18n/I18nProvider";
-import { catalogMessages } from "@/src/features/i18n/messages/catalog";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 import { useRouter } from "next/router";
 import { DatasetsTable } from "@/src/features/datasets/components/DatasetsTable";
 import Page from "@/src/components/layouts/Page";
@@ -13,7 +13,7 @@ import { LockIcon, PlusIcon } from "@langfuse/icons";
 import { useQueryParam, StringParam } from "use-query-params";
 
 export default function DatasetsPage() {
-  const t = useTranslation(catalogMessages);
+  const t = useTranslation(datasetsMessages);
   const router = useRouter();
   const projectId = router.query.projectId as string;
   const [currentFolderPath] = useQueryParam("folder", StringParam);

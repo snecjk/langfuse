@@ -17,6 +17,8 @@ import useLocalStorage from "@/src/components/useLocalStorage";
 import { History, PanelRightOpen } from "@langfuse/icons";
 import { useState } from "react";
 import { RouteParamsPendingFallback } from "@/src/components/RouteParamsPendingFallback/RouteParamsPendingFallback";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 import { useReadyRouteParams } from "@/src/hooks/useReadyRouteParams";
 
 export default function DatasetItemPage() {
@@ -40,6 +42,7 @@ function DatasetItemContent({
   datasetId: string;
   itemId: string;
 }) {
+  const t = useTranslation(datasetsMessages);
   const { selectedVersion, resetToLatest } = useDatasetVersion();
   const isViewingOldVersion = selectedVersion !== null;
 
@@ -141,8 +144,8 @@ function DatasetItemContent({
                 }
               >
                 <Tabs.List variant="inset" size="sm">
-                  <Tabs.Trigger value="pretty" label="Formatted" />
-                  <Tabs.Trigger value="json" label="Raw" />
+                  <Tabs.Trigger value="pretty" label={t("formatted")} />
+                  <Tabs.Trigger value="json" label={t("raw")} />
                 </Tabs.List>
               </Tabs>
             )}
@@ -152,14 +155,14 @@ function DatasetItemContent({
               onClick={() => setIsVersionPanelOpen(!isVersionPanelOpen)}
               title={
                 isVersionPanelOpen
-                  ? "Hide version history"
-                  : "Show version history"
+                  ? t("hideVersionHistory")
+                  : t("showVersionHistory")
               }
             >
               {isVersionPanelOpen ? (
                 <>
                   <History size="base" color="default" __rawClassName="mr-2" />
-                  Hide Version History
+                  {t("hideVersionHistory")}
                 </>
               ) : (
                 <>
@@ -168,7 +171,7 @@ function DatasetItemContent({
                     color="default"
                     __rawClassName="mr-2"
                   />
-                  Show Version History
+                  {t("showVersionHistory")}
                 </>
               )}
             </Button>
@@ -186,7 +189,7 @@ function DatasetItemContent({
                     onCheckedChange={setShowDiffMode}
                   />
                   <Label htmlFor="diff-mode" className="cursor-pointer text-sm">
-                    Show diff with latest version
+                    {t("showDiffWithLatest")}
                   </Label>
                 </div>
               </div>
@@ -197,7 +200,7 @@ function DatasetItemContent({
               selectedVersion &&
               !itemChangedAtVersion && (
                 <div className="text-muted-foreground mb-4 text-sm">
-                  Item unchanged in this version
+                  {t("itemUnchangedInVersion")}
                 </div>
               )}
 

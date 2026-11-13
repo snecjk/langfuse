@@ -44,8 +44,11 @@ import {
   getDatasetRunCompareTabs,
 } from "@/src/features/navigation/utils/dataset-run-compare-tabs";
 import { NoDataOrLoading } from "@/src/components/NoDataOrLoading";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 
 function DatasetCompareChartsLegacy() {
+  const t = useTranslation(datasetsMessages);
   const router = useRouter();
   const capture = usePostHogClientCapture();
   const projectId = router.query.projectId as string;
@@ -89,14 +92,16 @@ function DatasetCompareChartsLegacy() {
   return (
     <Page
       headerProps={{
-        title: `Compare experiments: ${dataset.data?.name ?? datasetId}`,
+        title: t("compareExperimentsTitle", {
+          name: dataset.data?.name ?? datasetId,
+        }),
         tabsProps: {
           tabs: getDatasetRunCompareTabs(projectId, datasetId),
           activeTab: DATASET_RUN_COMPARE_TABS.CHARTS,
         },
         breadcrumb: [
           {
-            name: "Datasets",
+            name: t("datasets"),
             href: `/project/${projectId}/datasets`,
           },
           {
@@ -104,12 +109,12 @@ function DatasetCompareChartsLegacy() {
             href: `/project/${projectId}/datasets/${datasetId}`,
           },
           {
-            name: "Experiments",
+            name: t("experimentsBreadcrumb"),
             href: `/project/${projectId}/datasets/${datasetId}/experiments`,
           },
         ],
         help: {
-          description: "Compare your experiments side by side",
+          description: t("compareExperimentsHelp"),
         },
         actionButtonsRight: (
           <>
@@ -125,7 +130,9 @@ function DatasetCompareChartsLegacy() {
                   onClick={() => capture("dataset_run:new_form_open")}
                 >
                   <FlaskConical size="base" color="default" />
-                  <span className="ml-2 hidden md:block">New experiment</span>
+                  <span className="ml-2 hidden md:block">
+                    {t("newExperiment")}
+                  </span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-h-[90vh] overflow-y-auto">
@@ -143,9 +150,9 @@ function DatasetCompareChartsLegacy() {
             </Dialog>
             <MultiSelectKeyValues
               key="select-runs"
-              title="Experiments"
+              title={t("experimentsBreadcrumb")}
               showSelectedValueStrings={false}
-              placeholder="Select runs to compare"
+              placeholder={t("selectRunsToCompare")}
               className="w-fit"
               variant="outline"
               hideClearButton
@@ -267,8 +274,8 @@ function DatasetCompareChartsLegacy() {
             ) : (
               <span className="text-muted-foreground -mt-2 text-sm">
                 {Boolean(chartDataMap?.size)
-                  ? "All charts hidden. Enable them in the Charts dropdown."
-                  : "Select more than one run to generate charts."}
+                  ? t("allChartsHidden")
+                  : t("selectMoreRunsForCharts")}
               </span>
             )}
           </div>
@@ -284,14 +291,14 @@ function DatasetCompareChartsLegacy() {
           <SidePanelContent className="overflow-y-auto p-1">
             <div className="w-full space-y-4">
               <div>
-                <SubHeaderLabel title="Description" />
+                <SubHeaderLabel title={t("description")} />
                 <span className="text-muted-foreground text-sm">
-                  {dataset.data?.description ?? "No description"}
+                  {dataset.data?.description ?? t("noDescription")}
                 </span>
               </div>
               {dataset.data?.metadata && (
                 <div>
-                  <SubHeaderLabel title="Metadata" />
+                  <SubHeaderLabel title={t("metadata")} />
                   <MarkdownJsonView content={dataset.data?.metadata} />
                 </div>
               )}

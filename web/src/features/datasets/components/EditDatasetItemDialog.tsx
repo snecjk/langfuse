@@ -31,7 +31,7 @@ import {
 } from "../utils/datasetItemUtils";
 import { isValidDatasetJson } from "../utils/parseDatasetJson";
 import { useTranslation } from "@/src/features/i18n/I18nProvider";
-import { catalogMessages } from "@/src/features/i18n/messages/catalog";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 
 const formSchema = z.object({
   input: z.string().refine(
@@ -78,7 +78,7 @@ export const EditDatasetItemDialog = ({
   datasetItem,
   dataset,
 }: EditDatasetItemDialogProps) => {
-  const t = useTranslation(catalogMessages);
+  const t = useTranslation(datasetsMessages);
   const [formError, setFormError] = useState<string | null>(null);
   const hasAccess = useHasProjectAccess({
     projectId: projectId,
@@ -141,7 +141,7 @@ export const EditDatasetItemDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent size="xl">
         <DialogHeader>
-          <DialogTitle>{t("editDatasetItem")}</DialogTitle>
+          <DialogTitle>{t("editDatasetItemTitle")}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -208,6 +208,7 @@ const SaveChangesButton = ({
   isPending: boolean;
   pendingUploads: PendingMediaUpload[];
 }) => {
+  const t = useTranslation(datasetsMessages);
   const [input, expectedOutput] = useWatch({
     control,
     name: ["input", "expectedOutput"],
@@ -230,7 +231,7 @@ const SaveChangesButton = ({
         pendingUploads.length > 0
       }
     >
-      Save changes
+      {t("saveChanges")}
     </Button>
   );
 };

@@ -3,6 +3,8 @@ import { useState } from "react";
 import { ExpandToggle } from "@/src/components/design-system/ExpandToggle/ExpandToggle";
 import { Alert } from "@/src/components/design-system/Alert/Alert";
 import { type BulkDatasetItemValidationError } from "@langfuse/shared";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 
 type CsvImportValidationErrorProps = {
   errors: BulkDatasetItemValidationError[];
@@ -11,6 +13,7 @@ type CsvImportValidationErrorProps = {
 export const CsvImportValidationError: React.FC<
   CsvImportValidationErrorProps
 > = ({ errors }) => {
+  const t = useTranslation(datasetsMessages);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const errorCount = errors.length;
@@ -19,24 +22,26 @@ export const CsvImportValidationError: React.FC<
   return (
     <div className="mt-4">
       <Alert variant="destructive">
-        <Alert.Title>Schema Validation Failed</Alert.Title>
+        <Alert.Title>{t("schemaValidationFailedTitle")}</Alert.Title>
         <Alert.Description>
           <div className="mt-2 flex flex-col gap-3">
             <p className="text-sm">
               {hasMoreThan10
-                ? `${errorCount}+ items failed validation. Showing first ${errorCount} errors.`
-                : `${errorCount} item${errorCount === 1 ? "" : "s"} failed validation.`}
+                ? t("validationFailedCsvCapped", {
+                    count: errorCount,
+                    shown: errorCount,
+                  })
+                : t("validationFailedCount", { count: errorCount })}
             </p>
             <p className="text-muted-foreground text-sm">
-              The CSV data does not match the required schema for this dataset.
-              Fix the errors in your CSV file and try importing again.
+              {t("csvValidationHelp")}
             </p>
 
             <ExpandToggle
               variant="icon"
               expanded={isExpanded}
-              label="Show error details"
-              expandedLabel="Hide error details"
+              label={t("showErrorDetails")}
+              expandedLabel={t("hideErrorDetails")}
               onExpandedChange={setIsExpanded}
             />
 
@@ -52,12 +57,15 @@ export const CsvImportValidationError: React.FC<
                         #{idx + 1}
                       </span>
                       <span className="text-sm font-bold">
-                        CSV Row {error.itemIndex + 2}:{" "}
-                        {error.field === "input"
-                          ? "Input"
-                          : error.field === "metadata"
-                            ? "Metadata"
-                            : "Expected Output"}
+                        {t("csvRowField", {
+                          row: error.itemIndex + 2,
+                          field:
+                            error.field === "input"
+                              ? t("input")
+                              : error.field === "metadata"
+                                ? t("metadata")
+                                : t("expectedOutput"),
+                        })}
                       </span>
                     </div>
 
@@ -78,8 +86,7 @@ export const CsvImportValidationError: React.FC<
 
                 {hasMoreThan10 && (
                   <p className="text-muted-foreground pt-2 text-xs">
-                    Fix these errors to see if there are additional validation
-                    issues.
+                    {t("fixValidationErrors")}
                   </p>
                 )}
               </div>

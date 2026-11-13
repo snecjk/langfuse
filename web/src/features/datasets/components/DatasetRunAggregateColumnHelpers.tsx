@@ -11,6 +11,8 @@ import { useDebounce } from "@/src/hooks/useDebounce";
 import type { ScoreColumn } from "@/src/features/scores/types";
 import { Toggle } from "@/src/components/design-system/Toggle/Toggle";
 import { useRouter } from "next/router";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 
 function DatasetAggregateCellWithBaselineDetection({
   value,
@@ -44,6 +46,7 @@ function DatasetAggregateCellWithBaselineDetection({
 }
 
 function BaselineToggle({ runId }: { runId: string }) {
+  const t = useTranslation(datasetsMessages);
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
   const justSetBaselineRef = useRef(false);
@@ -85,10 +88,12 @@ function BaselineToggle({ runId }: { runId: string }) {
   };
 
   const baselineText =
-    isHovered && !justSetBaselineRef.current ? "Clear baseline" : "Baseline";
-  const comparisonText = isHovered ? "Set as baseline" : "Comparison";
+    isHovered && !justSetBaselineRef.current
+      ? t("clearBaseline")
+      : t("baseline");
+  const comparisonText = isHovered ? t("setAsBaseline") : t("comparison");
   const selectedText = isBaseline ? baselineText : comparisonText;
-  const text = hasBaseline ? selectedText : "Set as baseline";
+  const text = hasBaseline ? selectedText : t("setAsBaseline");
 
   return (
     <Toggle
@@ -224,9 +229,12 @@ export const constructDatasetRunAggregateColumns = ({
   });
 };
 
-export const getDatasetRunAggregateColumnProps = (isLoading: boolean) => ({
+export const getDatasetRunAggregateColumnProps = (
+  isLoading: boolean,
+  header: string,
+) => ({
   accessorKey: "runs",
-  header: "Experiments",
+  header,
   id: "runs",
   isFixedPosition: true,
   cell: () => {

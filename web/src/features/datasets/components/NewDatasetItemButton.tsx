@@ -11,11 +11,14 @@ import { NewDatasetItemForm } from "@/src/features/datasets/components/NewDatase
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
 import { ActionButton } from "@/src/components/ActionButton";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 
 export const NewDatasetItemButton = (props: {
   projectId: string;
   datasetId?: string;
 }) => {
+  const t = useTranslation(datasetsMessages);
   const [open, setOpen] = useState(false);
   const submissionPending = useRef(false);
   const hasAccess = useHasProjectAccess({
@@ -36,12 +39,12 @@ export const NewDatasetItemButton = (props: {
           trackingEventName="dataset_item:new_form_open"
           icon={<PlusIcon size="base" aria-hidden="true" />}
         >
-          New item
+          {t("newItem")}
         </ActionButton>
       </DialogTrigger>
       <DialogContent size="lg">
         <DialogHeader>
-          <DialogTitle>Create new dataset item</DialogTitle>
+          <DialogTitle>{t("createItemTitle")}</DialogTitle>
         </DialogHeader>
         <NewDatasetItemForm
           projectId={props.projectId}

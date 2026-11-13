@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-deprecated -- Legacy UI usage retained during migration to design-system components. */
 import { useTranslation } from "@/src/features/i18n/I18nProvider";
 import { coreMessages } from "@/src/features/i18n/messages/core";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 import { DatasetRunsTable } from "@/src/features/datasets/components/DatasetRunsTable";
 import { api } from "@/src/utils/api";
 import { DetailPageNav } from "@/src/features/navigate-detail-pages/DetailPageNav";
@@ -61,6 +62,7 @@ function DatasetExperimentsView({
   datasetId: string;
 }) {
   const t = useTranslation(coreMessages);
+  const dt = useTranslation(datasetsMessages);
   const capture = usePostHogClientCapture();
   const utils = api.useUtils();
   const [isCreateExperimentDialogOpen, setIsCreateExperimentDialogOpen] =
@@ -121,7 +123,7 @@ function DatasetExperimentsView({
       title: t("experimentTriggered"),
       description: t("waitingForExperiment"),
       link: {
-        text: "View experiment",
+        text: t("viewExperiment"),
         href: isExperimentsBetaActive
           ? singleRunToExperimentsUrl(projectId, data.runId)
           : `/project/${projectId}/datasets/${data.datasetId}/compare?runs=${data.runId}`,
@@ -191,6 +193,7 @@ function DatasetExperimentsView({
     projectId,
     datasetId,
     dataset.data?.name,
+    dt("datasets"),
   );
 
   if (isInitializing) {

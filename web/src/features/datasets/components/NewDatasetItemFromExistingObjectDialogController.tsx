@@ -10,6 +10,8 @@ import {
 } from "@/src/components/ui/dialog";
 import { NewDatasetItemForm } from "@/src/features/datasets/components/NewDatasetItemForm";
 import { type MetadataDomainClient } from "@/src/utils/clientSideDomainTypes";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 
 type DatasetItemDialogState = {
   traceId?: string;
@@ -27,6 +29,7 @@ export function NewDatasetItemFromExistingObjectDialogController(props: {
     openDialog: (payload: DatasetItemDialogState) => void;
   }) => ReactNode;
 }) {
+  const t = useTranslation(datasetsMessages);
   const submissionPending = useRef(false);
   const currentInstance = useRef(0);
   const normalizePrefillValue = (
@@ -52,7 +55,7 @@ export function NewDatasetItemFromExistingObjectDialogController(props: {
       renderContent={({ state, closeDialog }) => (
         <>
           <DialogHeader>
-            <DialogTitle>Add item to datasets</DialogTitle>
+            <DialogTitle>{t("addItemToDatasetsTitle")}</DialogTitle>
           </DialogHeader>
           <NewDatasetItemForm
             key={state.instance}

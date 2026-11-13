@@ -14,6 +14,8 @@ import type {
 } from "@/src/features/media/validation";
 import { api } from "@/src/utils/api";
 import { copyTextToClipboard } from "@/src/utils/clipboard";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 import {
   findMediaReferences,
   MEDIA_REFERENCE_PATTERN,
@@ -172,6 +174,7 @@ function DatasetItemMediaUploadButton({
   onSelectFile: (file: File) => void | Promise<void>;
   disabled?: boolean;
 }) {
+  const t = useTranslation(datasetsMessages);
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -199,7 +202,7 @@ function DatasetItemMediaUploadButton({
         size="icon-xs"
         className="text-muted-foreground"
         disabled={disabled || isUploading}
-        title="Attach media"
+        title={t("attachMedia")}
         onClick={() => inputRef.current?.click()}
       >
         {isUploading ? (
@@ -218,6 +221,7 @@ function DatasetItemMediaUploadButton({
  * confirmation.
  */
 function CopyFieldValueButton({ value }: { value: string }) {
+  const t = useTranslation(datasetsMessages);
   const [copied, setCopied] = useState(false);
 
   return (
@@ -226,7 +230,7 @@ function CopyFieldValueButton({ value }: { value: string }) {
       variant="ghost"
       size="icon-xs"
       className="text-muted-foreground"
-      title="Copy to clipboard"
+      title={t("copyToClipboard")}
       onClick={async () => {
         await copyTextToClipboard(value);
         setCopied(true);
@@ -302,6 +306,7 @@ function DatasetItemAttachments({
   referenceStrings?: string[];
   pendingUploads?: PendingMediaUpload[];
 }) {
+  const t = useTranslation(datasetsMessages);
   if (
     media.length === 0 &&
     referenceStrings.length === 0 &&
@@ -310,7 +315,7 @@ function DatasetItemAttachments({
     return null;
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-sm font-bold">Attachments</span>
+      <span className="text-sm font-bold">{t("attachments")}</span>
       <div className="ph-no-capture flex flex-wrap gap-2">
         {referenceStrings.map((referenceString) => (
           <LangfuseMediaView

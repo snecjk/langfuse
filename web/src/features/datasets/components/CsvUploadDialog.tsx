@@ -15,6 +15,8 @@ import {
   TooltipTrigger,
 } from "@/src/components/ui/tooltip";
 import { File } from "@langfuse/icons";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 
 type CsvUploadDialogProps = {
   open: boolean;
@@ -31,6 +33,7 @@ export function CsvUploadDialog({
   datasetId,
   children,
 }: CsvUploadDialogProps) {
+  const t = useTranslation(datasetsMessages);
   const [preview, setPreview] = useState<CsvPreviewResult | null>(null);
   const [csvFile, setCsvFile] = useState<File | null>(null);
 
@@ -49,7 +52,7 @@ export function CsvUploadDialog({
       <DialogContent className="flex h-[80dvh] max-w-7xl flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            Upload CSV
+            {t("uploadCsvTitle")}
             {csvFile && (
               <Tooltip>
                 <TooltipTrigger asChild>

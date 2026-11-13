@@ -22,6 +22,7 @@ import { getDatasetBreadcrumb } from "@/src/features/datasets/utils/getDatasetBr
 import { RouteParamsPendingFallback } from "@/src/components/RouteParamsPendingFallback/RouteParamsPendingFallback";
 import { useReadyRouteParams } from "@/src/hooks/useReadyRouteParams";
 import { DatasetActionMenu } from "@/src/features/datasets/components/DatasetActionMenu";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 
 export default function DatasetItemsPage() {
   const route = useReadyRouteParams(["projectId", "datasetId"]);
@@ -42,6 +43,7 @@ function DatasetItemsView({
   datasetId: string;
 }) {
   const t = useTranslation(coreMessages);
+  const dt = useTranslation(datasetsMessages);
   const { selectedVersion, resetToLatest } = useDatasetVersion();
   const isViewingOldVersion = selectedVersion !== null;
 
@@ -86,6 +88,7 @@ function DatasetItemsView({
     projectId,
     datasetId,
     dataset.data?.name,
+    dt("datasets"),
   );
 
   return (

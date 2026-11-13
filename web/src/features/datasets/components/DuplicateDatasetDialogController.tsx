@@ -2,6 +2,8 @@ import { useRouter } from "next/router";
 import { type ReactNode } from "react";
 
 import { ConfirmationDialogController } from "@/src/components/design-system/ConfirmationDialogController/ConfirmationDialogController";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
 import { api } from "@/src/utils/api";
 
@@ -17,6 +19,7 @@ export function DuplicateDatasetDialogController({
   datasetId: string;
   projectId: string;
 }) {
+  const t = useTranslation(datasetsMessages);
   const router = useRouter();
   const hasAccess = useHasProjectAccess({
     projectId,
@@ -26,13 +29,13 @@ export function DuplicateDatasetDialogController({
 
   const disabled = hasAccess
     ? undefined
-    : { reason: "You don't have permission to duplicate this dataset." };
+    : { reason: t("permissionDuplicateDataset") };
 
   return (
     <ConfirmationDialogController
-      title="Duplicate dataset?"
-      text="This creates a copy of the dataset and all of its items."
-      confirmLabel="Duplicate dataset"
+      title={t("duplicateDatasetTitle")}
+      text={t("duplicateDatasetText")}
+      confirmLabel={t("duplicateDatasetAction")}
       variant="default"
       disabled={!hasAccess}
       loading={duplicateDataset.isPending}

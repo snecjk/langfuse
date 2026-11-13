@@ -14,6 +14,8 @@ import {
   insertMediaReferenceAtCursor,
 } from "./DatasetItemMediaAttachments";
 import type { Prisma } from "@langfuse/shared";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 import {
   FormControl,
   FormItem,
@@ -69,6 +71,7 @@ export const DatasetItemField = ({
   isFormField = false,
   onUploadMedia,
 }: DatasetItemFieldProps) => {
+  const t = useTranslation(datasetsMessages);
   const editorRef = useRef<ReactCodeMirrorRef>(null);
   const showMediaUpload = isFormField && editable && !!onUploadMedia;
   const showPrettyView = !isFormField && !editable && renderMode === "pretty";
@@ -170,7 +173,7 @@ export const DatasetItemField = ({
       {!isFormField && showPrettyView && pretty.scalar !== null && (
         <div className="ph-no-capture rounded-sm border py-1 pr-2 pl-4 font-mono text-xs/5 wrap-break-word whitespace-pre-wrap">
           {pretty.scalar === "" ? (
-            <span className="text-muted-foreground">empty</span>
+            <span className="text-muted-foreground">{t("empty")}</span>
           ) : (
             pretty.scalar
           )}

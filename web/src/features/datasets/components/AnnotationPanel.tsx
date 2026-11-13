@@ -12,6 +12,8 @@ import { AnnotationForm } from "@/src/features/scores/components/AnnotationForm"
 import { decomposeAggregateScoreKey } from "@/src/features/scores/lib/aggregateScores";
 import { ChevronRight } from "@langfuse/icons";
 import { useCallback } from "react";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 
 export const AnnotationPanel = ({ projectId }: { projectId: string }) => {
   const { activeCell, clearActiveCell, setCommentDraft } = useActiveCell();
@@ -42,6 +44,7 @@ function ActiveAnnotationPanel({
   clearActiveCell: ReturnType<typeof useActiveCell>["clearActiveCell"];
   setCommentDraft: ReturnType<typeof useActiveCell>["setCommentDraft"];
 }) {
+  const t = useTranslation(datasetsMessages);
   const { traceId, observationId } = activeCell;
   const handleDraftChange = useCallback(
     (hasDraft: boolean) =>
@@ -98,7 +101,7 @@ function ActiveAnnotationPanel({
                 <Button
                   variant="outline"
                   size="icon"
-                  aria-label="Close annotation panel"
+                  aria-label={t("closeAnnotationPanel")}
                   onClick={clearActiveCell}
                 >
                   <ChevronRight size="base" color="default" />
@@ -107,8 +110,7 @@ function ActiveAnnotationPanel({
             />
             {hasNonAnnotationScores && (
               <div className="text-muted-foreground mt-4 text-xs">
-                API and eval scores visible on left. Add manual annotations
-                above.
+                {t("apiAndEvalScoresNote")}
               </div>
             )}
           </>

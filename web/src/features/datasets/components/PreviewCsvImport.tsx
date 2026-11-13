@@ -27,6 +27,8 @@ import { useCsvDragAndDrop } from "@/src/features/datasets/hooks/useCsvDragAndDr
 import { useCsvImport } from "@/src/features/datasets/hooks/useCsvImport";
 import { createPortal } from "react-dom";
 import type { CsvPreviewResult } from "@/src/features/datasets/lib/csv/types";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 
 // Helper to extract schema keys from object schema
 function extractSchemaKeys(schema: unknown): string[] | null {
@@ -53,6 +55,7 @@ export function PreviewCsvImport({
   setPreview: (preview: CsvPreviewResult | null) => void;
   setOpen?: (open: boolean) => void;
 }) {
+  const t = useTranslation(datasetsMessages);
   const capture = usePostHogClientCapture();
 
   // Fetch dataset schema
@@ -249,22 +252,20 @@ export function PreviewCsvImport({
               htmlFor="wrapSingleColumn"
               className="cursor-pointer text-sm font-normal"
             >
-              Force Objects
+              {t("forceObjects")}
             </Label>
             <Tooltip>
               <TooltipTrigger asChild>
                 <InfoIcon size="base" color="muted" />
               </TooltipTrigger>
               <TooltipContent className="max-w-[300px]">
-                When a single csv column is mapped to a dataset item field, wrap
-                its value in an object instead of using the raw value. Example:{" "}
-                {`{"columnName": "value"}`} instead of {`"value"`}
+                {t("forceObjectsHelp")}
               </TooltipContent>
             </Tooltip>
           </div>
         )}
         <Button variant="outline" onClick={handleCancel}>
-          Cancel
+          {t("cancel")}
         </Button>
         <Button
           disabled={
@@ -274,8 +275,8 @@ export function PreviewCsvImport({
           onClick={handleImport}
         >
           {csvImport.progress.status === "processing"
-            ? "Importing..."
-            : "Import"}
+            ? t("importing")
+            : t("import")}
         </Button>
         {csvImport.progress.status === "processing" && (
           <div className="mt-2">

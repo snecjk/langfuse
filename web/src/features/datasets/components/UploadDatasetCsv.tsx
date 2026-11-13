@@ -12,6 +12,8 @@ import { parseCsvClient } from "@/src/features/datasets/lib/csv/helpers";
 import { DialogBody } from "@/src/components/ui/dialog";
 import { Dropzone } from "@/src/components/design-system/Dropzone/Dropzone";
 import type { CsvPreviewResult } from "@/src/features/datasets/lib/csv/types";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 
 export const MAX_FILE_SIZE_BYTES = 1024 * 1024 * 1 * 10; // 10MB
 const ACCEPTED_FILE_TYPES = ["text/csv"] as const;
@@ -28,13 +30,14 @@ export const UploadDatasetCsv = ({
   setPreview: (preview: CsvPreviewResult | null) => void;
   setCsvFile: (file: File | null) => void;
 }) => {
+  const t = useTranslation(datasetsMessages);
   const handleFiles = async (files: File[]) => {
     const file = files[0];
     if (!file) return;
 
     const result = FileSchema.safeParse(file);
     if (!result.success) {
-      showErrorToast("Invalid file type", "Please select a valid CSV file", {
+      showErrorToast(t("invalidFileType"), t("invalidFileTypeHelp"), {
         operation: "dataset_items.import",
         errorOrigin: "frontend",
         errorCategory: "user_input",
@@ -43,7 +46,7 @@ export const UploadDatasetCsv = ({
     }
 
     if (file.size > MAX_FILE_SIZE_BYTES) {
-      showErrorToast("File too large", "Maximum file size is 10MB", {
+      showErrorToast(t("fileTooLarge"), t("fileTooLargeHelp"), {
         operation: "dataset_items.import",
         errorOrigin: "frontend",
         errorCategory: "resource_limit",
@@ -59,7 +62,7 @@ export const UploadDatasetCsv = ({
       });
 
       if (!Boolean(preview.columns.length)) {
-        showErrorToast("Invalid CSV", "CSV must have at least 1 column", {
+        showErrorToast(t("invalidCsv"), t("invalidCsvHelp"), {
           operation: "dataset_items.import",
           errorOrigin: "frontend",
           errorCategory: "user_input",
@@ -70,8 +73,8 @@ export const UploadDatasetCsv = ({
       setPreview(preview);
     } catch (error) {
       showErrorToast(
-        "Failed to parse CSV",
-        error instanceof Error ? error.message : "Unknown error",
+        t("csvParseFailed"),
+        error instanceof Error ? error.message : t("csvParseFailed"),
         {
           operation: "dataset_items.import",
           errorOrigin: "frontend",
@@ -85,11 +88,8 @@ export const UploadDatasetCsv = ({
     <DialogBody className="border-t">
       <Card className="h-full items-center justify-center border-none">
         <CardHeader className="text-center">
-          <CardTitle className="text-lg">Add items to dataset</CardTitle>
-          <CardDescription>
-            Add items to dataset by uploading a file, add items manually or via
-            our SDKs/API
-          </CardDescription>
+          <CardTitle className="text-lg">{t("addItemsToDataset")}</CardTitle>
+          <CardDescription>{t("addItemsHelp")}</CardDescription>
         </CardHeader>
         <CardContent>
           <Dropzone

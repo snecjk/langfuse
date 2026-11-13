@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary, react/no-unstable-nested-components */
 /* eslint-disable @repo/no-null-render */
 import { useTranslation } from "@/src/features/i18n/I18nProvider";
-import { catalogMessages } from "@/src/features/i18n/messages/catalog";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 import { IconOnlyButton } from "@/src/components/IconOnlyButton";
 import { DataTable } from "@/src/components/table/data-table";
 import { type LangfuseColumnDef } from "@/src/components/table/types";
@@ -130,7 +130,7 @@ function DatasetsMultiSelectActionMenu({
     store,
     (state) => state.actions.deleteSelected,
   );
-  const t = useTranslation(catalogMessages);
+  const t = useTranslation(datasetsMessages);
   const capture = usePostHogClientCapture();
   const utils = api.useUtils();
   const deleteManyMutation = api.datasets.deleteMany.useMutation({
@@ -273,7 +273,7 @@ function DatasetsTableToolbar({
 }
 
 export function DatasetsTable(props: { projectId: string }) {
-  const t = useTranslation(catalogMessages);
+  const t = useTranslation(datasetsMessages);
   const { setDetailPageList } = useDetailPageLists();
   const [rowHeight, setRowHeight, rowHeights] = useRowHeightLocalStorage(
     "datasets",

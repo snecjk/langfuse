@@ -28,7 +28,7 @@ import { DialogBody, DialogFooter } from "@/src/components/ui/dialog";
 import { DatasetSchemaInput } from "./DatasetSchemaInput";
 import { DatasetSchemaValidationError } from "./DatasetSchemaValidationError";
 import { useTranslation } from "@/src/features/i18n/I18nProvider";
-import { catalogMessages } from "@/src/features/i18n/messages/catalog";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 
 type ServerSideSchemaValidationErrors = {
   datasetItemId: string;
@@ -116,7 +116,7 @@ const formSchema = z.object({
 });
 
 export const DatasetForm = (props: DatasetFormProps) => {
-  const t = useTranslation(catalogMessages);
+  const t = useTranslation(datasetsMessages);
   const [pending, setPending] = useState(false);
   const submissionPending = useRef(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -180,7 +180,7 @@ export const DatasetForm = (props: DatasetFormProps) => {
     currentName: form.watch("name"),
     allNames: allDatasetNames,
     form,
-    errorMessage: "Dataset name already exists.",
+    errorMessage: t("datasetNameAlreadyExists"),
     whitelistedName: props.mode === "update" ? props.datasetName : undefined,
   });
 
@@ -241,9 +241,7 @@ export const DatasetForm = (props: DatasetFormProps) => {
       }
     } catch (error) {
       setFormError(
-        error instanceof Error
-          ? error.message
-          : "Could not save the dataset. Please try again.",
+        error instanceof Error ? error.message : t("saveDatasetFailed"),
       );
       reportNonTrpcError(error, "datasets");
     } finally {

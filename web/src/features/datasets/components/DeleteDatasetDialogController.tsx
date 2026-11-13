@@ -1,3 +1,5 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
 import {
   DeleteDatasetDialog,
@@ -19,6 +21,7 @@ export function DeleteDatasetDialogController({
     openDialog: () => void;
   }) => ReactNode;
 }) {
+  const t = useTranslation(datasetsMessages);
   const capture = usePostHogClientCapture();
   const hasAccess = useHasProjectAccess({
     projectId: props.projectId,
@@ -27,7 +30,7 @@ export function DeleteDatasetDialogController({
 
   const disabled = hasAccess
     ? undefined
-    : { reason: "You don't have permission to delete this dataset." };
+    : { reason: t("permissionDeleteDataset") };
 
   return (
     <DeleteDatasetDialog {...props}>

@@ -28,8 +28,11 @@ import {
 import { SidePanel, SidePanelContent } from "@/src/components/ui/side-panel";
 import { AnnotationPanel } from "@/src/features/datasets/components/AnnotationPanel";
 import { Spinner } from "@/src/components/design-system/Spinner/Spinner";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 
 function DatasetCompareLegacy() {
+  const t = useTranslation(datasetsMessages);
   const router = useRouter();
   const capture = usePostHogClientCapture();
   const projectId = router.query.projectId as string;
@@ -74,10 +77,12 @@ function DatasetCompareLegacy() {
   return (
     <Page
       headerProps={{
-        title: `Compare runs: ${dataset.data?.name ?? datasetId}`,
+        title: t("compareRunsTitle", {
+          name: dataset.data?.name ?? datasetId,
+        }),
         breadcrumb: [
           {
-            name: "Datasets",
+            name: t("datasets"),
             href: `/project/${projectId}/datasets`,
           },
           {
@@ -85,12 +90,12 @@ function DatasetCompareLegacy() {
             href: `/project/${projectId}/datasets/${datasetId}`,
           },
           {
-            name: "Experiments",
+            name: t("experimentsBreadcrumb"),
             href: `/project/${projectId}/datasets/${datasetId}/experiments`,
           },
         ],
         help: {
-          description: "Compare your dataset runs side by side",
+          description: t("compareRunsHelp"),
         },
         tabsProps: {
           tabs: getDatasetRunCompareTabs(projectId, datasetId),
@@ -110,7 +115,9 @@ function DatasetCompareLegacy() {
                   onClick={() => capture("dataset_run:new_form_open")}
                 >
                   <FlaskConical size="base" color="default" />
-                  <span className="ml-2 hidden md:block">New experiment</span>
+                  <span className="ml-2 hidden md:block">
+                    {t("newExperiment")}
+                  </span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-h-[90vh] overflow-y-auto">
@@ -128,9 +135,9 @@ function DatasetCompareLegacy() {
             </Dialog>
             <MultiSelectKeyValues
               key="select-runs"
-              title="Experiments"
+              title={t("experimentsBreadcrumb")}
               showSelectedValueStrings={false}
-              placeholder="Select runs to compare"
+              placeholder={t("selectRunsToCompare")}
               className="w-fit"
               variant="outline"
               hideClearButton
@@ -201,7 +208,7 @@ function DatasetCompareLegacy() {
             open: activeCell !== null,
             onOpenChange: handlePanelOpenChange,
           }}
-          mobileTitle="Annotate"
+          mobileTitle={t("annotate")}
         >
           <SidePanelContent className="h-full">
             {activeCell ? (
@@ -209,7 +216,7 @@ function DatasetCompareLegacy() {
             ) : (
               <div className="flex items-center justify-center p-4">
                 <span className="text-muted-foreground text-sm">
-                  Loading annotation data...
+                  {t("loadingAnnotationData")}
                 </span>
               </div>
             )}

@@ -7,6 +7,8 @@ import { Separator } from "@/src/components/ui/separator";
 import { useEffect, useState } from "react";
 import { generateSchemaExample } from "../lib/generateSchemaExample";
 import { copyTextToClipboard } from "@/src/utils/clipboard";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 
 type DatasetSchemaHoverCardProps = {
   schema: Prisma.JsonValue;
@@ -19,8 +21,11 @@ export const DatasetSchemaHoverCard: React.FC<DatasetSchemaHoverCardProps> = ({
   schemaType,
   showLabel = false,
 }) => {
+  const t = useTranslation(datasetsMessages);
   const title =
-    schemaType === "input" ? "Input Schema" : "Expected Output Schema";
+    schemaType === "input"
+      ? t("inputSchemaTitle")
+      : t("expectedOutputSchemaTitle");
 
   const schemaString = JSON.stringify(schema, null, 2);
 
@@ -57,7 +62,7 @@ export const DatasetSchemaHoverCard: React.FC<DatasetSchemaHoverCardProps> = ({
         <div className="max-h-[80vh] w-[400px] overflow-auto p-3">
           <p className="text-sm font-bold">{title}</p>
           <p className="text-muted-foreground pt-2 text-sm">
-            Learn more about{" "}
+            {t("learnMoreAbout")}{" "}
             <a
               href="https://json-schema.org/learn/miscellaneous-examples"
               target="_blank"
@@ -82,7 +87,7 @@ export const DatasetSchemaHoverCard: React.FC<DatasetSchemaHoverCardProps> = ({
             <>
               <Separator className="my-4" />
               <div className="flex items-center justify-between">
-                <p className="text-sm font-bold">Example Object</p>
+                <p className="text-sm font-bold">{t("schemaExampleObject")}</p>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -113,12 +118,12 @@ export const DatasetSchemaHoverCard: React.FC<DatasetSchemaHoverCardProps> = ({
         <Button
           variant="ghost"
           className="text-muted-foreground hover:bg-accent hover:text-accent-foreground inline-flex items-center gap-1.5 rounded p-1 text-xs transition-colors"
-          aria-label={`View ${title}`}
+          aria-label={t("viewSchema", { title })}
           size="sm"
           {...getTriggerProps()}
         >
           <LockIcon size="base" color="default" />
-          {showLabel && <span>Schema enforced</span>}
+          {showLabel && <span>{t("schemaEnforced")}</span>}
         </Button>
       )}
     </HoverCard>

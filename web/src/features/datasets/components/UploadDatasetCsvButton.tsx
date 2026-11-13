@@ -4,11 +4,14 @@ import { useState } from "react";
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
 import { ActionButton } from "@/src/components/ActionButton";
 import { CsvUploadDialog } from "@/src/features/datasets/components/CsvUploadDialog";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 
 export const UploadDatasetCsvButton = (props: {
   projectId: string;
   datasetId: string;
 }) => {
+  const t = useTranslation(datasetsMessages);
   const [open, setOpen] = useState(false);
   const hasAccess = useHasProjectAccess({
     projectId: props.projectId,
@@ -30,7 +33,7 @@ export const UploadDatasetCsvButton = (props: {
           trackingEventName="dataset_item:upload_csv_button_click"
           icon={<UploadIcon size="base" aria-hidden="true" />}
         >
-          Upload CSV
+          {t("uploadCsv")}
         </ActionButton>
       </DialogTrigger>
     </CsvUploadDialog>

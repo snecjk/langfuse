@@ -1,4 +1,6 @@
 import { AlertCircle } from "@langfuse/icons";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 
 type DatasetError = {
   datasetId: string;
@@ -18,13 +20,14 @@ type DatasetItemFieldSchemaErrorsProps = {
 export const DatasetItemFieldSchemaErrors: React.FC<
   DatasetItemFieldSchemaErrorsProps
 > = ({ errors, showDatasetName = false }) => {
+  const t = useTranslation(datasetsMessages);
   return (
     <div className="border-destructive/50 bg-destructive/10 rounded-md border p-3">
       <div className="flex items-start gap-2">
         <AlertCircle size="base" color="destructive" __rawClassName="mt-0.5" />
         <div className="flex-1 space-y-2">
           <p className="text-destructive text-sm font-bold">
-            Schema validation failed
+            {t("schemaValidationFailed")}
           </p>
           {errors.map((error, idx) => (
             <div key={`${error.datasetId}-${idx}`} className="space-y-1">

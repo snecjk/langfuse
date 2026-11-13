@@ -1,5 +1,7 @@
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
 import { ConfirmationDialogController } from "@/src/components/design-system/ConfirmationDialogController/ConfirmationDialogController";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
 import { api } from "@/src/utils/api";
 import { useRouter } from "next/router";
@@ -21,6 +23,7 @@ export const DeleteDatasetRunDialogController = ({
     openDialog: () => void;
   }) => React.ReactNode;
 }) => {
+  const t = useTranslation(datasetsMessages);
   const capture = usePostHogClientCapture();
   const hasAccess = useHasProjectAccess({
     projectId: projectId,
@@ -36,9 +39,9 @@ export const DeleteDatasetRunDialogController = ({
 
   return (
     <ConfirmationDialogController
-      title="Please confirm"
-      text="This action cannot be undone. Traces linked to this run must be deleted manually."
-      confirmLabel="Delete Dataset Run"
+      title={t("deleteRunConfirmTitle")}
+      text={t("deleteRunConfirmText")}
+      confirmLabel={t("deleteDatasetRun")}
       variant="destructive"
       disabled={!hasAccess}
       loading={mutDelete.isPending}

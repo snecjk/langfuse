@@ -15,6 +15,8 @@ import {
 import { isSchemaField } from "@/src/features/datasets/lib/csv/helpers";
 import { Switch } from "@/src/components/design-system/Switch/Switch";
 import { Label } from "@/src/components/ui/label";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 import {
   Tooltip,
   TooltipContent,
@@ -176,11 +178,12 @@ export function MappingCard({
   onToggleDirectMappingForInput,
   onToggleDirectMappingForExpectedOutput,
 }: MappingCardProps) {
+  const t = useTranslation(datasetsMessages);
   return (
     <Card className="flex h-full flex-col overflow-hidden">
       <CardHeader className="shrink-0 border-b p-3">
         <CardTitle className="text-base font-bold">
-          Map to Dataset Items
+          {t("mapToDatasetItems")}
         </CardTitle>
       </CardHeader>
       <CardContent className="min-h-0 flex-1 space-y-4 overflow-y-auto p-3">
@@ -188,7 +191,7 @@ export function MappingCard({
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <h3 className="text-muted-foreground text-sm font-bold tracking-wide">
-              Input
+              {t("input")}
             </h3>
             {inputSchemaKeys && inputSchemaKeys.length > 0 && (
               <div className="flex items-center gap-1.5">
@@ -204,7 +207,7 @@ export function MappingCard({
                   htmlFor="direct-mapping-input"
                   className="text-muted-foreground cursor-pointer text-xs font-normal"
                 >
-                  Direct Mapping
+                  {t("directMapping")}
                 </Label>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -212,8 +215,8 @@ export function MappingCard({
                   </TooltipTrigger>
                   <TooltipContent className="max-w-[250px]" side="left">
                     {useDirectMappingForInput
-                      ? "Map entire CSV columns directly to the input field."
-                      : "Map CSV columns to individual schema fields."}
+                      ? t("directMappingInputOn")
+                      : t("directMappingInputOff")}
                   </TooltipContent>
                 </Tooltip>
               </div>
@@ -246,7 +249,7 @@ export function MappingCard({
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <h3 className="text-muted-foreground text-sm font-bold tracking-wide">
-              Expected Output
+              {t("expectedOutput")}
             </h3>
             {expectedOutputSchemaKeys &&
               expectedOutputSchemaKeys.length > 0 && (
@@ -263,7 +266,7 @@ export function MappingCard({
                     htmlFor="direct-mapping-expected"
                     className="text-muted-foreground cursor-pointer text-xs font-normal"
                   >
-                    Direct mapping
+                    {t("directMapping")}
                   </Label>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -271,8 +274,8 @@ export function MappingCard({
                     </TooltipTrigger>
                     <TooltipContent className="max-w-[250px]" side="left">
                       {useDirectMappingForExpectedOutput
-                        ? "Map entire CSV columns directly to the expected output field."
-                        : "Map CSV columns to individual schema fields."}
+                        ? t("directMappingOutputOn")
+                        : t("directMappingOutputOff")}
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -304,7 +307,7 @@ export function MappingCard({
         {/* METADATA SECTION */}
         <div className="space-y-2">
           <h3 className="text-muted-foreground text-sm font-bold tracking-wide">
-            Metadata
+            {t("metadata")}
           </h3>
           <FreeformDropZone
             id="metadata"

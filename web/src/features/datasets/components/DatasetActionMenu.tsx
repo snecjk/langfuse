@@ -2,6 +2,8 @@ import { Bot, Copy, Edit, LockIcon, Trash } from "@langfuse/icons";
 import { type ComponentProps, useMemo } from "react";
 
 import { DropdownMenu } from "@/src/components/design-system/DropdownMenu/DropdownMenu";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { datasetsMessages } from "@/src/features/i18n/messages/datasets";
 import { DeleteDatasetDialogController } from "@/src/features/datasets/components/DeleteDatasetDialogController";
 import { DuplicateDatasetDialogController } from "@/src/features/datasets/components/DuplicateDatasetDialogController";
 import { UpdateDatasetDialogController } from "@/src/features/datasets/components/UpdateDatasetDialogController";
@@ -32,12 +34,13 @@ function DatasetActionDropdown({
   manageEvaluatorsHref?: string;
   updateControl: ActionControl;
 }) {
+  const t = useTranslation(datasetsMessages);
   const items = useMemo<ComponentProps<typeof DropdownMenu>["items"]>(
     () => [
       {
         type: "item",
         id: "edit",
-        title: "Edit",
+        title: t("actionEdit"),
         icon: updateControl.disabled ? LockIcon : Edit,
         disabled: updateControl.disabled,
         onClick: updateControl.openDialog,
@@ -45,7 +48,7 @@ function DatasetActionDropdown({
       {
         type: "item",
         id: "duplicate",
-        title: "Duplicate",
+        title: t("actionDuplicate"),
         icon: duplicateControl.disabled ? LockIcon : Copy,
         disabled: duplicateControl.disabled,
         onClick: duplicateControl.openDialog,
@@ -53,7 +56,7 @@ function DatasetActionDropdown({
       {
         type: "item",
         id: "delete",
-        title: "Delete",
+        title: t("actionDelete"),
         icon: deleteControl.disabled ? LockIcon : Trash,
         disabled: deleteControl.disabled,
         onClick: deleteControl.openDialog,
@@ -63,14 +66,14 @@ function DatasetActionDropdown({
             {
               type: "item" as const,
               id: "manage-evaluators",
-              title: "Manage Evaluators",
+              title: t("manageEvaluators"),
               icon: Bot,
               href: manageEvaluatorsHref,
             },
           ]
         : []),
     ],
-    [deleteControl, duplicateControl, manageEvaluatorsHref, updateControl],
+    [deleteControl, duplicateControl, manageEvaluatorsHref, t, updateControl],
   );
 
   return (
