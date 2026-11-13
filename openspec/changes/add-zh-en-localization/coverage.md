@@ -59,6 +59,22 @@ claim. The matrix supersedes it for current status.
 >
 > 尚未完成的部分：各模块其余未迁移子组件、页面级客户端测试、覆盖矩阵逐页验证、生产构建与客户端包扫描（对应原任务 5.x / 6.x 验收门禁）。
 >
+> ### 本次会话进度记录（apply-change add-zh-en-localization，任务 3.3）
+>
+> 该会话完成导航、命令菜单与通知的逐页迁移，并修复了此前工作区遗留的类型/字符串问题：
+>
+> - **消息命名空间补齐**：
+>   - `navigation.ts`：新增 `sessionFiltersActive`、`editFilters`、`clearFilters`、`sessionUnavailable`、`retry`、`sessionUnavailableHint`、`dismissBanner`、`sessionRedesignAnnouncement`、`giveFeedback`、`dismissSessionRedesignBanner`。
+>   - `notifications.ts`：新增 `automationFailureTitle`（含 `{count}`）、`automationFailureDescription`、`scoreAnalyticsLoading`、`scoreAnalyticsProcessingLarge`、`scoreAnalyticsAnalyzingOne/Two`、`scoreAnalyticsSamplingApplied`、`scoreAnalyticsEstimatedTime`、`scoreAnalyticsSampledTitle/One/Two`、`agentToolsTitle`、`agentToolsDescription`。
+>   - `common.ts`：`dropzoneFileCount` 的 `zh-CN` 从字符串改为与英文一致的 `one`/`other` 复数对象（原先形状不一致，违反计数模板约定）。
+>   - `evaluations.ts`：拆分此前重复的 `selectOption`/`editField` 键——快捷键说明改用 `shortcutSelectOption`/`shortcutEditField`，评分表单沿用 `selectOption`/`editField`；新增扁平化的 `scoreDataTypeNumeric/Categorical/Boolean/Text`（字典 schema 不支持嵌套对象）。
+> - **组件迁移（引入 `useTranslation`）**：
+>   - `SessionFiltersBanner`、`SessionErrorBanner`、`SessionRedesignBanner`、`AutomationFailureBanner`、`ScoreAnalyticsNoticeBanner`、`AgentToolsBanner`。
+>   - `CommandMenu` 的 `AssistantItem` 搜索值由硬编码 `"Ask Assistant"` 改为 `t("cmdKAssistant")`。
+> - **行为修复**：`AnnotationScoreRow` 的 `scoreSavedOnTarget`/`scoreTargetInstead`/`alsoScoreTarget` 恢复了原实现中的 `target.label.toLowerCase()`，保持中英文渲染一致；`CategoricalScoreInput` 恢复「已存在同名分类时显示 Add new category」的原有判断；`AnnotationSaveStatus` 去掉嵌套三元并改用键映射。
+> - **检查结果**：双语资源 28 个命名空间 4659 条 key 零缺口、零插值参数不一致；`pnpm --filter web run lint` 通过；`pnpm --filter web run typecheck` 零错误；`pnpm --filter web run test-client`（i18n / command-k-menu / score-analytics / scores / annotation-queues / sessions / traces）`Test Files 89 passed (89)` / `Tests 883 passed | 48 skipped (931)`。
+> - **尚未验证**：侧栏/命令菜单/横幅的逐屏浏览器检查、窄屏与键盘可达性、生产构建与 client-bundle 扫描（仍属 5.x / 6.x 门禁）。
+>
 ## A. Public / authentication / workspace
 
 | # | Route / entry | Actual owner | Role / toggle gate | Sub-flows & states | Namespace | Source migration | Verification | Exception |
@@ -84,11 +100,11 @@ claim. The matrix supersedes it for current status.
 
 | # | Route / entry | Actual owner | Role / toggle gate | Sub-flows & states | Namespace | Source migration | Verification | Exception |
 |---|---------------|--------------|--------------------|--------------------|-----------|------------------|--------------|-----------|
-| B1 | 侧栏主导航（全路由） | `layouts/routes.tsx`, `AppSidebar`, `NavMain` | 已登录 | 路由/分组、折叠/展开、账户菜单、区域菜单、升级/支持 | `navigation` | 源码完成 | 未验证 | — |
-| B2 | 命令菜单 (⌘K) | `command-k-menu` | 已登录 | 搜索、分组、跳转、最近 | `navigation` | 源码完成 | 未验证 | 用户项目/组织名与跳转 URL 不翻译 |
+| B1 | 侧栏主导航（全路由） | `layouts/routes.tsx`, `AppSidebar`, `NavMain` | 已登录 | 路由/分组、折叠/展开、账户菜单、区域菜单、升级/支持 | `navigation` | 源码完成 | 部分验证（CommandMenu.clienttest 覆盖导航条目标题解析；侧栏逐屏未验证） | 用户项目/组织名与跳转 URL 不翻译 |
+| B2 | 命令菜单 (⌘K) | `command-k-menu/CommandMenu.tsx` | 已登录 | 搜索、分组、跳转、最近、助手入口、主题切换 | `navigation` | 源码完成（`routes.tsx` 全部 30 个 `titleKey` 与分组标签经 `useFilteredNavigation`/`NavMain` 走字典；CommandMenu 分组、空态、占位符、助手、主题条目均 t()；导航项 `value`/keywords 来自已翻译 title） | 部分验证（CommandMenu.clienttest 26/26 通过） | 用户项目/组织名与跳转 URL 不翻译 |
 | B3 | 全局通知/toast | `features/notifications`, `ErrorNotification`, `SuccessNotification` | 已登录 | 成功/错误/警告、带操作、上报 | `notifications` | 源码完成 | 部分验证（ErrorNotification.clienttest 覆盖切换更新） | 服务端原文（原始错误诊断保留） |
-| B4 | 顶部横幅/banner | `top-banner`, `payment-banner`, `preview-deployment-banner`, `cloud-status-notification` | 已登录 | 各横幅文案与操作 | `notifications` | 源码完成 | 未验证 | — |
-| B5 | 主题/外观切换 | `theming/ThemeToggle` | 已登录 | 明暗/系统 | `navigation` | 部分迁移 | 未验证 | — |
+| B4 | 顶部横幅/banner | `top-banner`, `payment-banner`, `preview-deployment-banner`, `cloud-status-notification`, `SessionRedesignBanner`, `SessionFiltersBanner`, `SessionErrorBanner`, `AutomationFailureBanner`, `ScoreAnalyticsNoticeBanner`, `AgentToolsBanner` | 已登录 | 各横幅文案、操作与 aria；自动化失败计数；抽样统计说明；智能代理提示 | `notifications`, `navigation` | 源码完成（本轮补齐 Session 三个横幅、自动化失败横幅、评分分析抽样横幅、Agent 工具横幅；支付/预览部署/云状态此前已迁移） | 未验证 | 文档 URL、GitHub 讨论链接不翻译 |
+| B5 | 主题/外观切换 | `theming/ThemeToggle`, `command-k-menu` 主题条目 | 已登录 | 明暗/系统 | `navigation` | 源码完成 | 未验证 | — |
 | B6 | 通用数据表格 chrome | `components/table/*`, `DataTableToolbar`, `DataTablePagination`, `DataTableRefreshButton`, `DataTableSelectAllBanner`, `DataTableColumnVisibilityFilter`, `DataTableRowHeightSwitch` | 已登录 | 分页、全选、列显示、行高、搜索模式、筛选构建器、刷新、导出、空态 | `table` | 源码完成（通用组件 chrome 已全量迁移 t()；页面级表格逐页迁移中） | 部分验证（DataTableToolbar.clienttest 覆盖切换保留草稿/选中） | — |
 | B7 | 通用筛选器 | `features/filters`, `search-bar`, `natural-language-filters` | 已登录 | 过滤构建器、搜索栏、AI 过滤、已应用/清除 | — | 源码完成（filter-builder、MultiSelect 硬编码文案已迁移 t()；search-bar 无硬编码残余） | 未验证 | — |
 | B8 | 通用日期/时间选择器 | `components/date-picker`, `global-time-range` | 已登录 | 预设、相对时间、自定义范围 | — | 未迁移 | 未验证 | — |
