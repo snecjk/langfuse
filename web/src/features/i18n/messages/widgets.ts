@@ -218,6 +218,66 @@ export const widgetMessages = {
     viewMode: "View mode",
     tableView: "Table",
     chartView: "Chart",
+    // Metric metadata badges
+    badgeUnit: "Unit",
+    badgeType: "Type",
+    // Chart value fallbacks and chrome
+    unknownSeries: "Unknown",
+    histogramAria: "Histogram",
+    histogramBin: "Bin {index}",
+    histogramBinTooltip: "Bin: {label}",
+    histogramCount: "Count",
+    showingTopSeries: "Showing top {visibleCount} of {totalCount} series",
+    // Filter presets
+    presetExperimentData: "Experiment Data",
+    presetExperimentDataHelp: "All experiment-items linked to experiments",
+    // Auto-suggested widget name / description fragments
+    noMetrics: "No Metrics",
+    moreMetrics: "+ {count} more",
+    toolCallsName: "Number of Tool Calls",
+    toolCallsDescription: "the number of tool calls",
+    nameByDimension: " by {dimension}",
+    nameSuffix: " ({view})",
+    descriptionTemplate: "Shows {metric} of {view}",
+    descriptionCountTemplate: "Shows the count of {view}",
+    descriptionByDimension: " by {dimension}",
+    descriptionFilteredBy: ", filtered by {columns}",
+    descriptionFilteredByCount: ", filtered by {count} conditions",
+    descriptionAnd: " and ",
+    unitDuration: "Duration",
+    unitTokens: "Tokens",
+    unitTokensPerSecond: "Tokens/s",
+    unitTraces: "Traces",
+    unitObservations: "Observations",
+    unitScores: "Scores",
+    unitUsers: "Users",
+    unitSessions: "Sessions",
+    unitTools: "Tools",
+    unitCalls: "Calls",
+    // Pivot table row labels
+    pivotTotalRow: "Total",
+    pivotSubtotalRow: "{dimension} (Subtotal)",
+    // Form validation messages (superRefine)
+    schemaNoBreakdown:
+      "This chart type does not support a breakdown dimension.",
+    schemaPivotMetricRequired:
+      "At least one metric is required for pivot tables.",
+    schemaPivotMaxMetrics: "A pivot table supports at most {count} metrics.",
+    schemaPivotMaxDimensions:
+      "A pivot table supports at most {count} dimensions.",
+    schemaSingleMetric: "This chart type requires exactly one metric.",
+    schemaSelectMeasure: "Select a measure.",
+    schemaSingleDimension:
+      "This chart type supports at most one breakdown dimension.",
+    schemaHistogramSingleMetric: "A histogram uses a single metric.",
+    schemaHistogramAggregation:
+      "A histogram requires the histogram aggregation.",
+    schemaHistogramUnsupported: "This measure cannot be shown as a histogram.",
+    schemaHistogramAggregationOnly:
+      "The histogram aggregation is only valid for histogram charts.",
+    // Slow query hint (shared error copy, surfaced by chart loading state)
+    slowQueryHint:
+      "This query is taking longer than usual. Try reducing the time frame or adding more filters.",
   },
   "zh-CN": {
     // Pages
@@ -431,5 +491,58 @@ export const widgetMessages = {
     viewMode: "视图模式",
     tableView: "表格",
     chartView: "图表",
+    // Metric metadata badges
+    badgeUnit: "单位",
+    badgeType: "类型",
+    // Chart value fallbacks and chrome
+    unknownSeries: "未知",
+    histogramAria: "直方图",
+    histogramBin: "区间 {index}",
+    histogramBinTooltip: "区间：{label}",
+    histogramCount: "计数",
+    showingTopSeries: "显示前 {visibleCount} 个系列，共 {totalCount} 个",
+    // Filter presets
+    presetExperimentData: "实验数据",
+    presetExperimentDataHelp: "与实验关联的所有实验条目",
+    // Auto-suggested widget name / description fragments
+    noMetrics: "无指标",
+    moreMetrics: "+ 更多 {count} 个",
+    toolCallsName: "工具调用次数",
+    toolCallsDescription: "工具调用次数",
+    nameByDimension: "（按{dimension}）",
+    nameSuffix: "（{view}）",
+    descriptionTemplate: "显示{view}的{metric}",
+    descriptionCountTemplate: "显示{view}的计数",
+    descriptionByDimension: "，按{dimension}拆分",
+    descriptionFilteredBy: "，筛选条件：{columns}",
+    descriptionFilteredByCount: "，筛选条件 {count} 项",
+    descriptionAnd: " 和 ",
+    unitDuration: "时长",
+    unitTokens: "Token",
+    unitTokensPerSecond: "Token/s",
+    unitTraces: "追踪",
+    unitObservations: "观察",
+    unitScores: "评分",
+    unitUsers: "用户",
+    unitSessions: "会话",
+    unitTools: "工具",
+    unitCalls: "调用",
+    // Pivot table row labels
+    pivotTotalRow: "总计",
+    pivotSubtotalRow: "{dimension}（小计）",
+    // Form validation messages (superRefine)
+    schemaNoBreakdown: "此图表类型不支持拆分维度。",
+    schemaPivotMetricRequired: "透视表至少需要选择一个指标。",
+    schemaPivotMaxMetrics: "透视表最多支持 {count} 个指标。",
+    schemaPivotMaxDimensions: "透视表最多支持 {count} 个维度。",
+    schemaSingleMetric: "此图表类型只能选择一个指标。",
+    schemaSelectMeasure: "请选择度量。",
+    schemaSingleDimension: "此图表类型最多支持一个拆分维度。",
+    schemaHistogramSingleMetric: "直方图只能使用单个指标。",
+    schemaHistogramAggregation: "直方图需要使用直方图聚合方式。",
+    schemaHistogramUnsupported: "此度量无法显示为直方图。",
+    schemaHistogramAggregationOnly: "直方图聚合方式仅可用于直方图图表。",
+    // Slow query hint (shared error copy, surfaced by chart loading state)
+    slowQueryHint: "此查询耗时超出平常。请尝试缩短时间范围或添加更多筛选条件。",
   },
 } satisfies Messages;

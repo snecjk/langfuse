@@ -13,6 +13,7 @@ import { Chart } from "@/src/features/widgets/chart-library/Chart";
 import {
   type FormatMetricOptions,
   type LegendPosition,
+  type MessageTranslator,
 } from "@/src/features/widgets/chart-library/chart-props";
 import { ChartLoadingState } from "@/src/features/widgets/chart-library/ChartLoadingState";
 import {
@@ -29,6 +30,8 @@ import {
 import { isTimeSeriesChart } from "@/src/features/widgets/chart-library/utils";
 import { useReadPath } from "@/src/features/events/hooks/useReadPath";
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 
 // ============================================================================
 // Types
@@ -176,6 +179,7 @@ export function WidgetContent({
   // Transport-only: `version` is a prop here, so an unresolved session can
   // never change WHAT is queried — only whether it streams (SSE) or not.
   const { isV4 } = useReadPath();
+  const t = useTranslation(widgetMessages);
   const [retryCount, setRetryCount] = useState(0);
 
   const handleRetry = useCallback(() => {
@@ -291,7 +295,7 @@ export function WidgetContent({
       // Handle series dimension (for legend)
       let seriesDimension: string;
       if (entityIsCategory) {
-        seriesDimension = xAxisValue ?? "Unknown";
+        seriesDimension = xAxisValue ?? t("unknownSeries");
       } else if (dimensionValue !== undefined) {
         const val = dimensionValue;
         // Empty first: "" is a string, so the order matters. (LFE-10694)
@@ -354,6 +358,7 @@ export function WidgetContent({
     dimensions,
     entityDimensionLabelMap,
     dimensionLabelMap,
+    t,
   ]);
 
   // Chart presentation (label and formatter)
@@ -368,8 +373,9 @@ export function WidgetContent({
       view,
       version,
       usdPrecision,
+      t: t as unknown as MessageTranslator,
     });
-  }, [chartType, metrics, view, version, usdPrecision]);
+  }, [chartType, metrics, view, version, usdPrecision, t]);
 
   // Loading state
   const chartLoadingState = getChartLoadingStateProps({
@@ -431,7 +437,7 @@ export function WidgetContent({
   if (isExternalLoading) {
     return (
       <div className="bg-background flex items-center justify-center rounded-lg border p-4">
-        <div className="text-muted-foreground">Loading...</div>
+        <div className="text-muted-foreground">{t("loading")}</div>
       </div>
     );
   }

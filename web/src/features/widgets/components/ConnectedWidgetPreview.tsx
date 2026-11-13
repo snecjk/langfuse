@@ -11,7 +11,10 @@ import { AlertCircle } from "@langfuse/icons";
 import { api } from "@/src/utils/api";
 import { getResultUnit } from "@langfuse/shared/query";
 import { Chart } from "@/src/features/widgets/chart-library/Chart";
-import { type DataPoint } from "@/src/features/widgets/chart-library/chart-props";
+import {
+  type DataPoint,
+  type MessageTranslator,
+} from "@/src/features/widgets/chart-library/chart-props";
 import { isTimeSeriesChart } from "@/src/features/widgets/chart-library/utils";
 import { ChartLoadingState } from "@/src/features/widgets/chart-library/ChartLoadingState";
 import {
@@ -201,6 +204,7 @@ function useWidgetPreviewData({
   selectedMeasure,
   selectedView,
 }: ConnectedWidgetPreviewProps) {
+  const t = useTranslation(widgetMessages);
   const queryResult = api.dashboard.executeQuery.useQuery(
     {
       projectId,
@@ -305,6 +309,7 @@ function useWidgetPreviewData({
       metric: { measure: selectedMeasure, agg: selectedAggregation },
       view: selectedView,
       version: viewVersion,
+      t: t as unknown as MessageTranslator,
     });
   }, [
     selectedAggregation,
@@ -312,6 +317,7 @@ function useWidgetPreviewData({
     selectedMeasure,
     selectedView,
     viewVersion,
+    t,
   ]);
 
   return {

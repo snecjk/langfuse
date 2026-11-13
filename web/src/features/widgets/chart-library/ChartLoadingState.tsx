@@ -2,7 +2,6 @@
 /* eslint-disable @repo/no-style-props */
 import { useEffect, useState } from "react";
 import { cn } from "@/src/utils/tailwind";
-import { SLOW_QUERY_HINT_TEXT } from "@langfuse/shared";
 import { type QueryProgress } from "@/src/hooks/useSSEDashboardQuery";
 import { QueryProgressBar } from "@/src/features/widgets/chart-library/QueryProgressBar";
 import { Button } from "@/src/components/ui/button";
@@ -31,7 +30,7 @@ export function ChartLoadingState({
   className,
   hintClassName,
   spinnerLabel = "Loading chart data",
-  hintText = SLOW_QUERY_HINT_TEXT,
+  hintText,
   hintDelayMs = DEFAULT_HINT_DELAY_MS,
   showSpinner = true,
   showHintImmediately = false,
@@ -46,6 +45,7 @@ export function ChartLoadingState({
       ? t("loadingChartData")
       : spinnerLabel;
   const localizedRetryLabel = retryLabel === "Retry" ? t("retry") : retryLabel;
+  const resolvedHintText = hintText ?? t("slowQueryHint");
   const [showHint, setShowHint] = useState(false);
   const [showProgressPhase, setShowProgressPhase] = useState(false);
   const shouldShowProgress = progress !== undefined;
@@ -174,7 +174,7 @@ export function ChartLoadingState({
               )}
             >
               {shouldRenderHint ? (
-                hintText
+                resolvedHintText
               ) : (
                 <span aria-hidden="true">&nbsp;</span>
               )}

@@ -7,7 +7,11 @@ import {
   formatMetric,
   toFullMetricString,
 } from "@/src/features/widgets/chart-library/utils";
-import { useInterfaceLocale } from "@/src/features/i18n/I18nProvider";
+import {
+  useInterfaceLocale,
+  useTranslation,
+} from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 
 export function VerticalBarChart({
   data,
@@ -19,6 +23,7 @@ export function VerticalBarChart({
   zeroBaseline = false,
 }: ChartProps) {
   const locale = useInterfaceLocale();
+  const t = useTranslation(widgetMessages);
   const categoryBars = useMemo(
     () => (colorBarsByCategory ? prepareCategoryBars(data) : null),
     [colorBarsByCategory, data],
@@ -26,11 +31,11 @@ export function VerticalBarChart({
   const chartData = useMemo(
     () =>
       (categoryBars?.rows ?? data).map((row, index) => ({
-        label: row.dimension ?? "Unknown",
+        label: row.dimension ?? t("unknownSeries"),
         value: typeof row.metric === "number" ? row.metric : null,
         color: categoryBars?.rows[index]?.fill,
       })),
-    [categoryBars, data],
+    [categoryBars, data, t],
   );
   const formatValue = (value: number) =>
     toFullMetricString(metricFormatter(value, { style: "compact", locale }));

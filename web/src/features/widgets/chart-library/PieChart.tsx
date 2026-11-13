@@ -1,5 +1,9 @@
 import React, { useMemo } from "react";
-import { useInterfaceLocale } from "@/src/features/i18n/I18nProvider";
+import {
+  useInterfaceLocale,
+  useTranslation,
+} from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 import { PieChart as DesignSystemPieChart } from "@/src/components/design-system/charts/PieChart/PieChart";
 import { type ChartProps } from "@/src/features/widgets/chart-library/chart-props";
 import {
@@ -18,15 +22,16 @@ export const PieChart: React.FC<
   metricFormatter = (value, options) => formatMetric(value, options),
 }) => {
   const locale = useInterfaceLocale();
+  const t = useTranslation(widgetMessages);
   const formatValue = (value: number) =>
     toFullMetricString(metricFormatter(value, { style: "compact", locale }));
 
   const chartData = useMemo(() => {
     return data.map((item) => ({
-      label: item.dimension || "Unknown",
+      label: item.dimension || t("unknownSeries"),
       value: typeof item.metric === "number" ? item.metric : 0,
     }));
-  }, [data]);
+  }, [data, t]);
 
   return <DesignSystemPieChart data={chartData} valueFormatter={formatValue} />;
 };

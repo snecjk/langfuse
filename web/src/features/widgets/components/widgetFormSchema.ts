@@ -29,6 +29,7 @@ import {
   MAX_PIVOT_TABLE_DIMENSIONS,
   MAX_PIVOT_TABLE_METRICS,
 } from "@/src/features/widgets/utils/pivot-table-utils";
+import type { MessageTranslator } from "@/src/features/widgets/chart-library/chart-props";
 
 /**
  * The set of widget chart types that accept a breakdown dimension. This mirrors
@@ -176,9 +177,14 @@ export type SortField = z.infer<typeof SortFieldSchema>;
  *
  * The factory is parameterised by `viewVersion` because the histogram
  * measure-capability check (invariant 1) reads the measure's type from the
- * version-specific view declaration.
+ * version-specific view declaration. The optional `t` translator localizes the
+ * validation messages the form renders inline and next to the disabled Save
+ * button; without it the English baseline applies.
  */
-export function makeWidgetFormSchema(viewVersion: ViewVersion) {
+export function makeWidgetFormSchema(
+  viewVersion: ViewVersion,
+  t?: MessageTranslator,
+) {
   return z
     .object({
       // Blank (null) name/description means "use the live auto-suggestion";
@@ -203,12 +209,18 @@ export function makeWidgetFormSchema(viewVersion: ViewVersion) {
         values.chart.type,
       );
 
+      const msg = (key: string, fallback: string): string =>
+        t ? t(key) : fallback;
+
       // Invariant 3: a non-breakdown chart type cannot carry a dimension.
       if (!supportsBreakdown && values.dimensions.length > 0) {
         ctx.addIssue({
           code: "custom",
           path: ["dimensions"],
-          message: "This chart type does not support a breakdown dimension.",
+          message: msg(
+            "schemaNoBreakdown",
+            "This chart type does not support a breakdown dimension.",
+          ),
         });
       }
 
@@ -221,21 +233,30 @@ export function makeWidgetFormSchema(viewVersion: ViewVersion) {
           ctx.addIssue({
             code: "custom",
             path: ["metrics"],
-            message: "At least one metric is required for pivot tables.",
+            message: msg(
+              "schemaPivotMetricRequired",
+              "At least one metric is required for pivot tables.",
+            ),
           });
         }
         if (values.metrics.length > MAX_PIVOT_TABLE_METRICS) {
           ctx.addIssue({
             code: "custom",
             path: ["metrics"],
-            message: `A pivot table supports at most ${MAX_PIVOT_TABLE_METRICS} metrics.`,
+            message: msg(
+              "schemaPivotMaxMetrics",
+              `A pivot table supports at most ${MAX_PIVOT_TABLE_METRICS} metrics.`,
+            ),
           });
         }
         if (values.dimensions.length > MAX_PIVOT_TABLE_DIMENSIONS) {
           ctx.addIssue({
             code: "custom",
             path: ["dimensions"],
-            message: `A pivot table supports at most ${MAX_PIVOT_TABLE_DIMENSIONS} dimensions.`,
+            message: msg(
+              "schemaPivotMaxDimensions",
+              `A pivot table supports at most ${MAX_PIVOT_TABLE_DIMENSIONS} dimensions.`,
+            ),
           });
         }
       } else {
@@ -243,21 +264,26 @@ export function makeWidgetFormSchema(viewVersion: ViewVersion) {
           ctx.addIssue({
             code: "custom",
             path: ["metrics"],
-            message: "This chart type requires exactly one metric.",
+            message: msg(
+              "schemaSingleMetric",
+              "This chart type requires exactly one metric.",
+            ),
           });
         } else if (!values.metrics[0].measure) {
           ctx.addIssue({
             code: "custom",
             path: ["metrics", 0, "measure"],
-            message: "Select a measure.",
+            message: msg("schemaSelectMeasure", "Select a measure."),
           });
         }
         if (values.dimensions.length > 1) {
           ctx.addIssue({
             code: "custom",
             path: ["dimensions"],
-            message:
+            message: msg(
+              "schemaSingleDimension",
               "This chart type supports at most one breakdown dimension.",
+            ),
           });
         }
       }
@@ -270,7 +296,10 @@ export function makeWidgetFormSchema(viewVersion: ViewVersion) {
           ctx.addIssue({
             code: "custom",
             path: ["chart", "type"],
-            message: "A histogram uses a single metric.",
+            message: msg(
+              "schemaHistogramSingleMetric",
+              "A histogram uses a single metric.",
+            ),
           });
         } else {
           const metric = values.metrics[0];
@@ -278,7 +307,10 @@ export function makeWidgetFormSchema(viewVersion: ViewVersion) {
             ctx.addIssue({
               code: "custom",
               path: ["metrics", 0, "aggregation"],
-              message: "A histogram requires the histogram aggregation.",
+              message: msg(
+                "schemaHistogramAggregation",
+                "A histogram requires the histogram aggregation.",
+              ),
             });
           }
           const measureType =
@@ -293,7 +325,10 @@ export function makeWidgetFormSchema(viewVersion: ViewVersion) {
             ctx.addIssue({
               code: "custom",
               path: ["chart", "type"],
-              message: "This measure cannot be shown as a histogram.",
+              message: msg(
+                "schemaHistogramUnsupported",
+                "This measure cannot be shown as a histogram.",
+              ),
             });
           }
         }
@@ -303,8 +338,10 @@ export function makeWidgetFormSchema(viewVersion: ViewVersion) {
         ctx.addIssue({
           code: "custom",
           path: ["metrics", 0, "aggregation"],
-          message:
+          message: msg(
+            "schemaHistogramAggregationOnly",
             "The histogram aggregation is only valid for histogram charts.",
+          ),
         });
       }
     });
@@ -416,7 +453,10 @@ export function deriveEffectiveSort(
  * description uses the UI-space editor filters (`values.filters`), matching the
  * legacy behaviour.
  */
-export function deriveWidgetSuggestions(values: WidgetFormValues): {
+export function deriveWidgetSuggestions(
+  values: WidgetFormValues,
+  t?: MessageTranslator,
+): {
   name: string;
   description: string;
 } {
@@ -446,6 +486,7 @@ export function deriveWidgetSuggestions(values: WidgetFormValues): {
       view: values.view,
       metrics: metricNames,
       isMultiMetric: isPivot && validMetrics.length > 0,
+      t,
     }),
     description: buildWidgetDescription({
       aggregation,
@@ -455,6 +496,7 @@ export function deriveWidgetSuggestions(values: WidgetFormValues): {
       filters: values.filters,
       metrics: metricNames,
       isMultiMetric: isPivot && validMetrics.length > 0,
+      t,
     }),
   };
 }

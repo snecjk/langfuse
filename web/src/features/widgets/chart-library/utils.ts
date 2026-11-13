@@ -2,6 +2,7 @@ import {
   type DataPoint,
   type FormatMetricOptions,
   type FormattedMetric,
+  type MessageTranslator,
 } from "./chart-props";
 import { type DashboardWidgetChartType } from "@langfuse/shared/src/db";
 import { compactNumberFormatter, numberFormatter } from "@/src/utils/numbers";
@@ -23,11 +24,12 @@ export type TimeSeriesGroupedRow = {
  */
 export const groupDataByTimeDimension = (
   data: DataPoint[],
+  t?: MessageTranslator,
 ): TimeSeriesGroupedRow[] => {
   // First, group by time_dimension
   const timeGroups = data.reduce(
     (acc: Record<string, Record<string, number | null>>, item: DataPoint) => {
-      const time = item.time_dimension || "Unknown";
+      const time = item.time_dimension || t?.("unknownSeries") || "Unknown";
       if (!acc[time]) {
         acc[time] = {};
       }
@@ -135,32 +137,35 @@ export const getEvenTickInterval = (
   pointCount <= maxTicks ? 0 : Math.ceil(pointCount / maxTicks) - 1;
 
 /**
- * Maps chart types to their human-readable display names.
+ * Maps chart types to their human-readable display names. The `t` translator
+ * (bound to widgetMessages) localizes the names; without one the English
+ * catalog strings are used, matching the standalone-callers baseline.
  */
 export function getChartTypeDisplayName(
   chartType: DashboardWidgetChartType,
+  t?: MessageTranslator,
 ): string {
   switch (chartType) {
     case "LINE_TIME_SERIES":
-      return "Line Chart (Time Series)";
+      return t?.("chartTypeLine") ?? "Line Chart";
     case "AREA_TIME_SERIES":
-      return "Area Chart (Time Series)";
+      return t?.("chartTypeArea") ?? "Area Chart";
     case "BAR_TIME_SERIES":
-      return "Bar Chart (Time Series)";
+      return t?.("chartTypeBarTimeSeries") ?? "Vertical Bar Chart";
     case "HORIZONTAL_BAR":
-      return "Horizontal Bar Chart (Total Value)";
+      return t?.("chartTypeHorizontalBar") ?? "Horizontal Bar Chart";
     case "VERTICAL_BAR":
-      return "Vertical Bar Chart (Total Value)";
+      return t?.("chartTypeVerticalBar") ?? "Vertical Bar Chart";
     case "PIE":
-      return "Pie Chart (Total Value)";
+      return t?.("chartTypePie") ?? "Pie Chart";
     case "NUMBER":
-      return "Big Number (Total Value)";
+      return t?.("chartTypeBigNumber") ?? "Big Number";
     case "HISTOGRAM":
-      return "Histogram (Total Value)";
+      return t?.("chartTypeHistogram") ?? "Histogram";
     case "PIVOT_TABLE":
-      return "Pivot Table (Total Value)";
+      return t?.("chartTypePivotTable") ?? "Pivot Table";
     default:
-      return "Unknown Chart Type";
+      return t?.("unknownSeries") ?? "Unknown";
   }
 }
 

@@ -4,7 +4,9 @@ import { BeakerIcon, type IconComponent } from "@langfuse/icons";
 import { type FilterState } from "@langfuse/shared";
 
 /**
- * Widget filter preset definition.
+ * Widget filter preset definition. `label` and `description` hold stable
+ * widgetMessages keys (not display copy) so the presets popover renders them
+ * in the active interface language.
  */
 type WidgetFilterPreset = {
   label: string;
@@ -27,8 +29,8 @@ type WidgetFilterPreset = {
  */
 export const WIDGET_FILTER_PRESETS = {
   allExperimentData: {
-    label: "Experiment Data",
-    description: "All experiment-items linked to experiments",
+    label: "presetExperimentData",
+    description: "presetExperimentDataHelp",
     icon: BeakerIcon,
     view: "observations",
     filters: [

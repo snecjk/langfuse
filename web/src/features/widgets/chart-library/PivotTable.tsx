@@ -242,6 +242,11 @@ export const PivotTable: React.FC<PivotTableProps> = ({
       metrics: config?.metrics ?? ["metric"], // Default to 'metric' field from DataPoint
       rowLimit: config?.rowLimit ?? DEFAULT_ROW_LIMIT,
       defaultSort: config?.defaultSort,
+      rowLabels: {
+        total: t("pivotTotalRow"),
+        subtotal: (dimensionValue: string) =>
+          t("pivotSubtotalRow", { dimension: dimensionValue }),
+      },
     };
 
     // Transform DataPoint[] to DatabaseRow[] format using utility functions
@@ -290,7 +295,7 @@ export const PivotTable: React.FC<PivotTableProps> = ({
       console.error("Error transforming data to pivot table:", error);
       return [];
     }
-  }, [data, config]);
+  }, [data, config, t]);
 
   // Apply sorting to pivot table rows
   const sortedRows = useMemo(() => {

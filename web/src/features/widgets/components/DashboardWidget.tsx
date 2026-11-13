@@ -17,7 +17,10 @@ import {
 } from "@langfuse/shared/query";
 import { type z } from "zod";
 import { Chart } from "@/src/features/widgets/chart-library/Chart";
-import { type ChartProps } from "@/src/features/widgets/chart-library/chart-props";
+import {
+  type ChartProps,
+  type MessageTranslator,
+} from "@/src/features/widgets/chart-library/chart-props";
 import { type FilterState, type OrderByState } from "@langfuse/shared";
 import { isTimeSeriesChart } from "@/src/features/widgets/chart-library/utils";
 import {
@@ -417,8 +420,9 @@ export function DashboardWidget({
       metric,
       view: widget.data.view,
       version: metricsVersion,
+      t: t as unknown as MessageTranslator,
     });
-  }, [metricsVersion, widget.data]);
+  }, [metricsVersion, widget.data, t]);
 
   // Memoize the Chart's config/chartConfig objects so the scheduler's page
   // re-renders don't hand Chart fresh literals every tick (transformedData is

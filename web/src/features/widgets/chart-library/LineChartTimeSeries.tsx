@@ -8,6 +8,7 @@ import {
 import {
   type ChartProps,
   type ChartThreshold,
+  type MessageTranslator,
 } from "@/src/features/widgets/chart-library/chart-props";
 import {
   formatMetric,
@@ -15,7 +16,11 @@ import {
   groupDataByTimeDimension,
   toFullMetricString,
 } from "@/src/features/widgets/chart-library/utils";
-import { useInterfaceLocale } from "@/src/features/i18n/I18nProvider";
+import {
+  useInterfaceLocale,
+  useTranslation,
+} from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 import { prepareDenseSeries } from "@/src/features/widgets/chart-library/prepareDenseSeries";
 import {
   parseChartTimestamp,
@@ -87,15 +92,16 @@ export function LineChartTimeSeries({
   compactYAxis = false,
 }: ChartProps) {
   const locale = useInterfaceLocale();
+  const t = useTranslation(widgetMessages);
   const allDimensions = useMemo(() => getUniqueDimensions(data), [data]);
   const groupedData = useMemo(
     () =>
       prepareDenseSeries(
-        groupDataByTimeDimension(data),
+        groupDataByTimeDimension(data, t as unknown as MessageTranslator),
         allDimensions,
         missingValue,
       ),
-    [data, allDimensions, missingValue],
+    [data, allDimensions, missingValue, t],
   );
   const visibleSeries = useMemo(
     () => prepareVisibleSeries(data, allDimensions),

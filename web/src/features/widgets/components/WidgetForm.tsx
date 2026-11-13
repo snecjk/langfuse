@@ -86,6 +86,7 @@ import { WIDGET_FILTER_PRESETS } from "@/src/features/widgets/constants/widgetFi
 import { useCaptureWidgetHighCardinalityError } from "@/src/features/widgets/hooks/useWidgetQueryErrorCapture";
 import { useTranslation } from "@/src/features/i18n/I18nProvider";
 import { widgetMessages } from "@/src/features/i18n/messages/widgets";
+import type { MessageTranslator } from "@/src/features/widgets/chart-library/chart-props";
 import {
   applyChartTypeChange,
   deriveEffectiveSort,
@@ -513,7 +514,10 @@ export function WidgetForm({
       });
       return;
     }
-    const s = deriveWidgetSuggestions(submitted);
+    const s = deriveWidgetSuggestions(
+      submitted,
+      t as unknown as MessageTranslator,
+    );
     onSave(
       toSavePayload(submitted, {
         suggestedName: s.name,
@@ -589,7 +593,7 @@ export function WidgetForm({
                             onClick={() => applyPreset(preset)}
                           >
                             <preset.icon size="base" __rawClassName="mr-2" />
-                            {preset.label}
+                            {t(preset.label as Parameters<typeof t>[0])}
                           </Button>
                         </PopoverClose>
                       ),
@@ -891,10 +895,10 @@ function SingleMetricField({
                   description: meta?.description,
                   badges: [
                     ...(meta?.unit
-                      ? [{ label: "Unit", value: meta.unit }]
+                      ? [{ label: t("badgeUnit"), value: meta.unit }]
                       : []),
                     ...(meta?.type
-                      ? [{ label: "Type", value: meta.type }]
+                      ? [{ label: t("badgeType"), value: meta.type }]
                       : []),
                   ],
                 },
@@ -1069,10 +1073,10 @@ function PivotMetricsField({
                         description: meta?.description,
                         badges: [
                           ...(meta?.unit
-                            ? [{ label: "Unit", value: meta.unit }]
+                            ? [{ label: t("badgeUnit"), value: meta.unit }]
                             : []),
                           ...(meta?.type
-                            ? [{ label: "Type", value: meta.type }]
+                            ? [{ label: t("badgeType"), value: meta.type }]
                             : []),
                         ],
                       },
@@ -1195,10 +1199,10 @@ function BreakdownSelect({
                   description: meta?.description,
                   badges: [
                     ...(meta?.unit
-                      ? [{ label: "Unit", value: meta.unit }]
+                      ? [{ label: t("badgeUnit"), value: meta.unit }]
                       : []),
                     ...(meta?.type
-                      ? [{ label: "Type", value: meta.type }]
+                      ? [{ label: t("badgeType"), value: meta.type }]
                       : []),
                   ],
                 },
@@ -1286,10 +1290,10 @@ function PivotDimensionsField({
                         description: meta?.description,
                         badges: [
                           ...(meta?.unit
-                            ? [{ label: "Unit", value: meta.unit }]
+                            ? [{ label: t("badgeUnit"), value: meta.unit }]
                             : []),
                           ...(meta?.type
-                            ? [{ label: "Type", value: meta.type }]
+                            ? [{ label: t("badgeType"), value: meta.type }]
                             : []),
                         ],
                       },
@@ -1604,13 +1608,16 @@ export function useWidgetFormState({
 
   // Precompute both version schemas/resolvers once. A blank name/description is
   // filled with the live suggestion and the filters are mapped into view space
-  // before zod (mirrors MonitorForm).
+  // before zod (mirrors MonitorForm). The bound translator keeps the rendered
+  // validation messages in the active interface language; the cast widens the
+  // namespace-bound `t` to the loose MessageTranslator the schema accepts.
+  const translator = t as unknown as MessageTranslator;
   const resolversByVersion = useMemo(
     () => ({
-      v1: zodResolver(makeWidgetFormSchema("v1") as any),
-      v2: zodResolver(makeWidgetFormSchema("v2") as any),
+      v1: zodResolver(makeWidgetFormSchema("v1", translator) as any),
+      v2: zodResolver(makeWidgetFormSchema("v2", translator) as any),
     }),
-    [],
+    [translator],
   );
   // The schema version is derived INSIDE the resolver from the (mapped) view
   // being validated — not from a render-written ref — so it is never render
@@ -1669,7 +1676,7 @@ export function useWidgetFormState({
     activeVersion,
     shape: values,
   });
-  const suggestions = deriveWidgetSuggestions(values);
+  const suggestions = deriveWidgetSuggestions(values, translator);
   const effectiveSort = deriveEffectiveSort(values);
 
   suggestionsRef.current = suggestions;

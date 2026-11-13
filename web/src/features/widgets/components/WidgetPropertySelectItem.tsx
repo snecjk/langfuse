@@ -1,5 +1,7 @@
 /* eslint-disable @repo/component-file-structure */
 import { HoverCard } from "@/src/components/design-system/HoverCard/HoverCard";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 import * as React from "react";
 
 interface PropertyHoverCardProps {
@@ -17,6 +19,7 @@ export const PropertyHoverCard = ({
   type,
   children,
 }: PropertyHoverCardProps) => {
+  const t = useTranslation(widgetMessages);
   return (
     <HoverCard
       openDelay={0}
@@ -30,12 +33,12 @@ export const PropertyHoverCard = ({
             <div className="mb-2 flex flex-wrap gap-2 text-xs">
               {unit && (
                 <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5">
-                  Unit: {unit}
+                  {t("badgeUnit")}: {unit}
                 </span>
               )}
               {type && (
                 <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5">
-                  Type: {type}
+                  {t("badgeType")}: {type}
                 </span>
               )}
             </div>

@@ -2,6 +2,18 @@ import type { ComponentType, ReactNode } from "react";
 import type { Locale } from "@/src/features/i18n/locale";
 import type tailwindColors from "tailwindcss/colors";
 
+/**
+ * Loose translator signature accepted by the pure helpers that render
+ * user-facing English copy (tick fallbacks, chart-type display names,
+ * auto-suggested widget names). Components pass their bound `useTranslation`
+ * result; the key is widened to `string` so any namespace-bound translator is
+ * assignable — callers pass keys they know their catalog resolves.
+ */
+export type MessageTranslator = (
+  key: string,
+  parameters?: Readonly<Record<string, string | number>>,
+) => string;
+
 export interface DataPoint {
   time_dimension: string | undefined;
   dimension: string | undefined;

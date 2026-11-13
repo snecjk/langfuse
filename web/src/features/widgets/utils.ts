@@ -12,6 +12,7 @@ import {
   type FormatMetricOptions,
   type MetricFormatterFunction,
   type MissingBucketValue,
+  type MessageTranslator,
 } from "@/src/features/widgets/chart-library/chart-props";
 import { mapLegacyUiTableFilterToView } from "@/src/features/dashboard/lib/dashboardUiTableToViewMapping";
 
@@ -122,8 +123,11 @@ export function formatMetricName(metricName: string): string {
 /**
  * Formats multiple metric names for display, showing first 3 and "+ X more" if needed
  */
-function formatMultipleMetricNames(metricNames: string[]): string {
-  if (metricNames.length === 0) return "No Metrics";
+function formatMultipleMetricNames(
+  metricNames: string[],
+  t?: MessageTranslator,
+): string {
+  if (metricNames.length === 0) return t?.("noMetrics") ?? "No Metrics";
   if (metricNames.length === 1) return formatMetricName(metricNames[0]);
 
   const formattedNames = metricNames.map(formatMetricName);
@@ -134,7 +138,9 @@ function formatMultipleMetricNames(metricNames: string[]): string {
 
   const firstThree = formattedNames.slice(0, 3).join(", ");
   const remaining = metricNames.length - 3;
-  return `${firstThree} + ${remaining} more`;
+  return t
+    ? `${firstThree}, ${t("moreMetrics", { count: remaining })}`
+    : `${firstThree} + ${remaining} more`;
 }
 
 export function buildWidgetName({
@@ -144,6 +150,7 @@ export function buildWidgetName({
   view,
   metrics,
   isMultiMetric = false,
+  t,
 }: {
   aggregation: string;
   measure: string;
@@ -151,12 +158,13 @@ export function buildWidgetName({
   view: string;
   metrics?: string[];
   isMultiMetric?: boolean;
+  t?: MessageTranslator;
 }) {
   let base: string;
 
   if (isMultiMetric && metrics && metrics.length > 0) {
     // Handle multi-metric scenarios (like pivot tables)
-    const metricDisplay = formatMultipleMetricNames(metrics);
+    const metricDisplay = formatMultipleMetricNames(metrics, t);
     base = metricDisplay;
   } else {
     // Handle single metric scenarios (existing logic)
@@ -167,7 +175,7 @@ export function buildWidgetName({
     } else if (measure === "toolCalls" && aggregation.toLowerCase() === "sum") {
       // Summing the per-observation call count is simply "the number of tool
       // calls" — surface the meaning, not the aggregation mechanics.
-      base = "Number of Tool Calls";
+      base = t?.("toolCallsName") ?? "Number of Tool Calls";
     } else {
       const agg = startCase(aggregation.toLowerCase());
       base = `${agg} ${meas}`;
@@ -175,9 +183,13 @@ export function buildWidgetName({
   }
 
   if (dimension && dimension !== "none") {
-    base += ` by ${startCase(dimension)}`;
+    base += t
+      ? t("nameByDimension", { dimension: startCase(dimension) })
+      : ` by ${startCase(dimension)}`;
   }
-  base += ` (${startCase(view)})`;
+  base += t
+    ? t("nameSuffix", { view: startCase(view) })
+    : ` (${startCase(view)})`;
   return base;
 }
 
@@ -189,6 +201,7 @@ export function buildWidgetDescription({
   filters,
   metrics,
   isMultiMetric = false,
+  t,
 }: {
   aggregation: string;
   measure: string;
@@ -197,41 +210,69 @@ export function buildWidgetDescription({
   filters: FilterState;
   metrics?: string[];
   isMultiMetric?: boolean;
+  t?: MessageTranslator;
 }) {
   const viewLabel = startCase(view);
   let sentence: string;
 
   if (isMultiMetric && metrics && metrics.length > 0) {
     // Handle multi-metric scenarios
-    const metricDisplay = formatMultipleMetricNames(metrics);
-    sentence = `Shows ${metricDisplay.toLowerCase()} of ${viewLabel}`;
+    const metricDisplay = formatMultipleMetricNames(metrics, t);
+    sentence = t
+      ? t("descriptionTemplate", {
+          metric: metricDisplay.toLowerCase(),
+          view: viewLabel,
+        })
+      : `Shows ${metricDisplay.toLowerCase()} of ${viewLabel}`;
   } else {
     // Handle single metric scenarios (existing logic)
     const measLabel = formatMetricName(measure);
 
     if (measure.toLowerCase() === "count") {
-      sentence = `Shows the count of ${viewLabel}`;
+      sentence = t
+        ? t("descriptionCountTemplate", { view: viewLabel })
+        : `Shows the count of ${viewLabel}`;
     } else if (measure === "toolCalls" && aggregation.toLowerCase() === "sum") {
       // Mirrors buildWidgetName: sum(toolCalls) is the number of tool calls.
-      sentence = `Shows the number of tool calls of ${viewLabel}`;
+      sentence = t
+        ? t("descriptionTemplate", {
+            metric: t("toolCallsDescription"),
+            view: viewLabel,
+          })
+        : `Shows the number of tool calls of ${viewLabel}`;
     } else {
       const aggLabel = startCase(aggregation.toLowerCase());
-      sentence = `Shows the ${aggLabel.toLowerCase()} ${measLabel.toLowerCase()} of ${viewLabel}`;
+      sentence = t
+        ? t("descriptionTemplate", {
+            metric: `${aggLabel} ${measLabel}`.toLowerCase(),
+            view: viewLabel,
+          })
+        : `Shows the ${aggLabel.toLowerCase()} ${measLabel.toLowerCase()} of ${viewLabel}`;
     }
   }
 
   // Dimension clause
   if (dimension && dimension !== "none") {
-    sentence += ` by ${startCase(dimension).toLowerCase()}`;
+    sentence += t
+      ? t("descriptionByDimension", {
+          dimension: startCase(dimension).toLowerCase(),
+        })
+      : ` by ${startCase(dimension).toLowerCase()}`;
   }
 
   // Filters clause
   if (filters && filters.length > 0) {
     if (filters.length <= 2) {
-      const cols = filters.map((f) => startCase(f.column)).join(" and ");
-      sentence += `, filtered by ${cols}`;
+      const cols = filters
+        .map((f) => startCase(f.column))
+        .join(t ? t("descriptionAnd") : " and ");
+      sentence += t
+        ? t("descriptionFilteredBy", { columns: cols })
+        : `, filtered by ${cols}`;
     } else {
-      sentence += `, filtered by ${filters.length} conditions`;
+      sentence += t
+        ? t("descriptionFilteredByCount", { count: filters.length })
+        : `, filtered by ${filters.length} conditions`;
     }
   }
 
@@ -261,8 +302,13 @@ export function shouldUseWidgetSSE({
   return isV4Enabled && version === "v2";
 }
 
+/**
+ * Unit keys surfaced by {@link getWidgetMetricPresentation}. `USD` is a currency
+ * code and stays verbatim; the rest map to widgetMessages keys so the chart
+ * series label renders in the active interface language, with the English
+ * catalog as the no-translator baseline.
+ */
 const widgetUnitLabels: Record<string, string> = {
-  USD: "USD",
   milliseconds: "Duration",
   tokens: "Tokens",
   "tokens/s": "Tokens/s",
@@ -273,6 +319,19 @@ const widgetUnitLabels: Record<string, string> = {
   sessions: "Sessions",
   tools: "Tools",
   calls: "Calls",
+};
+
+const widgetUnitLabelKeys: Record<string, string> = {
+  milliseconds: "unitDuration",
+  tokens: "unitTokens",
+  "tokens/s": "unitTokensPerSecond",
+  traces: "unitTraces",
+  observations: "unitObservations",
+  scores: "unitScores",
+  users: "unitUsers",
+  sessions: "unitSessions",
+  tools: "unitTools",
+  calls: "unitCalls",
 };
 
 /**
@@ -291,6 +350,7 @@ export function getWidgetMetricPresentation(params: {
   view: string;
   version: ViewVersion;
   usdPrecision?: FormatMetricOptions["usdPrecision"];
+  t?: MessageTranslator;
 }): {
   label: string;
   metricFormatter?: MetricFormatterFunction;
@@ -305,13 +365,22 @@ export function getWidgetMetricPresentation(params: {
   const usesCountStyleAggregation =
     params.metric.agg === "count" || params.metric.agg === "uniq";
 
+  const unitLabel = (unit: string): string => {
+    const key = widgetUnitLabelKeys[unit];
+    if (!key) return formatMetricName(unit);
+    return params.t ? params.t(key) : (widgetUnitLabels[unit] ?? unit);
+  };
+
   if (
     !usesCountStyleAggregation &&
     (measureDefinition?.unit === "USD" ||
       measureDefinition?.unit === "milliseconds")
   ) {
     return {
-      label: widgetUnitLabels[measureDefinition.unit],
+      label:
+        measureDefinition.unit === "USD"
+          ? "USD"
+          : unitLabel(measureDefinition.unit),
       metricFormatter: (value, options) =>
         formatMetric(value, {
           ...options,
@@ -323,9 +392,7 @@ export function getWidgetMetricPresentation(params: {
 
   if (!usesCountStyleAggregation && measureDefinition?.unit) {
     return {
-      label:
-        widgetUnitLabels[measureDefinition.unit] ??
-        formatMetricName(measureDefinition.unit),
+      label: unitLabel(measureDefinition.unit),
     };
   }
 

@@ -1,3 +1,6 @@
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { widgetMessages } from "@/src/features/i18n/messages/widgets";
+
 /** The 8-slot chart line palette, cycled by series index. */
 export const seriesColor = (index: number): string =>
   `hsl(var(--chart-${(index % 8) + 1}))`;
@@ -19,9 +22,10 @@ export function SeriesOverflowNote({
   visibleCount: number;
   totalCount: number;
 }) {
+  const t = useTranslation(widgetMessages);
   return (
     <div className="text-muted-foreground shrink-0 pb-1 text-right text-xs">
-      Showing top {visibleCount} of {totalCount} series
+      {t("showingTopSeries", { visibleCount, totalCount })}
     </div>
   );
 }

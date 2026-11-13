@@ -16,12 +16,7 @@ import { widgetMessages } from "@/src/features/i18n/messages/widgets";
 
 const HistogramChart = ({
   data,
-  config = {
-    count: {
-      label: "Count",
-      color: "hsl(var(--chart-fill-1))",
-    },
-  },
+  config,
   metricFormatter = (value, options) => formatMetric(value, options),
 }: {
   data: DataPoint[];
@@ -32,6 +27,10 @@ const HistogramChart = ({
   const locale = useInterfaceLocale();
   const formatBinEdge = (value: number) =>
     toFullMetricString(metricFormatter(value, { style: "compact", locale }));
+  const countLabel =
+    typeof config?.count?.label === "string"
+      ? config.count.label
+      : t("histogramCount");
 
   const transformHistogramData = (data: DataPoint[]) => {
     if (!data.length) return [];
@@ -47,7 +46,7 @@ const HistogramChart = ({
     }
 
     return data.map((item, index) => ({
-      label: item.dimension || `Bin ${index + 1}`,
+      label: item.dimension || t("histogramBin", { index: index + 1 }),
       value: (item.metric as number) || 0,
     }));
   };
@@ -65,13 +64,13 @@ const HistogramChart = ({
   return (
     <DesignSystemHistogramChart
       data={histogramData}
-      color={config.count?.color ?? "hsl(var(--chart-fill-1))"}
+      color={config?.count?.color ?? "hsl(var(--chart-fill-1))"}
       valueFormatter={(value) =>
         toFullMetricString(formatMetric(value, { style: "compact", locale }))
       }
-      ariaLabel="Histogram"
-      tooltipHeading={(label) => `Bin: ${label}`}
-      tooltipValueLabel="Count"
+      ariaLabel={t("histogramAria")}
+      tooltipHeading={(label) => t("histogramBinTooltip", { label })}
+      tooltipValueLabel={countLabel}
     />
   );
 };

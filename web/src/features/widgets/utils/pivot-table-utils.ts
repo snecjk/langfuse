@@ -20,6 +20,16 @@ import { isNotNullOrUndefined } from "@/src/utils/types";
 import { type OrderByState } from "@langfuse/shared";
 
 /**
+ * Optional row-label translator for {@link transformToPivotTable}: `Total` and
+ * `(Subtotal)` are structural labels the table chrome renders. Without one the
+ * English baseline applies (the pure-function contract the server tests pin).
+ */
+export interface PivotTableRowLabels {
+  total: string;
+  subtotal: (dimensionValue: string) => string;
+}
+
+/**
  * Default dimension limit for pivot table data rows
  * This prevents performance issues and maintains readability
  */
@@ -87,6 +97,24 @@ export interface PivotTableConfig {
   rowLimit?: number;
 
   defaultSort?: OrderByState;
+
+  /**
+   * Localized structural row labels (`Total`, `(Subtotal)`). Defaults to the
+   * English baseline so pure callers keep their existing output.
+   */
+  rowLabels?: PivotTableRowLabels;
+}
+
+/** Row labels defaulting to the English baseline when none are supplied. */
+function resolveRowLabels(
+  labels: PivotTableRowLabels | undefined,
+): PivotTableRowLabels {
+  return (
+    labels ?? {
+      total: "Total",
+      subtotal: (dimensionValue) => `${dimensionValue} (Subtotal)`,
+    }
+  );
 }
 
 /**
@@ -186,6 +214,7 @@ function processLevelRecursively(
   metrics: string[],
   totalDimensions: number,
   dimensionPath: string[],
+  rowLabels: PivotTableRowLabels,
 ): PivotTableRow[] {
   const rows: PivotTableRow[] = [];
   const currentDimensionIndex = totalDimensions - remainingDimensions.length;
@@ -235,6 +264,7 @@ function processLevelRecursively(
         dimensionValue,
         subtotalValues,
         currentDimensionIndex, // Subtotals at current dimension level
+        rowLabels,
       );
       rows.push(subtotalRow);
     }
@@ -246,6 +276,7 @@ function processLevelRecursively(
       metrics,
       totalDimensions,
       newDimensionPath,
+      rowLabels,
     );
 
     rows.push(...childRows);
@@ -305,16 +336,19 @@ export function transformToPivotTable(
   validatePivotTableConfig(config);
 
   const { dimensions, metrics, rowLimit = DEFAULT_ROW_LIMIT } = config;
+  const rowLabels = resolveRowLabels(config.rowLabels);
 
   // Handle empty data
   if (data.length === 0) {
-    return [createGrandTotalRow(metrics, createEmptyMetricValues(metrics))];
+    return [
+      createGrandTotalRow(metrics, createEmptyMetricValues(metrics), rowLabels),
+    ];
   }
 
   // Handle zero dimensions - just return grand total
   if (dimensions.length === 0) {
     const grandTotalValues = calculateGrandTotals(data, metrics);
-    return [createGrandTotalRow(metrics, grandTotalValues)];
+    return [createGrandTotalRow(metrics, grandTotalValues, rowLabels)];
   }
 
   // Apply row limit to data before processing
@@ -322,7 +356,11 @@ export function transformToPivotTable(
 
   // Add grand total row at the beginning
   const grandTotalValues = calculateGrandTotals(limitedData, metrics);
-  const grandTotalRow = createGrandTotalRow(metrics, grandTotalValues);
+  const grandTotalRow = createGrandTotalRow(
+    metrics,
+    grandTotalValues,
+    rowLabels,
+  );
 
   // Process dimensions recursively
   const pivotRows = processLevelRecursively(
@@ -331,6 +369,7 @@ export function transformToPivotTable(
     metrics,
     dimensions.length, // total number of dimensions
     [], // dimension path for labeling
+    rowLabels,
   );
 
   return [grandTotalRow, ...pivotRows];
@@ -641,14 +680,16 @@ export function createSubtotalRow(
   dimensionValue: string,
   subtotalValues: Record<string, number>,
   level: number,
+  rowLabels?: PivotTableRowLabels,
 ): PivotTableRow {
   const dimensionValues = { subtotal: dimensionValue };
+  const labels = resolveRowLabels(rowLabels);
 
   return {
     id: generateRowId(dimensionValues, "subtotal", level),
     type: "subtotal",
     level,
-    label: `${dimensionValue} (Subtotal)`,
+    label: labels.subtotal(dimensionValue),
     values: subtotalValues,
     isSubtotal: true,
     dimensionValues,
@@ -661,19 +702,22 @@ export function createSubtotalRow(
  *
  * @param metrics - Array of metric field names
  * @param grandTotalValues - Calculated grand total values for metrics
+ * @param rowLabels - Optional localized structural row labels
  * @returns Formatted pivot table grand total row
  */
 export function createGrandTotalRow(
   metrics: string[],
   grandTotalValues: Record<string, number>,
+  rowLabels?: PivotTableRowLabels,
 ): PivotTableRow {
   const dimensionValues = { total: "grand" };
+  const labels = resolveRowLabels(rowLabels);
 
   return {
     id: generateRowId(dimensionValues, "total", 0),
     type: "total",
     level: 0,
-    label: "Total",
+    label: labels.total,
     values: grandTotalValues,
     isTotal: true,
     dimensionValues,
