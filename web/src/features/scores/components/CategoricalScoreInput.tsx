@@ -10,9 +10,10 @@ import { KeyboardShortcut } from "@/src/components/design-system/KeyboardShortcu
 import { Tabs } from "@/src/components/design-system/Tabs/Tabs";
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
 import { isCategoricalDataType } from "@/src/features/scores/lib/helpers";
-import { getAddCategoryActionLabel } from "@/src/features/scores/lib/annotationFormHelpers";
 import { AddScoreCategoryDialog } from "@/src/features/scores/components/AddScoreCategoryDialog";
 import { type AnnotationAnalyticsContext } from "@/src/features/scores/lib/annotationAnalytics";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 
 const CHAR_CUTOFF = 6;
 const DIGIT_SHORTCUTS = ["1", "2", "3", "4", "5", "6", "7", "8", "9"] as const;
@@ -52,6 +53,7 @@ export function CategoricalScoreInput({
   onValueChange: (value: string, numericValue?: number) => void;
   isActive?: boolean;
 }) {
+  const t = useTranslation(evaluationsMessages);
   const hasConfigCudAccess = useHasProjectAccess({
     projectId,
     scope: "scoreConfigs:CUD",
@@ -66,19 +68,24 @@ export function CategoricalScoreInput({
     .filter((category) => !category.isOutdated)
     .map((category) => category.label);
 
-  const addCategoryButton = (search: string, close?: () => void) => (
-    <button
-      type="button"
-      className="hover:bg-accent hover:text-accent-foreground flex w-full items-center rounded-sm px-2 py-1.5 text-left text-xs"
-      onClick={() => {
-        close?.();
-        setPendingLabel(search.trim());
-      }}
-    >
-      <Plus size="base" __rawClassName="mr-2" />
-      {getAddCategoryActionLabel(search, existingLabels)}
-    </button>
-  );
+  const addCategoryButton = (search: string, close?: () => void) => {
+    const trimmedSearch = search.trim();
+    return (
+      <button
+        type="button"
+        className="hover:bg-accent hover:text-accent-foreground flex w-full items-center rounded-sm px-2 py-1.5 text-left text-xs"
+        onClick={() => {
+          close?.();
+          setPendingLabel(trimmedSearch);
+        }}
+      >
+        <Plus size="base" __rawClassName="mr-2" />
+        {trimmedSearch && !existingLabels.includes(trimmedSearch)
+          ? t("addCategoryQuote", { name: trimmedSearch })
+          : t("addNewCategory")}
+      </button>
+    );
+  };
 
   return (
     <>
@@ -92,9 +99,9 @@ export function CategoricalScoreInput({
             value: category.label,
             disabled: category.isOutdated,
           }))}
-          placeholder="Select category"
-          searchPlaceholder="Search categories..."
-          emptyText="No category found."
+          placeholder={t("selectCategory")}
+          searchPlaceholder={t("searchCategories")}
+          emptyText={t("noCategoryFound")}
           footer={
             canAddCategory
               ? ({ search, close }) => addCategoryButton(search, close)
@@ -152,7 +159,7 @@ export function CategoricalScoreInput({
               type="button"
               variant="ghost"
               size="icon-xs"
-              title="Add new category"
+              title={t("addNewCategory")}
               onClick={() => setPendingLabel("")}
             >
               <Plus size="sm" color="default" />

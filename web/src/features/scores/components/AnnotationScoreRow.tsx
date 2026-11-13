@@ -46,6 +46,8 @@ import {
 } from "@/src/features/scores/lib/helpers";
 import { enrichCategoryOptionsWithStaleScoreValue } from "@/src/features/scores/lib/annotationFormHelpers";
 import { getAnnotationTargetType } from "@/src/features/scores/lib/annotationAnalytics";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 import type { AnnotationFormActions } from "@/src/features/scores/actions/annotationFormActions";
 import type {
   AnnotateFormSchemaType,
@@ -168,6 +170,7 @@ export function AnnotationScoreRow({
   isActive?: boolean;
   onRemove: () => void;
 }) {
+  const t = useTranslation(evaluationsMessages);
   const [commentOpen, setCommentOpen] = useState(false);
   const [commentDraft, setCommentDraft] = useState<string | null>(null);
   const score = useWatch({ control: form.control, name: `scoreData.${index}` });
@@ -264,7 +267,7 @@ export function AnnotationScoreRow({
                       variant="link"
                       type="button"
                       size="xs"
-                      title="Add or view score comment"
+                      title={t("addOrViewScoreComment")}
                       // Center the comment icon vertically
                       // against the score label instead of stretching
                       // to the full (possibly multi-line) row height,
@@ -348,7 +351,7 @@ export function AnnotationScoreRow({
                         maxLength={TEXT_SCORE_MAX_LENGTH}
                         className="text-xs"
                         disabled={config.isArchived || locked}
-                        placeholder="Enter free form text..."
+                        placeholder={t("enterFreeFormText")}
                         onBlur={(event) => {
                           field.onBlur();
                           if (!isMovingToScoreActions(event))
@@ -455,7 +458,7 @@ export function AnnotationScoreRow({
           </div>
           {locked ? (
             <p className="text-muted-foreground mt-1 text-xs">
-              Saved scores cannot be edited in this project.
+              {t("savedScoresLocked")}
             </p>
           ) : null}
           {hasScoreValue || invalid || canRemove || targetOptions.length > 0 ? (
@@ -483,12 +486,13 @@ export function AnnotationScoreRow({
                   {targetOptions.length > 0 ? (
                     <>
                       <DropdownMenuLabel>
-                        Applies to: {target.label}
+                        {t("appliesTo", { target: target.label })}
                       </DropdownMenuLabel>
                       {score.id ? (
                         <div className="text-muted-foreground px-2 pb-2 text-xs">
-                          This score is saved on the{" "}
-                          {target.label.toLowerCase()} and cannot be moved.
+                          {t("scoreSavedOnTarget", {
+                            target: target.label.toLowerCase(),
+                          })}
                         </div>
                       ) : (
                         targetOptions.map(
@@ -512,8 +516,10 @@ export function AnnotationScoreRow({
                                 else deferredInput.current = input;
                               }}
                             >
-                              Score {destination.label.toLowerCase()} instead
-                              {hasField ? " (already selected)" : ""}
+                              {t("scoreTargetInstead", {
+                                target: destination.label.toLowerCase(),
+                              })}
+                              {hasField ? t("alreadySelected") : ""}
                             </DropdownMenuItem>
                           ),
                         )
@@ -532,8 +538,10 @@ export function AnnotationScoreRow({
                               if (nextKey) focusFieldKey.current = nextKey;
                             }}
                           >
-                            Also score {destination.label.toLowerCase()}
-                            {hasField ? " (already selected)" : ""}
+                            {t("alsoScoreTarget", {
+                              target: destination.label.toLowerCase(),
+                            })}
+                            {hasField ? t("alreadySelected") : ""}
                           </DropdownMenuItem>
                         ),
                       )}
@@ -551,7 +559,7 @@ export function AnnotationScoreRow({
                         onRemove();
                       }}
                     >
-                      Remove score
+                      {t("removeScore")}
                     </DropdownMenuItem>
                   ) : null}
                   {hasScoreValue || invalid ? (
@@ -562,7 +570,7 @@ export function AnnotationScoreRow({
                         actions.clear(fieldKey, target);
                       }}
                     >
-                      Clear score
+                      {t("clearScore")}
                     </DropdownMenuItem>
                   ) : null}
                 </>
@@ -580,8 +588,10 @@ export function AnnotationScoreRow({
                       if (event.currentTarget.dataset.state !== "open")
                         commitDeferredScore();
                     }}
-                    aria-label={`Score actions for ${score.name}${showTarget ? ` (${target.label})` : ""}`}
-                    title="Score actions"
+                    aria-label={t("scoreActionsFor", {
+                      name: `${score.name}${showTarget ? ` (${target.label})` : ""}`,
+                    })}
+                    title={t("scoreActions")}
                   >
                     <MoreHorizontal size="sm" color="default" />
                   </Button>

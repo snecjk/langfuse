@@ -8,6 +8,14 @@ import type { AnnotateFormSchemaType } from "@/src/features/scores/types";
 import { annotationFieldKey } from "@/src/features/scores/lib/annotationConfigSelection";
 import { hasChangedAnnotationValue } from "@/src/features/scores/state/annotationSaveStore";
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
+
+const SAVE_STATUS_LABEL_KEYS = {
+  saving: "saving",
+  saved: "saved",
+  error: "couldNotSave",
+} as const;
 
 export function AnnotationSaveStatus({
   form,
@@ -16,6 +24,7 @@ export function AnnotationSaveStatus({
   form: UseFormReturn<AnnotateFormSchemaType>;
   actions: AnnotationFormActions;
 }) {
+  const t = useTranslation(evaluationsMessages);
   const fields = useWatch({ control: form.control, name: "scoreData" });
   const { errors } = useFormState({ control: form.control, name: "scoreData" });
   const state = useStore(actions.saveStore);
@@ -40,7 +49,7 @@ export function AnnotationSaveStatus({
           <div
             key={itemStatus}
             role={active ? "status" : undefined}
-            aria-label={active ? "Score save status" : undefined}
+            aria-label={active ? t("scoreSaveStatus") : undefined}
             aria-hidden={!active}
             className={cn(
               "col-start-1 row-start-1 flex items-center justify-end gap-1 text-xs transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none",
@@ -56,13 +65,7 @@ export function AnnotationSaveStatus({
               {itemStatus === "saved" ? <Check size="sm" /> : null}
             </span>
             <span className="text-muted-foreground">
-              {
-                {
-                  saving: "Saving…",
-                  saved: "Saved",
-                  error: "Could not save",
-                }[itemStatus]
-              }
+              {t(SAVE_STATUS_LABEL_KEYS[itemStatus])}
             </span>
           </div>
         );

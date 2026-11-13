@@ -201,8 +201,7 @@ export default function ScoresAnalyticsPage() {
           { name: t("scores"), href: `/project/${projectId}/scores` },
         ],
         help: {
-          description:
-            "A score is an evaluation of a trace or observation. It can be created from user feedback, model-based evaluations, or manual review. See docs to learn more.",
+          description: t("scoreAnalyticsHelp"),
           href: "https://langfuse.com/docs/evaluation/overview",
         },
         tabsProps: {
@@ -276,7 +275,7 @@ export default function ScoresAnalyticsPage() {
             <div className="flex flex-col items-center justify-center gap-4 rounded-lg border p-12">
               <Spinner size="xxl" variant="muted" />
               <p className="text-muted-foreground text-sm">
-                Loading analytics data...
+                {t("loadingAnalyticsData")}
               </p>
             </div>
           )}

@@ -8,6 +8,8 @@ import {
 } from "@/src/components/ui/collapsible";
 import useLocalStorage from "@/src/components/useLocalStorage";
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 
 export function ScoreConfigDescription({
   configId,
@@ -18,6 +20,7 @@ export function ScoreConfigDescription({
   name: string;
   description: string;
 }) {
+  const t = useTranslation(evaluationsMessages);
   const [expanded, setExpanded] = useLocalStorage(
     `annotation-score-config-description-${configId}`,
     true,
@@ -60,7 +63,11 @@ export function ScoreConfigDescription({
             <CollapsibleTrigger asChild>
               <IconButton
                 icon={expanded ? ChevronDown : ChevronRight}
-                label={`${expanded ? "Hide" : "Show"} description for ${name}`}
+                label={
+                  expanded
+                    ? t("hideDescriptionFor", { name })
+                    : t("showDescriptionFor", { name })
+                }
                 size="xs"
               />
             </CollapsibleTrigger>

@@ -19,6 +19,8 @@ import { validateNewCategoryLabel } from "@/src/features/scores/lib/annotationFo
 import { type AnnotationAnalyticsContext } from "@/src/features/scores/lib/annotationAnalytics";
 import { showToast } from "@/src/features/notifications/showToast";
 import { classifyTrpcToastError } from "@/src/utils/trpcErrorClassification";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 
 export function AddScoreCategoryDialog({
   projectId,
@@ -37,6 +39,7 @@ export function AddScoreCategoryDialog({
   onCategoryAdded: (label: string, numericValue: number) => void;
   isActive?: boolean;
 }) {
+  const t = useTranslation(evaluationsMessages);
   const capture = usePostHogClientCapture();
   const utils = api.useUtils();
   const [label, setLabel] = useState(initialLabel);
@@ -61,7 +64,7 @@ export function AddScoreCategoryDialog({
     onError: (error) => {
       showToast({
         type: "ERROR",
-        title: error.message ?? "Failed to add category",
+        title: error.message ?? t("failedToAddCategory"),
         analytics: classifyTrpcToastError(error, "score_category.create"),
       });
     },
@@ -90,11 +93,9 @@ export function AddScoreCategoryDialog({
         }}
       >
         <DialogHeader variant="action">
-          <DialogTitle>Add category</DialogTitle>
+          <DialogTitle>{t("addCategory")}</DialogTitle>
           <DialogDescription>
-            This adds a category to{" "}
-            <span className="text-foreground font-bold">{config.name}</span> for
-            everyone in this project.
+            {t("addCategoryToProject", { name: config.name })}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -105,13 +106,15 @@ export function AddScoreCategoryDialog({
         >
           <DialogBody>
             <div className="grid gap-2">
-              <Label htmlFor="new-score-category-label">Category name</Label>
+              <Label htmlFor="new-score-category-label">
+                {t("categoryName")}
+              </Label>
               <Input
                 id="new-score-category-label"
                 value={label}
                 autoFocus
                 onChange={(event) => setLabel(event.target.value)}
-                placeholder="Enter a category name"
+                placeholder={t("enterCategoryName")}
               />
               {label.trim() && validationError ? (
                 <p className="text-destructive text-sm">{validationError}</p>
@@ -125,14 +128,14 @@ export function AddScoreCategoryDialog({
               onClick={onClose}
               disabled={appendCategory.isPending}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button
               type="submit"
               disabled={!!validationError}
               loading={appendCategory.isPending}
             >
-              Add category
+              {t("addCategory")}
             </Button>
           </DialogFooter>
         </form>

@@ -7,6 +7,8 @@ import {
 import { Button } from "@/src/components/ui/button";
 import { Skeleton } from "@/src/components/ui/skeleton";
 import Header from "@/src/components/layouts/header";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 import { api } from "@/src/utils/api";
 import { toDomainArrayWithStringifiedMetadata } from "@/src/utils/clientSideDomainTypes";
 import { AnnotationForm } from "./AnnotationForm";
@@ -27,6 +29,7 @@ export function AnnotationPanelContent({
   isActive: boolean;
   refreshRef?: Ref<AnnotationRefreshHandle>;
 }) {
+  const t = useTranslation(evaluationsMessages);
   const target = data.scoreTarget;
   const scoresQuery = api.events.scoresForTrace.useQuery(
     {
@@ -59,16 +62,16 @@ export function AnnotationPanelContent({
   if (scores === undefined) {
     return (
       <div className="flex flex-col gap-4">
-        <Header title="Annotate" actionButtons={[actionButtons]} />
+        <Header title={t("annotate")} actionButtons={[actionButtons]} />
         {scoresQuery.isError ? (
           <div className="flex flex-col items-start gap-3">
-            <p className="text-sm">Could not load scores.</p>
+            <p className="text-sm">{t("couldNotLoadScores")}</p>
             <Button
               variant="outline"
               size="sm"
               onClick={() => scoresQuery.refetch()}
             >
-              Try again
+              {t("tryAgain")}
             </Button>
           </div>
         ) : (

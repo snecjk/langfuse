@@ -1170,7 +1170,7 @@ export default function ScoresTable({
           target="_blank"
           rel="noopener noreferrer"
         >
-          What are scores?
+          {t("whatAreScores")}
         </a>
       </div>
     );
@@ -1350,7 +1350,7 @@ export default function ScoresTable({
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      What are scores?
+                      {t("whatAreScores")}
                     </a>
                   </div>
                 }

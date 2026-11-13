@@ -14,6 +14,8 @@ import {
 import { api } from "@/src/utils/api";
 import { JSONView } from "@/src/components/ui/CodeJsonViewer";
 import { Skeleton } from "@/src/components/ui/skeleton";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 import type { BaselineDiff } from "@/src/features/datasets/lib/calculateBaselineDiff";
 import { DiffLabel } from "@/src/features/datasets/components/DiffLabel";
 
@@ -88,6 +90,7 @@ export const ScoreRow = ({
   aggregate: AggregatedScoreData | null;
   diff?: BaselineDiff;
 }) => {
+  const t = useTranslation(evaluationsMessages);
   const [isHovered, setIsHovered] = React.useState(false);
 
   // ensure only loaded if user actually just hovered over the score
@@ -134,14 +137,14 @@ export const ScoreRow = ({
 
             <div className="space-y-2 text-xs">
               <ScoreDetailRow
-                label="Value"
+                label={t("value")}
                 value={resolveScoreValue(aggregate)}
               />
-              <ScoreDetailRow label="Source" value={source} />
+              <ScoreDetailRow label={t("source")} value={source} />
 
               {aggregate.comment && (
                 <ScoreDetailRow
-                  label="Comment"
+                  label={t("comment")}
                   value={
                     <span
                       title={aggregate.comment}
@@ -159,7 +162,7 @@ export const ScoreRow = ({
 
               {aggregate.hasMetadata && (
                 <ScoreDetailRow
-                  label="Metadata"
+                  label={t("metadata")}
                   value={
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -169,9 +172,9 @@ export const ScoreRow = ({
                               return metadata &&
                                 Object.keys(metadata).length > 0
                                 ? JSON.stringify(metadata)
-                                : "Loading...";
+                                : t("loadingEllipsis");
                             } catch {
-                              return "Invalid JSON";
+                              return t("invalidJson");
                             }
                           })()}
                         </span>

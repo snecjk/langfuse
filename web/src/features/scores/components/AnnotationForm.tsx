@@ -1,7 +1,7 @@
 /* eslint-disable @repo/component-file-structure */
 import React, { useEffect, useImperativeHandle, useRef, useState } from "react";
 import { ExternalLink, Plus } from "@langfuse/icons";
-import { ScoreDataTypeEnum, type ScoreConfigDataType } from "@langfuse/shared";
+import { type ScoreConfigDataType } from "@langfuse/shared";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/src/components/ui/button";
@@ -10,6 +10,8 @@ import Header from "@/src/components/layouts/header";
 import { DropdownMenu } from "@/src/components/design-system/DropdownMenu/DropdownMenu";
 import { KeyboardShortcut } from "@/src/components/design-system/KeyboardShortcut/KeyboardShortcut";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 import {
   formatAnnotateDescription,
   isTextDataType,
@@ -43,12 +45,12 @@ import type {
   AnnotationRefreshHandle,
 } from "@/src/features/scores/types";
 
-const scoreDataTypeLabels = {
-  [ScoreDataTypeEnum.NUMERIC]: "Numeric",
-  [ScoreDataTypeEnum.CATEGORICAL]: "Categorical",
-  [ScoreDataTypeEnum.BOOLEAN]: "Boolean",
-  [ScoreDataTypeEnum.TEXT]: "Text",
-} satisfies Record<ScoreConfigDataType, string>;
+const SCORE_DATA_TYPE_LABEL_KEYS = {
+  NUMERIC: "scoreDataTypeNumeric",
+  CATEGORICAL: "scoreDataTypeCategorical",
+  BOOLEAN: "scoreDataTypeBoolean",
+  TEXT: "scoreDataTypeText",
+} as const satisfies Record<ScoreConfigDataType, string>;
 
 function AnnotateHeader({
   saveStatus,
@@ -59,10 +61,11 @@ function AnnotateHeader({
   actionButtons: React.ReactNode;
   description?: string;
 }) {
+  const t = useTranslation(evaluationsMessages);
   return (
     <div className="relative">
       <Header
-        title="Annotate"
+        title={t("annotate")}
         titleClassName="text-foreground text-[16px] leading-6"
         help={
           description
@@ -110,6 +113,7 @@ export function AnnotationFormContent({
   refreshRef?: React.Ref<AnnotationRefreshHandle>;
   commentFlushRef?: React.Ref<AnnotationCommentFlush>;
 }) {
+  const t = useTranslation(evaluationsMessages);
   const capture = usePostHogClientCapture();
   const [initialTargets] = useState(() => suppliedTargets);
   const allowManualSelection = suppliedTargets.some(
@@ -232,7 +236,7 @@ export function AnnotationFormContent({
     ).size > 1;
   const description =
     targets.length > 1
-      ? "Annotate the trace and observation with scores to capture human evaluation across different dimensions."
+      ? t("dualAnnotateDescription")
       : formatAnnotateDescription(primaryTarget.scoreTarget);
   const { selectionOptions } = getScoreConfigSelection({
     targets,
@@ -307,12 +311,12 @@ export function AnnotationFormContent({
                   {(createControl) => (
                     <DropdownMenu
                       maxHeight="18rem"
-                      search={{ placeholder: "Search scores..." }}
+                      search={{ placeholder: t("searchScores") }}
                       items={[
                         ...addableOptions.map((option) => ({
                           type: "item" as const,
                           id: option.value,
-                          title: `${option.config.name} (${scoreDataTypeLabels[option.config.dataType]})`,
+                          title: `${option.config.name} (${t(SCORE_DATA_TYPE_LABEL_KEYS[option.config.dataType])})`,
                           onClick: () => {
                             const controlledFields =
                               form.getValues("scoreData");
@@ -328,7 +332,7 @@ export function AnnotationFormContent({
                         {
                           type: "item",
                           id: "create-score-config",
-                          title: "Add score config",
+                          title: t("addScoreConfig"),
                           icon: Plus,
                           disabled: createControl.disabled,
                           searchBehavior: "show-when-no-results",
@@ -337,7 +341,7 @@ export function AnnotationFormContent({
                         {
                           type: "item",
                           id: "view-score-config-settings",
-                          title: "Score settings",
+                          title: t("scoreSettings"),
                           icon: ExternalLink,
                           searchBehavior: "hide",
                           href: `/project/${scoreMetadata.projectId}/settings/scores`,
@@ -365,7 +369,7 @@ export function AnnotationFormContent({
                             color="default"
                             aria-hidden="true"
                           />
-                          Add score
+                          {t("addScore")}
                         </Button>
                       )}
                     </DropdownMenu>
@@ -453,7 +457,7 @@ export function AnnotationFormContent({
               <span className="flex items-center gap-1">
                 <KeyboardShortcut size="sm" keys={["ArrowUp"]} />
                 <KeyboardShortcut size="sm" keys={["ArrowDown"]} />
-                move between fields
+                {t("moveBetweenFields")}
               </span>
             )}
             {optionRowCount > 0 && (
@@ -461,13 +465,13 @@ export function AnnotationFormContent({
                 <KeyboardShortcut size="sm" keys={["1"]} />
                 <span className="text-muted-foreground">…</span>
                 <KeyboardShortcut size="sm" keys={["9"]} />
-                select option
+                {t("selectOption")}
               </span>
             )}
             {hasEditableRow && (
               <span className="flex items-center gap-1">
                 <KeyboardShortcut size="sm" keys={["Enter"]} />
-                edit field
+                {t("editField")}
               </span>
             )}
           </div>

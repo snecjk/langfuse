@@ -13,6 +13,8 @@ import { useRef, type ReactNode } from "react";
 import { getAnnotationTargetType } from "@/src/features/scores/lib/annotationAnalytics";
 import { type ScoreDomain } from "@langfuse/shared";
 import { type WithStringifiedMetadata } from "@/src/utils/clientSideDomainTypes";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { evaluationsMessages } from "@/src/features/i18n/messages/evaluations";
 import { AnnotationPanelContent } from "./AnnotationPanelContent";
 import {
   useTraceReviewPanelOptional,
@@ -45,6 +47,7 @@ export function AnnotateDrawerController<Target extends ScoreTarget>({
   children,
   projectId,
 }: AnnotateDrawerControllerProps<Target>) {
+  const t = useTranslation(evaluationsMessages);
   const onOpen = useReviewPanelOpen();
   const capture = usePostHogClientCapture();
   const reviewPanel = useTraceReviewPanelOptional();
@@ -69,7 +72,7 @@ export function AnnotateDrawerController<Target extends ScoreTarget>({
         >
           {/* AnnotationPanelContent's visible "Annotate" header is a plain
               heading, so the drawer still needs its own Title element. */}
-          <DrawerTitle className="sr-only">Annotate</DrawerTitle>
+          <DrawerTitle className="sr-only">{t("annotate")}</DrawerTitle>
           <div className="min-h-0 overflow-y-auto overscroll-contain p-3">
             <AnnotationPanelContent
               data={state}
