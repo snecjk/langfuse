@@ -4,12 +4,15 @@ import { SelectInput } from "@/src/components/design-system/SelectInput/SelectIn
 import { MultiSelectInput } from "@/src/components/design-system/MultiSelectInput/MultiSelectInput";
 import { type ExperimentFilterDraft } from "./experimentFilterEditing";
 import { type ExperimentFilterOptions } from "./experimentFilterTypes";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 export function ExperimentFilterValueEditor({
   draft,
   options,
   onChange,
 }: ExperimentFilterValueEditorProps) {
+  const t = useTranslation(experimentMessages);
   function handleTextChange(event: ChangeEvent<HTMLInputElement>) {
     onChange(event.target.value);
   }
@@ -22,39 +25,39 @@ export function ExperimentFilterValueEditor({
         : (options?.score_categories?.[draft.key] ?? []);
     return (
       <MultiSelectInput
-        aria-label="Filter values"
+        aria-label={t("filterValuesAria")}
         value={values}
         options={[...new Set([...offered, ...values])].map((value) => ({
           value,
           label: value,
         }))}
         onValueChange={onChange}
-        placeholder="Select values"
+        placeholder={t("selectValues")}
         selectedLabel={values.join(", ")}
-        searchPlaceholder="Search values"
-        emptyMessage={options ? "No values for this score" : "Loading values…"}
+        searchPlaceholder={t("searchValues")}
+        emptyMessage={options ? t("noValuesForScore") : t("loadingValues")}
       />
     );
   }
   if (draft.type === "booleanObject" || draft.type === "boolean")
     return (
       <SelectInput
-        aria-label="Filter value"
+        aria-label={t("filterValueAria")}
         value={String(draft.value)}
         options={[
           { value: "true", label: "true" },
           { value: "false", label: "false" },
         ]}
         onValueChange={onChange}
-        placeholder="Select value"
+        placeholder={t("selectValue")}
       />
     );
   return (
     <Input
-      aria-label="Filter value"
+      aria-label={t("filterValueAria")}
       value={String(draft.value)}
       onChange={handleTextChange}
-      placeholder="Value"
+      placeholder={t("filterValueLabel")}
       inputMode={draft.type === "numberObject" ? "decimal" : "text"}
     />
   );

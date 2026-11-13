@@ -33,8 +33,9 @@ export const experimentMessages = {
     // Run creation dialog
     runExperimentTitle: "Run Experiment",
     runExperimentDescription:
-      "Experiments allow you to test iterations of your application or prompt on a dataset. Learn more about experiments {link}.",
+      "Experiments allow you to test iterations of your application or prompt on a dataset. Learn more about experiments ",
     here: "here",
+    hereSuffix: ".",
     viaUserInterface: "via User Interface",
     viaUserInterfaceHelp:
       "Test single prompts and model configurations via Langfuse UI.",
@@ -139,8 +140,9 @@ export const experimentMessages = {
     continue: "Continue",
     // Multi-step form
     runExperimentDialogHelp:
-      "Run an experiment to evaluate prompts and model configurations against a dataset. See {link} to learn more.",
+      "Run an experiment to evaluate prompts and model configurations against a dataset. See ",
     documentation: "documentation",
+    documentationSuffix: " to learn more.",
     stepPromptModel: "Prompt & Model",
     stepDataset: "Dataset",
     stepEvaluators: "Evaluators",
@@ -199,6 +201,11 @@ export const experimentMessages = {
     itemVariableCount: "{variable}: {count} / {total}",
     missingVariablesNote:
       "Items missing all required variables and placeholders will be excluded from the dataset run.",
+    variableMismatch:
+      "No dataset item contains any of the variables this prompt expects: {variables}. Add them as top-level input keys, or choose a dataset that has them.",
+    variableMismatchEmpty:
+      "No dataset item contains any of the variables this prompt expects.",
+    unknownTotal: "unknown",
     // Evaluators step
     evaluatorsOptional: "Evaluators (Optional)",
     evaluatorsHelpV2:
@@ -349,6 +356,10 @@ export const experimentMessages = {
     regressed: "Regressed",
     unchanged: "Unchanged",
     noValues: "no values",
+    avgLabel: "AVG",
+    allExperiments: "All experiments",
+    costLabel: "Cost ($)",
+    latencyLabel: "Latency (ms)",
     // Empty comparison descriptions
     noItemDiffers:
       "No item on this page scored {score} differently from {comparison}.",
@@ -356,6 +367,8 @@ export const experimentMessages = {
       "No regressions on this score — no item on this page scored lower on {score} than {comparison}.",
     noItemHigher:
       "No item on this page scored higher on {score} than {comparison}.",
+    vsLabel: "vs",
+    thanLabel: "than",
     // Chart strip
     addChart: "Add chart",
     maxCharts: "Maximum of {count} charts",
@@ -382,6 +395,148 @@ export const experimentMessages = {
       "Attach an evaluator to score experiments on this dataset.",
     noSampleItem: "No dataset item is available to validate JSON paths.",
     save: "Save",
+    // Results table cells (match/differs verdict, Exp label)
+    match: "match",
+    differs: "differs",
+    exp: "Exp",
+    // Overview panel
+    overviewName: "Name",
+    overviewDescription: "Description",
+    overviewDataset: "Dataset",
+    overviewPrompt: "Prompt",
+    overviewModel: "Model",
+    overviewStartTime: "Start Time",
+    overviewPullRequestUrl: "Pull Request URL",
+    overviewGithubJobUrl: "GitHub Job URL",
+    // Grid cell chrome
+    annotate: "Annotate",
+    noData: "No data",
+    notScoredLower: "{count} not scored",
+    improvedItems: "Improved items",
+    regressedItems: "Regressed items",
+    itemsChangedTitle:
+      "{changed} items changed compared to baseline; {unchanged} unchanged; {uncomparable} uncomparable",
+    changedItemsCount: "{count} changed items",
+    improvedItemsCount: "{count} improved items",
+    regressedItemsCount: "{count} regressed items",
+    // Metric strip
+    unavailableMetric: "{label} (unavailable)",
+    chartAriaLabel: "Chart: {label}",
+    loadingAriaLabel: "Loading…",
+    scoresGroupLabel: "Scores",
+    baseMetricsGroupLabel: "Base Metrics",
+    // Input cell
+    openDatasetItem: "Open dataset item",
+    // Score comparison pills
+    thisPage: "this page",
+    thisPageTooltip:
+      "Comparing one experiment's score against another's is not something the items query can express, so this narrows the items loaded on the current page. Page through to check the rest of the run.",
+    // Score filter menu operators
+    worseThanShort: "Worse",
+    betterThanShort: "Better",
+    differentShort: "Different",
+    // Remote experiment upsert extras
+    headerOverridden: '"{name}" is set by Langfuse and cannot be overridden',
+    saveSecret: "I've saved the secret",
+    // Filter sidebar and blocks
+    openFilters: "Open filters",
+    collapseFilters: "Collapse filters",
+    experimentFilters: "Experiment filters",
+    filtersLabel: "Filters",
+    showOnlyActive: "Show only active",
+    clearAll: "Clear all",
+    retryOptions: "Retry options",
+    noActiveFilters: "No active filters.",
+    availableFilters: "Available filters",
+    addFilter: "Add filter",
+    applyChanges: "Apply changes",
+    filterValueLabel: "Value",
+    selectValue: "Select value",
+    selectValues: "Select values",
+    searchValues: "Search values",
+    noValuesForScore: "No values for this score",
+    loadingValues: "Loading values…",
+    filterExperiment: "Filter experiment",
+    selectExperiment: "Select experiment",
+    searchExperiment: "Search experiment",
+    selectExperimentToApply:
+      "Select an available experiment to apply this filter.",
+    scoreNameLabel: "Score name",
+    selectScore: "Select score",
+    searchScores: "Search scores",
+    loadingScoresFilter: "Loading scores…",
+    noScoresOfType: "No scores of this type",
+    scoreOptionsUnavailable: "Score options unavailable",
+    metadataKeyLabel: "Metadata key",
+    filterOperator: "Filter operator",
+    selectOperator: "Select operator",
+    scoreTypeMismatch:
+      "This score has a different type. Choose a compatible score.",
+    waitingForScoreOptions: "Waiting for score options before applying.",
+    unavailableExperiment: "Unavailable experiment ({target})",
+    chooseKeyIsSet: "Choose a key · is set",
+    addToAllExperiments: "Add to all experiments",
+    keyIsSetAll: "Key is set · All experiments",
+    itemMetadataLabel: "Item metadata",
+    metadataLabel2: "Metadata",
+    statusFilterLabel: "Status",
+    numericScoreLabel: "Numeric score",
+    categoricalScoreLabel: "Categorical score",
+    booleanScoreLabel: "Boolean score",
+    experimentLabel: "Experiment",
+    filterValueAria: "Filter value",
+    filterValuesAria: "Filter values",
+    addMetadataFilter: "Add metadata filter",
+    experimentFiltersAria: "Experiment filters",
+    availableFiltersAria: "Available filters",
+    // Filter options hook errors
+    scoreFilterOptionsError:
+      "Score filter options could not be loaded. Retry to edit score filters.",
+    experimentNameExists: "Experiment name already exists for this dataset.",
+    // Zod validation messages
+    experimentNameRequired: "Please enter an experiment name",
+    runNameRequired: "Run name is required",
+    promptRequired: "Please select a prompt",
+    datasetRequired: "Please select a dataset",
+    providerRequired: "Please select a provider",
+    modelRequired: "Please select a model",
+    // Create experiment webhook labels
+    loadingLabel: "Loading...",
+    configureLabel: "Configure",
+    runLabel: "Run",
+    // Matrix footer singular/plural
+    matrixFooterPlural:
+      "{scoreCount} scores × {experimentCount} runs, aggregated over the {itemCount} items on this page. Deltas are measured against the baseline column.",
+    matrixFooterSingular:
+      "{scoreCount} score × {experimentCount} run, aggregated over the {itemCount} item on this page. Deltas are measured against the baseline column.",
+    // Search registry overlays
+    experimentNameField: "Experiment name",
+    datasetField: "Dataset",
+    datasetFieldHelp: "Dataset the experiment ran against",
+    // Peek footer
+    unknown: "Unknown",
+    previousExperiment: "Previous experiment",
+    nextExperiment: "Next experiment",
+    // Time zone suffix (dataset versions)
+    utcLabel: "(UTC)",
+    // Boolean aggregate suffix
+    trueRateLabel: "true",
+    // Score header inline movement counts
+    improvedCountInline: "{count} improved",
+    regressedCountInline: "{count} regressed",
+    changedCountInline: "{count} changed",
+    // Review step labels
+    nameLabel: "Name",
+    versionValue: "Version {version}",
+    // Level labels (score prefixes and grid metadata)
+    trace: "Trace",
+    observation: "Observation",
+    latency: "Latency",
+    cost: "Cost",
+    // Dynamic aria labels
+    stepHasErrors: "{step} has errors",
+    filterFormAria: "{title} filter",
+    removeFilterAria: "Remove {title} filter",
   },
   "zh-CN": {
     // Experiments list page
@@ -415,8 +570,9 @@ export const experimentMessages = {
     // Run creation dialog
     runExperimentTitle: "运行实验",
     runExperimentDescription:
-      "实验允许你在数据集上测试应用或提示词的迭代版本。在这里了解更多关于实验的信息 {link}。",
+      "实验允许你在数据集上测试应用或提示词的迭代版本。在这里了解更多关于实验的信息 ",
     here: "这里",
+    hereSuffix: "。",
     viaUserInterface: "通过用户界面",
     viaUserInterfaceHelp: "通过 Langfuse UI 测试单个提示词和模型配置。",
     comparePromptVersions: "对比提示词版本",
@@ -506,9 +662,9 @@ export const experimentMessages = {
     noDatasetsHelp: "请先创建一个数据集，然后再设置远程实验触发器。",
     continue: "继续",
     // Multi-step form
-    runExperimentDialogHelp:
-      "运行实验以针对数据集评估提示词和模型配置。查看 {link} 了解更多。",
+    runExperimentDialogHelp: "运行实验以针对数据集评估提示词和模型配置。查看 ",
     documentation: "文档",
+    documentationSuffix: " 了解更多。",
     stepPromptModel: "提示词与模型",
     stepDataset: "数据集",
     stepEvaluators: "评估器",
@@ -562,6 +718,10 @@ export const experimentMessages = {
     itemVariableCount: "{variable}：{count} / {total}",
     missingVariablesNote:
       "缺少所有必需变量和占位符的条目将被排除在数据集运行之外。",
+    variableMismatch:
+      "没有数据集条目包含此提示词所需的任何变量：{variables}。请将它们添加为顶级输入键，或选择包含这些变量的数据集。",
+    variableMismatchEmpty: "没有数据集条目包含此提示词所需的任何变量。",
+    unknownTotal: "未知",
     // Evaluators step
     evaluatorsOptional: "评估器（可选）",
     evaluatorsHelpV2: "选择评估器为实验结果评分，并检查其变量映射。",
@@ -704,11 +864,17 @@ export const experimentMessages = {
     regressed: "回退",
     unchanged: "未变",
     noValues: "无值",
+    avgLabel: "平均",
+    allExperiments: "所有实验",
+    costLabel: "费用（$）",
+    latencyLabel: "延迟（ms）",
     // Empty comparison descriptions
     noItemDiffers: "此页面上没有条目的 {score} 与 {comparison} 不同。",
     noItemLower:
       "此评分没有回退——此页面上没有条目的 {score} 低于 {comparison}。",
     noItemHigher: "此页面上没有条目的 {score} 高于 {comparison}。",
+    vsLabel: "与",
+    thanLabel: "相比",
     // Chart strip
     addChart: "添加图表",
     maxCharts: "最多 {count} 个图表",
@@ -734,5 +900,144 @@ export const experimentMessages = {
     attachEvaluator: "附加评估器以对此数据集上的实验评分。",
     noSampleItem: "没有可用的数据集条目来验证 JSON 路径。",
     save: "保存",
+    // Results table cells (match/differs verdict, Exp label)
+    match: "匹配",
+    differs: "不同",
+    exp: "预期",
+    // Overview panel
+    overviewName: "名称",
+    overviewDescription: "描述",
+    overviewDataset: "数据集",
+    overviewPrompt: "提示词",
+    overviewModel: "模型",
+    overviewStartTime: "开始时间",
+    overviewPullRequestUrl: "Pull Request URL",
+    overviewGithubJobUrl: "GitHub Job URL",
+    // Grid cell chrome
+    annotate: "标注",
+    noData: "无数据",
+    notScoredLower: "{count} 个未评分",
+    improvedItems: "改善的条目",
+    regressedItems: "回退的条目",
+    itemsChangedTitle:
+      "{changed} 个条目与基线相比发生变化；{unchanged} 个未变；{uncomparable} 个不可比",
+    changedItemsCount: "{count} 个变化的条目",
+    improvedItemsCount: "{count} 个改善的条目",
+    regressedItemsCount: "{count} 个回退的条目",
+    // Metric strip
+    unavailableMetric: "{label}（不可用）",
+    chartAriaLabel: "图表：{label}",
+    loadingAriaLabel: "正在加载…",
+    scoresGroupLabel: "评分",
+    baseMetricsGroupLabel: "基础指标",
+    // Input cell
+    openDatasetItem: "打开数据集条目",
+    // Score comparison pills
+    thisPage: "本页",
+    thisPageTooltip:
+      "将一个实验与其他实验的评分进行对比，无法由条目查询直接表达，因此这里只筛选当前页已加载的条目。翻页可查看运行的其余部分。",
+    // Score filter menu operators
+    worseThanShort: "低于",
+    betterThanShort: "高于",
+    differentShort: "不同",
+    // Remote experiment upsert extras
+    headerOverridden: "“{name}”由 Langfuse 设置，无法覆盖",
+    saveSecret: "我已保存密钥",
+    // Filter sidebar and blocks
+    openFilters: "打开筛选",
+    collapseFilters: "收起筛选",
+    experimentFilters: "实验筛选",
+    filtersLabel: "筛选",
+    showOnlyActive: "仅显示启用项",
+    clearAll: "全部清除",
+    retryOptions: "重试选项",
+    noActiveFilters: "没有启用的筛选。",
+    availableFilters: "可用筛选",
+    addFilter: "添加筛选",
+    applyChanges: "应用更改",
+    filterValueLabel: "值",
+    selectValue: "选择值",
+    selectValues: "选择值",
+    searchValues: "搜索值",
+    noValuesForScore: "此评分没有值",
+    loadingValues: "正在加载值…",
+    filterExperiment: "筛选实验",
+    selectExperiment: "选择实验",
+    searchExperiment: "搜索实验",
+    selectExperimentToApply: "请选择一个可用实验以应用此筛选。",
+    scoreNameLabel: "评分名称",
+    selectScore: "选择评分",
+    searchScores: "搜索评分",
+    loadingScoresFilter: "正在加载评分…",
+    noScoresOfType: "此类型没有评分",
+    scoreOptionsUnavailable: "评分选项不可用",
+    metadataKeyLabel: "元数据键",
+    filterOperator: "筛选运算符",
+    selectOperator: "选择运算符",
+    scoreTypeMismatch: "此评分的类型不同。请选择兼容的评分。",
+    waitingForScoreOptions: "正在等待评分选项，之后再应用。",
+    unavailableExperiment: "不可用的实验（{target}）",
+    chooseKeyIsSet: "选择键 · 已设置",
+    addToAllExperiments: "添加到所有实验",
+    keyIsSetAll: "键已设置 · 所有实验",
+    itemMetadataLabel: "条目的元数据",
+    metadataLabel2: "元数据",
+    statusFilterLabel: "状态",
+    numericScoreLabel: "数值评分",
+    categoricalScoreLabel: "分类评分",
+    booleanScoreLabel: "布尔评分",
+    experimentLabel: "实验",
+    filterValueAria: "筛选值",
+    filterValuesAria: "筛选值",
+    addMetadataFilter: "添加元数据筛选",
+    experimentFiltersAria: "实验筛选",
+    availableFiltersAria: "可用筛选",
+    // Filter options hook errors
+    scoreFilterOptionsError: "评分筛选选项无法加载。重试后可编辑评分筛选。",
+    experimentNameExists: "此数据集中已存在同名实验。",
+    // Zod validation messages
+    experimentNameRequired: "请输入实验名称",
+    runNameRequired: "运行名称为必填项",
+    promptRequired: "请选择提示词",
+    datasetRequired: "请选择数据集",
+    providerRequired: "请选择提供方",
+    modelRequired: "请选择模型",
+    // Create experiment webhook labels
+    loadingLabel: "正在加载…",
+    configureLabel: "配置",
+    runLabel: "运行",
+    // Matrix footer singular/plural
+    matrixFooterPlural:
+      "{scoreCount} 个评分 × {experimentCount} 次运行，汇总本页的 {itemCount} 个条目。差异以基线列为基准衡量。",
+    matrixFooterSingular:
+      "{scoreCount} 个评分 × {experimentCount} 次运行，汇总本页的 {itemCount} 个条目。差异以基线列为基准衡量。",
+    // Search registry overlays
+    experimentNameField: "实验名称",
+    datasetField: "数据集",
+    datasetFieldHelp: "实验所针对的数据集",
+    // Peek footer
+    unknown: "未知",
+    previousExperiment: "上一个实验",
+    nextExperiment: "下一个实验",
+    // Time zone suffix (dataset versions)
+    utcLabel: "（UTC）",
+    // Boolean aggregate suffix
+    trueRateLabel: "为真",
+    // Score header inline movement counts
+    improvedCountInline: "{count} 个改善",
+    regressedCountInline: "{count} 个回退",
+    changedCountInline: "{count} 个变化",
+    // Review step labels
+    nameLabel: "名称",
+    versionValue: "版本 {version}",
+    // Level labels (score prefixes and grid metadata)
+    trace: "追踪",
+    observation: "观察",
+    latency: "延迟",
+    cost: "费用",
+    // Dynamic aria labels
+    stepHasErrors: "{step} 有错误",
+    filterFormAria: "{title} 筛选",
+    removeFilterAria: "移除 {title} 筛选",
   },
 } satisfies Messages;

@@ -12,6 +12,8 @@ import {
 } from "@/src/components/ui/input-command";
 import { PopoverController } from "@/src/components/ui/popover";
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 type DatasetPickerProps = {
   datasets: Array<{ id: string; name: string }>;
@@ -27,6 +29,7 @@ export function DatasetPicker({
   const selectedDataset = datasets.find(
     (dataset) => dataset.id === selectedDatasetId,
   );
+  const t = useTranslation(experimentMessages);
 
   return (
     <PopoverController
@@ -37,12 +40,12 @@ export function DatasetPicker({
       renderContent={({ closePopover }) => (
         <InputCommand>
           <InputCommandInput
-            placeholder="Search datasets..."
+            placeholder={t("searchDatasets")}
             className="h-9"
             variant="bottom"
           />
           <InputCommandList>
-            <InputCommandEmpty>No dataset found.</InputCommandEmpty>
+            <InputCommandEmpty>{t("noDatasetFound")}</InputCommandEmpty>
             <InputCommandGroup>
               {datasets.map((dataset) => (
                 <InputCommandItem
@@ -87,7 +90,7 @@ export function DatasetPicker({
               className="min-w-0 flex-1 truncate text-left"
               title={selectedDataset?.name}
             >
-              {selectedDataset?.name ?? "Select a dataset"}
+              {selectedDataset?.name ?? t("selectDataset")}
             </span>
             <DropdownIndicator />
           </Button>

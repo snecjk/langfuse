@@ -5,6 +5,8 @@ import { useExperimentPeekNavigation } from "../hooks/useExperimentPeekNavigatio
 import { useExperimentNames } from "../hooks/useExperimentNames";
 import { getExperimentColorStyles } from "./table/types";
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 export function ExperimentPeekFooter({ projectId }: { projectId: string }) {
   const {
@@ -17,13 +19,14 @@ export function ExperimentPeekFooter({ projectId }: { projectId: string }) {
     goToPrev,
     goToNext,
   } = useExperimentPeekNavigation();
+  const t = useTranslation(experimentMessages);
 
   const { experimentNames } = useExperimentNames({ projectId });
   const currentName =
     experimentNames.find((e) => e.experimentId === currentExperimentId)
       ?.experimentName ??
     currentExperimentId?.slice(0, 8) ??
-    "Unknown";
+    t("unknown");
   const colorStyles = currentExperimentId
     ? getExperimentColorStyles(currentExperimentId, allExperimentIds)
     : undefined;
@@ -38,7 +41,7 @@ export function ExperimentPeekFooter({ projectId }: { projectId: string }) {
           {currentName}
         </span>
         <ExperimentRunBadge colorClass={colorStyles?.badgeClass} strong>
-          {currentIndex === 0 ? "Baseline" : "Comp"}
+          {currentIndex === 0 ? t("baseline") : t("comp")}
         </ExperimentRunBadge>
       </div>
       <div className="flex items-center gap-1">
@@ -47,7 +50,7 @@ export function ExperimentPeekFooter({ projectId }: { projectId: string }) {
           className="gap-1.5 px-2"
           disabled={!hasPrev}
           onClick={goToPrev}
-          title="Previous experiment"
+          title={t("previousExperiment")}
         >
           <ArrowLeft size="base" color="default" />
         </Button>
@@ -59,7 +62,7 @@ export function ExperimentPeekFooter({ projectId }: { projectId: string }) {
           className="gap-1.5 px-2"
           disabled={!hasNext}
           onClick={goToNext}
-          title="Next experiment"
+          title={t("nextExperiment")}
         >
           <ArrowRight size="base" color="default" />
         </Button>

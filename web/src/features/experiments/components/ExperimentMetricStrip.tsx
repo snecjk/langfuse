@@ -14,7 +14,10 @@ import {
 import { ScoreTag } from "@/src/components/ScoreTag";
 import { WidgetContent } from "@/src/features/widgets/components/InlineWidget";
 import { type QueryType } from "@langfuse/shared/query";
-import { type MetricOption } from "@/src/features/experiments/types/charts";
+import {
+  type MetricOption,
+  METRIC_OPTION_GROUPS,
+} from "@/src/features/experiments/types/charts";
 import { buildWidgetConfigFromId } from "@/src/features/experiments/utils/charts";
 import { SCORE_LEVEL_TAGS } from "@/src/features/experiments/constants/charts";
 import { MetricStripMessage } from "@/src/components/metric-strip/MetricStripBand";
@@ -24,10 +27,9 @@ import {
 } from "@/src/components/metric-strip/MetricStripTrigger";
 import { cn } from "@/src/utils/tailwind";
 import { type ExperimentChartSlot } from "@/src/features/experiments/hooks/useExperimentCharts";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
-const EMPTY_PLOT = (
-  <MetricStripMessage message="No values for these experiments" />
-);
 export function ExperimentMetricStrip({
   projectId,
   experiments,
@@ -51,6 +53,7 @@ export function ExperimentMetricStrip({
   onRemove: () => void;
   canRemove: boolean;
 }) {
+  const t = useTranslation(experimentMessages);
   const orderedExperiments = useMemo(
     () =>
       [...experiments].sort(
@@ -139,13 +142,13 @@ export function ExperimentMetricStrip({
   return (
     <section
       className="group/chart flex h-full min-h-[130px] min-w-0 flex-col"
-      aria-label={`Chart: ${label}`}
+      aria-label={t("chartAriaLabel", { label })}
     >
       <div className="flex min-h-8 min-w-0 items-center gap-1.5 pl-2">
         <div className="min-w-0 flex-1">
           <Select value={slot.metricId} onValueChange={onMetricChange}>
             <SelectTrigger
-              aria-label="Chart metric"
+              aria-label={t("chartMetric")}
               className={cn(
                 METRIC_STRIP_TRIGGER_CLASS,
                 metricStripTriggerClasses.metric,
@@ -166,13 +169,15 @@ export function ExperimentMetricStrip({
             <SelectContent>
               {!selectedOption && (
                 <SelectItem value={slot.metricId} disabled>
-                  {label} (unavailable)
+                  {t("unavailableMetric", { label })}
                 </SelectItem>
               )}
-              {(["Scores", "Base Metrics"] as const).map((group) => (
+              {METRIC_OPTION_GROUPS.map((group) => (
                 <SelectGroup key={group}>
                   <SelectLabel className="text-xs font-bold">
-                    {group}
+                    {group === "Scores"
+                      ? t("scoresGroupLabel")
+                      : t("baseMetricsGroupLabel")}
                   </SelectLabel>
                   {availableMetricOptions
                     .filter((option) => option.group === group)
@@ -198,14 +203,14 @@ export function ExperimentMetricStrip({
         {!isCategorical && (
           <Select value={slot.chartType} onValueChange={handleChartTypeChange}>
             <SelectTrigger
-              aria-label="Chart type"
+              aria-label={t("chartTypeLabel")}
               className="h-6 w-auto gap-1 border-0 px-1 text-xs opacity-0 shadow-none group-focus-within/chart:opacity-100 group-hover/chart:opacity-100 data-[state=open]:opacity-100 [@media(hover:none)]:opacity-100"
             >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="line">Line</SelectItem>
-              <SelectItem value="bar">Bar</SelectItem>
+              <SelectItem value="line">{t("line")}</SelectItem>
+              <SelectItem value="bar">{t("bar")}</SelectItem>
             </SelectContent>
           </Select>
         )}
@@ -213,7 +218,7 @@ export function ExperimentMetricStrip({
           <div className="opacity-0 group-focus-within/chart:opacity-100 group-hover/chart:opacity-100 [@media(hover:none)]:opacity-100">
             <IconButton
               icon={X}
-              label={`Remove ${label} chart`}
+              label={t("removeChart", { label })}
               size="sm"
               onClick={onRemove}
             />
@@ -238,7 +243,9 @@ export function ExperimentMetricStrip({
             schedulerId={`experiments-chart-${slot.id}`}
             layoutHint="tight"
             entityDimensionLabelMap={entityDimensionLabelMap}
-            emptyState={EMPTY_PLOT}
+            emptyState={
+              <MetricStripMessage message={t("noValuesForExperiments")} />
+            }
             legendPosition="none"
             colorBarsByCategory={chartType === "VERTICAL_BAR"}
             zeroBaseline={chartType !== "LINE_TIME_SERIES"}
@@ -247,8 +254,8 @@ export function ExperimentMetricStrip({
           <MetricStripMessage
             message={
               experiments.length === 0
-                ? "No experiments in view"
-                : "No values for these experiments"
+                ? t("noExperimentsInView")
+                : t("noValuesForExperiments")
             }
           />
         )}

@@ -11,6 +11,11 @@ import {
   describeScoreComparisonFilter,
   type ScoreComparisonFilter,
 } from "@/src/features/experiments/fns/scoreComparisonFilter";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 export type ScoreComparisonPill = {
   filter: ScoreComparisonFilter;
@@ -30,6 +35,8 @@ export const ScoreComparisonFilterPills = ({
   pills: ScoreComparisonPill[];
   onRemove: (filter: ScoreComparisonFilter) => void;
 }) => {
+  const t = useTranslation(experimentMessages);
+  const locale = useInterfaceLocale();
   return (
     <div className="flex flex-wrap items-center gap-1.5 border-b px-2 py-2">
       {pills.map(({ filter, scoreName, comparisonName }) => {
@@ -37,6 +44,7 @@ export const ScoreComparisonFilterPills = ({
           operator: filter.operator,
           scoreName,
           comparisonName,
+          locale,
         });
         return (
           <BadgeShell key={`${filter.level}-${filter.scoreKey}`} color="filled">
@@ -47,14 +55,11 @@ export const ScoreComparisonFilterPills = ({
             <Tooltip>
               <TooltipTrigger asChild>
                 <span className="text-muted-foreground shrink-0 cursor-default underline decoration-dotted">
-                  this page
+                  {t("thisPage")}
                 </span>
               </TooltipTrigger>
               <TooltipContent className="max-w-[280px]">
-                Comparing one experiment&apos;s score against another&apos;s is
-                not something the items query can express, so this narrows the
-                items loaded on the current page. Page through to check the rest
-                of the run.
+                {t("thisPageTooltip")}
               </TooltipContent>
             </Tooltip>
             <Button

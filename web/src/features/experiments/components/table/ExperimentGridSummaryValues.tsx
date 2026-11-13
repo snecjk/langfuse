@@ -9,6 +9,15 @@ import {
 import { DiffLabel } from "@/src/features/datasets/components/DiffLabel";
 import { type ExperimentItemsTableRow } from "./types";
 import { type VisibilityState } from "@tanstack/react-table";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
+
+type ExperimentGridSummaryT = ReturnType<
+  typeof useTranslation<typeof experimentMessages>
+>;
 
 export function ExperimentGridSummaryValues({
   rows,
@@ -22,6 +31,7 @@ export function ExperimentGridSummaryValues({
   expanded,
   showScoreNames,
   onToggle,
+  t: tProp,
 }: {
   rows: ExperimentItemsTableRow[];
   experimentId: string;
@@ -34,7 +44,12 @@ export function ExperimentGridSummaryValues({
   expanded: boolean;
   showScoreNames: boolean;
   onToggle: () => void;
+  /** Injected by ExperimentGridView so the whole cell shares one translator. */
+  t?: ExperimentGridSummaryT;
 }) {
+  const tOwn = useTranslation(experimentMessages);
+  const t = tProp ?? tOwn;
+  const locale = useInterfaceLocale();
   const hasComparison =
     !!baselineExperimentId && experimentId !== baselineExperimentId;
   const scores = useMemo(
@@ -43,13 +58,13 @@ export function ExperimentGridSummaryValues({
         ...observationScoreOrder.map((key) => ({
           key,
           field: "observationScores" as const,
-          level: "Observation",
+          level: "observation" as const,
           columnId: key,
         })),
         ...traceScoreOrder.map((key) => ({
           key,
           field: "traceScores" as const,
-          level: "Trace",
+          level: "trace" as const,
           columnId: `Trace-${key}`,
         })),
       ]
@@ -109,7 +124,7 @@ export function ExperimentGridSummaryValues({
             ) : (
               <DropdownIndicator direction="right" size="sm" nudge />
             )}
-            SUMMARY · this page ({rows.length} items)
+            {t("summaryThisPage", { count: rows.length })}
           </button>
         )}
       </div>
@@ -117,15 +132,17 @@ export function ExperimentGridSummaryValues({
         scores.map((score) => {
           const { name, dataType, source, summary } = score;
           const { baseline: aggregate, delta, movement } = summary;
-          let aggregateLabel = "not scored";
+          let aggregateLabel = t("notScored");
           if (aggregate) {
             aggregateLabel =
               aggregate.kind === "average"
                 ? formatScoreValue(aggregate.value)
-                : formatScoreColumnAggregate(aggregate);
+                : formatScoreColumnAggregate(aggregate, locale);
           }
-          const value = isLoading ? "Loading…" : aggregateLabel;
-          const label = showScoreLevelLabels ? `${score.level}: ${name}` : name;
+          const value = isLoading ? t("loadingAriaLabel") : aggregateLabel;
+          const label = showScoreLevelLabels
+            ? `${score.level === "trace" ? t("trace") : t("observation")}: ${name}`
+            : name;
           return (
             <div
               key={score.columnId}
@@ -150,7 +167,9 @@ export function ExperimentGridSummaryValues({
                 {!isLoading &&
                   !hasComparison &&
                   aggregate?.kind === "average" && (
-                    <span className="text-muted-foreground text-xs">AVG</span>
+                    <span className="text-muted-foreground text-xs">
+                      {t("avgLabel")}
+                    </span>
                   )}
                 {!isLoading && delta !== null && delta !== 0 && (
                   <DiffLabel
@@ -167,25 +186,37 @@ export function ExperimentGridSummaryValues({
               {!isLoading && movement && (
                 <div
                   className="flex shrink-0 items-center gap-2 text-xs font-normal"
-                  title={`${movement.changed} items changed compared to baseline; ${movement.unchanged} unchanged; ${movement.notComparable} uncomparable`}
+                  title={t("itemsChangedTitle", {
+                    changed: movement.changed,
+                    unchanged: movement.unchanged,
+                    uncomparable: movement.notComparable,
+                  })}
                 >
                   {dataType === "CATEGORICAL" ? (
-                    <span aria-label={`${movement.changed} changed items`}>
+                    <span
+                      aria-label={t("changedItemsCount", {
+                        count: movement.changed,
+                      })}
+                    >
                       ↻ {movement.changed}
                     </span>
                   ) : (
                     <>
                       <span
                         className="text-dark-green"
-                        title="Improved items"
-                        aria-label={`${movement.improved} improved items`}
+                        title={t("improvedItems")}
+                        aria-label={t("improvedItemsCount", {
+                          count: movement.improved,
+                        })}
                       >
                         ↗ {movement.improved}
                       </span>
                       <span
                         className="text-dark-red"
-                        title="Regressed items"
-                        aria-label={`${movement.regressed} regressed items`}
+                        title={t("regressedItems")}
+                        aria-label={t("regressedItemsCount", {
+                          count: movement.regressed,
+                        })}
                       >
                         ↘ {movement.regressed}
                       </span>
@@ -198,7 +229,7 @@ export function ExperimentGridSummaryValues({
         })}
       {expanded && scores.length === 0 && showScoreNames && (
         <span className="text-muted-foreground text-xs">
-          {isLoading ? "Loading scores…" : "No scores selected"}
+          {isLoading ? t("loadingScores") : t("noScoresSelected")}
         </span>
       )}
     </div>

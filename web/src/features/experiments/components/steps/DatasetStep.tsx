@@ -32,6 +32,12 @@ import { StepHeader } from "@/src/features/experiments/components/shared/StepHea
 import { api } from "@/src/utils/api";
 import { format } from "date-fns";
 import { DatasetPicker } from "@/src/features/experiments/components/steps/DatasetPicker";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
+import { describeVariableMismatch } from "@/src/features/experiments/fns/describeVariableMismatch";
 
 export const DatasetStep: React.FC<DatasetStepProps> = ({
   projectId,
@@ -47,6 +53,8 @@ export const DatasetStep: React.FC<DatasetStepProps> = ({
     validationResult,
   } = datasetState;
   const { selectedPromptName, selectedPromptVersion } = promptInfo;
+  const t = useTranslation(experimentMessages);
+  const locale = useInterfaceLocale();
 
   // Fetch dataset versions when a dataset is selected
   const { data: datasetVersions } = api.datasets.listDatasetVersions.useQuery(
@@ -62,8 +70,8 @@ export const DatasetStep: React.FC<DatasetStepProps> = ({
   return (
     <div className="space-y-6">
       <StepHeader
-        title="Dataset Selection"
-        description="Choose the dataset to run your experiment on. The dataset structure must match the prompt template variables."
+        title={t("datasetSelectionTitle")}
+        description={t("datasetSelectionHelp")}
       />
 
       <FormField
@@ -71,7 +79,7 @@ export const DatasetStep: React.FC<DatasetStepProps> = ({
         name="datasetId"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Dataset</FormLabel>
+            <FormLabel>{t("dataset")}</FormLabel>
             <div className="flex items-center gap-2">
               <DatasetPicker
                 datasets={datasets ?? []}
@@ -86,26 +94,32 @@ export const DatasetStep: React.FC<DatasetStepProps> = ({
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="h-8">
-                      Expected columns
+                      {t("expectedColumns")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-80">
                     <div className="space-y-2">
                       <h4 className="leading-none font-bold">
-                        Expected Dataset Structure
+                        {t("expectedDatasetStructure")}
                       </h4>
                       <p className="text-muted-foreground text-sm">
-                        Based on prompt {selectedPromptName} v
-                        {selectedPromptVersion}
+                        {t("basedOnPrompt", {
+                          name: selectedPromptName,
+                          version: selectedPromptVersion,
+                        })}
                       </p>
                       <div className="space-y-1 pt-2">
-                        <p className="text-sm font-bold">Input variables:</p>
+                        <p className="text-sm font-bold">
+                          {t("inputVariables")}
+                        </p>
                         <ul className="list-inside list-disc text-sm">
                           {expectedColumns.inputVariables.map((variable) => (
                             <li key={variable}>{variable}</li>
                           ))}
                         </ul>
-                        <p className="text-sm font-bold">Expected output:</p>
+                        <p className="text-sm font-bold">
+                          {t("expectedOutputLabel")}
+                        </p>
                         <ul className="list-inside list-disc text-sm">
                           <li>
                             {expectedColumns.outputVariableName} (
@@ -129,7 +143,7 @@ export const DatasetStep: React.FC<DatasetStepProps> = ({
           name="datasetVersion"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Dataset Version (Optional)</FormLabel>
+              <FormLabel>{t("datasetVersion")}</FormLabel>
               <Select
                 onValueChange={(value) => {
                   if (value === "latest") {
@@ -142,27 +156,25 @@ export const DatasetStep: React.FC<DatasetStepProps> = ({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Latest version" />
+                    <SelectValue placeholder={t("latestVersion")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="latest">
-                    Latest version (default)
+                    {t("latestVersionDefault")}
                   </SelectItem>
                   {datasetVersions.map((version) => (
                     <SelectItem
                       key={version.toISOString()}
                       value={version.toISOString()}
                     >
-                      {format(version, "MMM d, yyyy 'at' h:mm a")} (UTC)
+                      {format(version, "MMM d, yyyy 'at' h:mm a")}{" "}
+                      {t("utcLabel")}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <FormDescription>
-                Run the experiment using the dataset state at a specific point
-                in time. Defaults to the latest version.
-              </FormDescription>
+              <FormDescription>{t("datasetVersionHelp")}</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -175,11 +187,16 @@ export const DatasetStep: React.FC<DatasetStepProps> = ({
             <Card className="border-dark-yellow bg-light-yellow relative overflow-hidden rounded-md shadow-none group-data-[collapsible=icon]:hidden">
               <CardHeader className="p-2">
                 <CardTitle className="text-dark-yellow flex items-center justify-between text-sm">
-                  <span>Invalid configuration</span>
+                  <span>{t("invalidConfiguration")}</span>
                   <Info size="base" />
                 </CardTitle>
                 <CardDescription className="text-foreground">
-                  {validationResult?.message}
+                  {validationResult.reason === "variable-mismatch"
+                    ? describeVariableMismatch(
+                        validationResult.variables ?? [],
+                        locale,
+                      )
+                    : validationResult.message}
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -188,26 +205,27 @@ export const DatasetStep: React.FC<DatasetStepProps> = ({
             <Card className="border-dark-green bg-light-green relative overflow-hidden rounded-md shadow-none group-data-[collapsible=icon]:hidden">
               <CardHeader className="p-2">
                 <CardTitle className="text-dark-green flex items-center justify-between text-sm">
-                  <span>Valid configuration</span>
+                  <span>{t("validConfiguration")}</span>
                   <CircleCheck size="base" />
                 </CardTitle>
                 <div className="text-sm">
-                  Matches between dataset items and prompt
-                  variables/placeholders
+                  {t("matchesVariables")}
                   <ul className="my-2 ml-2 list-inside list-disc">
                     {Object.entries(validationResult.variablesMap ?? {}).map(
                       ([variable, count]) => (
                         <li key={variable}>
-                          <strong>{variable}:</strong> {count} /{" "}
-                          {validationResult?.isValid
-                            ? validationResult.totalItems
-                            : "unknown"}
+                          {t("itemVariableCount", {
+                            variable,
+                            count,
+                            total: validationResult?.isValid
+                              ? validationResult.totalItems
+                              : t("unknownTotal"),
+                          })}
                         </li>
                       ),
                     )}
                   </ul>
-                  Items missing all required variables and placeholders will be
-                  excluded from the dataset run.
+                  {t("missingVariablesNote")}
                 </div>
               </CardHeader>
             </Card>

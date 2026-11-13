@@ -11,6 +11,7 @@ import { cn } from "@/src/utils/tailwind";
 import {
   completeExperimentFilter,
   EXPERIMENT_FILTER_KINDS,
+  experimentFilterKindLabel,
   type ExperimentFilterDraft,
 } from "./experimentFilterEditing";
 import {
@@ -19,6 +20,8 @@ import {
   type ExperimentFilterTarget,
 } from "./experimentFilterTypes";
 import { ExperimentFilterValueEditor } from "./ExperimentFilterValueEditor";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 /** Each keyed mount owns only its unfinished form values. */
 export function ExperimentFilterBlock({
@@ -33,7 +36,8 @@ export function ExperimentFilterBlock({
   const form = useForm<ExperimentFilterDraft>({ defaultValues: initialDraft });
   const draft = form.watch();
   const id = useId();
-  const state = prepareBlockState(draft, targets, options, optionsError);
+  const t = useTranslation(experimentMessages);
+  const state = prepareBlockState(draft, targets, options, optionsError, t);
   const isDirty = form.formState.isDirty;
 
   function handleApply(values: ExperimentFilterDraft) {
@@ -60,14 +64,14 @@ export function ExperimentFilterBlock({
   return (
     <form
       className="ph-no-capture flex min-w-0 flex-col gap-2 rounded-md border p-3"
-      aria-label={`${state.title} filter`}
+      aria-label={t("filterFormAria", { title: state.title })}
       onSubmit={handleSubmit}
     >
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-bold">{state.title}</span>
         <IconButton
           icon={X}
-          label={`Remove ${state.title} filter`}
+          label={t("removeFilterAria", { title: state.title })}
           size="sm"
           onClick={handleRemove}
         />
@@ -77,33 +81,33 @@ export function ExperimentFilterBlock({
           htmlFor={`${id}-target`}
           className="text-muted-foreground text-xs"
         >
-          Experiment
+          {t("experimentLabel")}
         </label>
         <SelectInput
           id={`${id}-target`}
-          aria-label="Filter experiment"
+          aria-label={t("filterExperiment")}
           value={draft.target}
           options={state.targets}
           onValueChange={handleTargetChange}
-          placeholder="Select experiment"
-          search={{ placeholder: "Search experiments" }}
+          placeholder={t("selectExperiment")}
+          search={{ placeholder: t("searchExperiment") }}
           error={!state.target}
         />
       </div>
       {!state.target && (
         <p role="alert" className="text-destructive text-xs">
-          Select an available experiment to apply this filter.
+          {t("selectExperimentToApply")}
         </p>
       )}
       {state.isScore && (
         <>
           <SelectInput
-            aria-label="Score name"
+            aria-label={t("scoreNameLabel")}
             value={draft.key}
             options={state.scoreNames}
             onValueChange={handleScoreChange}
-            placeholder="Select score"
-            search={{ placeholder: "Search scores" }}
+            placeholder={t("selectScore")}
+            search={{ placeholder: t("searchScores") }}
             emptyMessage={state.emptyScoresMessage}
             error={state.invalidType}
           />
@@ -118,20 +122,20 @@ export function ExperimentFilterBlock({
       )}
       {state.isMetadata && (
         <Input
-          aria-label="Metadata key"
-          placeholder="Metadata key"
+          aria-label={t("metadataKeyLabel")}
+          placeholder={t("metadataKeyLabel")}
           {...form.register("key")}
         />
       )}
       <SelectInput
-        aria-label="Filter operator"
+        aria-label={t("filterOperator")}
         value={draft.operator}
         options={filterOperators[draft.type].map((value) => ({
           value,
           label: value,
         }))}
         onValueChange={handleOperatorChange}
-        placeholder="Select operator"
+        placeholder={t("selectOperator")}
       />
       {!state.isPresence && (
         <ExperimentFilterValueEditor
@@ -142,17 +146,17 @@ export function ExperimentFilterBlock({
       )}
       {state.invalidType && (
         <p role="alert" className="text-destructive text-xs">
-          This score has a different type. Choose a compatible score.
+          {t("scoreTypeMismatch")}
         </p>
       )}
       {state.isWaiting && (
         <p role="status" className="text-muted-foreground text-xs">
-          Waiting for score options before applying.
+          {t("waitingForScoreOptions")}
         </p>
       )}
       {isDirty && (
         <Button
-          text="Apply changes"
+          text={t("applyChanges")}
           type="submit"
           size="sm"
           disabled={!state.canApply}
@@ -167,6 +171,7 @@ function prepareBlockState(
   targets: readonly ExperimentFilterTarget[],
   options: ExperimentFilterOptions | undefined,
   optionsError: string | null,
+  t: ReturnType<typeof useTranslation<typeof experimentMessages>>,
 ) {
   const kind = EXPERIMENT_FILTER_KINDS.find(
     (entry) => entry.column === draft.column,
@@ -186,18 +191,18 @@ function prepareBlockState(
     isScore && allNames.has(draft.key) && !availableNames.includes(draft.key);
   const availableTargets = targets.map((entry) => ({
     value: entry.id,
-    label: entry.label,
+    label: entry.displayLabel ?? entry.label,
   }));
   if (!target)
     availableTargets.push({
       value: draft.target,
-      label: `Unavailable experiment (${draft.target})`,
+      label: t("unavailableExperiment", { target: draft.target }),
     });
-  let emptyScoresMessage = "Loading scores…";
-  if (options) emptyScoresMessage = "No scores of this type";
-  if (optionsError) emptyScoresMessage = "Score options unavailable";
+  let emptyScoresMessage = t("loadingScoresFilter");
+  if (options) emptyScoresMessage = t("noScoresOfType");
+  if (optionsError) emptyScoresMessage = t("scoreOptionsUnavailable");
   return {
-    title: kind?.label ?? draft.column,
+    title: kind ? experimentFilterKindLabel(kind.column, t) : draft.column,
     target,
     targets: availableTargets,
     isScore,

@@ -1,6 +1,8 @@
 import { DropdownIndicator } from "@/src/components/design-system/DropdownIndicator/DropdownIndicator";
 import { cn } from "@/src/utils/tailwind";
 import { getExperimentColorStyles } from "./types";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 /**
  * The list compare view's first column header: the Input label, the page
@@ -21,10 +23,11 @@ export function ExperimentListInputHeader({
   experiments: Array<{ experimentId: string; experimentName: string }>;
   colorExperimentIds: string[];
 }) {
+  const t = useTranslation(experimentMessages);
   return (
     <div className="flex min-w-0 flex-col gap-1 py-0.5">
-      <span className="truncate" title="Input">
-        Input
+      <span className="truncate" title={t("input")}>
+        {t("input")}
       </span>
       <button
         type="button"
@@ -40,7 +43,7 @@ export function ExperimentListInputHeader({
         ) : (
           <DropdownIndicator direction="right" size="sm" nudge />
         )}
-        SUMMARY · this page ({itemCount} items)
+        {t("summaryThisPage", { count: itemCount })}
       </button>
       {experiments.map((experiment) => {
         const colorStyles = getExperimentColorStyles(

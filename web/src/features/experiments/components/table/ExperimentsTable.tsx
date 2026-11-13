@@ -555,7 +555,7 @@ export default function ExperimentsTable({
             experimentIds: experiments.rows.map((e) => e.id),
           })
         : [],
-    prefix: "Trace",
+    prefix: t("trace"),
     isFilterDataPending: experiments.status === "loading",
     presentKeys: presentScoreKeys?.traceItem,
   });
@@ -571,7 +571,7 @@ export default function ExperimentsTable({
     rawKey: true,
     displayFormat: "aggregate",
     scoreColumnKey: "observationItemScores",
-    headerPrefix: "Observation",
+    headerPrefix: t("observation"),
     projectId,
     filter:
       experiments.rows && experiments.rows.length > 0
@@ -600,7 +600,7 @@ export default function ExperimentsTable({
           })
         : [],
     rawKey: true,
-    prefix: "Experiment",
+    prefix: t("experimentColumn"),
     isFilterDataPending: experiments.status === "loading",
     presentKeys: presentScoreKeys?.experiment,
   });
@@ -610,8 +610,12 @@ export default function ExperimentsTable({
       metricOptionsFromScoreColumns(
         observationScoreDefinitions,
         experimentScoreDefinitions,
+        t as (
+          key: "costLabel" | "latencyLabel",
+          parameters?: Readonly<Record<string, string | number>>,
+        ) => string,
       ),
-    [observationScoreDefinitions, experimentScoreDefinitions],
+    [observationScoreDefinitions, experimentScoreDefinitions, t],
   );
   const chartDateRange = fallbackDateRange ?? tableDateRange;
 

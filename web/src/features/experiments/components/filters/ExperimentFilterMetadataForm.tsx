@@ -7,6 +7,8 @@ import {
   newExperimentFilterDraft,
 } from "./experimentFilterEditing";
 import { type MetadataFilterColumn } from "./experimentFilterTypes";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 export function ExperimentFilterMetadataForm({
   column,
@@ -16,6 +18,7 @@ export function ExperimentFilterMetadataForm({
   const form = useForm<{ key: string }>({ defaultValues: { key: "" } });
   const key = form.watch("key");
   const filter = completeMetadataFilter(column, key);
+  const t = useTranslation(experimentMessages);
 
   function handleAdd(values: { key: string }) {
     const completed = completeMetadataFilter(column, values.key);
@@ -34,29 +37,34 @@ export function ExperimentFilterMetadataForm({
   return (
     <form
       className="ph-no-capture flex flex-col gap-3"
-      aria-label="Add metadata filter"
+      aria-label={t("addMetadataFilter")}
       onSubmit={handleSubmit}
     >
       <span className="text-sm font-bold">
-        {column === "itemMetadata" ? "Item metadata" : "Metadata"}
+        {column === "itemMetadata"
+          ? t("itemMetadataLabel")
+          : t("metadataLabel2")}
       </span>
-      <p className="text-muted-foreground text-xs">
-        Key is set · All experiments
-      </p>
+      <p className="text-muted-foreground text-xs">{t("keyIsSetAll")}</p>
       <Input
-        aria-label="Metadata key"
-        placeholder="Metadata key"
+        aria-label={t("metadataKeyLabel")}
+        placeholder={t("metadataKeyLabel")}
         {...form.register("key")}
         autoFocus
       />
       <div className="flex justify-end gap-2">
         <Button
-          text="Cancel"
+          text={t("cancel")}
           variant="ghost"
           size="sm"
           onClick={handleCancel}
         />
-        <Button text="Add filter" type="submit" size="sm" disabled={!filter} />
+        <Button
+          text={t("addFilter")}
+          type="submit"
+          size="sm"
+          disabled={!filter}
+        />
       </div>
     </form>
   );

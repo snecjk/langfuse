@@ -37,6 +37,8 @@ import { type Prisma, WebhookProtectedHeaders } from "@langfuse/shared";
 import { Skeleton } from "@/src/components/ui/skeleton";
 import { getFormattedPayload } from "@/src/features/experiments/utils/format";
 import { Spinner } from "@/src/components/design-system/Spinner/Spinner";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 const RemoteExperimentSetupSchema = z.object({
   url: z.url(),
@@ -78,6 +80,7 @@ export const RemoteExperimentUpsertForm = ({
     projectId,
     scope: "datasets:CUD",
   });
+  const t = useTranslation(experimentMessages);
 
   const dataset = api.datasets.byId.useQuery({
     projectId,
@@ -120,8 +123,8 @@ export const RemoteExperimentUpsertForm = ({
       onSuccess: (data) => {
         showSuccessToast({
           operation: "remote_experiment.configure",
-          title: "Setup successfully",
-          description: "Your changes have been saved.",
+          title: t("setupSuccess"),
+          description: t("setupSuccessHelp"),
         });
         utils.datasets.getRemoteExperiment.invalidate({
           projectId,
@@ -135,8 +138,8 @@ export const RemoteExperimentUpsertForm = ({
       },
       onError: (error) => {
         showErrorToast(
-          error.message || "Failed to setup",
-          "Please check your URL and config and try again.",
+          error.message || t("setupFailed"),
+          t("setupFailedHelp"),
           classifyTrpcToastError(error, "remote_experiment.update"),
         );
       },
@@ -147,9 +150,8 @@ export const RemoteExperimentUpsertForm = ({
       onSuccess: () => {
         showSuccessToast({
           operation: "remote_experiment.delete",
-          title: "Deleted successfully",
-          description:
-            "The remote dataset run trigger has been removed from this dataset.",
+          title: t("deleteSuccess"),
+          description: t("deleteSuccessHelp"),
         });
         setShowRemoteExperimentUpsertForm(false);
         utils.datasets.getRemoteExperiment.invalidate({
@@ -159,8 +161,8 @@ export const RemoteExperimentUpsertForm = ({
       },
       onError: (error) => {
         showErrorToast(
-          error.message || "Failed to delete remote dataset run trigger",
-          "Please try again.",
+          error.message || t("deleteFailed"),
+          t("deleteFailedHelp"),
           classifyTrpcToastError(error, "remote_experiment.delete"),
         );
       },
@@ -172,7 +174,7 @@ export const RemoteExperimentUpsertForm = ({
         JSON.parse(data.defaultPayload);
       } catch {
         form.setError("defaultPayload", {
-          message: "Invalid JSON format",
+          message: t("invalidJson"),
         });
         return;
       }
@@ -185,7 +187,7 @@ export const RemoteExperimentUpsertForm = ({
       if (!name) continue;
       if (WebhookProtectedHeaders.includes(name.toLowerCase())) {
         form.setError(`headers.${index}.name`, {
-          message: `"${name}" is set by Langfuse and cannot be overridden`,
+          message: t("headerOverridden", { name }),
         });
         return;
       }
@@ -207,11 +209,7 @@ export const RemoteExperimentUpsertForm = ({
   };
 
   const handleDelete = () => {
-    if (
-      confirm(
-        "Are you sure you want to delete this remote dataset run trigger?",
-      )
-    ) {
+    if (confirm(t("confirmDeleteTrigger"))) {
       deleteRemoteExperimentMutation.mutate({
         projectId,
         datasetId,
@@ -231,13 +229,8 @@ export const RemoteExperimentUpsertForm = ({
     return (
       <>
         <DialogHeader>
-          <DialogTitle>Save your signing secret</DialogTitle>
-          <DialogDescription>
-            Langfuse signs every remote experiment request with this secret via
-            the <code>x-langfuse-signature</code> header. Store it in your
-            service to verify that requests come from Langfuse. It can only be
-            viewed once.
-          </DialogDescription>
+          <DialogTitle>{t("saveSigningSecret")}</DialogTitle>
+          <DialogDescription>{t("saveSigningSecretHelp")}</DialogDescription>
         </DialogHeader>
         <DialogBody>
           <CodeSection variant="outline" content={oneTimeSecret} />
@@ -247,7 +240,7 @@ export const RemoteExperimentUpsertForm = ({
             type="button"
             onClick={() => setShowRemoteExperimentUpsertForm(false)}
           >
-            {"I've saved the secret"}
+            {t("saveSecret")}
           </Button>
         </DialogFooter>
       </>
@@ -268,25 +261,17 @@ export const RemoteExperimentUpsertForm = ({
           }}
           className="inline-block self-start"
         >
-          ← Back
+          {t("back")}
         </Button>
         <DialogTitle>
           {existingRemoteExperiment
-            ? "Edit remote experiment trigger"
-            : "Set up remote experiment trigger in UI"}
+            ? t("editRemoteExperimentTrigger")
+            : t("setupRemoteExperimentTrigger")}
         </DialogTitle>
         <DialogDescription>
-          Enable your team to run custom experiments on dataset{" "}
-          <strong>
-            {dataset.isSuccess ? (
-              <>&quot;{dataset.data?.name}&quot;</>
-            ) : (
-              <Spinner size="sm" display="inline" />
-            )}
-          </strong>
-          . Configure a webhook URL to trigger remote custom experiments from
-          UI. We will send dataset info (name, id) and config to your service,
-          which can run against the dataset and post results to Langfuse.
+          {t("setupRemoteTriggerHelp", {
+            name: dataset.isSuccess ? `"${dataset.data?.name}"` : "",
+          })}
         </DialogDescription>
       </DialogHeader>
 
@@ -298,11 +283,8 @@ export const RemoteExperimentUpsertForm = ({
               name="url"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>URL</FormLabel>
-                  <FormDescription>
-                    The URL that will be called when the remote experiment is
-                    triggered.
-                  </FormDescription>
+                  <FormLabel>{t("urlLabel")}</FormLabel>
+                  <FormDescription>{t("urlHelp")}</FormDescription>
                   <FormControl>
                     <Input
                       placeholder="https://your-service.com/webhook"
@@ -311,9 +293,7 @@ export const RemoteExperimentUpsertForm = ({
                   </FormControl>
                   {field.value.startsWith("http://") && (
                     <p className="text-dark-yellow text-sm">
-                      This endpoint uses plain HTTP: the payload and all headers
-                      — including secret headers — will be sent unencrypted. Use
-                      HTTPS for production endpoints.
+                      {t("httpWarning")}
                     </p>
                   )}
                   <FormMessage />
@@ -326,12 +306,8 @@ export const RemoteExperimentUpsertForm = ({
               name="defaultPayload"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Default config</FormLabel>
-                  <FormDescription>
-                    Set a default config that will be sent to the remote
-                    experiment run URL. This can be modified before starting a
-                    new run. View docs for more details.
-                  </FormDescription>
+                  <FormLabel>{t("defaultConfig")}</FormLabel>
+                  <FormDescription>{t("defaultConfigHelp")}</FormDescription>
                   <CodeMirrorEditor
                     value={field.value}
                     onChange={field.onChange}
@@ -351,13 +327,13 @@ export const RemoteExperimentUpsertForm = ({
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                   <div className="space-y-0.5">
-                    <FormLabel>Sign requests</FormLabel>
+                    <FormLabel>{t("signRequests")}</FormLabel>
                     <FormDescription>
                       {field.value
                         ? existingRemoteExperiment?.displaySecretKey
-                          ? "Requests include an x-langfuse-signature header so your service can verify they come from Langfuse."
-                          : "A signing secret will be generated when you save and shown once."
-                        : "Requests will be sent without an x-langfuse-signature header."}
+                          ? t("signRequestsHelp")
+                          : t("signRequestsWillGenerate")
+                        : t("signRequestsDisabled")}
                     </FormDescription>
                     {field.value &&
                       existingRemoteExperiment?.displaySecretKey && (
@@ -369,8 +345,7 @@ export const RemoteExperimentUpsertForm = ({
                             content={existingRemoteExperiment.displaySecretKey}
                           />
                           <div className="text-muted-foreground mt-1 text-xs">
-                            Secret is encrypted and can only be viewed when
-                            generated
+                            {t("secretEncrypted")}
                           </div>
                         </div>
                       )}
@@ -390,17 +365,15 @@ export const RemoteExperimentUpsertForm = ({
                 <AccordionPrimitive.Header className="flex">
                   <AccordionPrimitive.Trigger className="flex flex-1 items-center justify-start gap-2 py-2 text-sm font-bold transition-all hover:underline [&>svg]:order-first [&>svg]:-rotate-90 [&[data-state=open]>svg]:rotate-0">
                     <DropdownIndicator nudge />
-                    Advanced Options
+                    {t("advancedOptions")}
                   </AccordionPrimitive.Trigger>
                 </AccordionPrimitive.Header>
                 <AccordionPrimitive.Content className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden text-sm transition-all">
                   <div className="space-y-6 px-1 pt-2 pb-4">
                     <div>
-                      <FormLabel>Custom headers</FormLabel>
+                      <FormLabel>{t("customHeaders")}</FormLabel>
                       <FormDescription className="mb-2">
-                        Optional headers to include in the request, e.g. for
-                        authenticating with your service. Secret header values
-                        are stored encrypted and shown masked.
+                        {t("customHeadersHelp")}
                       </FormDescription>
 
                       {headerFields.map((field, index) => {
@@ -423,7 +396,7 @@ export const RemoteExperimentUpsertForm = ({
                                 <FormItem>
                                   <FormControl>
                                     <Input
-                                      placeholder="Header Name"
+                                      placeholder={t("headerName")}
                                       {...field}
                                     />
                                   </FormControl>
@@ -438,7 +411,9 @@ export const RemoteExperimentUpsertForm = ({
                                 <FormItem>
                                   <FormControl>
                                     <Input
-                                      placeholder={displayValue || "Value"}
+                                      placeholder={
+                                        displayValue || t("headerValue")
+                                      }
                                       {...field}
                                       type={isSecret ? "password" : "text"}
                                     />
@@ -459,8 +434,8 @@ export const RemoteExperimentUpsertForm = ({
                               }
                               title={
                                 isSecret
-                                  ? "Make header public"
-                                  : "Make header secret"
+                                  ? t("makeHeaderPublic")
+                                  : t("makeHeaderSecret")
                               }
                             >
                               {isSecret ? (
@@ -502,7 +477,7 @@ export const RemoteExperimentUpsertForm = ({
                           color="default"
                           __rawClassName="mr-1"
                         />
-                        Add Custom Header
+                        {t("addCustomHeader")}
                       </Button>
                     </div>
 
@@ -512,11 +487,11 @@ export const RemoteExperimentUpsertForm = ({
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                           <div className="space-y-0.5">
-                            <FormLabel>Enabled</FormLabel>
+                            <FormLabel>{t("enabled")}</FormLabel>
                             <FormDescription>
                               {field.value
-                                ? "Trigger is active. You can disable anytime to pause without losing your configuration."
-                                : "Trigger is paused. Enable to allow running remote experiments."}
+                                ? t("triggerActive")
+                                : t("triggerPaused")}
                             </FormDescription>
                           </div>
                           <FormControl>
@@ -548,7 +523,7 @@ export const RemoteExperimentUpsertForm = ({
                       <Spinner size="sm" />
                     </div>
                   )}
-                  Delete
+                  {t("delete")}
                 </Button>
               )}
               <Button
@@ -561,7 +536,7 @@ export const RemoteExperimentUpsertForm = ({
                     <Spinner size="sm" />
                   </div>
                 ) : null}
-                {existingRemoteExperiment ? "Update" : "Set up"}
+                {existingRemoteExperiment ? t("update") : t("setUp")}
               </Button>
             </div>
           </DialogFooter>

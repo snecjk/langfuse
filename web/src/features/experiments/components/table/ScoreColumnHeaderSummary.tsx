@@ -11,6 +11,16 @@ import {
   formatScoreColumnAggregate,
   formatScoreValue,
 } from "@/src/features/experiments/fns/formatScoreColumnAggregate";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
+import { type Locale } from "@/src/features/i18n/locale";
+
+type ScoreHeaderT = ReturnType<
+  typeof useTranslation<typeof experimentMessages>
+>;
 
 const SummaryRow = ({ label, value }: { label: string; value: ReactNode }) => (
   <div className="flex items-baseline justify-between gap-4 text-xs">
@@ -19,13 +29,19 @@ const SummaryRow = ({ label, value }: { label: string; value: ReactNode }) => (
   </div>
 );
 
-const movementCountsTitle = (summary: ScoreColumnSummary) => {
+const movementCountsTitle = (summary: ScoreColumnSummary, t: ScoreHeaderT) => {
   const { movement } = summary;
   if (!movement) return "";
   return [
-    movement.improved ? `${movement.improved} improved` : null,
-    movement.regressed ? `${movement.regressed} regressed` : null,
-    movement.changed ? `${movement.changed} changed` : null,
+    movement.improved
+      ? t("improvedCountInline", { count: movement.improved })
+      : null,
+    movement.regressed
+      ? t("regressedCountInline", { count: movement.regressed })
+      : null,
+    movement.changed
+      ? t("changedCountInline", { count: movement.changed })
+      : null,
   ]
     .filter(Boolean)
     .join(", ");
@@ -44,12 +60,16 @@ const ComparisonHoverCard = ({
   comparisonName,
   hasBaseline,
   children,
+  t,
+  locale,
 }: {
   dataType: ScoreColumnDataType;
   summary: ScoreColumnSummary;
   comparisonName?: string;
   hasBaseline: boolean;
   children: ReactNode;
+  t: ScoreHeaderT;
+  locale: Locale;
 }) => {
   const { baseline, comparison, movement } = summary;
 
@@ -59,30 +79,32 @@ const ComparisonHoverCard = ({
       content={
         <div className="flex w-64 flex-col gap-1 p-3 font-normal">
           <SummaryRow
-            label={hasBaseline ? "Baseline" : "This experiment"}
+            label={hasBaseline ? t("baseline") : t("thisExperiment")}
             value={
-              baseline ? formatScoreColumnAggregate(baseline) : "no values"
+              baseline
+                ? formatScoreColumnAggregate(baseline, locale)
+                : t("noValues")
             }
           />
           {movement && (
             <>
               <SummaryRow
-                label={comparisonName ?? "Comparison"}
+                label={comparisonName ?? t("comparison")}
                 value={
                   comparison
-                    ? formatScoreColumnAggregate(comparison)
-                    : "no values"
+                    ? formatScoreColumnAggregate(comparison, locale)
+                    : t("noValues")
                 }
               />
               {dataType === "CATEGORICAL" ? (
                 <SummaryRow
-                  label="Changed value"
+                  label={t("changedValue")}
                   value={`↻${movement.changed}`}
                 />
               ) : (
                 <>
                   <SummaryRow
-                    label="Improved"
+                    label={t("improved")}
                     value={
                       <span className="text-dark-green font-bold">
                         ↗{movement.improved}
@@ -90,7 +112,7 @@ const ComparisonHoverCard = ({
                     }
                   />
                   <SummaryRow
-                    label="Regressed"
+                    label={t("regressed")}
                     value={
                       <span className="text-dark-red font-bold">
                         ↘{movement.regressed}
@@ -99,8 +121,11 @@ const ComparisonHoverCard = ({
                   />
                 </>
               )}
-              <SummaryRow label="Unchanged" value={movement.unchanged} />
-              <SummaryRow label="Not scored" value={movement.notComparable} />
+              <SummaryRow label={t("unchanged")} value={movement.unchanged} />
+              <SummaryRow
+                label={t("notScored")}
+                value={movement.notComparable}
+              />
             </>
           )}
         </div>
@@ -122,9 +147,11 @@ const ComparisonHoverCard = ({
 const BaselineHeaderLine = ({
   baseline,
   baselineText,
+  t,
 }: {
   baseline: ScoreColumnAggregate | null;
   baselineText: string;
+  t: ScoreHeaderT;
 }) => (
   <span className="text-muted-foreground flex flex-wrap items-center gap-x-1 text-[10px] leading-tight font-normal tabular-nums">
     {baseline ? (
@@ -136,11 +163,11 @@ const BaselineHeaderLine = ({
           {baselineText}
         </span>
         {baseline.kind === "average" && (
-          <span className="text-muted-foreground">AVG</span>
+          <span className="text-muted-foreground">{t("avgLabel")}</span>
         )}
       </>
     ) : (
-      <span>no values</span>
+      <span>{t("noValues")}</span>
     )}
   </span>
 );
@@ -148,15 +175,19 @@ const BaselineHeaderLine = ({
 const ComparisonHeaderLine = ({
   summary,
   dataType,
+  t,
+  locale,
 }: {
   summary: ScoreColumnSummary;
   dataType: ScoreColumnDataType;
+  t: ScoreHeaderT;
+  locale: Locale;
 }) => {
   const { comparison, delta } = summary;
   const deltaToShow = delta !== null && delta !== 0 ? delta : null;
   const comparisonText = comparison
-    ? formatScoreColumnAggregate(comparison)
-    : "no values";
+    ? formatScoreColumnAggregate(comparison, locale)
+    : t("noValues");
 
   return (
     <span className="text-muted-foreground flex min-w-0 flex-wrap items-center gap-x-1 overflow-hidden text-[10px] leading-tight font-normal tabular-nums">
@@ -175,7 +206,10 @@ const ComparisonHeaderLine = ({
         />
       )}
       {hasMovementCounts(summary) && summary.movement && (
-        <span className="min-w-0 truncate" title={movementCountsTitle(summary)}>
+        <span
+          className="min-w-0 truncate"
+          title={movementCountsTitle(summary, t)}
+        >
           {dataType === "CATEGORICAL" ? (
             summary.movement.changed > 0 && (
               <span className="pr-1">↻{summary.movement.changed}</span>
@@ -230,13 +264,15 @@ export const ScoreColumnHeaderSummary = ({
   filterMenu?: ReactNode;
 }) => {
   const { icon, label: nameLabel } = splitScoreDataTypeIcon(label);
+  const t = useTranslation(experimentMessages);
+  const locale = useInterfaceLocale();
   const baseline = summaries[0]?.baseline ?? null;
   const comparisonSummaries = summaries.filter(
     (summary) => summary.movement !== null,
   );
   const baselineText = baseline
-    ? formatScoreColumnAggregate(baseline)
-    : "no values";
+    ? formatScoreColumnAggregate(baseline, locale)
+    : t("noValues");
 
   return (
     // The filter menu sits outside the hover-card trigger so its own popover is
@@ -258,10 +294,13 @@ export const ScoreColumnHeaderSummary = ({
               dataType={dataType}
               summary={summaries[0]}
               hasBaseline={hasBaseline}
+              t={t}
+              locale={locale}
             >
               <BaselineHeaderLine
                 baseline={baseline}
                 baselineText={baselineText}
+                t={t}
               />
             </ComparisonHoverCard>
           ) : (
@@ -269,6 +308,7 @@ export const ScoreColumnHeaderSummary = ({
               <BaselineHeaderLine
                 baseline={baseline}
                 baselineText={baselineText}
+                t={t}
               />
               {comparisonSummaries.map((summary, index) => (
                 <ComparisonHoverCard
@@ -277,8 +317,15 @@ export const ScoreColumnHeaderSummary = ({
                   summary={summary}
                   comparisonName={comparisonNames[index]}
                   hasBaseline={hasBaseline}
+                  t={t}
+                  locale={locale}
                 >
-                  <ComparisonHeaderLine summary={summary} dataType={dataType} />
+                  <ComparisonHeaderLine
+                    summary={summary}
+                    dataType={dataType}
+                    t={t}
+                    locale={locale}
+                  />
                 </ComparisonHoverCard>
               ))}
             </>

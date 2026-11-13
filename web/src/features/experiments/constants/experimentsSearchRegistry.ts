@@ -56,6 +56,10 @@ const EXCLUDED_COLUMN_IDS: ReadonlySet<string> = new Set([
  * Grammar overlay: aliases, units and prose that `ColumnDefinition` does not
  * carry. Units matter because every run metric here is a magnitude someone
  * types with an implied unit (`cost:>1`, `latency:>30`).
+ *
+ * The `label`/`description` values are the grammar's canonical English names —
+ * they appear in persisted query text and saved views, so they stay stable.
+ * Localized UI labels for the same fields live in the messages namespace.
  */
 const EXPERIMENT_FIELD_OVERLAY = {
   name: {

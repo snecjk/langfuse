@@ -14,6 +14,8 @@ import {
   type ExperimentFilterOptions,
   type ExperimentFilterTarget,
 } from "./experimentFilterTypes";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 export function ExperimentFilterSidebarView({
   filters,
@@ -36,6 +38,7 @@ export function ExperimentFilterSidebarView({
   );
   const activeOnlyId = useId();
   const filterBlocks = prepareFilterBlocks(filters);
+  const t = useTranslation(experimentMessages);
 
   function handleOpen() {
     onOpenChange(true);
@@ -54,7 +57,7 @@ export function ExperimentFilterSidebarView({
       <div className="flex h-full justify-center pt-2">
         <IconButton
           icon={Filter}
-          label="Open filters"
+          label={t("openFilters")}
           size="md"
           onClick={handleOpen}
         />
@@ -64,7 +67,7 @@ export function ExperimentFilterSidebarView({
   return (
     <>
       <aside
-        aria-label="Experiment filters"
+        aria-label={t("experimentFiltersAria")}
         className={cn(
           "flex min-w-0 flex-col",
           layout === "panel" && "h-full overflow-hidden",
@@ -73,11 +76,12 @@ export function ExperimentFilterSidebarView({
         {layout === "panel" && (
           <div className="flex items-center justify-between gap-2 border-b p-3">
             <span className="text-sm font-bold">
-              Filters{filters.length > 0 && ` (${filters.length})`}
+              {t("filtersLabel")}
+              {filters.length > 0 && ` (${filters.length})`}
             </span>
             <IconButton
               icon={PanelLeftClose}
-              label="Collapse filters"
+              label={t("collapseFilters")}
               size="sm"
               onClick={handleCollapse}
             />
@@ -99,11 +103,11 @@ export function ExperimentFilterSidebarView({
                 checked={showOnlyActive}
                 onCheckedChange={handleActiveOnlyChange}
               />
-              Show only active
+              {t("showOnlyActive")}
             </label>
             {filters.length > 0 && (
               <Button
-                text="Clear all"
+                text={t("clearAll")}
                 variant="ghost"
                 size="sm"
                 onClick={onClearAll}
@@ -114,7 +118,7 @@ export function ExperimentFilterSidebarView({
             <div role="alert" className="flex flex-col gap-2 text-xs">
               <p>{optionsError}</p>
               <Button
-                text="Retry options"
+                text={t("retryOptions")}
                 variant="secondary"
                 size="sm"
                 onClick={onRetryOptions}
@@ -123,7 +127,7 @@ export function ExperimentFilterSidebarView({
           )}
           {filters.length === 0 && (
             <p className="text-muted-foreground py-3 text-center text-xs">
-              No active filters.
+              {t("noActiveFilters")}
             </p>
           )}
           {filterBlocks.map(({ filter, index, key }) => (

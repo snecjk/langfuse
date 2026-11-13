@@ -5,6 +5,8 @@ import { Button } from "@/src/components/design-system/Button/Button";
 import { PopoverController } from "@/src/components/ui/popover";
 import { ExperimentFilterCreationPopup } from "./ExperimentFilterCreationPopup";
 import { type ExperimentFilterOptions } from "./experimentFilterTypes";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 export function ExperimentFilterAddButton({
   options,
@@ -12,6 +14,7 @@ export function ExperimentFilterAddButton({
   onAdd,
   portalContainer,
 }: ExperimentFilterAddButtonProps) {
+  const t = useTranslation(experimentMessages);
   function renderContent({
     closePopover,
   }: Parameters<ComponentProps<typeof PopoverController>["renderContent"]>[0]) {
@@ -33,18 +36,17 @@ export function ExperimentFilterAddButton({
       portalContainer={portalContainer}
       renderContent={renderContent}
     >
-      {renderTrigger}
+      {({ Trigger }) => (
+        <Trigger asChild>
+          <Button
+            text={t("addFilter")}
+            icon={Plus}
+            variant="secondary"
+            size="sm"
+          />
+        </Trigger>
+      )}
     </PopoverController>
-  );
-}
-
-function renderTrigger({
-  Trigger,
-}: Parameters<ComponentProps<typeof PopoverController>["children"]>[0]) {
-  return (
-    <Trigger asChild>
-      <Button text="Add filter" icon={Plus} variant="secondary" size="sm" />
-    </Trigger>
   );
 }
 

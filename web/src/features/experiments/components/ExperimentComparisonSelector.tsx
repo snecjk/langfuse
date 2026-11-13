@@ -23,11 +23,14 @@ import {
   MAX_SELECTED_EXPERIMENTS,
   MAX_VISIBLE_COMPARISON_CHIPS,
   NO_DATASET_KEY,
-  NO_DATASET_LABEL,
-  UNNAMED_DATASET_LABEL,
 } from "@/src/features/experiments/constants/comparison";
 import { getExperimentColorStyles } from "./table/types";
 import { cn } from "@/src/utils/tailwind";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 export type ExperimentOption = Omit<ExperimentNameOption, "startTime"> & {
   /** null when an id in the URL no longer resolves to a run. */
@@ -58,10 +61,13 @@ type ComparisonRow =
 const datasetKeyOf = (option: { datasetId: string | null }) =>
   option.datasetId ?? NO_DATASET_KEY;
 
-const datasetLabelOf = (option: ExperimentOption) =>
+const datasetLabelOf = (
+  option: ExperimentOption,
+  t: ReturnType<typeof useTranslation<typeof experimentMessages>>,
+) =>
   option.datasetId === null
-    ? NO_DATASET_LABEL
-    : (option.datasetName ?? UNNAMED_DATASET_LABEL);
+    ? t("noDataset")
+    : (option.datasetName ?? t("deletedDataset"));
 
 const rowKeyOf = (row: ComparisonRow) => {
   switch (row.kind) {
@@ -106,6 +112,8 @@ export function ExperimentComparisonSelector({
   } = useExperimentSearch({
     projectId,
   });
+  const t = useTranslation(experimentMessages);
+  const locale = useInterfaceLocale();
 
   const [expandedOverrides, setExpandedOverrides] = useState<
     Record<string, boolean>
@@ -178,7 +186,7 @@ export function ExperimentComparisonSelector({
       const datasetKey = datasetKeyOf(option);
       const group = byDataset.get(datasetKey) ?? {
         datasetKey,
-        label: datasetLabelOf(option),
+        label: datasetLabelOf(option, t),
         options: [],
       };
       group.options.push(option);
@@ -195,7 +203,7 @@ export function ExperimentComparisonSelector({
         (a.options[0]?.startTime.getTime() ?? 0)
       );
     });
-  }, [searchResults, baselineDatasetKey]);
+  }, [searchResults, baselineDatasetKey, t]);
 
   const rows = useMemo(() => {
     // With no baseline yet there is no "current" dataset, so open the one
@@ -323,7 +331,7 @@ export function ExperimentComparisonSelector({
   return (
     <div className="space-y-2">
       <MultiSelectCombobox<ComparisonRow>
-        labelLeft="Compare"
+        labelLeft={t("compare")}
         selectedItems={selectedRows}
         onItemsChange={handleItemsChange}
         searchQuery={searchQuery}
@@ -333,8 +341,8 @@ export function ExperimentComparisonSelector({
         onOpenChange={handleOpenChange}
         placeholder={
           isMaxReached
-            ? `Max ${MAX_SELECTED_EXPERIMENTS} experiments`
-            : "Search experiments..."
+            ? t("maxExperiments", { count: MAX_SELECTED_EXPERIMENTS })
+            : t("searchExperiments")
         }
         disabled={isLoading}
         showSearchIcon={false}
@@ -360,9 +368,7 @@ export function ExperimentComparisonSelector({
                 <div className="border-input flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border">
                   {isAutoSelectEnabled && <Check size="sm" />}
                 </div>
-                <span className="text-xs">
-                  Auto-select a comparison experiment by default
-                </span>
+                <span className="text-xs">{t("autoSelectComparison")}</span>
               </button>
             );
           }
@@ -393,9 +399,9 @@ export function ExperimentComparisonSelector({
                 {!row.isBaselineDataset && (
                   <span
                     className="text-muted-foreground ml-auto shrink-0 text-xs italic"
-                    title="Runs on another dataset scored different items, so their values are not comparable."
+                    title={t("otherDatasetHelp")}
                   >
-                    other dataset
+                    {t("otherDataset")}
                   </span>
                 )}
               </button>
@@ -423,17 +429,17 @@ export function ExperimentComparisonSelector({
                 {option.experimentName}
               </span>
               {row.isBaseline && (
-                <Badge color="outline" size="sm" text="BASELINE" />
+                <Badge color="outline" size="sm" text={t("baselineBadge")} />
               )}
               {row.isLatest && (
-                <Badge color="outline" size="sm" text="LATEST" />
+                <Badge color="outline" size="sm" text={t("latestBadge")} />
               )}
               {option.startTime && (
                 <span
                   className="text-muted-foreground shrink-0 text-xs"
                   title={option.startTime.toLocaleString()}
                 >
-                  {formatRunRecency(option.startTime)}
+                  {formatRunRecency(option.startTime, locale)}
                 </span>
               )}
             </button>
@@ -460,7 +466,7 @@ export function ExperimentComparisonSelector({
                     <p key={hidden.experimentId}>
                       {hidden.experimentName}
                       {hidden.startTime
-                        ? ` · ${formatRunRecency(hidden.startTime)}`
+                        ? ` · ${formatRunRecency(hidden.startTime, locale)}`
                         : ""}
                     </p>
                   ))}
@@ -479,9 +485,11 @@ export function ExperimentComparisonSelector({
           const chipTitle = [
             option.experimentName,
             option.startTime
-              ? `Started ${option.startTime.toLocaleString()}`
-              : "This experiment is no longer available",
-            isOtherDataset ? `Dataset: ${datasetLabelOf(option)}` : null,
+              ? t("startedAt", { time: option.startTime.toLocaleString() })
+              : t("experimentUnavailable"),
+            isOtherDataset
+              ? t("datasetLabel", { name: datasetLabelOf(option, t) })
+              : null,
           ]
             .filter(Boolean)
             .join("\n");
@@ -509,9 +517,9 @@ export function ExperimentComparisonSelector({
               {isOtherDataset && (
                 <span
                   className="text-muted-foreground max-w-24 truncate text-[10px]"
-                  title={`Dataset: ${datasetLabelOf(option)}`}
+                  title={t("datasetLabel", { name: datasetLabelOf(option, t) })}
                 >
-                  {datasetLabelOf(option)}
+                  {datasetLabelOf(option, t)}
                 </span>
               )}
               <button
@@ -521,7 +529,9 @@ export function ExperimentComparisonSelector({
                   onRemove();
                 }}
                 className="hover:bg-muted ml-0.5 rounded-full"
-                aria-label={`Remove ${option.experimentName}`}
+                aria-label={t("removeExperiment", {
+                  name: option.experimentName,
+                })}
               >
                 <X size="sm" />
               </button>

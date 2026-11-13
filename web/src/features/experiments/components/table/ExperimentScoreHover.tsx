@@ -11,6 +11,12 @@ import { copyTextToClipboard } from "@/src/utils/clipboard";
 import { api } from "@/src/utils/api";
 import { Check, Copy, ExternalLink } from "@langfuse/icons";
 import Link from "next/link";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
+
+export type ExperimentScoreHoverT = ReturnType<
+  typeof useTranslation<typeof experimentMessages>
+>;
 
 /**
  * How one score reads in a cell: a categorical score's modal value, a numeric
@@ -44,15 +50,20 @@ export function ExperimentScoreHover({
   diff,
   projectId,
   children,
+  t: tProp,
 }: {
   scoreKey: string;
   aggregate: AggregatedScoreData | null;
   diff?: BaselineDiff | null;
   projectId: string;
   children: ReactElement<React.HTMLProps<HTMLDivElement>>;
+  /** Injected by callers that already hold a translator. */
+  t?: ExperimentScoreHoverT;
 }) {
   const { name, source, dataType } = decomposeAggregateScoreKey(scoreKey);
   const displayValue = scoreValueOf(aggregate);
+  const tOwn = useTranslation(experimentMessages);
+  const t = tProp ?? tOwn;
 
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -79,30 +90,30 @@ export function ExperimentScoreHover({
           <div className="flex flex-col gap-3">
             <span className="font-bold">{name}</span>
             <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
-              <dt className="text-muted-foreground">Value</dt>
+              <dt className="text-muted-foreground">{t("value")}</dt>
               <dd className="min-w-0">
                 {displayValue}
                 {diff?.type === "CATEGORICAL" && (
                   <span className="text-muted-foreground ml-2 whitespace-normal">
                     {diff.from
-                      ? `← Baseline: ${diff.from}`
-                      : "Varies from baseline"}
+                      ? t("baselinePrefix", { value: diff.from })
+                      : t("variesFromBaseline")}
                   </span>
                 )}
               </dd>
-              <dt className="text-muted-foreground">Source</dt>
+              <dt className="text-muted-foreground">{t("source")}</dt>
               <dd className="capitalize">{source.toLowerCase()}</dd>
-              <dt className="text-muted-foreground">Type</dt>
+              <dt className="text-muted-foreground">{t("type")}</dt>
               <dd className="capitalize">{dataType.toLowerCase()}</dd>
             </dl>
             {aggregate?.comment && (
               <div>
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Comment</span>
+                  <span className="text-muted-foreground">{t("comment")}</span>
                   <Button
                     variant="ghost"
                     size="sm"
-                    text={copied ? "Copied" : "Copy comment"}
+                    text={copied ? t("copied") : t("copyComment")}
                     icon={copied ? Check : Copy}
                     onClick={async () => {
                       await copyTextToClipboard(aggregate.comment!);
@@ -116,8 +127,10 @@ export function ExperimentScoreHover({
             )}
             {aggregate?.hasMetadata && aggregate.id && (
               <div className="flex flex-col gap-1">
-                <span className="text-muted-foreground">Metadata</span>
-                {isError && <p>Could not load metadata.</p>}
+                <span className="text-muted-foreground">
+                  {t("metadataLabel")}
+                </span>
+                {isError && <p>{t("couldNotLoadMetadata")}</p>}
                 {!isError && metadata !== undefined && (
                   <JSONView json={metadata} />
                 )}
@@ -134,7 +147,7 @@ export function ExperimentScoreHover({
                 className="flex items-center gap-1 hover:underline"
               >
                 <ExternalLink size="sm" />
-                View execution trace
+                {t("viewExecutionTrace")}
               </Link>
             )}
           </div>

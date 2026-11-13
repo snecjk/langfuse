@@ -13,6 +13,13 @@ import {
   completeExperimentFilter,
   experimentFilterToDraft,
 } from "../components/filters/experimentFilterEditing";
+import { translate } from "@/src/features/i18n/messages";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
+
+type ExperimentMessageKey = Extract<keyof typeof experimentMessages.en, string>;
+
+const t = (key: ExperimentMessageKey) =>
+  translate("en", experimentMessages, key);
 
 describe("experiment item search contract", () => {
   it("lowers root/trace score conditions to the same canonical columns as the sidebar", () => {
@@ -98,6 +105,7 @@ describe("experiment filter targets", () => {
       experimentIds: ["run-b", "run-a"],
       experiments: runs,
       colorExperimentIds: ["run-a", "run-b"],
+      t,
     }),
   });
 

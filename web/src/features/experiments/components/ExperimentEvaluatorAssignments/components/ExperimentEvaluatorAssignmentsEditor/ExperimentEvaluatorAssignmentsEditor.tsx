@@ -12,6 +12,8 @@ import type {
   RuleEvaluatorOption,
 } from "@/src/features/evals/v2/types/rules";
 import type { ExperimentEvaluatorAssignmentsHandle } from "@/src/features/experiments/components/ExperimentEvaluatorAssignments/types/experimentEvaluatorAssignmentsHandle";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 export const ExperimentEvaluatorAssignmentsEditor = forwardRef<
   ExperimentEvaluatorAssignmentsHandle,
@@ -40,9 +42,10 @@ export const ExperimentEvaluatorAssignmentsEditor = forwardRef<
   },
   ref,
 ) {
+  const t = useTranslation(experimentMessages);
   const [store] = useState(() =>
     createRuleSetupStore({
-      name: "Experiment evaluators",
+      name: t("experimentEvaluators"),
       filter: [],
       sampling: 1,
       assignments: initialAssignments,
@@ -79,8 +82,8 @@ export const ExperimentEvaluatorAssignmentsEditor = forwardRef<
         estimatingEvaluatorIds={[]}
         footerTrailing={null}
         pickerWidth="trigger"
-        emptyDescription="Attach an evaluator to score experiments on this dataset."
-        sourceUnavailableMessage="No dataset item is available to validate JSON paths."
+        emptyDescription={t("attachEvaluator")}
+        sourceUnavailableMessage={t("noSampleItem")}
         disabled={disabled}
       />
       {showSaveButton ? (
@@ -95,7 +98,7 @@ export const ExperimentEvaluatorAssignmentsEditor = forwardRef<
               });
             }}
           >
-            Save
+            {t("save")}
           </Button>
         </div>
       ) : null}

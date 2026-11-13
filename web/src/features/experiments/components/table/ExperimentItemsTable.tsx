@@ -126,6 +126,10 @@ import { resolveExperimentPeekTarget } from "@/src/features/experiments/fns/reso
 import { useTranslation } from "@/src/features/i18n/I18nProvider";
 import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
+type ExperimentItemsT = ReturnType<
+  typeof useTranslation<typeof experimentMessages>
+>;
+
 /**
  * A row on its way into the peek, carrying which experiment's cell was
  * clicked. Absent for a click on the row itself, which still opens the
@@ -391,11 +395,17 @@ const matchesExpectedOutput = (
   return mayBeTruncated ? null : true;
 };
 
-const ExpectedMatchChip = ({ matches }: { matches: boolean }) => (
+const ExpectedMatchChip = ({
+  matches,
+  t,
+}: {
+  matches: boolean;
+  t: ExperimentItemsT;
+}) => (
   <span className="mt-0.5 ml-1 inline-flex shrink-0">
     <Badge
       color={matches ? "success" : "error"}
-      text={matches ? "match" : "differs"}
+      text={matches ? t("match") : t("differs")}
     />
   </span>
 );
@@ -413,6 +423,7 @@ const StackedOutputCell = ({
   expectedOutput,
   row,
   onExperimentClick,
+  t,
 }: {
   outputs: ExperimentOutputData[];
   allExperimentIds: string[];
@@ -428,6 +439,7 @@ const StackedOutputCell = ({
   row?: ExperimentItemsTableRow;
   /** Clicking one experiment's line opens that run, not the row's baseline. */
   onExperimentClick?: ExperimentCellClickHandler;
+  t: ExperimentItemsT;
 }) => {
   const outputsByExperimentId = useMemo(
     () => new Map(outputs.map((out) => [out.experimentId, out])),
@@ -447,7 +459,7 @@ const StackedOutputCell = ({
         <div className="flex min-h-0 items-start overflow-hidden py-0.5 pr-1 pl-1.5">
           <div className="flex h-full min-h-0 min-w-0 items-start">
             <span className="text-muted-foreground mt-0.5 mr-1 shrink-0 text-[10px] font-bold uppercase">
-              Exp
+              {t("exp")}
             </span>
             <ConnectedIOTableCell
               isLoading={false}
@@ -505,7 +517,7 @@ const StackedOutputCell = ({
                 singleLine={singleLine}
                 chip={
                   expectedMatch === null ? undefined : (
-                    <ExpectedMatchChip matches={expectedMatch} />
+                    <ExpectedMatchChip matches={expectedMatch} t={t} />
                   )
                 }
               />
@@ -791,10 +803,10 @@ export default function ExperimentItemsTable({
         ),
         scoreColumnKey: "observationScores",
         displayFormat: "smart",
-        headerPrefix: "Observation",
+        headerPrefix: t("observation"),
         rawKey: true,
       }),
-    [scoreColumnDefs.observationScoreColumns, presentScoreKeys?.observation],
+    [scoreColumnDefs.observationScoreColumns, presentScoreKeys?.observation, t],
   );
 
   const traceScoreColumns = useMemo(
@@ -806,10 +818,10 @@ export default function ExperimentItemsTable({
         ),
         scoreColumnKey: "traceScores",
         displayFormat: "smart",
-        prefix: "Trace",
+        prefix: t("trace"),
         rawKey: true,
       }),
-    [scoreColumnDefs.traceScoreColumns, presentScoreKeys?.trace],
+    [scoreColumnDefs.traceScoreColumns, presentScoreKeys?.trace, t],
   );
 
   // Use the shared loading state for both sidebar and columns
@@ -978,7 +990,10 @@ export default function ExperimentItemsTable({
       scoreField: "observationScores" | "traceScores",
     ): LangfuseColumnDef<ExperimentItemsTableRow>[] =>
       scoreColumns.map((scoreCol) => {
-        const key = scoreCol.accessorKey?.replace(`Trace-`, "");
+        // The accessor key carries the level prefix (`{level}-{key}`), which is
+        // translated at runtime; strip whatever prefix the column was built
+        // with by matching the column's own id structure rather than a literal.
+        const key = scoreCol.accessorKey?.replace(/^(Trace|Observation)-/, "");
         const summaries = key
           ? scoreColumnSummaries[scoreField].get(key)
           : undefined;
@@ -1073,8 +1088,10 @@ export default function ExperimentItemsTable({
               ? experiments.find((exp) => exp.experimentId === baselineId)
               : undefined;
             const baselineScoresData = baselineExperiment?.[scoreField] ?? null;
-            // todo: fix properly
-            const scoreKey = scoreCol.accessorKey?.replace(`Trace-`, "");
+            const scoreKey = scoreCol.accessorKey?.replace(
+              /^(Trace|Observation)-/,
+              "",
+            );
             return (
               <StackedExperimentCell
                 experiments={experiments}
@@ -1204,7 +1221,7 @@ export default function ExperimentItemsTable({
   const traceScoreOrder = useMemo(
     () =>
       traceScoreColumns
-        .map((col) => col.accessorKey?.replace(/^Trace-/, ""))
+        .map((col) => col.accessorKey?.replace(/^(Trace|Observation)-/, ""))
         .filter((key): key is string => typeof key === "string"),
     [traceScoreColumns],
   );
@@ -1354,6 +1371,7 @@ export default function ExperimentItemsTable({
                   ? (row.original.expectedOutput ?? undefined)
                   : undefined
               }
+              t={t}
             />
           );
         },
@@ -1549,7 +1567,7 @@ export default function ExperimentItemsTable({
       scoreCols.flatMap((scoreCol) => {
         const accessorKey = scoreCol.accessorKey;
         if (!accessorKey || columnVisibility[accessorKey] === false) return [];
-        const scoreKey = accessorKey.replace(/^Trace-/, "");
+        const scoreKey = accessorKey.replace(/^(Trace|Observation)-/, "");
         const dataType =
           scoreDataTypesByKey[scoreFieldForLevel(level)].get(scoreKey);
         if (!dataType) return [];

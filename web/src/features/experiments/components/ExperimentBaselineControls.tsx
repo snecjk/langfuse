@@ -7,14 +7,15 @@ import {
 import { X } from "@langfuse/icons";
 import { useExperimentNames } from "@/src/features/experiments/hooks/useExperimentNames";
 import { formatRunRecency } from "@/src/features/experiments/fns/formatRunRecency";
-import {
-  NO_DATASET_KEY,
-  NO_DATASET_LABEL,
-  UNNAMED_DATASET_LABEL,
-} from "@/src/features/experiments/constants/comparison";
+import { NO_DATASET_KEY } from "@/src/features/experiments/constants/comparison";
 import { cn } from "@/src/utils/tailwind";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
 import { baselineChangedProps } from "@/src/features/experiments/lib/analytics";
+import {
+  useTranslation,
+  useInterfaceLocale,
+} from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 type ExperimentBaselineControlsProps = {
   projectId: string;
@@ -35,6 +36,8 @@ export function ExperimentBaselineControls({
     projectId,
   });
   const capture = usePostHogClientCapture();
+  const locale = useInterfaceLocale();
+  const t = useTranslation(experimentMessages);
 
   // `baseline_changed` fires from the two paths through this control — picking a
   // run and clearing it. Arriving on the page with a baseline already set (a row
@@ -52,20 +55,20 @@ export function ExperimentBaselineControls({
       const group = byDataset.get(datasetKey) ?? {
         heading:
           experiment.datasetId === null
-            ? NO_DATASET_LABEL
-            : (experiment.datasetName ?? UNNAMED_DATASET_LABEL),
+            ? t("noDataset")
+            : (experiment.datasetName ?? t("deletedDataset")),
         options: [],
       };
       group.options.push({
         value: experiment.experimentId,
         label: experiment.experimentName,
-        badge: formatRunRecency(experiment.startTime),
+        badge: formatRunRecency(experiment.startTime, locale),
       });
       byDataset.set(datasetKey, group);
     }
 
     return [...byDataset.values()];
-  }, [experimentNames]);
+  }, [experimentNames, locale, t]);
 
   return (
     <div className="flex min-w-0 items-center">
@@ -84,9 +87,11 @@ export function ExperimentBaselineControls({
             );
             onBaselineChange(id);
           }}
-          placeholder={baselineName ?? baselineId ?? "Select baseline..."}
-          emptyText="No experiments found"
-          searchPlaceholder="Search experiments..."
+          placeholder={
+            baselineName ?? baselineId ?? t("selectBaselinePlaceholder")
+          }
+          emptyText={t("noExperimentsFound")}
+          searchPlaceholder={t("searchExperiments")}
           disabled={isLoading}
           className={cn(
             "rounded-l-none border-l-0",
@@ -111,8 +116,8 @@ export function ExperimentBaselineControls({
             onBaselineClear();
           }}
           disabled={isLoading}
-          title="Clear baseline"
-          aria-label="Clear baseline"
+          title={t("clearBaseline")}
+          aria-label={t("clearBaseline")}
         >
           <X size="base" color="default" />
         </Button>

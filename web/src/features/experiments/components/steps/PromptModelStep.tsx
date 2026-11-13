@@ -37,6 +37,8 @@ import { type PromptModelStepProps } from "@/src/features/experiments/types/step
 import { StepHeader } from "@/src/features/experiments/components/shared/StepHeader";
 import { toPromptLabelListItems } from "@/src/features/prompts/utils";
 import { LabelList } from "@/src/components/design-system/LabelList/LabelList";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 export const PromptModelStep: React.FC<PromptModelStepProps> = ({
   projectId,
@@ -71,6 +73,7 @@ export const PromptModelStep: React.FC<PromptModelStepProps> = ({
   const [selectedSchema, setSelectedSchema] = useState<LlmSchema | null>(null);
   const [schemaPopoverOpen, setSchemaPopoverOpen] = useState(false);
   const [schemaDialogOpen, setSchemaDialogOpen] = useState(false);
+  const t = useTranslation(experimentMessages);
   const [schemaDialogRequest, setSchemaDialogRequest] = useState<{
     id: number;
     existingLlmSchema: LlmSchema | null;
@@ -124,8 +127,8 @@ export const PromptModelStep: React.FC<PromptModelStepProps> = ({
   return (
     <div className="space-y-6">
       <StepHeader
-        title="Prompt & Model Configuration"
-        description="Select the prompt version and configure the model parameters for your experiment."
+        title={t("promptModelTitle")}
+        description={t("promptModelHelp")}
       />
 
       <FormField
@@ -133,7 +136,7 @@ export const PromptModelStep: React.FC<PromptModelStepProps> = ({
         name="promptId"
         render={() => (
           <FormItem>
-            <FormLabel>Prompt</FormLabel>
+            <FormLabel>{t("prompt")}</FormLabel>
             <div className="mb-2 flex gap-2">
               <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
@@ -144,7 +147,7 @@ export const PromptModelStep: React.FC<PromptModelStepProps> = ({
                     aria-expanded={open}
                     className="w-2/3 justify-between gap-2 px-2 font-normal"
                   >
-                    {selectedPromptName || "Select a prompt"}
+                    {selectedPromptName || t("selectPrompt")}
                     <DropdownIndicator />
                   </Button>
                 </PopoverTrigger>
@@ -154,12 +157,14 @@ export const PromptModelStep: React.FC<PromptModelStepProps> = ({
                 >
                   <InputCommand>
                     <InputCommandInput
-                      placeholder="Search prompts..."
+                      placeholder={t("searchPrompts")}
                       className="h-9"
                       variant="bottom"
                     />
                     <InputCommandList>
-                      <InputCommandEmpty>No prompt found.</InputCommandEmpty>
+                      <InputCommandEmpty>
+                        {t("noPromptFound")}
+                      </InputCommandEmpty>
                       <InputCommandGroup>
                         {promptsByName &&
                           Object.entries(promptsByName).map(
@@ -205,8 +210,8 @@ export const PromptModelStep: React.FC<PromptModelStepProps> = ({
                     className="w-1/3 justify-between gap-2 px-2 font-normal"
                   >
                     {selectedPromptVersion
-                      ? `Version ${selectedPromptVersion}`
-                      : "Version"}
+                      ? t("versionValue", { version: selectedPromptVersion })
+                      : t("version")}
                     <DropdownIndicator />
                   </Button>
                 </PopoverTrigger>
@@ -216,11 +221,13 @@ export const PromptModelStep: React.FC<PromptModelStepProps> = ({
                 >
                   <InputCommand>
                     <InputCommandInput
-                      placeholder="Search versions..."
+                      placeholder={t("searchVersions")}
                       className="h-9"
                     />
                     <InputCommandList>
-                      <InputCommandEmpty>No version found.</InputCommandEmpty>
+                      <InputCommandEmpty>
+                        {t("noVersionFound")}
+                      </InputCommandEmpty>
                       <InputCommandGroup className="overflow-y-auto">
                         {promptsByName &&
                         selectedPromptName &&
@@ -236,7 +243,9 @@ export const PromptModelStep: React.FC<PromptModelStepProps> = ({
                             >
                               <div className="flex min-w-0 flex-1 items-center gap-2">
                                 <span className="shrink-0">
-                                  Version {prompt.version}
+                                  {t("versionValue", {
+                                    version: prompt.version,
+                                  })}
                                 </span>
                                 {prompt.labels.length > 0 && (
                                   <div className="min-w-0">
@@ -262,7 +271,7 @@ export const PromptModelStep: React.FC<PromptModelStepProps> = ({
                           ))
                         ) : (
                           <InputCommandItem disabled>
-                            No versions available
+                            {t("noVersionsAvailable")}
                           </InputCommandItem>
                         )}
                       </InputCommandGroup>
@@ -274,8 +283,7 @@ export const PromptModelStep: React.FC<PromptModelStepProps> = ({
             {selectedPromptToolConfig.status === "invalid" && (
               <p className="text-dark-yellow flex items-center gap-1.5 text-sm">
                 <TriangleAlert size="base" />
-                Invalid tool config detected on this prompt version. Its tools
-                will be ignored when running the experiment.
+                {t("invalidToolConfig")}
               </p>
             )}
             <FormMessage />
@@ -289,7 +297,7 @@ export const PromptModelStep: React.FC<PromptModelStepProps> = ({
         render={() => (
           <FormItem>
             <ModelParameters
-              customHeader={<FormLabel>Model</FormLabel>}
+              customHeader={<FormLabel>{t("model")}</FormLabel>}
               {...{
                 modelParams,
                 availableModels,
@@ -321,7 +329,7 @@ export const PromptModelStep: React.FC<PromptModelStepProps> = ({
         render={({ field }) => (
           <FormItem>
             <div className="flex items-center justify-between">
-              <FormLabel>Structured output (optional)</FormLabel>
+              <FormLabel>{t("structuredOutput")}</FormLabel>
               <Switch
                 checked={structuredOutputEnabled}
                 onCheckedChange={handleToggleStructuredOutput}
@@ -344,7 +352,7 @@ export const PromptModelStep: React.FC<PromptModelStepProps> = ({
                           aria-expanded={schemaPopoverOpen}
                           className="flex-1 justify-between gap-2 px-2 font-normal"
                         >
-                          {selectedSchema?.name || "Select schema"}
+                          {selectedSchema?.name || t("selectSchema")}
                           <DropdownIndicator />
                         </Button>
                       </PopoverTrigger>
@@ -354,13 +362,13 @@ export const PromptModelStep: React.FC<PromptModelStepProps> = ({
                       >
                         <InputCommand>
                           <InputCommandInput
-                            placeholder="Search schemas..."
+                            placeholder={t("searchSchemas")}
                             className="h-9"
                             variant="bottom"
                           />
                           <InputCommandList>
                             <InputCommandEmpty>
-                              No schema found.
+                              {t("noSchemaFound")}
                             </InputCommandEmpty>
                             <InputCommandGroup>
                               {savedSchemas.data.map((schema) => (
@@ -397,7 +405,9 @@ export const PromptModelStep: React.FC<PromptModelStepProps> = ({
                       <Button
                         variant="ghost"
                         size="icon"
-                        aria-label={`View schema ${selectedSchema.name}`}
+                        aria-label={t("viewSchema", {
+                          name: selectedSchema.name,
+                        })}
                         onClick={() => openSchemaDialog(selectedSchema)}
                       >
                         <EyeIcon size="base" color="default" />
@@ -415,7 +425,7 @@ export const PromptModelStep: React.FC<PromptModelStepProps> = ({
                       color="default"
                       __rawClassName="mr-2"
                     />
-                    Add schema
+                    {t("addSchema")}
                   </Button>
                 )}
                 {schemaDialogRequest && (
@@ -450,8 +460,8 @@ export const PromptModelStep: React.FC<PromptModelStepProps> = ({
               {hasToolStructuredOutputConflict
                 ? PROMPT_TOOL_STRUCTURED_OUTPUT_CONFLICT_MESSAGE
                 : structuredOutputEnabled
-                  ? "Configure the schema for structured LLM outputs"
-                  : "Enable to enforce a specific output format"}
+                  ? t("configureSchema")
+                  : t("enableStructuredOutput")}
             </CardDescription>
             <FormMessage />
           </FormItem>

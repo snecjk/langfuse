@@ -2,13 +2,21 @@ import { type ExperimentFilterOptions } from "./experimentFilterTypes";
 import {
   completeExperimentFilter,
   EXPERIMENT_FILTER_KINDS,
+  experimentFilterKindLabel,
   newExperimentFilterDraft,
   type ExperimentFilterDraft,
 } from "./experimentFilterEditing";
+import { type useTranslation } from "@/src/features/i18n/I18nProvider";
+import { type experimentMessages } from "@/src/features/i18n/messages/experiments";
+
+type FilterCreationT = ReturnType<
+  typeof useTranslation<typeof experimentMessages>
+>;
 
 export function experimentFilterCreationChoices(
   options: ExperimentFilterOptions | undefined,
   optionsError: string | null,
+  t: FilterCreationT,
 ) {
   return EXPERIMENT_FILTER_KINDS.map(function prepareChoice(kind) {
     const draft = prepareDefaultDraft(kind.column, options);
@@ -16,9 +24,10 @@ export function experimentFilterCreationChoices(
     const filter = completeExperimentFilter(draft);
     return {
       ...kind,
+      label: experimentFilterKindLabel(kind.column, t),
       filter,
       metadataColumn,
-      description: describeDefault(draft, options, optionsError),
+      description: describeDefault(draft, options, optionsError, t),
       levels: defaultScoreLevels(draft, options),
       isDisabled: !metadataColumn && !filter,
     };
@@ -70,8 +79,9 @@ function describeDefault(
   draft: ExperimentFilterDraft,
   options: ExperimentFilterOptions | undefined,
   optionsError: string | null,
+  t: FilterCreationT,
 ): string {
-  if (draft.type === "stringObject") return "Choose a key · is set";
+  if (draft.type === "stringObject") return t("chooseKeyIsSet");
   if (draft.column === "level") return "DEFAULT";
   if (completeExperimentFilter(draft)) {
     const value = Array.isArray(draft.value)
@@ -79,8 +89,8 @@ function describeDefault(
       : draft.value;
     return `${draft.key} ${draft.operator} ${value}`;
   }
-  if (optionsError) return "Score options unavailable";
-  return options ? "No scores of this type" : "Loading scores…";
+  if (optionsError) return t("scoreOptionsUnavailable");
+  return options ? t("noScoresOfType") : t("loadingScoresFilter");
 }
 
 function defaultScoreLevels(

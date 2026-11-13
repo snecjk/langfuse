@@ -16,6 +16,8 @@ import { type EvaluatorsStepProps } from "@/src/features/experiments/types/stepP
 import { StepHeader } from "@/src/features/experiments/components/shared/StepHeader";
 import { ExperimentEvaluatorAssignments } from "@/src/features/experiments/components/ExperimentEvaluatorAssignments/ExperimentEvaluatorAssignments";
 import { Skeleton } from "@/src/components/ui/skeleton";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 export const EvaluatorsStep: React.FC<EvaluatorsStepProps> = ({
   projectId,
@@ -26,6 +28,7 @@ export const EvaluatorsStep: React.FC<EvaluatorsStepProps> = ({
   permissions,
 }) => {
   const { hasEvalReadAccess, hasEvalWriteAccess } = permissions;
+  const t = useTranslation(experimentMessages);
   const legacyEvaluatorState =
     evaluatorState.version === "legacy" ? evaluatorState : undefined;
   const evalTemplate = useEvaluatorFormTemplate({
@@ -37,17 +40,17 @@ export const EvaluatorsStep: React.FC<EvaluatorsStepProps> = ({
   return (
     <div className="space-y-6">
       <StepHeader
-        title="Evaluators (Optional)"
+        title={t("evaluatorsOptional")}
         description={
           evaluatorState.version === "v2"
-            ? "Choose evaluators to score experiment results and review their variable mappings."
-            : "Configure evaluators to automatically score experiment results. You can add multiple evaluators to assess different aspects of your LLM outputs."
+            ? t("evaluatorsHelpV2")
+            : t("evaluatorsHelpLegacy")
         }
       />
 
       <FormItem className="space-y-3">
         {evaluatorState.version === "legacy" ? (
-          <FormLabel>Evaluators</FormLabel>
+          <FormLabel>{t("evaluators")}</FormLabel>
         ) : null}
         {hasEvalReadAccess && datasetId ? (
           evaluatorState.version === "v2" ? (
@@ -81,8 +84,8 @@ export const EvaluatorsStep: React.FC<EvaluatorsStepProps> = ({
         ) : (
           <p className="text-muted-foreground text-sm">
             {!hasEvalReadAccess
-              ? "You don't have permission to manage evaluators"
-              : "Please select a dataset first to configure evaluators"}
+              ? t("noEvaluatorPermission")
+              : t("selectDatasetFirst")}
           </p>
         )}
         <FormMessage />
@@ -104,9 +107,8 @@ export const EvaluatorsStep: React.FC<EvaluatorsStepProps> = ({
               <DialogHeader>
                 <DialogTitle>
                   {evaluatorState.selectedEvaluatorData.evaluator.id
-                    ? "Edit"
-                    : "Configure"}{" "}
-                  Evaluator
+                    ? t("editEvaluator")
+                    : t("configureEvaluator")}
                 </DialogTitle>
               </DialogHeader>
               <EvaluatorForm

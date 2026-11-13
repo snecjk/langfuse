@@ -23,7 +23,14 @@ type ValidationResult =
     }
   | {
       isValid: false;
+      reason?:
+        | "prompt-not-found"
+        | "prompt-unresolved"
+        | "no-variables"
+        | "empty-dataset"
+        | "variable-mismatch";
       message: string;
+      variables?: string[];
     }
   | undefined;
 

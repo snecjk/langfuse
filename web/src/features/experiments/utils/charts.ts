@@ -115,6 +115,10 @@ const LEVEL_SORT_ORDER: ScoreLevel[] = ["obs", "experiment"];
  */
 export function buildMetricOptions(
   scoreFilterOptions: ScoreFilterOptions,
+  t?: (
+    key: "costLabel" | "latencyLabel",
+    parameters?: Readonly<Record<string, string | number>>,
+  ) => string,
 ): MetricOption[] {
   const scoreOptions = Object.values(SCORE_METRIC_SPECS).flatMap(
     ({ level, dataType, filterKey }) => {
@@ -154,12 +158,12 @@ export function buildMetricOptions(
   return [
     {
       id: BASE_CHART_IDS.COST,
-      label: "Cost ($)",
+      label: t ? t("costLabel") : "Cost ($)",
       group: "Base Metrics",
     },
     {
       id: BASE_CHART_IDS.LATENCY,
-      label: "Latency (ms)",
+      label: t ? t("latencyLabel") : "Latency (ms)",
       group: "Base Metrics",
     },
     ...scoreOptions,

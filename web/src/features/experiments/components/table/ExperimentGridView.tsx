@@ -28,6 +28,12 @@ import { type DataTablePeekViewProps } from "@/src/components/table/peek";
 
 import { useHasProjectAccess } from "@/src/features/rbac/utils/checkProjectAccess";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
+
+export type ExperimentT = ReturnType<
+  typeof useTranslation<typeof experimentMessages>
+>;
 
 // Grid view row heights (matching DatasetCompareRunsTable)
 export const GRID_VIEW_ROW_HEIGHTS = {
@@ -113,6 +119,7 @@ export const ExperimentGridView = ({
 }: ExperimentGridViewProps) => {
   const canAnnotate = useHasProjectAccess({ projectId, scope: "scores:save" });
   const capture = usePostHogClientCapture();
+  const t = useTranslation(experimentMessages);
   const [summaryExpanded, setSummaryExpanded] = useState(true);
   // Keep the explicit baseline separate from the comparison list. A baseline
   // is optional, so c-only URLs render every selected experiment here.
@@ -167,7 +174,7 @@ export const ExperimentGridView = ({
               </span>
               {useExperimentColors && (
                 <ExperimentRunBadge colorClass={colorStyles?.badgeClass} strong>
-                  {isBaseline ? "Baseline" : "Comp"}
+                  {isBaseline ? t("baseline") : t("comp")}
                 </ExperimentRunBadge>
               )}
             </div>
@@ -240,6 +247,7 @@ export const ExperimentGridView = ({
               }
               columnVisibility={columnVisibility}
               markerClassName={colorStyles?.markerClass}
+              t={t}
               onAnnotate={
                 canAnnotate &&
                 peekView?.openPeek &&
@@ -297,6 +305,7 @@ export const ExperimentGridView = ({
     peekView,
     canAnnotate,
     capture,
+    t,
   ]);
 
   // Build all columns: Select, Input, Expected Output, then experiment columns
@@ -308,7 +317,7 @@ export const ExperimentGridView = ({
         : []),
       {
         accessorKey: "input",
-        header: "Input",
+        header: t("input"),
         headerClassName: "align-top pt-3",
         cellPadding: "none",
         size: 200,
@@ -326,6 +335,7 @@ export const ExperimentGridView = ({
             input={row.original.input}
             isLoading={ioLoading}
             singleLine={singleLine}
+            t={t}
           />
         ),
       },
@@ -335,7 +345,7 @@ export const ExperimentGridView = ({
         ? [
             createIOTableColumn<ExperimentItemsTableRow>({
               accessorKey: "expectedOutput",
-              header: "Expected Output",
+              header: t("expectedOutput"),
               headerClassName: "align-top pt-3",
               size: 200,
               getCell: (value) =>
@@ -357,6 +367,7 @@ export const ExperimentGridView = ({
       selectActionColumn,
       showExpectedOutput,
       singleLine,
+      t,
     ],
   );
 

@@ -4,6 +4,8 @@ import { type ExperimentItemScoreFilterOptions } from "../../types/charts";
 export type ExperimentFilterTarget = {
   id: string;
   label: string;
+  /** Localized display label; falls back to the canonical label. */
+  displayLabel?: string;
   textClassName?: string;
 };
 

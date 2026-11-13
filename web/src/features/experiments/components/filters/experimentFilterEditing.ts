@@ -1,5 +1,11 @@
 import { singleFilter, type FilterState } from "@langfuse/shared";
+import { type useTranslation } from "@/src/features/i18n/I18nProvider";
+import { type experimentMessages } from "@/src/features/i18n/messages/experiments";
 
+type FilterKindT = ReturnType<typeof useTranslation<typeof experimentMessages>>;
+
+// The English `label` values are the untranslated source strings; the UI
+// resolves the localized label via `experimentFilterKindLabel` at render time.
 export const EXPERIMENT_FILTER_KINDS = [
   { column: "level", type: "stringOptions", label: "Status" },
   { column: "scores_avg", type: "numberObject", label: "Numeric score" },
@@ -12,6 +18,32 @@ export const EXPERIMENT_FILTER_KINDS = [
   { column: "itemMetadata", type: "stringObject", label: "Item metadata" },
   { column: "eventMetadata", type: "stringObject", label: "Metadata" },
 ] as const;
+
+const FILTER_KIND_LABEL_KEYS: Record<
+  (typeof EXPERIMENT_FILTER_KINDS)[number]["column"],
+  | "statusFilterLabel"
+  | "numericScoreLabel"
+  | "categoricalScoreLabel"
+  | "booleanScoreLabel"
+  | "itemMetadataLabel"
+  | "metadataLabel2"
+> = {
+  level: "statusFilterLabel",
+  scores_avg: "numericScoreLabel",
+  score_categories: "categoricalScoreLabel",
+  score_booleans: "booleanScoreLabel",
+  itemMetadata: "itemMetadataLabel",
+  eventMetadata: "metadataLabel2",
+};
+
+export function experimentFilterKindLabel(
+  column: string,
+  t: FilterKindT,
+): string {
+  const kind = EXPERIMENT_FILTER_KINDS.find((entry) => entry.column === column);
+  if (!kind) return column;
+  return t(FILTER_KIND_LABEL_KEYS[kind.column]);
+}
 
 export type ExperimentFilterDraft = {
   column: string;

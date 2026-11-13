@@ -1,6 +1,8 @@
 import { api, type RouterOutputs } from "@/src/utils/api";
 import { useMemo } from "react";
 import { type ExperimentItemScoreFilterOptions } from "@/src/features/experiments/types/charts";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 const EXPERIMENT_ITEM_LEVEL_OPTIONS = ["DEBUG", "DEFAULT", "WARNING", "ERROR"];
 
@@ -12,6 +14,7 @@ export const useExperimentItemsFilterOptions = ({
   projectId: string;
   experimentIds: string[];
 }) => {
+  const t = useTranslation(experimentMessages);
   const filterOptions = api.experiments.itemsFilterOptions.useQuery(
     { projectId, experimentIds },
     {
@@ -43,9 +46,7 @@ export const useExperimentItemsFilterOptions = ({
     filterOptions: transformedOptions,
     scoreColumns,
     isLoading: filterOptions.isLoading,
-    error: filterOptions.isError
-      ? "Score filter options could not be loaded. Retry to edit score filters."
-      : null,
+    error: filterOptions.isError ? t("scoreFilterOptionsError") : null,
     retry,
   };
 };

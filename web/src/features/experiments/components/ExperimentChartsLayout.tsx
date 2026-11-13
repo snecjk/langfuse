@@ -20,6 +20,8 @@ import {
 } from "@/src/features/experiments/types/charts";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
 import { chartMetricChangedProps } from "@/src/features/experiments/lib/analytics";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 const PANEL_IDS = ["charts", "table"];
 type Props = {
@@ -62,6 +64,7 @@ function ChartsLayout({
   const { charts, canAdd, addChart, removeChart, updateChart } =
     useExperimentCharts({ projectId, availableMetricOptions, scoreCoverage });
   const capture = usePostHogClientCapture();
+  const t = useTranslation(experimentMessages);
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
     id: `experiment-charts-size-${projectId}`,
     panelIds: PANEL_IDS,
@@ -69,10 +72,10 @@ function ChartsLayout({
   });
   const isLoading = isExternalLoading || isMetricOptionsLoading;
   const addChartTitle = (() => {
-    if (canAdd) return "Add chart";
+    if (canAdd) return t("addChart");
     if (charts.length >= MAX_EXPERIMENT_CHARTS)
-      return `Maximum of ${MAX_EXPERIMENT_CHARTS} charts`;
-    return "All available metrics are already shown";
+      return t("maxCharts", { count: MAX_EXPERIMENT_CHARTS });
+    return t("allMetricsShown");
   })();
   const handleAddChart = () => {
     addChart();
@@ -129,9 +132,9 @@ function ChartsLayout({
     if (metricOptionsError)
       return (
         <div className="flex h-full items-center justify-center gap-2 text-xs">
-          <span>Could not load chart metrics.</span>
+          <span>{t("couldNotLoadChartMetrics")}</span>
           <Button
-            text="Retry"
+            text={t("retryLabel")}
             variant="ghost"
             size="sm"
             onClick={onRetryMetricOptions}
@@ -142,7 +145,7 @@ function ChartsLayout({
       return (
         <div
           className="bg-muted h-full animate-pulse"
-          aria-label="Loading charts"
+          aria-label={t("loadingCharts")}
         />
       );
     return (
@@ -153,7 +156,7 @@ function ChartsLayout({
         <div className="shrink-0 border-l pt-1" title={addChartTitle}>
           <IconButton
             icon={Plus}
-            label="Add chart"
+            label={t("addChart")}
             size="sm"
             disabled={!canAdd}
             onClick={handleAddChart}
@@ -177,7 +180,7 @@ function ChartsLayout({
       >
         <div className="h-full border-t">{renderCharts()}</div>
       </ResizablePanel>
-      <ResizableHandle withHandle aria-label="Resize charts and table" />
+      <ResizableHandle withHandle aria-label={t("resizeChartsAndTable")} />
       <ResizablePanel id="table" minSize="150px">
         <div className="flex h-full min-h-0 flex-col overflow-hidden">
           {children}

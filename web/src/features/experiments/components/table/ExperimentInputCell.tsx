@@ -3,6 +3,18 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { ConnectedIOTableCell } from "@/src/components/table/ConnectedIOTableCell";
 import { shouldIgnoreRowClickTarget } from "@/src/components/table/shouldIgnoreRowClickTarget";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
+
+type ExperimentInputCellProps = {
+  projectId: string;
+  datasetId: string | null;
+  itemId: string;
+  input: string | null | undefined;
+  isLoading: boolean;
+  singleLine: boolean;
+  t?: ReturnType<typeof useTranslation<typeof experimentMessages>>;
+};
 
 export function ExperimentInputCell({
   projectId,
@@ -11,15 +23,11 @@ export function ExperimentInputCell({
   input,
   isLoading,
   singleLine,
-}: {
-  projectId: string;
-  datasetId: string | null;
-  itemId: string;
-  input: string | null | undefined;
-  isLoading: boolean;
-  singleLine: boolean;
-}) {
+  t: tProp,
+}: ExperimentInputCellProps) {
   const router = useRouter();
+  const tOwn = useTranslation(experimentMessages);
+  const t = tProp ?? tOwn;
   const href = datasetId
     ? `/project/${projectId}/datasets/${datasetId}/items/${encodeURIComponent(itemId)}`
     : null;
@@ -43,7 +51,7 @@ export function ExperimentInputCell({
       {href ? (
         <Link
           href={href}
-          aria-label="Open dataset item"
+          aria-label={t("openDatasetItem")}
           className="text-muted-foreground hover:text-primary absolute top-1 right-1 rounded-sm p-0.5 focus-visible:ring-2 focus-visible:outline-none"
           onClick={(event) => event.stopPropagation()}
         >

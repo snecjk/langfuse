@@ -2,6 +2,7 @@
 export type MetricOption = {
   id: string;
   label: string;
+  /** Internal group identity; display label is resolved via `metricGroupLabel`. */
   group: "Base Metrics" | "Scores";
   /**
    * The level the score was recorded at, absent on base metrics. Presentation
@@ -17,6 +18,11 @@ export type MetricOption = {
    */
   valueKind?: "numeric" | "boolean" | "categorical";
 };
+
+/** The dropdown's group headings, in display order. */
+export const METRIC_OPTION_GROUPS = ["Scores", "Base Metrics"] as const;
+
+export type MetricOptionGroup = (typeof METRIC_OPTION_GROUPS)[number];
 
 /**
  * How many values each score name carries across the runs in view, per level.

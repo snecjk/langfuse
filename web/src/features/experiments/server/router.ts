@@ -82,9 +82,22 @@ const ValidConfigResponse = z.object({
   variablesMap: z.record(z.string(), z.number()),
 });
 
+/**
+ * The structured reason a config is invalid. `variables` carries the prompt's
+ * expected variable names for the `variable-mismatch` reason, so the client can
+ * translate the message into the user's interface language.
+ */
 const InvalidConfigResponse = z.object({
   isValid: z.literal(false),
+  reason: z.enum([
+    "prompt-not-found",
+    "prompt-unresolved",
+    "no-variables",
+    "empty-dataset",
+    "variable-mismatch",
+  ]),
   message: z.string(),
+  variables: z.array(z.string()).optional(),
 });
 
 const ConfigResponse = z.discriminatedUnion("isValid", [
@@ -120,6 +133,7 @@ export const experimentsRouter = createTRPCRouter({
       if (!prompt) {
         return {
           isValid: false,
+          reason: "prompt-not-found",
           message: "Selected prompt not found.",
         };
       }
@@ -135,6 +149,7 @@ export const experimentsRouter = createTRPCRouter({
         ) {
           return {
             isValid: false,
+            reason: "prompt-unresolved",
             message: isBaseError(error)
               ? error.message
               : "Selected prompt could not be resolved.",
@@ -146,6 +161,7 @@ export const experimentsRouter = createTRPCRouter({
       if (!resolvedPrompt) {
         return {
           isValid: false,
+          reason: "prompt-not-found",
           message: "Selected prompt not found.",
         };
       }
@@ -170,6 +186,7 @@ export const experimentsRouter = createTRPCRouter({
       if (!Boolean(allVariables.length)) {
         return {
           isValid: false,
+          reason: "no-variables",
           message: "Selected prompt has no variables or placeholders.",
         };
       }
@@ -188,6 +205,7 @@ export const experimentsRouter = createTRPCRouter({
       if (!Boolean(totalItems)) {
         return {
           isValid: false,
+          reason: "empty-dataset",
           message: "Selected dataset is empty or all items are inactive.",
         };
       }
@@ -202,7 +220,9 @@ export const experimentsRouter = createTRPCRouter({
       if (!Boolean(Object.keys(variablesMap).length)) {
         return {
           isValid: false,
+          reason: "variable-mismatch",
           message: describeVariableMismatch(allVariables),
+          variables: allVariables,
         };
       }
 

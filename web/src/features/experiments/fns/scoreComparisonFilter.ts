@@ -3,6 +3,9 @@ import {
   readOrderedScoreValue,
   type ScoreColumnDataType,
 } from "./summariseScoreColumn";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
+import { translate } from "@/src/features/i18n/messages";
+import { type Locale } from "@/src/features/i18n/locale";
 
 /** Which score family a filtered column belongs to. */
 export type ScoreLevel = "observation" | "trace";
@@ -116,10 +119,13 @@ export const matchesScoreComparisonFilter = ({
     : baselineValue > comparisonValue;
 };
 
-const OPERATOR_WORDS: Record<ScoreComparisonOperator, string> = {
-  lower: "Worse",
-  higher: "Better",
-  differs: "Different",
+const OPERATOR_WORD_KEYS: Record<
+  ScoreComparisonOperator,
+  "worseThan" | "betterThan" | "differentFrom"
+> = {
+  lower: "worseThan",
+  higher: "betterThan",
+  differs: "differentFrom",
 };
 
 /** The chip's plain English: "Worse groundedness than judge-haiku-baseline". */
@@ -127,14 +133,24 @@ export const describeScoreComparisonFilter = ({
   operator,
   scoreName,
   comparisonName,
+  locale = "en",
 }: {
   operator: ScoreComparisonOperator;
   scoreName: string;
   comparisonName: string;
-}): string =>
-  `${OPERATOR_WORDS[operator]} ${scoreName} ${
-    operator === "differs" ? "vs" : "than"
+  locale?: Locale;
+}): string => {
+  const word = translate(
+    locale,
+    experimentMessages,
+    OPERATOR_WORD_KEYS[operator],
+  );
+  return `${word} ${scoreName} ${
+    operator === "differs"
+      ? translate(locale, experimentMessages, "vsLabel")
+      : translate(locale, experimentMessages, "thanLabel")
   } ${comparisonName}`;
+};
 
 /** Which of a row's two score maps a level's scores live in. */
 export const scoreFieldForLevel = (level: ScoreLevel) =>
@@ -202,14 +218,25 @@ export const describeEmptyScoreComparison = ({
   operator,
   scoreName,
   comparisonName,
+  locale = "en",
 }: {
   operator: ScoreComparisonOperator;
   scoreName: string;
   comparisonName: string;
+  locale?: Locale;
 }): string => {
   if (operator === "differs")
-    return `No item on this page scored ${scoreName} differently from ${comparisonName}.`;
+    return translate(locale, experimentMessages, "noItemDiffers", {
+      score: scoreName,
+      comparison: comparisonName,
+    });
   if (operator === "lower")
-    return `No regressions on this score — no item on this page scored lower on ${scoreName} than ${comparisonName}.`;
-  return `No item on this page scored higher on ${scoreName} than ${comparisonName}.`;
+    return translate(locale, experimentMessages, "noItemLower", {
+      score: scoreName,
+      comparison: comparisonName,
+    });
+  return translate(locale, experimentMessages, "noItemHigher", {
+    score: scoreName,
+    comparison: comparisonName,
+  });
 };

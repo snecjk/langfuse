@@ -10,6 +10,8 @@ import {
   type ExperimentFilterOptions,
   type MetadataFilterColumn,
 } from "./experimentFilterTypes";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 /** Creation buffers unmount with the popover; only complete conditions escape. */
 export function ExperimentFilterCreationContent({
@@ -20,6 +22,7 @@ export function ExperimentFilterCreationContent({
 }: ExperimentFilterCreationContentProps) {
   const [metadataColumn, setMetadataColumn] =
     useState<MetadataFilterColumn | null>(null);
+  const t = useTranslation(experimentMessages);
 
   function handleChoose(choice: CreationChoice) {
     if (choice.metadataColumn) setMetadataColumn(choice.metadataColumn);
@@ -48,15 +51,17 @@ export function ExperimentFilterCreationContent({
   return (
     <div className="ph-no-capture flex flex-col gap-1">
       <p className="text-muted-foreground px-2 pb-2 text-xs">
-        Add to all experiments
+        {t("addToAllExperiments")}
       </p>
-      {experimentFilterCreationChoices(options, optionsError).map((choice) => (
-        <ExperimentFilterCreationChoice
-          key={choice.column}
-          choice={choice}
-          onChoose={handleChoose}
-        />
-      ))}
+      {experimentFilterCreationChoices(options, optionsError, t).map(
+        (choice) => (
+          <ExperimentFilterCreationChoice
+            key={choice.column}
+            choice={choice}
+            onChoose={handleChoose}
+          />
+        ),
+      )}
     </div>
   );
 }

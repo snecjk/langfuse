@@ -6,6 +6,10 @@ type ScoreColumn = { name: string; dataType: string };
 export function metricOptionsFromScoreColumns(
   observation: ScoreColumn[],
   experiment: ScoreColumn[],
+  t?: (
+    key: "costLabel" | "latencyLabel",
+    parameters?: Readonly<Record<string, string | number>>,
+  ) => string,
 ) {
   const groupScoreNamesByDataType = (columns: ScoreColumn[]) => {
     const numeric = new Set(
@@ -26,12 +30,15 @@ export function metricOptionsFromScoreColumns(
   };
   const obs = groupScoreNamesByDataType(observation);
   const run = groupScoreNamesByDataType(experiment);
-  return buildMetricOptions({
-    obs_scores_avg: obs.numeric,
-    obs_score_booleans: obs.boolean,
-    obs_score_categories: obs.categorical,
-    experiment_scores_avg: run.numeric,
-    experiment_score_booleans: run.boolean,
-    experiment_score_categories: run.categorical,
-  });
+  return buildMetricOptions(
+    {
+      obs_scores_avg: obs.numeric,
+      obs_score_booleans: obs.boolean,
+      obs_score_categories: obs.categorical,
+      experiment_scores_avg: run.numeric,
+      experiment_score_booleans: run.boolean,
+      experiment_score_categories: run.categorical,
+    },
+    t,
+  );
 }

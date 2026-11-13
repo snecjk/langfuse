@@ -14,6 +14,8 @@ import {
   type ExperimentDiffMode,
   type ExperimentResultsLayout,
 } from "@/src/features/experiments/hooks/useExperimentResultsState";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 type ExperimentDisplaySettingsProps = {
   layout: ExperimentResultsLayout;
@@ -70,39 +72,40 @@ export function ExperimentDisplaySettings({
   onIoRenderModeChange,
 }: ExperimentDisplaySettingsProps) {
   const isItemVisibilityDisabled = !hasComparisons || !hasBaseline;
+  const t = useTranslation(experimentMessages);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="h-8 px-2.5 text-xs">
           <Settings2 size="base" color="default" />
-          <span className="ml-2">Display</span>
+          <span className="ml-2">{t("display")}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
-        <DropdownMenuLabel>Layout</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("layout")}</DropdownMenuLabel>
         <OptionItem
           selected={layout === "list"}
           onSelect={() => onLayoutChange("list")}
         >
-          List view: one column per metric
+          {t("listView")}
         </OptionItem>
         <OptionItem
           selected={layout === "grid"}
           onSelect={() => onLayoutChange("grid")}
         >
-          Grid view: one column per experiment
+          {t("gridView")}
         </OptionItem>
         <OptionItem
           selected={layout === "matrix"}
           onSelect={() => onLayoutChange("matrix")}
         >
-          Score matrix: scores as rows, runs as columns
+          {t("matrixView")}
         </OptionItem>
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuLabel>Cell format</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("cellFormat")}</DropdownMenuLabel>
         <OptionItem
           selected={ioRenderMode === "json"}
           onSelect={() => onIoRenderModeChange("json")}
@@ -113,47 +116,47 @@ export function ExperimentDisplaySettings({
           selected={ioRenderMode === "text"}
           onSelect={() => onIoRenderModeChange("text")}
         >
-          Formatted
+          {t("formatted")}
         </OptionItem>
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuLabel>Diff</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("diff")}</DropdownMenuLabel>
         <OptionItem
           selected={diffMode === "comparison"}
           onSelect={() => onDiffModeChange("comparison")}
         >
-          Comparison → Baseline
+          {t("diffComparison")}
         </OptionItem>
         <OptionItem
           selected={diffMode === "expected"}
           onSelect={() => onDiffModeChange("expected")}
         >
-          Expected → Output
+          {t("diffExpected")}
         </OptionItem>
         <OptionItem
           selected={diffMode === "off"}
           onSelect={() => onDiffModeChange("off")}
         >
-          Off — values only
+          {t("diffOff")}
         </OptionItem>
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuLabel>Item Visibility</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("itemVisibility")}</DropdownMenuLabel>
         <OptionItem
           selected={itemVisibility === "baseline-only"}
           disabled={isItemVisibilityDisabled}
           onSelect={() => onItemVisibilityChange("baseline-only")}
         >
-          Show only items in baseline
+          {t("baselineOnly")}
         </OptionItem>
         <OptionItem
           selected={itemVisibility === "all"}
           disabled={isItemVisibilityDisabled}
           onSelect={() => onItemVisibilityChange("all")}
         >
-          Show all items
+          {t("showAll")}
         </OptionItem>
       </DropdownMenuContent>
     </DropdownMenu>

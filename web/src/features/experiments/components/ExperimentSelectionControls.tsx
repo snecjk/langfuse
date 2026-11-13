@@ -12,6 +12,8 @@ import { ExperimentBaselineControls } from "./ExperimentBaselineControls";
 import { ExperimentComparisonSelector } from "./ExperimentComparisonSelector";
 import { getExperimentColorStyles } from "./table/types";
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
 
 type ExperimentSelectionControlsProps = {
   projectId: string;
@@ -42,6 +44,7 @@ export function ExperimentSelectionControls({
 }: ExperimentSelectionControlsProps) {
   const router = useRouter();
   const capture = usePostHogClientCapture();
+  const t = useTranslation(experimentMessages);
   // The dataset each run belongs to, for `isSameDataset`. The picker reports its
   // own change from the click; the two paths reported here are the ones no
   // control owns — the auto-selected default, and a selection already in the URL.
@@ -137,7 +140,7 @@ export function ExperimentSelectionControls({
               )}
             />
           )}
-          Baseline
+          {t("baseline")}
         </div>
         <div className="w-full max-w-64 min-w-0 flex-1">
           <ExperimentBaselineControls

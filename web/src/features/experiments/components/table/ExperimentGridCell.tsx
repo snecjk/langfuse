@@ -34,6 +34,12 @@ import { cn } from "@/src/utils/tailwind";
 import { type ScoreLevel } from "@/src/components/ScoreTag";
 import { NotRecordedMetric } from "./NotRecordedMetric";
 import { ExperimentScoreHover, scoreValueOf } from "./ExperimentScoreHover";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
+
+export type ExperimentGridT = ReturnType<
+  typeof useTranslation<typeof experimentMessages>
+>;
 
 type ExperimentGridCellProps = {
   projectId: string;
@@ -67,6 +73,8 @@ type ExperimentGridCellProps = {
   /** Clicking this experiment's cell selects it in peek navigation instead of the row's default (baseline) target. */
   onExperimentClick?: (event: React.MouseEvent) => void;
   onAnnotate?: () => void;
+  /** Injected by ExperimentGridView so the whole cell shares one translator. */
+  t?: ExperimentGridT;
 };
 
 /**
@@ -117,6 +125,7 @@ const ScoreItem = ({
   level,
   showScoreLevelLabel,
   showBaselineDelta,
+  t,
 }: {
   scoreKey: string;
   aggregate: AggregatedScoreData | null;
@@ -125,6 +134,7 @@ const ScoreItem = ({
   level: Extract<ScoreLevel, "observation" | "trace">;
   showScoreLevelLabel: boolean;
   showBaselineDelta: boolean;
+  t: ExperimentGridT;
 }) => {
   const { name } = decomposeAggregateScoreKey(scoreKey);
   const displayValue = scoreValueOf(aggregate);
@@ -135,6 +145,7 @@ const ScoreItem = ({
       aggregate={aggregate}
       diff={diff}
       projectId={projectId}
+      t={t}
     >
       <div
         tabIndex={0}
@@ -143,7 +154,7 @@ const ScoreItem = ({
         <div className="flex min-w-0 items-center gap-1">
           <span className="text-muted-foreground line-clamp-1 min-w-0">
             {showScoreLevelLabel &&
-              `${level === "trace" ? "Trace" : "Observation"}: `}
+              `${level === "trace" ? t("trace") : t("observation")}: `}
             {name}
           </span>
         </div>
@@ -161,8 +172,8 @@ const ScoreItem = ({
           {diff?.type === "CATEGORICAL" && (
             <span
               className="text-muted-foreground text-xs"
-              aria-label="Changed compared to baseline"
-              title="Changed compared to baseline"
+              aria-label={t("changedComparedToBaseline")}
+              title={t("changedComparedToBaseline")}
             >
               ↻
             </span>
@@ -184,6 +195,7 @@ const getScoreRowDefinition = (
   scoreKey: string,
   level: Extract<ScoreLevel, "observation" | "trace">,
   showScoreLevelLabel: boolean,
+  t: ExperimentGridT,
 ): CellRowDef<GridCellData> => ({
   accessorKey: level === "trace" ? `Trace-${scoreKey}` : scoreKey,
   cell: ({ data }) => (
@@ -201,6 +213,7 @@ const getScoreRowDefinition = (
       level={level}
       showScoreLevelLabel={showScoreLevelLabel}
       showBaselineDelta={data.showBaselineDelta}
+      t={t}
     />
   ),
 });
@@ -214,9 +227,11 @@ const hasVisibleCellMetadata = (columnVisibility: VisibilityState) =>
 const CellMetadataFooter = ({
   data,
   columnVisibility,
+  t,
 }: {
   data: GridCellData;
   columnVisibility: VisibilityState;
+  t: ExperimentGridT;
 }) => {
   const visible = (key: (typeof METADATA_KEYS)[number]) =>
     columnVisibility[key] !== false;
@@ -226,7 +241,7 @@ const CellMetadataFooter = ({
       {(visible("latencyMs") || visible("startTime")) && (
         <div className="flex items-center justify-between gap-2">
           <div className="text-muted-foreground flex min-w-0 flex-wrap items-center gap-x-2">
-            {visible("latencyMs") && <span>Latency</span>}
+            {visible("latencyMs") && <span>{t("latency")}</span>}
             {visible("startTime") && startTime && (
               <>
                 <span aria-hidden>·</span>
@@ -247,7 +262,7 @@ const CellMetadataFooter = ({
                   {formatLatency(data.latencyMs)}
                 </span>
               ) : (
-                <NotRecordedMetric metric="latency" />
+                <NotRecordedMetric metric="latency" t={t} />
               )}
               {data.latencyDiff && (
                 <DiffLabel
@@ -263,14 +278,14 @@ const CellMetadataFooter = ({
       )}
       {visible("totalCost") && (
         <div className="flex items-center justify-between gap-2">
-          <span className="text-muted-foreground">Cost</span>
+          <span className="text-muted-foreground">{t("cost")}</span>
           <div className={valueColumnsClass(data.showBaselineDelta)}>
             {data.totalCost != null ? (
               <span className="font-bold tabular-nums">
                 {formatCost(data.totalCost)}
               </span>
             ) : (
-              <NotRecordedMetric metric="cost" />
+              <NotRecordedMetric metric="cost" t={t} />
             )}
             {data.totalCostDiff && (
               <DiffLabel
@@ -285,7 +300,7 @@ const CellMetadataFooter = ({
       )}
       {visible("level") && (
         <div className="flex items-center justify-between gap-2">
-          <span className="text-muted-foreground">Status</span>
+          <span className="text-muted-foreground">{t("status")}</span>
           <div className={valueColumnsClass(data.showBaselineDelta)}>
             <Metric value={data.level} />
           </div>
@@ -370,7 +385,10 @@ export const ExperimentGridCell = ({
   showScoreLevelLabels,
   onExperimentClick,
   onAnnotate,
+  t: tProp,
 }: ExperimentGridCellProps) => {
+  const tOwn = useTranslation(experimentMessages);
+  const t = tProp ?? tOwn;
   const scoreDiffs = useMemo(
     () =>
       !showDiff || isBaseline || !baselineScores
@@ -433,16 +451,21 @@ export const ExperimentGridCell = ({
     // follows the list-view columns.
     {
       accessorKey: "scores",
-      header: "Scores",
+      header: t("scores"),
       children: [
         ...(columnVisibility.observationScores !== false
           ? observationScoreOrder.map((key) =>
-              getScoreRowDefinition(key, "observation", showScoreLevelLabels),
+              getScoreRowDefinition(
+                key,
+                "observation",
+                showScoreLevelLabels,
+                t,
+              ),
             )
           : []),
         ...(columnVisibility.traceScores !== false
           ? traceScoreOrder.map((key) =>
-              getScoreRowDefinition(key, "trace", showScoreLevelLabels),
+              getScoreRowDefinition(key, "trace", showScoreLevelLabels, t),
             )
           : []),
       ],
@@ -456,6 +479,7 @@ export const ExperimentGridCell = ({
               <CellMetadataFooter
                 data={data}
                 columnVisibility={columnVisibility}
+                t={t}
               />
             ),
           },
@@ -464,7 +488,7 @@ export const ExperimentGridCell = ({
     // Output section. Display chooses text or JSON. Row height does not.
     {
       accessorKey: "output",
-      header: "Output",
+      header: t("output"),
       cell: ({ data }) =>
         data.isLoading ? (
           <ConnectedIOTableCell
@@ -523,7 +547,7 @@ export const ExperimentGridCell = ({
       {onAnnotate && (
         <div className="bg-background absolute right-1 bottom-1 z-1 rounded-md opacity-0 group-focus-within/grid-cell:opacity-100 group-hover/grid-cell:opacity-100">
           <Button
-            text="Annotate"
+            text={t("annotate")}
             icon={SquarePen}
             variant="ghost"
             size="sm"
@@ -607,9 +631,10 @@ export const ExperimentGridCell = ({
  * Empty cell component for when there's no data for an experiment.
  */
 export const ExperimentGridCellEmpty = () => {
+  const t = useTranslation(experimentMessages);
   return (
     <div className="flex h-full w-full min-w-0 items-start justify-start p-2">
-      <span className="text-muted-foreground text-xs">No data</span>
+      <span className="text-muted-foreground text-xs">{t("noData")}</span>
     </div>
   );
 };

@@ -17,16 +17,25 @@ import {
 import { Check, ListFilter } from "@langfuse/icons";
 import { type ScoreComparisonOperator } from "@/src/features/experiments/fns/scoreComparisonFilter";
 import { cn } from "@/src/utils/tailwind";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { experimentMessages } from "@/src/features/i18n/messages/experiments";
+
+type ScoreFilterT = ReturnType<
+  typeof useTranslation<typeof experimentMessages>
+>;
 
 export type ScoreComparisonTarget = {
   experimentId: string;
   experimentName: string;
 };
 
-const OPERATOR_LABELS: Record<ScoreComparisonOperator, string> = {
-  lower: "Worse than",
-  higher: "Better than",
-  differs: "Different from",
+const OPERATOR_LABEL_KEYS: Record<
+  ScoreComparisonOperator,
+  "worseThan" | "betterThan" | "differentFrom"
+> = {
+  lower: "worseThan",
+  higher: "betterThan",
+  differs: "differentFrom",
 };
 
 const ORDERED_OPERATORS: ScoreComparisonOperator[] = [
@@ -50,21 +59,24 @@ export const ScoreColumnFilterMenuTrigger = forwardRef<
     /** A filter is set on this score, so the control stops hiding itself. */
     isActive: boolean;
   }
->(({ isActive, ...triggerProps }, ref) => (
-  <button
-    ref={ref}
-    aria-label="Filter items by this score"
-    className={cn(
-      "hover:bg-muted mt-0.5 shrink-0 rounded-sm p-0.5",
-      isActive
-        ? "text-primary-accent"
-        : "text-muted-foreground opacity-0 group-hover:opacity-100",
-    )}
-    {...triggerProps}
-  >
-    <ListFilter size="sm" />
-  </button>
-));
+>(({ isActive, ...triggerProps }, ref) => {
+  const t = useTranslation(experimentMessages);
+  return (
+    <button
+      ref={ref}
+      aria-label={t("filterItemsByScore")}
+      className={cn(
+        "hover:bg-muted mt-0.5 shrink-0 rounded-sm p-0.5",
+        isActive
+          ? "text-primary-accent"
+          : "text-muted-foreground opacity-0 group-hover:opacity-100",
+      )}
+      {...triggerProps}
+    >
+      <ListFilter size="sm" />
+    </button>
+  );
+});
 ScoreColumnFilterMenuTrigger.displayName = "ScoreColumnFilterMenuTrigger";
 
 /**
@@ -80,6 +92,7 @@ export const ScoreColumnFilterMenu = ({
   onSelect,
   onClear,
   children,
+  t: tProp,
 }: {
   /** The experiments this score can be read against, default first. */
   targets: ScoreComparisonTarget[];
@@ -96,7 +109,11 @@ export const ScoreColumnFilterMenu = ({
   onClear: () => void;
   /** Renders the trigger, so its presentation stays with the caller. */
   children: ComponentProps<typeof DropdownMenuController>["children"];
+  /** Injected by ExperimentItemsTable so the menu shares its translator. */
+  t?: ScoreFilterT;
 }) => {
+  const tOwn = useTranslation(experimentMessages);
+  const t = tProp ?? tOwn;
   const operators = hasOrder ? ORDERED_OPERATORS : (["differs"] as const);
   const isActive = (operator: ScoreComparisonOperator, experimentId: string) =>
     active?.operator === operator &&
@@ -108,7 +125,7 @@ export const ScoreColumnFilterMenu = ({
       maxWidth="16rem"
       renderMenu={() => (
         <>
-          <DropdownMenuLabel>Show only items</DropdownMenuLabel>
+          <DropdownMenuLabel>{t("showOnlyItems")}</DropdownMenuLabel>
           {operators.map((operator) =>
             targets.length === 1 ? (
               <DropdownMenuItem
@@ -122,15 +139,15 @@ export const ScoreColumnFilterMenu = ({
                 )}
                 <span
                   className="truncate"
-                  title={`${OPERATOR_LABELS[operator]} ${targets[0].experimentName}`}
+                  title={`${t(OPERATOR_LABEL_KEYS[operator])} ${targets[0].experimentName}`}
                 >
-                  {OPERATOR_LABELS[operator]} {targets[0].experimentName}
+                  {t(OPERATOR_LABEL_KEYS[operator])} {targets[0].experimentName}
                 </span>
               </DropdownMenuItem>
             ) : (
               <DropdownMenuSub key={operator}>
                 <DropdownMenuSubTrigger>
-                  {OPERATOR_LABELS[operator]}…
+                  {t(OPERATOR_LABEL_KEYS[operator])}…
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent className="w-56">
@@ -166,14 +183,13 @@ export const ScoreColumnFilterMenu = ({
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={onClear}>
                 <span className="mr-2 h-4 w-4 shrink-0" />
-                Remove this score&apos;s filter
+                {t("removeFilter")}
               </DropdownMenuItem>
             </>
           )}
           <DropdownMenuSeparator />
           <span className="text-muted-foreground block px-2 py-1.5 text-[10px]">
-            Compares the items loaded on this page — page through to check the
-            rest of the run.
+            {t("comparesLoadedPage")}
           </span>
         </>
       )}
