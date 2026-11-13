@@ -610,12 +610,12 @@ function AnnotationQueueRunContent({
                 <KeyboardShortcut size="sm" keys={["ArrowUp"]} />
                 <KeyboardShortcut size="sm" keys={["ArrowDown"]} />
               </ShortcutRow>
-              <ShortcutRow label={t("selectOption")}>
+              <ShortcutRow label={t("shortcutSelectOption")}>
                 <KeyboardShortcut size="sm" keys={["1"]} />
                 <span className="text-muted-foreground text-xs">–</span>
                 <KeyboardShortcut size="sm" keys={["9"]} />
               </ShortcutRow>
-              <ShortcutRow label={t("editField")}>
+              <ShortcutRow label={t("shortcutEditField")}>
                 <KeyboardShortcut size="sm" keys={["Enter"]} />
               </ShortcutRow>
               <ShortcutRow label={t("commitField")}>

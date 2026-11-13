@@ -51,6 +51,25 @@ export const notificationMessages = {
       "Receive an email when someone mentions you in a comment",
     personalNotificationsUpdateFailed:
       "Failed to update notification preference. Please try again.",
+    automationFailureTitle:
+      "This automation was automatically disabled due to at least {count} consecutive webhook failures.",
+    automationFailureDescription:
+      "Check the execution history below, fix any issues with your webhook endpoint, then reactivate the automation.",
+    scoreAnalyticsLoading: "Loading analytics...",
+    scoreAnalyticsProcessingLarge: "Processing large dataset...",
+    scoreAnalyticsAnalyzingOne: "Analyzing ~{count} scores",
+    scoreAnalyticsAnalyzingTwo:
+      "Analyzing ~{count1} (Score 1) and ~{count2} (Score 2) scores",
+    scoreAnalyticsSamplingApplied: "Sampling will be applied",
+    scoreAnalyticsEstimatedTime: "Est. time: {time}",
+    scoreAnalyticsSampledTitle: "Sampled Data",
+    scoreAnalyticsSampledOne:
+      "Results based on a {rate}% sample of ~{count} scores.",
+    scoreAnalyticsSampledTwo:
+      "Results based on a {rate}% sample of ~{count1} Score 1 and ~{count2} Score 2 data.",
+    agentToolsTitle: "Langfuse works great with your AI coding agents.",
+    agentToolsDescription:
+      "Connect Claude Code, Codex, and other agents to your data with the Langfuse Agent Skill, MCP server, and CLI.",
   },
   "zh-CN": {
     reportIssue: "向 Langfuse 团队报告问题",
@@ -100,5 +119,23 @@ export const notificationMessages = {
     personalNotificationsCommentMentionsDescription:
       "当有人在评论中提及你时接收邮件",
     personalNotificationsUpdateFailed: "更新通知偏好失败。请重试。",
+    automationFailureTitle:
+      "由于连续 {count} 次 webhook 失败，此自动化已被自动停用。",
+    automationFailureDescription:
+      "请查看下方的执行历史，修复 webhook 端点的问题，然后重新启用该自动化。",
+    scoreAnalyticsLoading: "正在加载分析…",
+    scoreAnalyticsProcessingLarge: "正在处理大型数据集…",
+    scoreAnalyticsAnalyzingOne: "正在分析约 {count} 条评分",
+    scoreAnalyticsAnalyzingTwo:
+      "正在分析约 {count1} 条（评分 1）和约 {count2} 条（评分 2）评分",
+    scoreAnalyticsSamplingApplied: "将应用抽样",
+    scoreAnalyticsEstimatedTime: "预计耗时：{time}",
+    scoreAnalyticsSampledTitle: "抽样数据",
+    scoreAnalyticsSampledOne: "结果基于约 {count} 条评分的 {rate}% 抽样。",
+    scoreAnalyticsSampledTwo:
+      "结果基于约 {count1} 条评分 1 和约 {count2} 条评分 2 数据的 {rate}% 抽样。",
+    agentToolsTitle: "Langfuse 与你的 AI 编码代理配合极佳。",
+    agentToolsDescription:
+      "通过 Langfuse Agent Skill、MCP 服务器和 CLI，将 Claude Code、Codex 及其他代理连接到你的数据。",
   },
 } satisfies Messages;

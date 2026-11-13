@@ -44,7 +44,10 @@ export const commonMessages = {
     dropzoneDragDropUpload: "拖拽或点击上传",
     dropzoneDragDropReplace: "拖拽或点击替换",
     dropzoneAccepts: "接受 {types}",
-    dropzoneFileCount: "{count} 个文件 • {size} MB",
+    dropzoneFileCount: {
+      one: "{count} 个文件 • {size} MB",
+      other: "{count} 个文件 • {size} MB",
+    },
     dropzoneMoreFiles: "另外 {count} 个",
   },
 } satisfies Messages;

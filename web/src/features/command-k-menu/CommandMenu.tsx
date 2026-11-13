@@ -369,7 +369,7 @@ function AssistantItem({ onDone }: { onDone: () => void }) {
 
   return (
     <CommandItem
-      value="Ask Assistant"
+      value={t("cmdKAssistant")}
       keywords={["assistant", "ai", "agent", "chat", "new chat", "ask"]}
       onSelect={handleSelect}
     >

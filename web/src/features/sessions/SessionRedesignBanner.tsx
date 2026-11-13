@@ -1,6 +1,8 @@
 import { ArrowUpRight, X } from "@langfuse/icons";
 import { Button } from "@/src/components/ui/button";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
+import { useTranslation } from "@/src/features/i18n/I18nProvider";
+import { navigationMessages } from "@/src/features/i18n/messages/navigation";
 
 export function SessionRedesignBanner({
   onDismiss,
@@ -8,9 +10,12 @@ export function SessionRedesignBanner({
   onDismiss: () => void;
 }) {
   const capture = usePostHogClientCapture();
+  const t = useTranslation(navigationMessages);
   return (
     <div className="relative flex shrink-0 items-center justify-center gap-2 border-b border-orange-200/50 bg-orange-50/60 px-10 py-1 text-sm text-orange-800 dark:border-orange-900/50 dark:bg-orange-950/30 dark:text-orange-200">
-      <span className="text-foreground">We redesigned the session view.</span>
+      <span className="text-foreground">
+        {t("sessionRedesignAnnouncement")}
+      </span>
       <a
         href="https://langfuse.com/changelog/2026-10-13-redesigned-session-view"
         onClick={() => capture("session_detail:announcement_learn_more_click")}
@@ -18,7 +23,7 @@ export function SessionRedesignBanner({
         rel="noopener noreferrer"
         className="inline-flex items-center hover:shadow-[0_1px_currentColor]"
       >
-        Learn more
+        {t("learnMore")}
         <ArrowUpRight size="sm" aria-hidden="true" />
       </a>
       <a
@@ -28,14 +33,14 @@ export function SessionRedesignBanner({
         rel="noopener noreferrer"
         className="inline-flex items-center hover:shadow-[0_1px_currentColor]"
       >
-        Give feedback
+        {t("giveFeedback")}
         <ArrowUpRight size="sm" aria-hidden="true" />
       </a>
       <div className="absolute right-2 flex items-center">
         <Button
           variant="ghost"
           size="icon-xs"
-          aria-label="Dismiss redesigned sessions view banner"
+          aria-label={t("dismissSessionRedesignBanner")}
           onClick={() => {
             capture("session_detail:announcement_dismiss");
             onDismiss();
